@@ -1,0 +1,1710 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AWS based distributed scheduler and job runner">
+      
+      
+        <meta name="author" content="Murray Andrews">
+      
+      
+      
+        <link rel="prev" href="19-cloudformation-templates.html">
+      
+      
+        <link rel="next" href="21-release-notes.html">
+      
+      
+      <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+    
+    
+      
+        <title>FAQ - Lava User Guide</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="css/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#frequently-asked-questions" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="Lava User Guide" class="md-header__button md-logo" aria-label="Lava User Guide" data-md-component="logo">
+      
+  <img src="img/lava-icons/svg/256/lava-icon-256-opaque.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Lava User Guide
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              FAQ
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        
+
+<a href="https://github.com/jin-gizmo/lava" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lava on GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="Lava User Guide" class="md-nav__button md-logo" aria-label="Lava User Guide" data-md-component="logo">
+      
+  <img src="img/lava-icons/svg/256/lava-icon-256-opaque.svg" alt="logo">
+
+    </a>
+    Lava User Guide
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+<a href="https://github.com/jin-gizmo/lava" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lava on GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="01-about-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02-concepts.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="03-architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="04-dynamodb-tables.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DynamoDB Tables
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="05-job-dispatch.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Dispatch
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="06-jobs-job-types.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Jobs & Job Types
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="07-connectors.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Connectors
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="08-job-actions.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Actions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="09-lava-state-manager.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava State Manager
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="10-installation-operation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation & Operation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="11-lava-job-framework.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava Job Framework
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="12-developing-lava-jobs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Developing Lava Jobs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="13-jinja-rendering-in-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Jinja Rendering in Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="14-enhancing-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enhancing Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="15-lava-and-docker.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava and Docker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="16-commands-utilities.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Commands & Utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="17-job-framework-samples.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Framework Samples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="18-api.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="19-cloudformation-templates.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CloudFormation Templates
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="20-faq.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scheduling-and-dispatch-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling and Dispatch FAQ
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scheduling and Dispatch FAQ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scheduling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jobs-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jobs FAQ
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Jobs FAQ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Questions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#db_from_s3" class="md-nav__link">
+    <span class="md-ellipsis">
+      db_from_s3
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#db_to_s3" class="md-nav__link">
+    <span class="md-ellipsis">
+      db_to_s3
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      docker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exe" class="md-nav__link">
+    <span class="md-ellipsis">
+      exe
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lavasched" class="md-nav__link">
+    <span class="md-ellipsis">
+      lavasched
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pkg" class="md-nav__link">
+    <span class="md-ellipsis">
+      pkg
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sql" class="md-nav__link">
+    <span class="md-ellipsis">
+      sql
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connectors-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connectors FAQ
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connectors FAQ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-questions_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Questions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssh-scp-sftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      ssh, scp, sftp
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-and-operation-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation and Operation FAQ
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation and Operation FAQ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-lava-worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Lava Worker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-lava-docker-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Lava Docker Images
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-lava-framework-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Lava Framework FAQ
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Lava Framework FAQ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-questions_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Questions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jinja-rendering-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jinja Rendering FAQ
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="21-release-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Notes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="22-credits.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Credits
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="23-known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Known Issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scheduling-and-dispatch-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling and Dispatch FAQ
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scheduling and Dispatch FAQ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scheduling" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jobs-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jobs FAQ
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Jobs FAQ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-questions" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Questions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#db_from_s3" class="md-nav__link">
+    <span class="md-ellipsis">
+      db_from_s3
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#db_to_s3" class="md-nav__link">
+    <span class="md-ellipsis">
+      db_to_s3
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      docker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exe" class="md-nav__link">
+    <span class="md-ellipsis">
+      exe
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lavasched" class="md-nav__link">
+    <span class="md-ellipsis">
+      lavasched
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pkg" class="md-nav__link">
+    <span class="md-ellipsis">
+      pkg
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sql" class="md-nav__link">
+    <span class="md-ellipsis">
+      sql
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connectors-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connectors FAQ
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Connectors FAQ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-questions_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Questions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ssh-scp-sftp" class="md-nav__link">
+    <span class="md-ellipsis">
+      ssh, scp, sftp
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installation-and-operation-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation and Operation FAQ
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Installation and Operation FAQ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-lava-worker" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Lava Worker
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-lava-docker-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Lava Docker Images
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-lava-framework-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Lava Framework FAQ
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Lava Framework FAQ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general-questions_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      General Questions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jinja-rendering-faq" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jinja Rendering FAQ
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="frequently-asked-questions" x-nav="FAQ">Frequently Asked Questions<a class="headerlink" href="#frequently-asked-questions" title="Permanent link">&para;</a></h1>
+<h2 id="scheduling-and-dispatch-faq">Scheduling and Dispatch FAQ<a class="headerlink" href="#scheduling-and-dispatch-faq" title="Permanent link">&para;</a></h2>
+<h3 id="scheduling">Scheduling<a class="headerlink" href="#scheduling" title="Permanent link">&para;</a></h3>
+<h4 id="can-a-job-be-scheduled-to-run-when-a-worker-reboots">Can a job be scheduled to run when a worker reboots?<a class="headerlink" href="#can-a-job-be-scheduled-to-run-when-a-worker-reboots" title="Permanent link">&para;</a></h4>
+<p>Yes … and no.</p>
+<p>The <code>@reboot</code> crontab specification can be used in a job schedule
+but what does that actually mean? Given that it will occur on the
+dispatcher node, any job scheduled on a reboot will only get dispatched
+when the dispatcher itself reboots. This may be useful, but it's not
+obvious how.</p>
+<h2 id="jobs-faq">Jobs FAQ<a class="headerlink" href="#jobs-faq" title="Permanent link">&para;</a></h2>
+<p>This section covers questions related to jobs in general as well as those
+specific to particular job types.</p>
+<h3 id="general-questions">General Questions<a class="headerlink" href="#general-questions" title="Permanent link">&para;</a></h3>
+<h4 id="job-failed-errno-26-text-file-busy-tmplava">Job failed: [Errno 26] Text file busy: '/tmp/lava/...'<a class="headerlink" href="#job-failed-errno-26-text-file-busy-tmplava" title="Permanent link">&para;</a></h4>
+<p>This is the result of an S3 race condition. Essentially it's a lava internal
+error that should not happen.</p>
+<p>The <a href="10-installation-operation.html#general-configuration-parameters">PAYLOAD_SETTLING_TIME</a> can help control
+this.</p>
+<h4 id="no-payload-files-downloaded-from-s3">No payload files downloaded from S3<a class="headerlink" href="#no-payload-files-downloaded-from-s3" title="Permanent link">&para;</a></h4>
+<p>The payload prefix specified does not refer to any objects in S3. It generally
+means the payload value in the job specification is incorrect. Note that this
+value is always relative to the payloads area in S3, not absolute.</p>
+<h4 id="recursive-download-not-supported">Recursive download not supported<a class="headerlink" href="#recursive-download-not-supported" title="Permanent link">&para;</a></h4>
+<p>This error can occur for multiple job types that involve downloading a payload
+from the payload area in S3.</p>
+<p>It occurs if the specified payload points to an S3 prefix that has nested
+<em>folders</em> underneath (in the sense that S3 fakes the notion of <em>folder</em>).</p>
+<h4 id="overlapping-runs-for-the-same-job">Overlapping runs for the same job<a class="headerlink" href="#overlapping-runs-for-the-same-job" title="Permanent link">&para;</a></h4>
+<p>When a lava job is dispatched, a run ID (UUID) is assigned at the time of
+dispatch and a dispatch message is placed onto the job SQS queue for the target
+worker.</p>
+<p>The lava worker must complete the job, successfully or otherwise, before the SQS
+queue message visibility timeout expires, otherwise the job will be re-queued by
+SQS for another run. The re-run will have the same run configuration, including
+run ID.</p>
+<p>If multiple instances of a job run are active at the same time, it is likely
+that the job is running longer than the SQS worker queue visibility timeout.</p>
+<p>Options in this situation are (in order of preference):</p>
+<ol>
+<li>
+<p>Redesign the job to run more efficiently so it completes within the message
+    visibility period.</p>
+</li>
+<li>
+<p>Use the <code>timeout</code> parameter on the job where available so that lava will
+    kill the job before the message visibility timeout expires.</p>
+</li>
+<li>
+<p>Set the <a href="04-dynamodb-tables.html#the-jobs-table">max_tries</a> field in the job
+    specification.</p>
+</li>
+<li>
+<p>Increase the visibility timeout on the worker SQS queue. This should be done
+    by updating the CloudFormation stack for the worker. SQS limits the
+    visibility timeout to a maximum of 12 hours.</p>
+</li>
+</ol>
+<h4 id="what-timezone-applies-when-a-job-is-run">What timezone applies when a job is run?<a class="headerlink" href="#what-timezone-applies-when-a-job-is-run" title="Permanent link">&para;</a></h4>
+<p>Lava controls the timezone when a job is dispatched as it's obviously important
+that a job is run at the correct time.</p>
+<p>Lava does not control the timezone in which a job executes and lava makes no
+promises about the timezone of the execution environment.</p>
+<p>If a job runs natively on a lava worker, it will generally inherit the timezone
+of the host, which can be anything. If it runs as a <a href="06-jobs-job-types.html#job-type-docker">docker</a>
+job it may have a different timezone to the host.</p>
+<p>The bottom line is that jobs need to either:</p>
+<ol>
+<li>
+<p>Avoid any timezone dependency in the execution environment (e.g. by always
+    working with UTC or timezone aware timestamps); or</p>
+</li>
+<li>
+<p>Explicitly control the execution timezone. For <a href="06-jobs-job-types.html#job-type-cmd">cmd</a>,
+    <a href="06-jobs-job-types.html#job-type-docker">docker</a>, <a href="06-jobs-job-types.html#job-type-exe">exe</a> and <a href="06-jobs-job-types.html#job-type-pkg">pkg</a>
+    jobs, this can be done by specifying the <code>TZ</code> environment variable in the
+    <code>env</code> parameter of the job specification. e.g.</p>
+</li>
+</ol>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><span class="p">{</span>
+</span><span id="__span-0-2"><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exe&quot;</span><span class="p">,</span>
+</span><span id="__span-0-3"><span class="w">    </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><span class="w">    </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-5"><span class="w">        </span><span class="nt">&quot;TZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Australia/Darwin&quot;</span>
+</span><span id="__span-0-6"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-0-7"><span class="p">}</span>
+</span></code></pre></div>
+<p>Danger signs in a job payload are usage of the <strong>date(1)</strong> command or use of
+<code>datetime.datetime.now()</code> in a Python script.</p>
+<h4 id="why-are-timezones-all-over-the-place-in-event-records">Why are timezones all over the place in event records?<a class="headerlink" href="#why-are-timezones-all-over-the-place-in-event-records" title="Permanent link">&para;</a></h4>
+<p>Records in the <a href="04-dynamodb-tables.html#the-events-table">events</a> table contain a bunch of different
+timestamps that may appear to have a random selection of timezones associated
+with them.</p>
+<p>Timezone aware timestamps are not all rendered into UTC for two reasons:</p>
+<ol>
+<li>
+<p>The timezone information can sometimes be useful when investigating issues.</p>
+</li>
+<li>
+<p>There is no particular need to convert to UTC as the timestamp is
+    unambiguous.</p>
+</li>
+</ol>
+<p>This why they have the timezones that they do.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Timezone Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ts_event</td>
+<td>This timezone aware timestamp is generated by the job execution environment. For most jobs, the timezone is that of the host running the lava worker. For <a href="06-jobs-job-types.html#job-type-docker">docker</a> jobs, it is the timezone of the container, which may be different from the host.</td>
+</tr>
+<tr>
+<td>ts_dispatch</td>
+<td>This timezone aware timestamp is generated by the job dispatch environment. For scheduled jobs, this is the timezone of the host running the dispatch command via <strong>cron(8)</strong> and is unrelated to the timezone associated with the job schedule. For jobs dispatched by the <a href="05-job-dispatch.html#the-dispatch-helper">dispatch helper</a> or <a href="05-job-dispatch.html#dispatching-jobs-from-s3-events">s3trigger</a>, the dispatch event comes from an AWS lambda function and the associated timezone is UTC. For <a href="05-job-dispatch.html#direct-dispatch">directly dispatched</a> jobs, the timezone will be whatever timezone the dispatching entity happens to have.</td>
+</tr>
+<tr>
+<td>tu_event</td>
+<td>This is the timezone naive equivalent of <code>ts_event</code> in UTC. It's present purely as a convenience.</td>
+</tr>
+<tr>
+<td>ttl</td>
+<td>This is a lava internal field. Its the UNIX epoch timestamp used by DynamoDB to automatically expire and remove old event records. Don't touch it or bother trying to interpret it.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="db_from_s3">db_from_s3<a class="headerlink" href="#db_from_s3" title="Permanent link">&para;</a></h3>
+<h4 id="error-invalid-byte-sequence-for-encoding-utf8">Error: invalid byte sequence for encoding “UTF8”<a class="headerlink" href="#error-invalid-byte-sequence-for-encoding-utf8" title="Permanent link">&para;</a></h4>
+<p>This typically means either:</p>
+<ol>
+<li>
+<p>The source data contains non-UTF8 characters; or</p>
+</li>
+<li>
+<p>The source is actually a gzip file but the <code>GZIP</code> option has not been
+    specified in the job parameters.</p>
+</li>
+</ol>
+<h4 id="error-http-412-the-file-has-been-modified-since-the-import-call-started">Error: HTTP 412. The file has been modified since the import call started<a class="headerlink" href="#error-http-412-the-file-has-been-modified-since-the-import-call-started" title="Permanent link">&para;</a></h4>
+<p>This is probably the result of an S3 race condition. It shouldn't happen. Report
+it if it does.</p>
+<h3 id="db_to_s3">db_to_s3<a class="headerlink" href="#db_to_s3" title="Permanent link">&para;</a></h3>
+<h4 id="there-is-no-db_to_s3-job-type-what-should-i-do-instead">There is no db_to_s3 job type. What should I do instead?<a class="headerlink" href="#there-is-no-db_to_s3-job-type-what-should-i-do-instead" title="Permanent link">&para;</a></h4>
+<p>Yes. Sorry about that.</p>
+<p>There are a number of alternatives.</p>
+<p>For Redshift, use <a href="06-jobs-job-types.html#job-type-redshift_unload">redshift_unload</a> which is
+optimised to extract data from Redshift efficiently.</p>
+<p>For other database types, the <a href="16-commands-utilities.html#lava-sql-utility">lava-sql</a> utility can cover
+many use cases. It can extract data from all supported database types into CSV,
+JSONL and Parquet format. It can be called directly from within the payload of
+<a href="06-jobs-job-types.html#job-type-exe">exe</a>, <a href="06-jobs-job-types.html#job-type-pkg">pkg</a> and <a href="06-jobs-job-types.html#job-type-docker">docker</a> jobs.</p>
+<p>It can also be used directly in a <a href="06-jobs-job-types.html#job-type-cmd">cmd</a> job as a DIY version of a
+<code>db_to_s3</code> job. This is what such a job might look like in the YAML format
+supported by the <a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a>:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ersatz db_to_s3 type of job</span>
+</span><span id="__span-1-2">
+</span><span id="__span-1-3"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmd</span>
+</span><span id="__span-1-4">
+</span><span id="__span-1-5"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ prefix.job }&gt;/ersatz-db-to-s3</span>
+</span><span id="__span-1-6">
+</span><span id="__span-1-7"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ worker.main }&gt;</span>
+</span><span id="__span-1-8"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-1-9"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ owner }&gt;</span>
+</span><span id="__span-1-10">
+</span><span id="__span-1-11"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+</span><span id="__span-1-12"><span class="w">  </span><span class="no">/bin/sh -c</span>
+</span><span id="__span-1-13"><span class="w">  </span><span class="no">&quot;</span>
+</span><span id="__span-1-14"><span class="w">  </span><span class="no">echo &#39;SELECT a, b, c FROM my_schema.my_table&#39; |</span>
+</span><span id="__span-1-15"><span class="w">  </span><span class="no">lava-sql</span>
+</span><span id="__span-1-16"><span class="w">  </span><span class="no">--format csv</span>
+</span><span id="__span-1-17"><span class="w">  </span><span class="no">--header</span>
+</span><span id="__span-1-18"><span class="w">  </span><span class="no">--conn-id &#39;&lt;{ db.conn_id }&gt;&#39;</span>
+</span><span id="__span-1-19"><span class="w">  </span><span class="no">--output &#39;{{ realm.s3_temp }}/{{ job.job_id }}/output.csv&#39;</span>
+</span><span id="__span-1-20"><span class="w">  </span><span class="no">-</span>
+</span><span id="__span-1-21"><span class="w">  </span><span class="no">&quot;</span>
+</span><span id="__span-1-22">
+</span><span id="__span-1-23"><span class="nt">event_log</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Output file is {{ realm.s3_temp }}/{{ job.job_id }}/output.csv</span>
+</span></code></pre></div>
+<p>Note the final <code>-</code> argument to <a href="16-commands-utilities.html#lava-sql-utility">lava-sql</a> tells it to
+read the query from stdin.</p>
+<p>We can also load the query from S3 instead of embedding it in the job, thus:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-2-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ersatz db_to_s3 type of job</span>
+</span><span id="__span-2-2">
+</span><span id="__span-2-3"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmd</span>
+</span><span id="__span-2-4">
+</span><span id="__span-2-5"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ prefix.job }&gt;/ersatz-db-to-s3</span>
+</span><span id="__span-2-6">
+</span><span id="__span-2-7"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ worker.main }&gt;</span>
+</span><span id="__span-2-8"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-2-9"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ owner }&gt;</span>
+</span><span id="__span-2-10">
+</span><span id="__span-2-11"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+</span><span id="__span-2-12"><span class="w">  </span><span class="no">/bin/sh -c</span>
+</span><span id="__span-2-13"><span class="w">  </span><span class="no">&quot;</span>
+</span><span id="__span-2-14"><span class="w">  </span><span class="no">lava-sql</span>
+</span><span id="__span-2-15"><span class="w">  </span><span class="no">--format csv</span>
+</span><span id="__span-2-16"><span class="w">  </span><span class="no">--header</span>
+</span><span id="__span-2-17"><span class="w">  </span><span class="no">--conn-id &#39;&lt;{ db.conn_id }&gt;&#39;</span>
+</span><span id="__span-2-18"><span class="w">  </span><span class="no">--output &#39;{{ realm.s3_temp }}/{{ job.job_id }}/output.csv&#39;</span>
+</span><span id="__span-2-19"><span class="w">  </span><span class="no">&#39;{{ realm.s3_payloads }}/&lt;{ prefix.payload }&gt;/xyz.rsc/query.sql&#39;</span>
+</span><span id="__span-2-20"><span class="w">  </span><span class="no">&quot;</span>
+</span><span id="__span-2-21">
+</span><span id="__span-2-22"><span class="nt">event_log</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Output file is {{ realm.s3_temp }}/{{ job.job_id }}/output.csv</span>
+</span></code></pre></div>
+<h3 id="docker">docker<a class="headerlink" href="#docker" title="Permanent link">&para;</a></h3>
+<h4 id="you-must-specify-a-region">You must specify a region<a class="headerlink" href="#you-must-specify-a-region" title="Permanent link">&para;</a></h4>
+<p>If a <a href="06-jobs-job-types.html#job-type-docker">docker</a> job requires access to AWS
+resources (e.g. S3, the lava connections manager etc.) it will be using the
+boto3 Python module to do so. This requires the AWS region in which it runs to
+be specified. Rather than hard-wire that into the container, the easiest way to
+set this is by adding the following environment variable to the parameters in
+the job specification:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><span class="p">{</span>
+</span><span id="__span-3-2"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-3"><span class="w">        </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-4"><span class="w">         </span><span class="nt">&quot;AWS_DEFAULT_REGION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ap-southeast-2&quot;</span>
+</span><span id="__span-3-5"><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-3-6"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-7"><span class="p">}</span>
+</span></code></pre></div>
+<p>Note that the IAM role for the worker should provide the authentication
+requirements for docker containers running on that worker.</p>
+<h3 id="exe">exe<a class="headerlink" href="#exe" title="Permanent link">&para;</a></h3>
+<h4 id="error-job-failed-errno-8-exec-format-error-tmplava">Error: job ... (...) failed: [Errno 8] Exec format error: '/tmp/lava/...'<a class="headerlink" href="#error-job-failed-errno-8-exec-format-error-tmplava" title="Permanent link">&para;</a></h4>
+<p>This error indicates that the operating system tried to run a script as a binary
+when it isn't. It generally means that the hashbang line is missing from the
+beginning of a script file indicating what interpreter to use. For a Python
+script it will look exactly like this:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-4-1"><span class="ch">#!/usr/bin/env python3</span>
+</span></code></pre></div>
+<p>This error can also occur when an executable has been edited on a DOS system and
+has acquired DOS CRLF line endings instead of UNIX LF line endings.</p>
+<h3 id="lavasched">lavasched<a class="headerlink" href="#lavasched" title="Permanent link">&para;</a></h3>
+<h4 id="failing-lavasched-jobs">Failing lavasched jobs<a class="headerlink" href="#failing-lavasched-jobs" title="Permanent link">&para;</a></h4>
+<p>This is the result of a bad crontab spec in a newly added job.</p>
+<p>Prior to version 5.0.0 (Cotopaxi), it could be tricky to localise the bad job
+specification. Since Cotopaxi, output from
+<a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> jobs now includes a context
+diff of the new crontab vs the old one to simplify tracking of changes and
+problem diagnosis.</p>
+<h3 id="pkg">pkg<a class="headerlink" href="#pkg" title="Permanent link">&para;</a></h3>
+<h4 id="error-job-failed-errno-8-exec-format-error-tmplava_1">Error: job ... (...) failed: [Errno 8] Exec format error: '/tmp/lava/...'<a class="headerlink" href="#error-job-failed-errno-8-exec-format-error-tmplava_1" title="Permanent link">&para;</a></h4>
+<p>This error indicates that the operating system tried to run a script as a binary
+when it isn't. It generally means that the hashbang line is missing from the
+beginning of a script file indicating what interpreter to use. For a Python
+script it will look exactly like this:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><span class="ch">#!/usr/bin/env python3</span>
+</span></code></pre></div>
+<p>This error can also occur when an executable has been edited on a DOS system and
+has acquired DOS CRLF line endings instead of UNIX LF line endings.</p>
+<h4 id="in-what-timezone-will-a-pkg-job-run">In what timezone will a <a href="06-jobs-job-types.html#job-type-pkg">pkg</a> job run?<a class="headerlink" href="#in-what-timezone-will-a-pkg-job-run" title="Permanent link">&para;</a></h4>
+<p>By default, all jobs run in the timezone setting of the worker itself. This is
+unrelated to the dispatch timezone.</p>
+<p>For a <a href="06-jobs-job-types.html#job-type-pkg">pkg</a> job, the timezone for the job run
+can be specified by adding the <code>TZ</code> environment variable to the job
+specification, thus:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><span class="p">{</span>
+</span><span id="__span-6-2"><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pkg&quot;</span><span class="p">,</span>
+</span><span id="__span-6-3"><span class="w">    </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-6-4"><span class="w">    </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-5"><span class="w">        </span><span class="nt">&quot;TZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Australia/Darwin&quot;</span>
+</span><span id="__span-6-6"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-6-7"><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="sql"><a href="06-jobs-job-types.html#job-type-sql">sql</a><a class="headerlink" href="#sql" title="Permanent link">&para;</a></h3>
+<h4 id="error-need-to-escape-but-no-escapechar-set">Error: need to escape, but no escapechar set<a class="headerlink" href="#error-need-to-escape-but-no-escapechar-set" title="Permanent link">&para;</a></h4>
+<p>When lava collects the output of a query from an
+<a href="06-jobs-job-types.html#job-type-sql">sql</a> job, it uses the standard Python CSV
+writer to format the data for output. If it detects that the data requires an
+escape character to be specified but this has not been done in the job
+specification, this error will result.</p>
+<h2 id="connectors-faq">Connectors FAQ<a class="headerlink" href="#connectors-faq" title="Permanent link">&para;</a></h2>
+<p>This section covers questions related to connectors in general as well as those
+specific to particular job types.</p>
+<h3 id="general-questions_1">General Questions<a class="headerlink" href="#general-questions_1" title="Permanent link">&para;</a></h3>
+<h4 id="why-is-psycopg2-not-supported">Why is psycopg2 not supported?<a class="headerlink" href="#why-is-psycopg2-not-supported" title="Permanent link">&para;</a></h4>
+<p>In a word, licensing. Psycopg2 is LGPL.</p>
+<h4 id="why-is-pygresql-not-supported">Why is pygresql not supported?<a class="headerlink" href="#why-is-pygresql-not-supported" title="Permanent link">&para;</a></h4>
+<p>As of v5.0.0 (Cotopaxi), <a href="https://www.pygresql.org/">pygresql</a> can be specified
+as the driver to use for Postgres family connectors using the <code>subtype</code> field in
+the connection specification.</p>
+<p>It is strongly recommended to stick with the default of
+<a href="https://github.com/tlocke/pg8000">pg8000</a> for the
+<a href="06-jobs-job-types.html#job-type-db_from_s3">db_from_s3</a> and
+<a href="06-jobs-job-types.html#job-type-redshift_unload">redshift_unload</a> job types.</p>
+<h4 id="why-would-i-use-pygresql-instead-of-pg8000">Why would I use pygresql instead of pg8000?<a class="headerlink" href="#why-would-i-use-pygresql-instead-of-pg8000" title="Permanent link">&para;</a></h4>
+<p>Insert performance of <a href="https://github.com/tlocke/pg8000">pg8000</a> is poor.
+For Python based jobs inserting a lot of data,
+<a href="https://www.pygresql.org/">pygresql</a> should give better performance.</p>
+<h4 id="is-sqlalchemy-supported">Is SQLAlchemy supported?<a class="headerlink" href="#is-sqlalchemy-supported" title="Permanent link">&para;</a></h4>
+<p>As of v5.0.0 (Cotopaxi), the SQL based connectors provide native support for
+<a href="https://www.sqlalchemy.org/">SQLAlchemy</a>. An SQLAlchemy engine can be created
+using a lava connector to manage the underlying connection process.</p>
+<h3 id="ssh-scp-sftp">ssh, scp, sftp<a class="headerlink" href="#ssh-scp-sftp" title="Permanent link">&para;</a></h3>
+<h4 id="authentication-failures">Authentication Failures<a class="headerlink" href="#authentication-failures" title="Permanent link">&para;</a></h4>
+<p>A possible cause of authentication failures is the default behaviour of ssh, scp
+and sftp in situations where it cannot verify the fingerprint of the remote
+host's public key. When this occurs, the client will drop into interactive mode
+to ask for confirmation to accept the key, like so:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1">The authenticity of host &#39;sftp.xyzzy.com (192.219.1.1)&#39; can&#39;t be established.
+</span><span id="__span-7-2">RSA key fingerprint is SHA256:TXYwAhoSEfm6Me6RtFHJRUEGL9lTuHqySI6GyxVe//M.
+</span><span id="__span-7-3">RSA key fingerprint is MD5:52:b4:70:1d:c1:0e:aa:4d:32:8e:f8:7a:cb:f9:b8:7e.
+</span><span id="__span-7-4">Are you sure you want to continue connecting (yes/no)?
+</span></code></pre></div>
+<p>Lava cannot handle this.</p>
+<p>To avoid this problem, add <code>-o StrictHostKeyChecking=no</code> to the arguments when
+invoking the connector script provided by lava.</p>
+<h2 id="installation-and-operation-faq">Installation and Operation FAQ<a class="headerlink" href="#installation-and-operation-faq" title="Permanent link">&para;</a></h2>
+<h3 id="the-lava-worker">The Lava Worker<a class="headerlink" href="#the-lava-worker" title="Permanent link">&para;</a></h3>
+<h4 id="modulenotfounderror-no-module-named-psutil">ModuleNotFoundError: No module named 'psutil'<a class="headerlink" href="#modulenotfounderror-no-module-named-psutil" title="Permanent link">&para;</a></h4>
+<p>This error appears to be unique to the Amazon Linux 1 AMI due to a bug in the
+Python configuration on that AMI. Basically, binary modules, such as <code>psutil</code>,
+are getting installed in a <code>lib64</code> directory by pip instead of <code>lib</code> and Python
+is not looking in <code>lib64</code>.</p>
+<p>The fix is:</p>
+<p><div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><span class="nb">unset</span><span class="w"> </span>PYTHON_INSTALL_LAYOUT
+</span><span id="__span-8-2">python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>psutil<span class="w"> </span>--upgrade
+</span></code></pre></div>
+Note that this problem can also affect other modules including <code>jinja2</code> and
+<code>cx_Oracle</code>. The fix is the same in each case.</p>
+<h3 id="the-lava-docker-images">The Lava Docker Images<a class="headerlink" href="#the-lava-docker-images" title="Permanent link">&para;</a></h3>
+<h4 id="docker-build-fails-error-internal-load-metadata-for-dockerio">Docker build fails : ERROR [internal] load metadata for docker.io...<a class="headerlink" href="#docker-build-fails-error-internal-load-metadata-for-dockerio" title="Permanent link">&para;</a></h4>
+<p>There is a bug in some versions of docker buildkit which seems to occur when
+connecting to docker hub via a proxy. If this message occurs, try building from
+location that does not require a proxy connection.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>As of v8.1.0 (<a href="https://en.wikipedia.org/wiki/Kīlauea">Kīlauea</a>), lava docker
+images <em>must</em> be built with buildkit enabled.</p>
+</div>
+<h2 id="the-lava-framework-faq">The Lava Framework FAQ<a class="headerlink" href="#the-lava-framework-faq" title="Permanent link">&para;</a></h2>
+<h3 id="general-questions_2">General Questions<a class="headerlink" href="#general-questions_2" title="Permanent link">&para;</a></h3>
+<h4 id="retrospectively-adding-jupyter-notebook-support">Retrospectively adding Jupyter notebook support<a class="headerlink" href="#retrospectively-adding-jupyter-notebook-support" title="Permanent link">&para;</a></h4>
+<p>If Jupyter support was not requested when the project was originally created
+using cookiecutter, it can be enabled afterwards using the following process:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><span class="c1"># Got to project root</span>
+</span><span id="__span-9-2"><span class="nb">cd</span><span class="w">  </span>&lt;PROJECT-ROOT&gt;
+</span><span id="__span-9-3">
+</span><span id="__span-9-4"><span class="c1"># Add jupyter to requirements file</span>
+</span><span id="__span-9-5"><span class="nb">echo</span><span class="w"> </span>jupyter<span class="w"> </span>&gt;&gt;<span class="w"> </span>etc/requirements.txt
+</span><span id="__span-9-6">
+</span><span id="__span-9-7"><span class="c1"># Install jupyter support</span>
+</span><span id="__span-9-8">make<span class="w"> </span>init
+</span></code></pre></div>
+<h4 id="retrospectively-adding-lava-libraries">Retrospectively adding lava libraries<a class="headerlink" href="#retrospectively-adding-lava-libraries" title="Permanent link">&para;</a></h4>
+<p>If the lava libraries were not requested when the project was originally created
+using cookiecutter, they can be added afterwards using the following process:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1"><span class="c1"># Got to project root</span>
+</span><span id="__span-10-2"><span class="nb">cd</span><span class="w">  </span>&lt;PROJECT-ROOT&gt;
+</span><span id="__span-10-3">
+</span><span id="__span-10-4"><span class="c1"># Add lava to requirements file</span>
+</span><span id="__span-10-5"><span class="nb">echo</span><span class="w"> </span>jinlava<span class="w"> </span>&gt;&gt;<span class="w"> </span>etc/requirements.txt
+</span><span id="__span-10-6">
+</span><span id="__span-10-7"><span class="c1"># Install</span>
+</span><span id="__span-10-8">make<span class="w"> </span>init
+</span></code></pre></div>
+<h2 id="jinja-rendering-faq">Jinja Rendering FAQ<a class="headerlink" href="#jinja-rendering-faq" title="Permanent link">&para;</a></h2>
+<h4 id="does-lava-support-recursive-rendering">Does lava support recursive rendering?<a class="headerlink" href="#does-lava-support-recursive-rendering" title="Permanent link">&para;</a></h4>
+<p>No.</p>
+<p>For any job type that supports Jinja rendering, lava performs only a single
+rendering pass. So, for example, it is not possible to include Jinja syntax in
+a <code>vars</code> variable that references an element in <code>globals</code> as this would require
+two rendering passes to first inject the global into the var and then render the
+Jinja content of the var.</p>
+<p><a href="https://en.wikipedia.org/wiki/Colossal_Cave_Adventure#Maze_of_twisty_little_passages">You are in a maze of twisty little passages, all alike</a>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; Origin Energy 2025
+    </div>
+  
+</div>
+      <div class="md-footer-social">
+        <div class="md-copyright">
+          <div class="md-copyright__highlight">
+            v8.2.0 (Kilauea)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

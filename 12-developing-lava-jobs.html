@@ -1,0 +1,1579 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AWS based distributed scheduler and job runner">
+      
+      
+        <meta name="author" content="Murray Andrews">
+      
+      
+      
+        <link rel="prev" href="11-lava-job-framework.html">
+      
+      
+        <link rel="next" href="13-jinja-rendering-in-lava.html">
+      
+      
+      <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+    
+    
+      
+        <title>Developing Lava Jobs - Lava User Guide</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="css/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#developing-lava-jobs" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="Lava User Guide" class="md-header__button md-logo" aria-label="Lava User Guide" data-md-component="logo">
+      
+  <img src="img/lava-icons/svg/256/lava-icon-256-opaque.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Lava User Guide
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Developing Lava Jobs
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        
+
+<a href="https://github.com/jin-gizmo/lava" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lava on GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="Lava User Guide" class="md-nav__button md-logo" aria-label="Lava User Guide" data-md-component="logo">
+      
+  <img src="img/lava-icons/svg/256/lava-icon-256-opaque.svg" alt="logo">
+
+    </a>
+    Lava User Guide
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+<a href="https://github.com/jin-gizmo/lava" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lava on GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="01-about-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02-concepts.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="03-architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="04-dynamodb-tables.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DynamoDB Tables
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="05-job-dispatch.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Dispatch
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="06-jobs-job-types.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Jobs & Job Types
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="07-connectors.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Connectors
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="08-job-actions.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Actions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="09-lava-state-manager.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava State Manager
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="10-installation-operation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation & Operation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="11-lava-job-framework.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava Job Framework
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Developing Lava Jobs
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="12-developing-lava-jobs.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Developing Lava Jobs
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executable-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executable Jobs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Executable Jobs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#executable-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executable Scripts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-of-temporary-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temporary Files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-if-running-in-lava" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing if Running in Lava
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-of-stdin-stdout-and-stderr" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stdin, stdout and stderr
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exit-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exit Status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-and-error-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status and Error messages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-handling-for-executable-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connections in Executable Jobs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-executable-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Executable Jobs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connection-handling-for-python-based-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connections in Python
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connection-handling-for-sqlalchemy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connections in SQLAlchemy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-connections-the-good-the-bad-and-the-ugly-of-dbapi-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Connections - The Good, the Bad and the Ugly of DBAPI 2.0
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Connections - The Good, the Bad and the Ugly of DBAPI 2.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-good" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Good
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-ugly" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Ugly
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-bad" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Bad
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dbapi-20-usage-in-lava" class="md-nav__link">
+    <span class="md-ellipsis">
+      DBAPI 2.0 Usage in Lava
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sql-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      SQL Jobs
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="13-jinja-rendering-in-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Jinja Rendering in Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="14-enhancing-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enhancing Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="15-lava-and-docker.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava and Docker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="16-commands-utilities.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Commands & Utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="17-job-framework-samples.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Framework Samples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="18-api.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="19-cloudformation-templates.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CloudFormation Templates
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="20-faq.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="21-release-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Notes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="22-credits.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Credits
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="23-known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Known Issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executable-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executable Jobs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Executable Jobs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#executable-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Executable Scripts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-of-temporary-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Temporary Files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-if-running-in-lava" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing if Running in Lava
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-of-stdin-stdout-and-stderr" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stdin, stdout and stderr
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exit-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exit Status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#status-and-error-messages" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status and Error messages
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-handling-for-executable-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connections in Executable Jobs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#python-executable-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Executable Jobs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connection-handling-for-python-based-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connections in Python
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connection-handling-for-sqlalchemy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Connections in SQLAlchemy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-connections-the-good-the-bad-and-the-ugly-of-dbapi-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      Database Connections - The Good, the Bad and the Ugly of DBAPI 2.0
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Connections - The Good, the Bad and the Ugly of DBAPI 2.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-good" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Good
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-ugly" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Ugly
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-bad" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Bad
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dbapi-20-usage-in-lava" class="md-nav__link">
+    <span class="md-ellipsis">
+      DBAPI 2.0 Usage in Lava
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sql-jobs" class="md-nav__link">
+    <span class="md-ellipsis">
+      SQL Jobs
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="developing-lava-jobs">Developing Lava Jobs<a class="headerlink" href="#developing-lava-jobs" title="Permanent link">&para;</a></h1>
+<h2 id="executable-jobs">Executable Jobs<a class="headerlink" href="#executable-jobs" title="Permanent link">&para;</a></h2>
+<p>Executable jobs are handled by <a href="06-jobs-job-types.html#job-type-cmd">cmd</a>,
+<a href="06-jobs-job-types.html#job-type-exe">exe</a>, <a href="06-jobs-job-types.html#job-type-pkg">pkg</a>
+and <a href="06-jobs-job-types.html#job-type-docker">docker</a> job types.</p>
+<p>Executable scripts (bash, Python, Perl etc), as well as worker compatible
+binaries, are fine for use in lava. The information in this section is
+applicable to all of these.</p>
+<p>For <a href="#python-executable-jobs">Python based jobs</a>, additional
+capabilities are provided by direct access to the lava packages.</p>
+<p>The run-time environment for executable jobs in lava is a conventional Linux
+environment based on the worker on which the job runs.</p>
+<p>For docker jobs, some details may depend on the nature of the container being
+run. Refer to the chapter on <a href="15-lava-and-docker.html#lava-and-docker">lava and docker</a>
+for more information.</p>
+<p>The main peculiarities associated with lava based executable jobs are outlined
+below.</p>
+<h3 id="executable-scripts">Executable Scripts<a class="headerlink" href="#executable-scripts" title="Permanent link">&para;</a></h3>
+<p>Lava relies on the <em>hashbang</em> line at the beginning of the script to determine
+the appropriate interpreter in exactly the same way that a UNIX shell does.</p>
+<div class="admonition warning">
+<p class="admonition-title">Beware DOS</p>
+<p>If the script has been edited on a DOS system, it is very likely that it
+will have DOS style CRLF line endings instead of UNIX style LF endings.
+This will prevent the hashbang line from being recognised and the job will
+fail.</p>
+</div>
+<h3 id="handling-of-temporary-files">Handling of Temporary Files<a class="headerlink" href="#handling-of-temporary-files" title="Permanent link">&para;</a></h3>
+<p>Lava jobs are run in a temporary directory created by lava and deleted by lava
+when the job exits. </p>
+<p>The <code>TMPDIR</code> environment variable is set for
+<a href="06-jobs-job-types.html#job-type-cmd">cmd</a>,
+<a href="06-jobs-job-types.html#job-type-exe">exe</a> and <a href="06-jobs-job-types.html#job-type-pkg">pkg</a>
+jobs to point within the private run area for the job rather than inheriting
+the default system setting. This variable can be referenced explicitly in a
+job. Alternatively, the
+<a href="https://www.gnu.org/software/autogen/mktemp.html">mktemp(1)</a>
+command line utility or the Python
+<a href="https://docs.python.org/library/tempfile.html">tempfile</a> module can
+be used as these will use <code>TMPDIR</code> if used correctly.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>The following applies to Linux. Note that
+<a href="https://www.unix.com/man-page/osx/1/mktemp/">macOS mktemp(1)</a> behaves very
+differently in a number of ways, including using of <code>TMPDIR</code>.</p>
+</div>
+<p>Typical usage in a shell is:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><span class="ch">#!/bin/bash</span>
+</span><span id="__span-0-2">
+</span><span id="__span-0-3"><span class="c1"># Create a temp file in our private job area</span>
+</span><span id="__span-0-4"><span class="nv">MY_TMP_FILE</span><span class="o">=</span><span class="k">$(</span>mktemp<span class="k">)</span>
+</span><span id="__span-0-5">
+</span><span id="__span-0-6"><span class="c1"># Create a temp directory in our private job area</span>
+</span><span id="__span-0-7"><span class="nv">MY_TMP_DIR</span><span class="o">=</span><span class="k">$(</span>mktemp<span class="w"> </span>-d<span class="k">)</span>
+</span><span id="__span-0-8">
+</span><span id="__span-0-9"><span class="c1"># Create a temp directory using a name template. The -t is critical here.</span>
+</span><span id="__span-0-10"><span class="nv">MY_TMP_DIR2</span><span class="o">=</span><span class="k">$(</span>mktemp<span class="w"> </span>-d<span class="w"> </span>-t<span class="w"> </span>tmp-XXXXXX<span class="k">)</span>
+</span></code></pre></div>
+<p>Typical usage in Python is:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-1-1"><span class="ch">#!/usr/bin/env python3</span>
+</span><span id="__span-1-2">
+</span><span id="__span-1-3"><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+</span><span id="__span-1-4">
+</span><span id="__span-1-5"><span class="c1"># Create a tempfile. The file is open.</span>
+</span><span id="__span-1-6"><span class="n">tmp_file_descriptor</span><span class="p">,</span> <span class="n">tmp_file_name</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">()</span>
+</span><span id="__span-1-7">
+</span><span id="__span-1-8"><span class="c1"># Create a temp directory.</span>
+</span><span id="__span-1-9"><span class="n">tmp_dir_name</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+</span></code></pre></div>
+<p>While lava will clean these up when the job exits, it is still good practice for
+jobs to clean up after themselves. Jobs should generally avoid creating
+temporary objects in <code>/tmp</code> because lava will not clean these up and there are
+no guarantees about availability of storage space in <code>/tmp</code>.</p>
+<h3 id="testing-if-running-in-lava">Testing if Running in Lava<a class="headerlink" href="#testing-if-running-in-lava" title="Permanent link">&para;</a></h3>
+<p>Sometimes it's necessary for an executable to test whether or not it is running
+in lava. The easiest way to do this is to look for the presence of one of the
+lava environment variables <code>LAVA_REALM</code> or <code>LAVA_JOB_ID</code>.</p>
+<p>In a bash script, this would look like:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><span class="ch">#!/bin/bash</span>
+</span><span id="__span-2-2">
+</span><span id="__span-2-3"><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$LAVA_REALM</span><span class="s2">&quot;</span><span class="w"> </span>!<span class="o">=</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span><span class="o">]</span>
+</span><span id="__span-2-4"><span class="k">then</span>
+</span><span id="__span-2-5"><span class="w">    </span><span class="c1"># We are in lava</span>
+</span><span id="__span-2-6"><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;I lava you&quot;</span>
+</span><span id="__span-2-7"><span class="k">else</span>
+</span><span id="__span-2-8"><span class="w">    </span><span class="c1"># We are not in lava</span>
+</span><span id="__span-2-9"><span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;I don&#39;t lava you anymore&quot;</span>
+</span><span id="__span-2-10"><span class="k">fi</span>
+</span></code></pre></div>
+<h3 id="handling-of-stdin-stdout-and-stderr">Handling of stdin, stdout and stderr<a class="headerlink" href="#handling-of-stdin-stdout-and-stderr" title="Permanent link">&para;</a></h3>
+<p>For executable jobs, stdin is redirected from <code>/dev/null</code> while stdout and
+stderr are captured and uploaded to the realm temporary area in S3 unless the
+worker is running with the <code>--dev</code> option. In that case, stdout and stderr are
+emitted locally on the worker.</p>
+<h3 id="exit-status">Exit Status<a class="headerlink" href="#exit-status" title="Permanent link">&para;</a></h3>
+<p>Lava assumes that a zero exit status indicates that the job has succeeded. This
+will trigger any <code>on_success</code> job actions.</p>
+<p>A non-zero exit status indicates to lava that the job has failed. This will
+trigger any <code>on_fail</code> actions.</p>
+<h3 id="status-and-error-messages">Status and Error messages<a class="headerlink" href="#status-and-error-messages" title="Permanent link">&para;</a></h3>
+<p>Executable jobs running under lava should print useful status and error messages
+to stdout and stderr, just as they should when running in any other environment.</p>
+<p>In normal operation, lava will collect this and upload it to S3 and place a
+pointer to it in the job
+event record.</p>
+<p>When the worker is running with the <code>--dev</code> option, stdout and stderr from the
+job are emitted locally rather than being sent to S3. This can help with
+development and debugging.</p>
+<h3 id="connection-handling-for-executable-jobs">Connection Handling for Executable Jobs<a class="headerlink" href="#connection-handling-for-executable-jobs" title="Permanent link">&para;</a></h3>
+<p>Handling of connections to external resources is facilitated via small
+executables created by lava to effect the connection. The path to the connector
+executable is passed to the lava job executable as an environment variable.</p>
+<p>The following example shows how this would be used in a shell script to access
+a database connection, but the mechanism is generic and available to any
+executable that can read environment variables and invoke an external program.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><span class="ch">#!/bin/bash</span>
+</span><span id="__span-3-2">
+</span><span id="__span-3-3"><span class="c1"># The following environment variables are set in the Lava exe job specification.</span>
+</span><span id="__span-3-4"><span class="c1"># The can be as many connections to different resources as is required.</span>
+</span><span id="__span-3-5"><span class="c1">#</span>
+</span><span id="__span-3-6"><span class="c1"># LAVA_CONN_AURORA01</span>
+</span><span id="__span-3-7"><span class="c1">#    Lava connector script for the &quot;aurora01&quot; database. The lava job spec must</span>
+</span><span id="__span-3-8"><span class="c1">#    have an &quot;aurora01&quot; connections entry.</span>
+</span><span id="__span-3-9">
+</span><span id="__span-3-10"><span class="c1"># SQL to do something</span>
+</span><span id="__span-3-11"><span class="nv">SQL</span><span class="o">=</span><span class="s2">&quot;....&quot;</span>
+</span><span id="__span-3-12">
+</span><span id="__span-3-13"><span class="c1"># Run a command line SQL client that is preconfigured for auto login.</span>
+</span><span id="__span-3-14"><span class="nv">$LAVA_CONN_AURORA01</span><span class="w"> </span>--database<span class="o">=</span>dbname<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$SQL</span><span class="s2">&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>local-temp-file
+</span><span id="__span-3-15">
+</span><span id="__span-3-16"><span class="c1"># Now do something clever with the results.</span>
+</span></code></pre></div>
+<p><a href="#python-executable-jobs">Python based executable jobs</a> have
+additional options for handling connections by virtue of programmatic access to
+the underlying lava connection manager.</p>
+<h2 id="python-executable-jobs">Python Executable Jobs<a class="headerlink" href="#python-executable-jobs" title="Permanent link">&para;</a></h2>
+<p>In addition to the facilities available to all executable jobs, additional
+functionality is available for Python jobs as lava itself is Python based.</p>
+<p>Python based executable jobs can interface directly with the lava Python base
+package. This provides access to the lava connection manager as well as other
+modules included with lava.</p>
+<p>See <a href="10-installation-operation.html#installing-lava-locally">Installing Lava Locally</a>.</p>
+<h2 id="connection-handling-for-python-based-jobs">Connection Handling for Python Based Jobs<a class="headerlink" href="#connection-handling-for-python-based-jobs" title="Permanent link">&para;</a></h2>
+<p>Python based lava programs can invoke the lava connection manager directly.  See
+<a class="autorefs autorefs-internal" title="            lava.connection" href="18-api.html#lava.connection">lava.connections</a> in the <a href="18-api.html#lava-api-reference">API
+documentation</a> for more information.</p>
+<p>This is a simple example showing how to create a connection to an SQL-based
+database:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+</span><span id="__span-4-2"><span class="kn">from</span><span class="w"> </span><span class="nn">lava.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_pysql_connection</span>
+</span><span id="__span-4-3">
+</span><span id="__span-4-4"><span class="c1"># As we are using the lava connection manager, we just need the connection ID</span>
+</span><span id="__span-4-5"><span class="c1"># this time – not the connector script. So use LAVA_CONNID_DB not LAVA_CONN_DB.</span>
+</span><span id="__span-4-6">
+</span><span id="__span-4-7"><span class="n">conn_id</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LAVA_CONNID_DB&#39;</span><span class="p">]</span>
+</span><span id="__span-4-8"><span class="n">realm</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LAVA_REALM&#39;</span><span class="p">]</span>
+</span><span id="__span-4-9">
+</span><span id="__span-4-10"><span class="c1"># Get a standard DBAPI 2.0 connection</span>
+</span><span id="__span-4-11"><span class="n">conn</span> <span class="o">=</span> <span class="n">get_pysql_connection</span><span class="p">(</span><span class="n">conn_id</span><span class="p">,</span> <span class="n">realm</span><span class="p">)</span>
+</span><span id="__span-4-12">
+</span><span id="__span-4-13"><span class="c1"># Knock yourself out with SQL wizardry…</span>
+</span><span id="__span-4-14"><span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+</span><span id="__span-4-15"><span class="o">...</span>
+</span><span id="__span-4-16"><span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></code></pre></div>
+<h2 id="connection-handling-for-sqlalchemy">Connection Handling for SQLAlchemy<a class="headerlink" href="#connection-handling-for-sqlalchemy" title="Permanent link">&para;</a></h2>
+<p>The SQL <a href="07-connectors.html#database-connectors">database connectors</a> provide native
+support for <a href="https://www.sqlalchemy.org/">SQLAlchemy</a>. An SQLAlchemy engine can
+be created using a lava connector to manage the underlying connection process.</p>
+<p>This is useful, not just for using SQLAlchemy natively, but also for packages
+such as <a href="https://pandas.pydata.org">pandas</a> that rely on SQLAlchemy for database
+interaction.</p>
+<p>The following example shows how this would be used.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+</span><span id="__span-5-2"><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span id="__span-5-3"><span class="kn">from</span><span class="w"> </span><span class="nn">lava.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_sqlalchemy_engine</span>
+</span><span id="__span-5-4">
+</span><span id="__span-5-5"><span class="c1"># As we are using the lava connection manager, we just need the connection ID</span>
+</span><span id="__span-5-6"><span class="c1"># this time – not the connector script. So use LAVA_CONNID_DB not LAVA_CONN_DB.</span>
+</span><span id="__span-5-7">
+</span><span id="__span-5-8"><span class="n">conn_id</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LAVA_CONNID_DB&#39;</span><span class="p">]</span>
+</span><span id="__span-5-9"><span class="n">realm</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LAVA_REALM&#39;</span><span class="p">]</span>
+</span><span id="__span-5-10">
+</span><span id="__span-5-11"><span class="n">engine</span> <span class="o">=</span> <span class="n">get_sqlalchemy_engine</span><span class="p">(</span><span class="n">conn_id</span><span class="p">,</span> <span class="n">realm</span><span class="p">)</span>
+</span><span id="__span-5-12"><span class="c1"># engine is a standard SQLAlchemy engine.</span>
+</span><span id="__span-5-13">
+</span><span id="__span-5-14"><span class="k">with</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+</span><span id="__span-5-15">    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;... an SQL query ...&#39;</span><span class="p">):</span>
+</span><span id="__span-5-16">        <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span id="__span-5-17">
+</span><span id="__span-5-18"><span class="c1"># Or use with pandas</span>
+</span><span id="__span-5-19"><span class="n">table_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_table</span><span class="p">(</span><span class="s1">&#39;my_table&#39;</span><span class="p">,</span> <span class="n">con</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span>
+</span></code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There is a known issue for SQLAlchemy and pg8000. See the
+<a href="23-known-issues.html#pg8000-type-error-with-sqlalchemy">workaround</a>.</p>
+</div>
+<h2 id="database-connections-the-good-the-bad-and-the-ugly-of-dbapi-20">Database Connections - The Good, the Bad and the Ugly of DBAPI 2.0<a class="headerlink" href="#database-connections-the-good-the-bad-and-the-ugly-of-dbapi-20" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p>Aaaah–aaaah–aaah–aaaah… Wah–wah–wahhhh…</p>
+<p>(Don't tell me you don't know)</p>
+</div>
+<p>Lava uses DBAPI 2.0 based database drivers, the interface for which is specified
+in <a href="https://www.python.org/dev/peps/pep-0249/">PEP 249</a>.</p>
+<h3 id="the-good">The Good<a class="headerlink" href="#the-good" title="Permanent link">&para;</a></h3>
+<p>DBAPI 2.0 provides some level of interface consistency across database types. In
+simple cases, you only need to invoke the lava <code>get_pysql_connection()</code> function
+as described above to obtain a database connection which can be used to execute
+queries in a more or less consistent way across database types. But ...</p>
+<h3 id="the-ugly">The Ugly<a class="headerlink" href="#the-ugly" title="Permanent link">&para;</a></h3>
+<p>While DBAPI 2.0 provides <code>Connection.commit()</code> and <code>Connection.rollback()</code>
+functions, it does not provide a <code>Connection.begin()</code> function to start a
+transaction and driver implementations can differ in how they handle this.
+(Most, but not all, handle this by setting <code>Connection.autocommit</code>). Different
+databases also use different SQL syntax to begin a transaction. Oracle is
+notable in that it does not support <code>BEGIN TRANSACTION</code> in the way that Postgres
+and MySQL do.</p>
+<p>To avoid this problem, lava provides a helper function
+<a class="autorefs autorefs-internal" title="            begin_transaction" href="18-api.html#lava.lib.db.begin_transaction">lava.lib.db.begin_transaction()</a>.
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><span class="kn">from</span><span class="w"> </span><span class="nn">lava.connection</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_pysql_connection</span>
+</span><span id="__span-6-2"><span class="kn">from</span><span class="w"> </span><span class="nn">lava.lib.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">begin_transaction</span>
+</span><span id="__span-6-3">
+</span><span id="__span-6-4"><span class="n">conn</span> <span class="o">=</span> <span class="n">get_pysql_connection</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</span><span id="__span-6-5"><span class="n">cursor</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+</span><span id="__span-6-6">
+</span><span id="__span-6-7"><span class="k">try</span><span class="p">:</span>
+</span><span id="__span-6-8">    <span class="n">begin_transaction</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">cursor</span><span class="p">)</span>
+</span><span id="__span-6-9">    <span class="c1"># Do some SQL stuff</span>
+</span><span id="__span-6-10"><span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+</span><span id="__span-6-11">    <span class="n">conn</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+</span><span id="__span-6-12"><span class="k">else</span><span class="p">:</span>
+</span><span id="__span-6-13">    <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+</span><span id="__span-6-14"><span class="k">finally</span><span class="p">:</span>
+</span><span id="__span-6-15">    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></code></pre></div></p>
+<h3 id="the-bad">The Bad<a class="headerlink" href="#the-bad" title="Permanent link">&para;</a></h3>
+<p><a href="https://www.python.org/dev/peps/pep-0249/">PEP 249</a> defines 5 different
+possible mechanisms for passing query parameters when a query is executed.</p>
+<p>This is because it is absolutely critical for a <em>standard</em> to have 5
+incompatible ways of doing exactly the same thing.</p>
+<p>Unfortunately there is no consistency across different drivers as to which
+subset of these is implemented or the default setting. The <code>paramstyle</code> module
+constant will specify the default mechanism.</p>
+<p>Some drivers, such as pg8000, allow the <code>paramstyle</code> <em>constant</em> to be set to
+different values to support different parameter passing styles. Some don't.</p>
+<p>It's a bit of a mess unfortunately and makes writing driver independent code
+inordinately difficult. You either need to test the module's <code>paramstyle</code>
+setting and adapt the parameter passing mechanism at run-time or just make do
+with the specific driver settings.</p>
+<h2 id="dbapi-20-usage-in-lava">DBAPI 2.0 Usage in Lava<a class="headerlink" href="#dbapi-20-usage-in-lava" title="Permanent link">&para;</a></h2>
+<p>Lava uses the following drivers by default. Check the documentation for the
+driver for more details.</p>
+<table>
+<thead>
+<tr>
+<th>Database Family</th>
+<th>Driver</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MSSQL</td>
+<td><a href="https://pypi.org/project/pyodbc/">pyodbc</a></td>
+</tr>
+<tr>
+<td>MySQL</td>
+<td><a href="https://pymysql.readthedocs.io/en/latest/">PyMySQL</a></td>
+</tr>
+<tr>
+<td>Oracle</td>
+<td><a href="https://oracle.github.io/python-cx_Oracle/">cx_Oracle</a></td>
+</tr>
+<tr>
+<td>Postgres</td>
+<td><a href="https://github.com/tlocke/pg8000">pg8000</a></td>
+</tr>
+<tr>
+<td>Redshift</td>
+<td><a href="https://github.com/tlocke/pg8000">pg8000</a></td>
+</tr>
+<tr>
+<td>SQLite3</td>
+<td><a href="https://docs.python.org/3/library/sqlite3.html">sqlite3</a></td>
+</tr>
+</tbody>
+</table>
+<p>Python code either must be sophisticated enough to adapt to the DBAPI 2.0
+variations at run-time or must have specific knowledge of which driver is being
+used. Using <a href="#connection-handling-for-sqlalchemy">SQLAlchemy</a>
+instead of the native interface may be of assistance in the former option.</p>
+<p>Lava also provides limited support to select an alternate driver for some
+database types. This is done using the <code>subtype</code> field in the database
+connection specification. Refer to individual connectors for details.</p>
+<h2 id="sql-jobs">SQL Jobs<a class="headerlink" href="#sql-jobs" title="Permanent link">&para;</a></h2>
+<p>The <a href="06-jobs-job-types.html#job-type-sql">sql</a>,
+<a href="06-jobs-job-types.html#job-type-sqlc">sqlc</a>,
+<a href="06-jobs-job-types.html#job-type-sqli">sqli</a> and
+<a href="06-jobs-job-types.html#job-type-sqlv">sqlv</a> jobs will run SQL commands against a
+target RDBMS.</p>
+<p>There is nothing special that needs to be done with the SQL to prepare it to run
+with lava but it is important to keep the following in mind:</p>
+<ul>
+<li>
+<p>Lava will manage all of the connectivity to the database.</p>
+</li>
+<li>
+<p>The SQL must match the syntax requirements of the target database.</p>
+</li>
+<li>
+<p><a href="06-jobs-job-types.html#job-type-sqlc">sqlc</a> jobs use the command line client
+    specific to the target database. Typically these will support some client
+    specific meta commands to control behaviour of the client. These can be used
+    in the job payload script.</p>
+</li>
+<li>
+<p><a href="06-jobs-job-types.html#job-type-sqlc">sqlc</a> and
+    <a href="06-jobs-job-types.html#job-type-sqlv">sqlv</a> jobs have a timeout that can be
+    configured in the job specification. <a href="06-jobs-job-types.html#job-type-sql">sql</a>
+    and <a href="06-jobs-job-types.html#job-type-sqli">sqli</a> jobs do not have a timeout. Like
+    all jobs, the visibility timeout on the worker queue needs to be kept in
+    mind.</p>
+</li>
+<li>
+<p>If the queries return data, this will be placed into the temporary area in
+    S3. Some other process may need to do something with this data.</p>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; Origin Energy 2025
+    </div>
+  
+</div>
+      <div class="md-footer-social">
+        <div class="md-copyright">
+          <div class="md-copyright__highlight">
+            v8.2.0 (Kilauea)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

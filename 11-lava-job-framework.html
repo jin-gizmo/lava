@@ -1,0 +1,2903 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AWS based distributed scheduler and job runner">
+      
+      
+        <meta name="author" content="Murray Andrews">
+      
+      
+      
+        <link rel="prev" href="10-installation-operation.html">
+      
+      
+        <link rel="next" href="12-developing-lava-jobs.html">
+      
+      
+      <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+    
+    
+      
+        <title>Lava Job Framework - Lava User Guide</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="css/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#the-lava-job-framework" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="Lava User Guide" class="md-header__button md-logo" aria-label="Lava User Guide" data-md-component="logo">
+      
+  <img src="img/lava-icons/svg/256/lava-icon-256-opaque.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Lava User Guide
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lava Job Framework
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        
+
+<a href="https://github.com/jin-gizmo/lava" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lava on GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="Lava User Guide" class="md-nav__button md-logo" aria-label="Lava User Guide" data-md-component="logo">
+      
+  <img src="img/lava-icons/svg/256/lava-icon-256-opaque.svg" alt="logo">
+
+    </a>
+    Lava User Guide
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+<a href="https://github.com/jin-gizmo/lava" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lava on GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="01-about-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02-concepts.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="03-architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="04-dynamodb-tables.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DynamoDB Tables
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="05-job-dispatch.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Dispatch
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="06-jobs-job-types.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Jobs & Job Types
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="07-connectors.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Connectors
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="08-job-actions.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Actions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="09-lava-state-manager.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava State Manager
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="10-installation-operation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation & Operation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Lava Job Framework
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="11-lava-job-framework.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava Job Framework
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Guidelines
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Started
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jinja-rendering-of-lava-framework-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jinja Rendering
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Jinja Rendering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-rendering-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Built-in Rendering Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jinja-template-factorisation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Template Factorisation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jinja-template-self-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Template Self-Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-dynamodb-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating DynamoDB Items
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating DynamoDB Items">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jinja-rendering-of-dynamodb-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jinja Rendering of Items
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conditional-deployment-of-dynamodb-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conditional Deployment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-amazon-eventbridge-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating EventBridge Rules
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating EventBridge Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#anatomy-of-eventbridge-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Anatomy of EventBridge Rules
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-specification-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rule Specification Files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specifying-rule-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Specifying Rule Targets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-rule-specification-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-payloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating Payloads
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating Payloads">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resource-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Directories
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dag-payloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      DAG Payloads
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-payloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Payloads
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exe-payloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exe Payloads
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pkg-payloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pkg Payloads
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miscellaneous-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Miscellaneous Components
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-the-deployable-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Building
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-deployable-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstalling-deployable-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uninstalling
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#health-checking-deployable-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Health Checking
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Health Checking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#code-hygiene" class="md-nav__link">
+    <span class="md-ellipsis">
+      Code Hygiene
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-drift-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Drift Detection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updating-the-framework-in-an-existing-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating the Framework
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="12-developing-lava-jobs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Developing Lava Jobs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="13-jinja-rendering-in-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Jinja Rendering in Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="14-enhancing-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enhancing Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="15-lava-and-docker.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava and Docker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="16-commands-utilities.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Commands & Utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="17-job-framework-samples.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Framework Samples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="18-api.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="19-cloudformation-templates.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CloudFormation Templates
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="20-faq.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="21-release-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Notes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="22-credits.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Credits
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="23-known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Known Issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage-guidelines" class="md-nav__link">
+    <span class="md-ellipsis">
+      Usage Guidelines
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Started
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#jinja-rendering-of-lava-framework-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jinja Rendering
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Jinja Rendering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-rendering-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Built-in Rendering Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jinja-template-factorisation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Template Factorisation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jinja-template-self-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Template Self-Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-dynamodb-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating DynamoDB Items
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating DynamoDB Items">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jinja-rendering-of-dynamodb-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jinja Rendering of Items
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conditional-deployment-of-dynamodb-items" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conditional Deployment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-amazon-eventbridge-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating EventBridge Rules
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating EventBridge Rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#anatomy-of-eventbridge-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Anatomy of EventBridge Rules
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rule-specification-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rule Specification Files
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specifying-rule-targets" class="md-nav__link">
+    <span class="md-ellipsis">
+      Specifying Rule Targets
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-rule-specification-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-payloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating Payloads
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating Payloads">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resource-directories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Directories
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dag-payloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      DAG Payloads
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-payloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Payloads
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#exe-payloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exe Payloads
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pkg-payloads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pkg Payloads
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#miscellaneous-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Miscellaneous Components
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#building-the-deployable-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Building
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#installing-deployable-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installing
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#uninstalling-deployable-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Uninstalling
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#health-checking-deployable-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Health Checking
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Health Checking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#code-hygiene" class="md-nav__link">
+    <span class="md-ellipsis">
+      Code Hygiene
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuration-drift-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Drift Detection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updating-the-framework-in-an-existing-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating the Framework
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="the-lava-job-framework" x-nav="Lava Job Framework">The Lava Job Framework<a class="headerlink" href="#the-lava-job-framework" title="Permanent link">&para;</a></h1>
+<p>Building and deploying simple lava jobs is fairly straightforward. For more
+complex requirements, a lava solution may require multiple jobs with associated
+JSON job specifications, connectors and S3 triggers to be tailored and deployed
+across multiple lava realms (e.g. dev, test and production). Job payloads also
+need to be assembled into packages or docker containers and deployed. This can
+be manually intensive and error prone.</p>
+<p>The lava job framework provides a suggested way of structuring, building and
+deploying lava jobs. Its use is completely optional.</p>
+<p>The framework provides the following advantages over hand-crafting a complex
+lava solution.</p>
+<ul>
+<li>
+<p>Job, connection and s3 trigger specifications can be specified in either
+    YAML or JSON in a realm / environment independent way. YAML is easier to
+    read, write and annotate than JSON. YAML formatted samples are provided in
+    the <a href="17-job-framework-samples.html#lava-job-framework-samples">Lava Job Framework Samples</a>
+    section.</p>
+</li>
+<li>
+<p>Environment specific information is managed in separate, extensible
+    configuration files.</p>
+</li>
+<li>
+<p>The deployable job, connection and s3 trigger specifications and the job
+    payloads can be generated and deployed for a target environment in a single
+    step.</p>
+</li>
+<li>
+<p>The framework can automatically build and deploy single file
+    <a href="06-jobs-job-types.html#job-type-exe">exe</a>, <a href="06-jobs-job-types.html#job-type-sql">sql</a>
+    and <a href="06-jobs-job-types.html#job-type-sqlc">sqlc</a> payloads, multi-file
+    <a href="06-jobs-job-types.html#job-type-pkg">pkg</a> payloads and images for
+    <a href="06-jobs-job-types.html#job-type-docker">docker</a> jobs. It could be readily
+    integrated into a CI/CD pipeline.</p>
+</li>
+</ul>
+<p>The framework uses a combination of the following common tools:</p>
+<ul>
+<li>
+<p><a href="https://pypi.python.org/pypi/cookiecutter">cookiecutter</a></p>
+</li>
+<li>
+<p><a href="https://www.gnu.org/software/make/">GNU make</a></p>
+</li>
+<li>
+<p><a href="https://jinja.palletsprojects.com/">Jinja</a> rendering</p>
+</li>
+<li>
+<p>The <a href="https://aws.amazon.com/cli/">AWS CLI</a>.</p>
+</li>
+</ul>
+<p>It works on Linux and macOS. It can also run inside a docker container, with
+some limitations. It is not supported on DOS.</p>
+<h2 id="usage-guidelines">Usage Guidelines<a class="headerlink" href="#usage-guidelines" title="Permanent link">&para;</a></h2>
+<p>A key goal of the framework is to facilitate the separation of environment
+specific configuration details from the structure and logic of a lava based
+solution. When developing lava solution components it is critical to properly
+parameterise the various components to allow the same solution to be rapidly
+migrated from one environment to another (e.g. dev to prod).</p>
+<p>The following guidelines should be considered:</p>
+<ol>
+<li>
+<p>Become familiar with basic <a href="https://jinja.palletsprojects.com/">Jinja</a>
+    syntax. Jinja is used extensively in lava and the job framework.</p>
+</li>
+<li>
+<p>Never hard-code any environment specific information into source code.
+    These details should be properly parameterised and values provided by the
+    environment configuration file at build time. Typical environment specific
+    information includes S3 bucket names, database identifiers, schema names,
+    host names and addresses etc.</p>
+</li>
+<li>
+<p>Complete solution design, implementation and testing in a single development
+    environment. Once done, the configuration file can be cloned for other
+    environments and the parameters adjusted appropriately. Building for these
+    other environments is then a quick and easy process.</p>
+</li>
+</ol>
+<h2 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<p>Ensure you have GNU <strong>make</strong> and Python 3.9+ installed. Make will be
+preinstalled on many Linux systems, or will be available in the distro package
+repos. For macOS, install the Xcode developer tools.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Recommended Approach</label><label for="__tabbed_1_2">Legacy Approach</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="admonition note">
+<p class="admonition-title">New in v8.2 (Kīlauea)</p>
+</div>
+<p>The recommended approach to creating a new lava framework project is using
+the <a href="16-commands-utilities.html#lava-new-utility">lava-new</a> utility.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><span class="c1"># Install the jinlava package if not already installed.</span>
+</span><span id="__span-0-2">pip<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>jinlava
+</span><span id="__span-0-3">
+</span><span id="__span-0-4"><span class="c1"># Create a new lava framework project.</span>
+</span><span id="__span-0-5">lava-new<span class="w"> </span>my-project-directory
+</span></code></pre></div>
+<hr />
+</div>
+<div class="tabbed-block">
+<p>The lava framework itself is packaged as a zip file:
+<code>cookiecutter-lava-&lt;VERSION&gt;.zip</code>. If this is not available, it can be
+built by cloning the lava repo and running <code>make tools</code>. The zip file will
+be placed in the <code>dist/dev-tools</code> directory.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This was the approach required prior to v8.2 (Kīlauea). It can still be
+used provided you have access to the lava framework cookiecutter bundle.</p>
+</div>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><span class="c1"># Install cookiecutter </span>
+</span><span id="__span-1-2">pip<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>--upgrade<span class="w"> </span>cookiecutter
+</span><span id="__span-1-3">
+</span><span id="__span-1-4"><span class="c1"># Install the AWS CLI, if not installed.</span>
+</span><span id="__span-1-5">pip<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>--upgrade<span class="w"> </span>awscli
+</span><span id="__span-1-6">
+</span><span id="__span-1-7"><span class="c1"># Create a new lava project. Cookiecutter will issue prompts for a few</span>
+</span><span id="__span-1-8"><span class="c1"># configuration parameters. The parameters &quot;project_name&quot; and &quot;project_dir&quot;</span>
+</span><span id="__span-1-9"><span class="c1"># are particularly important. The others can easily be changed later.</span>
+</span><span id="__span-1-10">
+</span><span id="__span-1-11">cookiecutter<span class="w"> </span>cookiecutter-lava-&lt;VERSION&gt;.zip
+</span></code></pre></div>
+<hr />
+</div>
+</div>
+</div>
+<p>Either approach will prompt the user for some basic configuration options and
+then create the project structure in the specified directory. It should look
+like this (items in angled brackets refer to the values provided in response to
+cookiecutter prompts):</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1">&lt;project_dir&gt;/
+</span><span id="__span-2-2">        +--&gt; Makefile               # Master make file. Try &quot;make help&quot;.
+</span><span id="__span-2-3">        +--&gt; bin/                   # Miscellaneous utilities.
+</span><span id="__span-2-4">        +--&gt; config/                # Config files - one per environment.
+</span><span id="__span-2-5">        |       +--&gt; &lt;env&gt;.yaml     # Initial config built by cookiecutter.
+</span><span id="__span-2-6">        +--&gt; etc/                   # Miscellaneous support files.
+</span><span id="__span-2-7">        +--&gt; lava-connections/      # Lava connection specifications.
+</span><span id="__span-2-8">        +--&gt; lava-jobs/             # Lava job specifications.
+</span><span id="__span-2-9">        +--&gt; lava-payloads/         # Lava job payloads.
+</span><span id="__span-2-10">        +--&gt; lava-rules/            # Amazon EventBridge specifications.
+</span><span id="__span-2-11">        +--&gt; lava-triggers/         # Lava s3trigger specifications.
+</span><span id="__span-2-12">        +--&gt; misc/                  # Non-deployable job related components.
+</span></code></pre></div>
+<p>To complete the setup:</p>
+<p><div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><span class="c1"># cd to the new project directory</span>
+</span><span id="__span-3-2"><span class="nb">cd</span><span class="w"> </span>&lt;project_dir&gt;
+</span><span id="__span-3-3">
+</span><span id="__span-3-4"><span class="c1"># Initialise the project environment. This will create a virtualenv and install</span>
+</span><span id="__span-3-5"><span class="c1"># a bunch of required components. This can be safely rerun at any time.</span>
+</span><span id="__span-3-6">make<span class="w"> </span>init
+</span><span id="__span-3-7">
+</span><span id="__span-3-8"><span class="c1"># Activate the virtual environment</span>
+</span><span id="__span-3-9"><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+</span></code></pre></div>
+If the project requires any non-standard Python packages, create a suitable
+<code>requirements.txt</code> file at the root of the project directory before running
+<code>make init</code>. The packages required by the framework itself are already
+covered in <code>etc/requirements.txt</code>.</p>
+<p>The project is now ready to start creating the various lava components.</p>
+<h2 id="jinja-rendering-of-lava-framework-components">Jinja Rendering of Lava Framework Components<a class="headerlink" href="#jinja-rendering-of-lava-framework-components" title="Permanent link">&para;</a></h2>
+<p>It is very important to create the lava job framework component specifications
+in a way that is environment independent. This allows the same specification
+file to generate deployable components for multiple target environments (e.g.
+development, testing, production). The framework achieves this by placing all
+environment specific parameters into a YAML configuration file in the <code>config</code>
+directory and using <a href="https://jinja.palletsprojects.com/">Jinja</a> rendering to
+inject the environment parameters into the specifications at build/deploy time.</p>
+<p>The cookiecutter will create an initial skeleton environment configuration file
+that can be tailored as needed and copied as the basis for other environments.
+Apart from a small number of variables required for the correct operation of the
+project framework, configuration files have no predefined structure. The file
+can contain whatever other variables are required for a given project.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Parameters in the configuration file should not use the <code>lava</code> key. This is
+reserved for use by lava itself.</p>
+</div>
+<p>Because lava specifications can contain Jinja markup intended for lava itself,
+this build/deploy time rendering must use non-standard Jinja delimiters to
+avoid a clash. For build/deploy time parameter injection, use the following
+Jinja delimiters.</p>
+<ul>
+<li>
+<p><code>&lt;{...}&gt;</code> instead of <code>{{...}}</code></p>
+</li>
+<li>
+<p><code>&lt;#...#&gt;</code> instead of <code>{#...#}</code></p>
+</li>
+<li>
+<p><code>&lt;%...%&gt;</code> instead of <code>{% %}</code></p>
+</li>
+</ul>
+<h3 id="built-in-rendering-variables">Built-in Rendering Variables<a class="headerlink" href="#built-in-rendering-variables" title="Permanent link">&para;</a></h3>
+<p>In addition to the parameters defined in the environment configuration file,
+the following variables are also made available to the renderer.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>env</td>
+<td>str</td>
+<td>The name of the configuration file (without the <code>.yaml</code> suffix).</td>
+</tr>
+<tr>
+<td>jinja.ctime</td>
+<td>str</td>
+<td>Current local date/time in ctime(3) format.</td>
+</tr>
+<tr>
+<td>jinja.datetime</td>
+<td>str</td>
+<td>Current local date/time in YYYY-mm-dd HH:MM:SS format.</td>
+</tr>
+<tr>
+<td>jinja.iso_datetime</td>
+<td>str</td>
+<td>Current date/time in ISO8601 format.</td>
+</tr>
+<tr>
+<td>jinja.prog</td>
+<td>str</td>
+<td>Name of the rendering program.</td>
+</tr>
+<tr>
+<td>jinja.templates</td>
+<td>list[str]</td>
+<td>A list of the files being rendered. For framework files, <code>jinja.templates[0]</code> will be the name of the YAML source file relative to the enclosing <code>lava-*</code> directory.</td>
+</tr>
+<tr>
+<td>jinja.user</td>
+<td>str</td>
+<td>Current user name.</td>
+</tr>
+<tr>
+<td>jinja.utc_ctime</td>
+<td>str</td>
+<td>Current UTC date/time in ctime(3) format.</td>
+</tr>
+<tr>
+<td>jinja.utc_datetime</td>
+<td>str</td>
+<td>Current UTC date/time in YYYY-mm-dd HH:MM:SS format.</td>
+</tr>
+<tr>
+<td>lava.aws.account</td>
+<td>str</td>
+<td>The AWS account ID.</td>
+</tr>
+<tr>
+<td>lava.aws.arn()</td>
+<td>function</td>
+<td>Helper function to assist with constructing AWS ARNs for a limited range of AWS resource types. See below.</td>
+</tr>
+<tr>
+<td>lava.aws.ecr_uri</td>
+<td>str</td>
+<td>The base URI for the ECR registry. The repository name needs to be appended to get the repository URI.</td>
+</tr>
+<tr>
+<td>lava.aws.region</td>
+<td>str</td>
+<td>The AWS region (e.g. <code>ap-southeast-2</code>).</td>
+</tr>
+<tr>
+<td>lava.aws.user</td>
+<td>str</td>
+<td>The AWS user or role name (e.g. <code>user/fred</code>).</td>
+</tr>
+<tr>
+<td>lava.dag()</td>
+<td>function</td>
+<td>A helper function for building <a href="#dag-payloads">DAG payloads</a>.</td>
+</tr>
+<tr>
+<td>lava.realm</td>
+<td>dict[str,*]</td>
+<td>The <a href="04-dynamodb-tables.html#the-realms-table">realms</a> table entry for the target realm. e.g. <code>&lt;{ lava.realm.s3_temp.split('/')[2] }&gt;</code> is the realm temp bucket.</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>lava.arn(service, resource)</code> function is a helper function to generate AWS ARNs. Mostly
+these are required for specifying targets for
+<a href="#creating-amazon-eventbridge-rules">Amazon EventBridge Rules</a>. The allowed
+values for the <code>service</code> and <code>resource</code> arguments are:</p>
+<table>
+<thead>
+<tr>
+<th>service</th>
+<th>resource</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>iam-role</td>
+<td>The name of an IAM role.</td>
+</tr>
+<tr>
+<td>lambda-function</td>
+<td>The name of an AWS Lambda function.</td>
+</tr>
+<tr>
+<td>log-group</td>
+<td>The name of a CloudWatch log group.</td>
+</tr>
+<tr>
+<td>sns-topic</td>
+<td>The name of an SNS topic.</td>
+</tr>
+<tr>
+<td>sqs-queue</td>
+<td>The name of an SQS queue.</td>
+</tr>
+</tbody>
+</table>
+<p>For example, this will generate the ARN for the
+<a href="05-job-dispatch.html#dispatching-jobs-from-s3-events">s3trigger</a> Lambda function for the realm:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1">&lt;{ lava.aws.arn(&#39;lambda-function&#39;, &#39;lava-&#39; + realm + &#39;-s3trigger&#39;) }&gt;
+</span></code></pre></div>
+<h3 id="jinja-template-factorisation">Jinja Template Factorisation<a class="headerlink" href="#jinja-template-factorisation" title="Permanent link">&para;</a></h3>
+<p>In more complex projects, it is not uncommon to have several jobs or triggers
+containing similar or repeated material. This material can be factored out into
+reusable sub-templates that are included into the main component at build time.</p>
+<p>If these reusable sub-templates are located in one of the <code>lava-*</code> directories
+and have names ending in <code>.yaml</code> or <code>.json</code>, they must have names starting with
+an underscore, or be in a subdirectory with a name starting with underscore,
+otherwise the framework will attempt to process them as a complete specification
+in their own right.</p>
+<p>Jinja provides several mechanisms to facilitate such factorisation:</p>
+<ol>
+<li>
+<p><a href="#jinja-template-inheritance">Template inheritance</a></p>
+</li>
+<li>
+<p><a href="#jinja-template-inclusion">Template inclusion</a></p>
+</li>
+<li>
+<p><a href="#jinja-template-import">Template import</a></p>
+</li>
+<li>
+<p><a href="#jinja-template-self-configuration">Template self-configuration</a></p>
+</li>
+</ol>
+<h4 id="jinja-template-inheritance">Jinja Template Inheritance<a class="headerlink" href="#jinja-template-inheritance" title="Permanent link">&para;</a></h4>
+<p>Template inheritance allows construction of a base skeleton template that
+contains common elements and defines blocks that child templates can override.</p>
+<p>It is the most complex of the factorisation methods. Refer to the
+<a href="https://jinja.palletsprojects.com">Jinja documentation</a> for details.</p>
+<h4 id="jinja-template-inclusion">Jinja Template Inclusion<a class="headerlink" href="#jinja-template-inclusion" title="Permanent link">&para;</a></h4>
+<p>The Jinja
+<a href="https://jinja.palletsprojects.com/en/2.11.x/templates/#include">include</a>
+statement is useful to include a sub-template and return the rendered contents
+of that file into the current namespace. These sub-templates are rendered using
+the environment configuration file in exactly same way as the main component
+files. They can also receive variable values that are set in the parent file.</p>
+<p>The sub-templates can be placed in a subdirectory of the relevant lava job
+framework directory or in a common area elsewhere in the project tree. YAML
+files that are not full specification files must have names beginning with
+underscore or be in a subdirectory with a name beginning with an underscore if
+located within one of the <code>lava-*</code> directories.</p>
+<p>For example, consider the following s3trigger specification.</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-5-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Process</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">received</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">source_a&quot;</span>
+</span><span id="__span-5-2"><span class="nt">trigger_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.s3trigger</span><span class="nv"> </span><span class="s">}&gt;/source_a&quot;</span>
+</span><span id="__span-5-3">
+</span><span id="__span-5-4"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-5-5">
+</span><span id="__span-5-6"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/process/source_a&quot;</span>
+</span><span id="__span-5-7">
+</span><span id="__span-5-8"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">s3.bucket</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-5-9"><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;source_a&quot;</span>
+</span><span id="__span-5-10">
+</span><span id="__span-5-11"><span class="nt">parameters</span><span class="p">:</span>
+</span><span id="__span-5-12"><span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
+</span><span id="__span-5-13"><span class="w">    </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">bucket</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</span><span id="__span-5-14"><span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">key</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</span></code></pre></div>
+<p>This is fine if there is only a single <code>source_a</code> that needs to be handled. If
+new sources are added that have similar processing, the s3trigger specification
+will be copied multiple times with common material.</p>
+<p>An alternative approach is to create a new directory <code>lava-triggers/_common</code>
+containing the following file <code>whatever.yaml</code>. This relies on the main template
+to set the <code>source</code> variable.</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-6-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Process</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">received</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-6-2"><span class="nt">trigger_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.s3trigger</span><span class="nv"> </span><span class="s">}&gt;/&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-6-3">
+</span><span id="__span-6-4"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-6-5">
+</span><span id="__span-6-6"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/process/&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-6-7">
+</span><span id="__span-6-8"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">s3.bucket</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-6-9"><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-6-10">
+</span><span id="__span-6-11"><span class="nt">parameters</span><span class="p">:</span>
+</span><span id="__span-6-12"><span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
+</span><span id="__span-6-13"><span class="w">    </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">bucket</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</span><span id="__span-6-14"><span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">key</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</span></code></pre></div>
+<p>The main s3trigger specification then becomes:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-7-1"><span class="c1"># Set the source for the sub-template</span>
+</span><span id="__span-7-2"><span class="c1"># &lt;% set source=&#39;source_a&#39; %&gt;</span>
+</span><span id="__span-7-3">
+</span><span id="__span-7-4"><span class="c1"># Load the sub-template</span>
+</span><span id="__span-7-5"><span class="c1"># &lt;% include &#39;_common/whatever.yaml&#39; %&gt;</span>
+</span></code></pre></div>
+<h4 id="jinja-template-import">Jinja Template Import<a class="headerlink" href="#jinja-template-import" title="Permanent link">&para;</a></h4>
+<p>Jinja2 allows variables (and macros) to be imported from other templates using
+the <a href="https://jinja.palletsprojects.com/en/2.11.x/templates/#import">import</a>
+statement. This process is broadly similar to Python imports.</p>
+<p>Imported templates don’t have access to the current template variables, just the
+globals.</p>
+<p>For example, consider the following file <code>vars.jinja</code>:</p>
+<div class="language-jinja highlight"><pre><span></span><code><span id="__span-8-1"><span class="x">&lt;% set bucket=&#39;my-bucket&#39; %&gt;</span>
+</span></code></pre></div>
+<p>This can be used in YAML template thus:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-9-1"><span class="c1"># &lt;% from &#39;vars.jinja&#39; import bucket %&gt;</span>
+</span><span id="__span-9-2">
+</span><span id="__span-9-3"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">bucket</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span></code></pre></div>
+<p>Alternatively:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-10-1"><span class="c1"># &lt;% import &#39;vars.jinja&#39; as v %&gt;</span>
+</span><span id="__span-10-2">
+</span><span id="__span-10-3"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">v.bucket</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span></code></pre></div>
+<p>Note that because <code>vars.jinja</code> does not end in <code>.yaml</code>, the framework will not
+confuse it with a specification file.</p>
+<h3 id="jinja-template-self-configuration">Jinja Template Self-Configuration<a class="headerlink" href="#jinja-template-self-configuration" title="Permanent link">&para;</a></h3>
+<p>The Jinja rendering process is aware of the name of the source file being
+rendered and makes this name available for use in the rendering process as the
+expression <code>jinja.templates[0]</code>. For example, if the source file is
+<code>lava-jobs/dir/file.yaml</code>, this expression will have the value <code>dir/file.yaml</code>.</p>
+<p>This allows the contents of the created DynamoDB object to be dependent on the
+name of the file.</p>
+<p>Here is a simple example of how this can be used to create a generic job that
+avoids embedding specific configuration details.</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-11-1"><span class="c1"># Assume the name of this file is lava-jobs/my-db/my-schema/my-table/count.yaml</span>
+</span><span id="__span-11-2">
+</span><span id="__span-11-3"><span class="c1"># Extract database, schema and table names:</span>
+</span><span id="__span-11-4"><span class="c1"># &lt;% set db=jinja.templates[0].split(&#39;/&#39;)[0] %&gt;</span>
+</span><span id="__span-11-5"><span class="c1"># &lt;% set schema=jinja.templates[0].split(&#39;/&#39;)[1] %&gt;</span>
+</span><span id="__span-11-6"><span class="c1"># &lt;% set table=jinja.templates[0].split(&#39;/&#39;)[2] %&gt;</span>
+</span><span id="__span-11-7">
+</span><span id="__span-11-8"><span class="c1"># Now we can use these in our job spec</span>
+</span><span id="__span-11-9">
+</span><span id="__span-11-10"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Count</span><span class="nv"> </span><span class="s">rows</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">}&gt;.&lt;{</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">}&gt;</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">database</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">db</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-11"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/count/&lt;{</span><span class="nv"> </span><span class="s">db</span><span class="nv"> </span><span class="s">}&gt;/&lt;{</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">}&gt;.&lt;{</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-12"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sqli</span>
+</span><span id="__span-11-13"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">owner</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-14">
+</span><span id="__span-11-15"><span class="nt">dispatcher</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">dispatcher.main</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-16"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">worker.main</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-17"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-11-18">
+</span><span id="__span-11-19"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SELECT</span><span class="nv"> </span><span class="s">count(*)</span><span class="nv"> </span><span class="s">FROM</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">}&gt;.&lt;{</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-20"><span class="nt">parameters</span><span class="p">:</span>
+</span><span id="__span-11-21"><span class="w">  </span><span class="c1"># Lookup a table in the config file to convert db to a connector ID</span>
+</span><span id="__span-11-22"><span class="w">  </span><span class="nt">conn_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">db_conn_table[db]</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span></code></pre></div>
+<p>This is probably overkill for handling a single table in a single database.
+However, if the same action is required for multiple tables, the same
+specification can be copied without modification, provided the file naming
+structure is setup correctly. Alternatively, symlinks can be used to avoid
+multiple copies of the same specification. Like so:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-12-1">lava-jobs
+</span><span id="__span-12-2">├── Makefile
+</span><span id="__span-12-3">├── README.md
+</span><span id="__span-12-4">├── _common
+</span><span id="__span-12-5">│   └── count.yaml
+</span><span id="__span-12-6">├── db1
+</span><span id="__span-12-7">│   ├── schema1
+</span><span id="__span-12-8">│   │   └── table1
+</span><span id="__span-12-9">│   │       └── count.yaml -&gt; ../../../_common/count.yaml
+</span><span id="__span-12-10">│   └── schema2
+</span><span id="__span-12-11">│       └── table2
+</span><span id="__span-12-12">│           └── count.yaml -&gt; ../../../_common/count.yaml
+</span><span id="__span-12-13">└── db2
+</span><span id="__span-12-14">    └── schema3
+</span><span id="__span-12-15">        └── table3
+</span><span id="__span-12-16">            └── count.yaml -&gt; ../../../_common/count.yaml
+</span></code></pre></div>
+<h2 id="creating-dynamodb-items">Creating DynamoDB Items<a class="headerlink" href="#creating-dynamodb-items" title="Permanent link">&para;</a></h2>
+<p>The <code>lava-connections</code>, <code>lava-jobs</code> and <code>lava-triggers</code> directories will contain
+the source for the lava specification components for the project. The source can
+be either JSON (<code>*.json</code>) or YAML (<code>*.yaml</code>) files that will be converted into
+JSON and pushed to the appropriate DynamoDB table as part of the <a href="#installing-deployable-components">deployment
+process</a>. It is strongly
+recommended to use YAML as it is easier to write, read and annotate with
+comments.</p>
+<p>There are samples for the various DynamoDB table entries available in the
+<a href="17-job-framework-samples.html#lava-job-framework-samples">Lava Job Framework Samples</a>
+section.</p>
+<p>Existing lava configuration entries can be imported from the <a href="04-dynamodb-tables.html#dynamodb-tables">DynamoDB
+tables</a> using the
+<a href="16-commands-utilities.html#lava-dump-utility">lava-dump</a> utility. The resulting files will need
+to be manually edited to remove realm specific settings and move those to the
+environment configuration file(s).</p>
+<h3 id="jinja-rendering-of-dynamodb-items">Jinja Rendering of DynamoDB Items<a class="headerlink" href="#jinja-rendering-of-dynamodb-items" title="Permanent link">&para;</a></h3>
+<p>Jinja rendering of lava framework components as part of the build and deploy
+process is supported. See
+<a href="#jinja-rendering-of-lava-framework-components">Jinja Rendering of Lava Framework Components</a>.</p>
+<h3 id="conditional-deployment-of-dynamodb-items">Conditional Deployment of DynamoDB Items<a class="headerlink" href="#conditional-deployment-of-dynamodb-items" title="Permanent link">&para;</a></h3>
+<p>In most cases, exactly the same inventory of components should be deployed to
+all target environments, although the contents may be environment specific. In
+some, limited, circumstances, some components may not need to be deployed to
+some target environments.</p>
+<p>The lava framework will skip deployment of a component if the built JSON
+component contains only a <code>null</code> object. This is achieved by wrapping the YAML
+source for the object in a Jinja conditional block like so:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-13-1"><span class="c1"># &lt;% if env in (&#39;dev&#39;, &#39;uat&#39;) %&gt;</span>
+</span><span id="__span-13-2"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Conditional job</span>
+</span><span id="__span-13-3"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maybe_yes_maybe_no</span>
+</span><span id="__span-13-4"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">etc ...</span>
+</span><span id="__span-13-5"><span class="c1"># &lt;% endif %&gt;</span>
+</span></code></pre></div>
+<p>When this job is built for the <code>dev</code> or <code>uat</code> environments, the resulting json
+object will be non-null and hence the job will be installed. when it is built
+for the <code>prod</code> environment, the contents will generate a <code>null</code> JSON object 
+which will be skipped during installation.</p>
+<p>The conditional logic can make use of any of the configuration information
+made available when rendering the item, including the contents of the environment
+configuration file.</p>
+<h3 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h3>
+<p>The following example shows an <a href="06-jobs-job-types.html#job-type-sql">sql</a> job
+specification:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-14-1"><span class="c1"># --------------------------------------</span>
+</span><span id="__span-14-2"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sample SQL job</span>
+</span><span id="__span-14-3"><span class="nt">dispatcher</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ dispatcher.none }&gt;</span>
+</span><span id="__span-14-4"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-14-5"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ prefix.job }&gt;/simple-sql</span>
+</span><span id="__span-14-6"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ owner }&gt;</span>
+</span><span id="__span-14-7"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ prefix.payload }&gt;/simple.sql</span>
+</span><span id="__span-14-8"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sql</span>
+</span><span id="__span-14-9"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ worker.main }&gt;</span>
+</span><span id="__span-14-10">
+</span><span id="__span-14-11"><span class="c1"># Get the name of the job source file relative to lava-jobs dir.</span>
+</span><span id="__span-14-12"><span class="nt">x-srcfile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ jinja.templates[0] }&gt;</span>
+</span><span id="__span-14-13">
+</span><span id="__span-14-14"><span class="c1"># --------------------------------------</span>
+</span><span id="__span-14-15"><span class="c1"># Post job actions</span>
+</span><span id="__span-14-16"><span class="c1"># &lt;% if on_fail %&gt;</span>
+</span><span id="__span-14-17"><span class="nt">on_fail</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ on_fail }&gt;</span>
+</span><span id="__span-14-18"><span class="c1"># &lt;% endif %&gt;</span>
+</span><span id="__span-14-19">
+</span><span id="__span-14-20"><span class="c1"># &lt;% if on_success %&gt;</span>
+</span><span id="__span-14-21"><span class="nt">on_success</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ on_success }&gt;</span>
+</span><span id="__span-14-22"><span class="c1"># &lt;% endif %&gt;</span>
+</span><span id="__span-14-23">
+</span><span id="__span-14-24"><span class="c1"># --------------------------------------</span>
+</span><span id="__span-14-25"><span class="nt">parameters</span><span class="p">:</span>
+</span><span id="__span-14-26"><span class="w">  </span><span class="nt">conn_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ conn.mydb }&gt;</span>
+</span><span id="__span-14-27"><span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
+</span><span id="__span-14-28"><span class="w">    </span><span class="nt">schema_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ schema.staging }&gt;</span>
+</span></code></pre></div>
+<p>All of the values delimited by <code>&lt;{...}&gt;</code>, <code>&lt;%...%&gt;</code> will be obtained from
+whichever environment configuration file is used at build/deploy time.</p>
+<p>If the configuration file is:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-15-1"><span class="c1"># --------------------------------------</span>
+</span><span id="__span-15-2"><span class="c1"># Lava environment configuration file</span>
+</span><span id="__span-15-3">
+</span><span id="__span-15-4"><span class="nt">realm</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user01&quot;</span>
+</span><span id="__span-15-5"><span class="nt">prefix</span><span class="p">:</span>
+</span><span id="__span-15-6"><span class="w">  </span><span class="nt">job</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app/demo&quot;</span>
+</span><span id="__span-15-7"><span class="w">  </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app/demo&quot;</span>
+</span><span id="__span-15-8"><span class="w">  </span><span class="nt">s3trigger</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app/demo&quot;</span>
+</span><span id="__span-15-9"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Fred&quot;</span>
+</span><span id="__span-15-10"><span class="nt">worker</span><span class="p">:</span>
+</span><span id="__span-15-11"><span class="w">  </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;core&quot;</span>
+</span><span id="__span-15-12"><span class="nt">dispatcher</span><span class="p">:</span>
+</span><span id="__span-15-13"><span class="w">  </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Sydney&quot;</span>
+</span><span id="__span-15-14"><span class="w">  </span><span class="nt">none</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;--&quot;</span>
+</span><span id="__span-15-15"><span class="nt">schedule</span><span class="p">:</span>
+</span><span id="__span-15-16"><span class="w">  </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;--&quot;</span>
+</span><span id="__span-15-17">
+</span><span id="__span-15-18"><span class="c1"># --------------------------------------</span>
+</span><span id="__span-15-19"><span class="c1"># Connections</span>
+</span><span id="__span-15-20"><span class="nt">conn</span><span class="p">:</span>
+</span><span id="__span-15-21"><span class="w">  </span><span class="nt">mydb</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">redshift/dev</span>
+</span><span id="__span-15-22">
+</span><span id="__span-15-23"><span class="c1"># --------------------------------------</span>
+</span><span id="__span-15-24"><span class="c1"># Post-job actions These can be safely removed if not needed.</span>
+</span><span id="__span-15-25"><span class="nt">on_fail</span><span class="p">:</span>
+</span><span id="__span-15-26"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">email</span>
+</span><span id="__span-15-27"><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fred@somewhere.com</span>
+</span><span id="__span-15-28"><span class="w">    </span><span class="nt">subject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ALARM:</span><span class="nv"> </span><span class="s">Job={{job.job_id}}@{{realm.realm}}&quot;</span>
+</span><span id="__span-15-29"><span class="w">    </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Run</span><span class="nv"> </span><span class="s">{{job.run_id}}:</span><span class="nv"> </span><span class="s">{{result.error}}&quot;</span>
+</span><span id="__span-15-30">
+</span><span id="__span-15-31"><span class="c1"># --------------------------------------</span>
+</span><span id="__span-15-32"><span class="c1"># Custom variables.</span>
+</span><span id="__span-15-33">
+</span><span id="__span-15-34"><span class="nt">schema</span><span class="p">:</span>
+</span><span id="__span-15-35"><span class="w">  </span><span class="nt">staging</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">public</span>
+</span></code></pre></div>
+<p>The final job will look like this:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-16-1"><span class="p">{</span>
+</span><span id="__span-16-2"><span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sample SQL job&quot;</span><span class="p">,</span>
+</span><span id="__span-16-3"><span class="w">    </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+</span><span id="__span-16-4"><span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-16-5"><span class="w">    </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;app/demo/simple-sql&quot;</span><span class="p">,</span>
+</span><span id="__span-16-6"><span class="w">    </span><span class="nt">&quot;on_fail&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-16-7"><span class="w">        </span><span class="p">{</span>
+</span><span id="__span-16-8"><span class="w">            </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email&quot;</span><span class="p">,</span>
+</span><span id="__span-16-9"><span class="w">            </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run {{job.run_id}}: {{result.error}}&quot;</span><span class="p">,</span>
+</span><span id="__span-16-10"><span class="w">            </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALARM: Job={{job.job_id}}@{{realm.realm}}&quot;</span><span class="p">,</span>
+</span><span id="__span-16-11"><span class="w">            </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fred@somewhere.com&quot;</span>
+</span><span id="__span-16-12"><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-16-13"><span class="w">    </span><span class="p">],</span>
+</span><span id="__span-16-14"><span class="w">    </span><span class="nt">&quot;owner&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fred&quot;</span><span class="p">,</span>
+</span><span id="__span-16-15"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-16-16"><span class="w">        </span><span class="nt">&quot;conn_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;redshift/dev&quot;</span><span class="p">,</span>
+</span><span id="__span-16-17"><span class="w">        </span><span class="nt">&quot;vars&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-16-18"><span class="w">            </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public&quot;</span>
+</span><span id="__span-16-19"><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-16-20"><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-16-21"><span class="w">    </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;app/demo/simple.sql&quot;</span><span class="p">,</span>
+</span><span id="__span-16-22"><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sql&quot;</span><span class="p">,</span>
+</span><span id="__span-16-23"><span class="w">    </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;core&quot;</span>
+</span><span id="__span-16-24"><span class="p">}</span>
+</span></code></pre></div>
+<h2 id="creating-amazon-eventbridge-rules">Creating Amazon EventBridge Rules<a class="headerlink" href="#creating-amazon-eventbridge-rules" title="Permanent link">&para;</a></h2>
+<p>Lava provides support for triggering jobs from Amazon EventBridge rules via a
+number of mechanisms:</p>
+<ul>
+<li>
+<p>Using the <a href="05-job-dispatch.html#dispatching-jobs-from-amazon-eventbridge">lava dispatch helper</a>.</p>
+</li>
+<li>
+<p>Using Amazon S3 Event Notifications with Amazon EventBridge.</p>
+</li>
+</ul>
+<p>Also, a project may need to create EventBridge rules to interact with other
+non-lava elements in the environment.</p>
+<p>In each case, EventBridge rules with suitable targets need to be created. The
+lava job framework supports this with rule specifications placed in the
+<code>lava-rules</code> directory.</p>
+<blockquote>
+<p>Sorry, I couldn't resist.</p>
+</blockquote>
+<h3 id="anatomy-of-eventbridge-rules">Anatomy of EventBridge Rules<a class="headerlink" href="#anatomy-of-eventbridge-rules" title="Permanent link">&para;</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This explanation is for general information only and many details are omitted.
+Consult AWS documentation for full details.</p>
+</div>
+<p>EventBridge rules are attached to an event bus (typically the <code>default</code> bus) and
+contain the following key components:</p>
+<ul>
+<li>
+<p>A rule name.</p>
+</li>
+<li>
+<p>A description.</p>
+</li>
+<li>
+<p>An optional event pattern that is matched against incoming events by
+    EventBridge at runtime to determine if the rule should fire or not.</p>
+</li>
+<li>
+<p>An optional schedule that specifies a <em>cron</em> style schedule or repetition
+    frequency for the rule to fire.</p>
+</li>
+<li>
+<p>Targets for the rule and a definition of what data to send to the targets.
+    A range of target types are supported, including Lambda functions, 
+    CloudWatch log groups, SNS topics and SQS queues. While targets are optional,
+    not having any is pretty pointless.</p>
+</li>
+<li>
+<p>Tags for the rule.</p>
+</li>
+</ul>
+<p>For the lava job framework, these elements are defined in a <a href="#rule-specification-files">rule specification
+file</a>.</p>
+<h3 id="rule-specification-files">Rule Specification Files<a class="headerlink" href="#rule-specification-files" title="Permanent link">&para;</a></h3>
+<p>Rule specification files are YAML (or JSON, if you must) formatted and placed in
+the <code>lava-rules</code> directory. These files are Jinja rendered against the specified
+environment configuration file as for other YAML job framework components and
+deployed to EventBridge by the lava job framework.</p>
+<p>A sample rule specification file is provided <a href="17-job-framework-samples.html#rule-samples">here</a>.</p>
+<p>Each file has the following keys:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>description</td>
+<td>str</td>
+<td>Yes</td>
+<td>A short description of the rule.</td>
+</tr>
+<tr>
+<td>enabled</td>
+<td>Boolean</td>
+<td>No</td>
+<td>Whether or not the rule is enabled. Defaults to <code>false</code></td>
+</tr>
+<tr>
+<td>event_bus_name</td>
+<td>str</td>
+<td>No</td>
+<td>The event bus name. The default is <code>default</code>.</td>
+</tr>
+<tr>
+<td>event_pattern</td>
+<td>dict</td>
+<td>No</td>
+<td>The pattern used to select which events trigger the rule. See the <a href="https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html">AWS documentation</a> for details.</td>
+</tr>
+<tr>
+<td>owner</td>
+<td>str</td>
+<td>Yes</td>
+<td>Name or email address of the rule owner. This will be added as a tag on the rule when deployed.</td>
+</tr>
+<tr>
+<td>role_arn</td>
+<td>str</td>
+<td>No</td>
+<td>The ARN of the IAM role associated with the rule. See the <a href="https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-manage-iam-access.html">AWS documentation</a> for details.</td>
+</tr>
+<tr>
+<td>rule_id</td>
+<td>str</td>
+<td>Yes</td>
+<td>The rule name. This must be of the form <code>lava.&lt;REALM&gt;.*</code>.</td>
+</tr>
+<tr>
+<td>schedule_expression</td>
+<td>str</td>
+<td>No</td>
+<td>A <em>cron</em> style schedule or repetition frequency for the rule to fire. See the <a href="https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html">AWS documentation</a> for details.</td>
+</tr>
+<tr>
+<td>tags</td>
+<td>dict</td>
+<td>No</td>
+<td>A dictionary of key/value pairs that will be added as tags to the rule. These are additional to the <code>owner</code> and control tags added by the lava framework.</td>
+</tr>
+<tr>
+<td>targets</td>
+<td>list</td>
+<td>No</td>
+<td>A list of targets for the rule. If omitted, the rule may fire but nothing will happen. See <a href="#specifying-rule-targets">Specifying Rule Targets</a>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="specifying-rule-targets">Specifying Rule Targets<a class="headerlink" href="#specifying-rule-targets" title="Permanent link">&para;</a></h3>
+<p>A rule target is a resource to which EventBridge sends an event message when a
+rule fires. Rules can have zero or more targets. Consult the
+<a href="https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-targets.html">AWS documentation</a>
+for details.</p>
+<p><a href="#rule-specification-files">Rule specification files</a> may contain the <code>targets</code>
+key which is a list of targets for the rule. Each entry in the list specifies
+the resource or endpoint and any additional parameters required for that
+endpoint.</p>
+<p>The format for each entry in the <code>targets</code> list can be either:</p>
+<ol>
+<li>
+<p>The ARN of a target resource.</p>
+</li>
+<li>
+<p>A full target specification using the structure specified for a target in
+    the boto3 EventBridge
+    <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/events.html#EventBridge.Client.put_targets">put_targets</a>
+    function (camel case and all). </p>
+</li>
+</ol>
+<p>In the first case, the incoming event is forwarded, unmodified, to the resource
+specified by the ARN. This is suitable for
+<a href="05-job-dispatch.html#configuring-amazon-eventbridge-for-s3-events">using EventBridge to trigger lava jobs from S3 events</a>,
+among other uses. The lava job framework provides 
+<a href="#built-in-rendering-variables">Jinja helper functions</a> to assist with
+constructing ARNs.</p>
+<p>In the second case, the specification provides full control over the target
+configuration, including the nature of the event message being sent.</p>
+<h3 id="example-rule-specification-file">Example Rule Specification File<a class="headerlink" href="#example-rule-specification-file" title="Permanent link">&para;</a></h3>
+<p>The following example is typical of one used to send an S3 bucket event to the
+realm s3trigger lambda function to dispatch a lava job. It also logs the event
+to CloudWatch logs.</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-17-1"><span class="c1"># rule_id becomes the rule name</span>
+</span><span id="__span-17-2"><span class="nt">rule_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.rule</span><span class="nv"> </span><span class="s">}&gt;.s3-rule-example&quot;</span>
+</span><span id="__span-17-3">
+</span><span id="__span-17-4"><span class="c1"># If you forget this, your rule is disabled.</span>
+</span><span id="__span-17-5"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-17-6">
+</span><span id="__span-17-7"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Fred</span>
+</span><span id="__span-17-8"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A sample rule</span>
+</span><span id="__span-17-9">
+</span><span id="__span-17-10"><span class="nt">tags</span><span class="p">:</span>
+</span><span id="__span-17-11"><span class="w">  </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-great-project</span>
+</span><span id="__span-17-12">
+</span><span id="__span-17-13"><span class="c1"># This will capture object creation in s3://my-bucket/an/interesting/prefix</span>
+</span><span id="__span-17-14"><span class="nt">event_pattern</span><span class="p">:</span>
+</span><span id="__span-17-15"><span class="w">  </span><span class="nt">detail</span><span class="p">:</span>
+</span><span id="__span-17-16"><span class="w">    </span><span class="nt">bucket</span><span class="p">:</span>
+</span><span id="__span-17-17"><span class="w">      </span><span class="nt">name</span><span class="p">:</span>
+</span><span id="__span-17-18"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-bucket</span>
+</span><span id="__span-17-19"><span class="w">    </span><span class="nt">object</span><span class="p">:</span>
+</span><span id="__span-17-20"><span class="w">      </span><span class="nt">key</span><span class="p">:</span>
+</span><span id="__span-17-21"><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">an/interesting/prefix</span>
+</span><span id="__span-17-22"><span class="w">  </span><span class="nt">detail-type</span><span class="p">:</span>
+</span><span id="__span-17-23"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Object Created</span>
+</span><span id="__span-17-24"><span class="w">  </span><span class="nt">source</span><span class="p">:</span>
+</span><span id="__span-17-25"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aws.s3</span>
+</span><span id="__span-17-26">
+</span><span id="__span-17-27"><span class="nt">targets</span><span class="p">:</span>
+</span><span id="__span-17-28">
+</span><span id="__span-17-29"><span class="w">  </span><span class="c1"># Construct the ARN for the realm s3trigger lambda</span>
+</span><span id="__span-17-30"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn(&#39;lambda-function&#39;, &#39;lava-&#39; + realm + &#39;-s3trigger&#39;) }&gt;</span>
+</span><span id="__span-17-31"><span class="w">  </span><span class="c1"># Let&#39;s log messages in CloudWatch logs</span>
+</span><span id="__span-17-32"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn(&#39;log-group&#39;, &#39;/aws/events/lava&#39;) }&gt;</span>
+</span><span id="__span-17-33">
+</span><span id="__span-17-34"><span class="w">  </span><span class="c1"># This does exactly the same as the previous targets using the full target</span>
+</span><span id="__span-17-35"><span class="w">  </span><span class="c1"># format. Don&#39;t do both or s3trigger will get 2 events sent</span>
+</span><span id="__span-17-36"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trigger-me</span>
+</span><span id="__span-17-37"><span class="w">    </span><span class="nt">Arn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn(&#39;lambda-function&#39;, &#39;lava-&#39; + realm + &#39;-s3trigger&#39;) }&gt;</span>
+</span><span id="__span-17-38"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log-me</span>
+</span><span id="__span-17-39"><span class="w">    </span><span class="nt">Arn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn(&#39;log-group&#39;, &#39;/aws/events/lava&#39;) }&gt;</span>
+</span></code></pre></div>
+<h2 id="creating-payloads">Creating Payloads<a class="headerlink" href="#creating-payloads" title="Permanent link">&para;</a></h2>
+<p>Some job types, such as
+<a href="06-jobs-job-types.html#job-type-cmd">cmd</a>,
+<a href="06-jobs-job-types.html#job-type-dag">dag</a> and
+<a href="06-jobs-job-types.html#job-type-sqli">sqli</a>, have the payload fully contained within
+the <a href="04-dynamodb-tables.html#the-jobs-table">job specification</a>.</p>
+<p>For other job types, such as 
+<a href="06-jobs-job-types.html#job-type-exe">exe</a>,
+<a href="06-jobs-job-types.html#job-type-pkg">pkg</a> and
+<a href="06-jobs-job-types.html#job-type-sql">sql</a>, the payload is external to the
+<a href="04-dynamodb-tables.html#the-jobs-table">job specification</a>, which references the
+payload content (e.g. as a code bundle in S3 or a docker image repository).
+For these, the <code>lava-payloads</code> directory will contain the source for the lava
+payloads for the project. The framework currently supports automated build for
+the following external payload types:</p>
+<ul>
+<li>
+<p>Python scripts (<code>*.py</code>)</p>
+</li>
+<li>
+<p>Jupyter notebooks (<code>*.ipynb</code>)</p>
+</li>
+<li>
+<p>Shell scripts (<code>*.sh</code>)</p>
+</li>
+<li>
+<p>SQL scripts (<code>*.sql</code>)</p>
+</li>
+<li>
+<p><a href="#pkg-payloads">Packages</a> for
+    <a href="06-jobs-job-types.html#job-type-pkg">pkg</a> jobs (<code>*.pkg/</code>).</p>
+</li>
+<li>
+<p><a href="#docker-payloads">Docker images</a> for
+    <a href="06-jobs-job-types.html#job-type-docker">docker</a> jobs (<code>*.docker/</code>).</p>
+</li>
+<li>
+<p><a href="#resource-directories">Resource directories</a>
+    (<code>*.rsc</code> and <code>*.raw</code>).</p>
+</li>
+</ul>
+<h3 id="resource-directories">Resource Directories<a class="headerlink" href="#resource-directories" title="Permanent link">&para;</a></h3>
+<p>Directories directly under <code>lava-payloads</code> with names ending in <code>.rsc</code> or <code>.raw</code>
+are static resource directories that contain no active job components but are
+uploaded to the payloads area in S3 for consumption by lava jobs as required.</p>
+<p>Directories ending in <code>.rsc</code> will have the contents Jinja rendered at
+build/deploy time using the specified environment configuration file.</p>
+<p>Directories ending in <code>.raw</code> are not Jinja rendered.</p>
+<p>In either case, the directory structure is replicated in the project payload
+area in S3 under the <code>prefix.payload</code> item from the environment configuration.
+Symbolic links are followed as part of the process.</p>
+<p>Note that the lava worker will completely ignore these areas in S3. It is up to
+individual jobs to download the contents as required. For situations where
+static resources need to be accessed locally by a job, it may be more
+appropriate to place them directly in the <code>.pkg</code> or <code>.docker</code> directory so
+that they are included in the job payload.</p>
+<p>An element <code>my-file</code> from a resource directory <code>xyz.rsc</code> can be referenced in a
+job specification thus:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-18-1">{{ realm.s3_payloads }}/&lt;{ prefix.payload }&gt;/xyz.rsc/my-file
+</span></code></pre></div>
+<h3 id="dag-payloads">DAG Payloads<a class="headerlink" href="#dag-payloads" title="Permanent link">&para;</a></h3>
+<p>The payload for <a href="06-jobs-job-types.html#job-type-dag">dag</a> jobs is a map
+representing job dependencies. The details can be included directly in the job
+specification.  The job framework also provides support for generating this
+map at build time via the following:</p>
+<ul>
+<li>
+<p>The <a href="16-commands-utilities.html#lava-dag-generator">lava-dag-gen</a> utility which is
+    provided in the job framework <code>bin</code> directory.</p>
+</li>
+<li>
+<p>A Jinja function, <code>lava.dag()</code>, that calls this utility to generate and
+    interpolate a DAG payload at build time.</p>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The lava framework cannot easily tell if a job using the <code>lava.dag()</code>
+function needs to be rebuilt as it may depend on external data. Hence, the
+framework will always rebuild job specifications that use this function.</p>
+</div>
+<p>This following example shows how to use the Jinja function:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-19-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A daggy job</span>
+</span><span id="__span-19-2">
+</span><span id="__span-19-3"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dag</span>
+</span><span id="__span-19-4">
+</span><span id="__span-19-5"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/dag/demo&quot;</span>
+</span><span id="__span-19-6"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">worker.main</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-19-7"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-19-8"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">owner</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-19-9">
+</span><span id="__span-19-10"><span class="nt">parameters</span><span class="p">:</span>
+</span><span id="__span-19-11"><span class="w">  </span><span class="nt">workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</span><span id="__span-19-12">
+</span><span id="__span-19-13"><span class="c1"># Generate the dag payload by reading the first tab in Excel file dag.xlsx</span>
+</span><span id="__span-19-14"><span class="nt">payload</span><span class="p">:</span><span class="w">  </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">lava.dag(&#39;dag.xlsx&#39;}&gt;&quot;</span>
+</span></code></pre></div>
+<p>The first (positional) argument to the <code>lava.dag()</code> function corresponds to the
+<code>source</code> argument of the
+<a href="16-commands-utilities.html#lava-dag-generator">lava-dag-gen</a> utility.</p>
+<p>The <code>lava.dag()</code> function also supports keyword arguments that match the
+<code>--option value</code> command line options of the 
+<a href="16-commands-utilities.html#lava-dag-generator">lava-dag-gen</a> utility, although not all of
+these are useful in a lava framework job specification.</p>
+<p>The following example shows how to generate the dag payload by reading
+dependencies from a database using a lava connector:</p>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-20-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A daggy job</span>
+</span><span id="__span-20-2">
+</span><span id="__span-20-3"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dag</span>
+</span><span id="__span-20-4">
+</span><span id="__span-20-5"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/dag/demo&quot;</span>
+</span><span id="__span-20-6"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">worker.main</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-20-7"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</span><span id="__span-20-8"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">owner</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-20-9">
+</span><span id="__span-20-10"><span class="nt">parameters</span><span class="p">:</span>
+</span><span id="__span-20-11"><span class="w">  </span><span class="nt">workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</span><span id="__span-20-12">
+</span><span id="__span-20-13"><span class="c1"># Generate the dag payload by reading a database table. Note that the realm</span>
+</span><span id="__span-20-14"><span class="c1"># value from the framework configuration file is used.</span>
+</span><span id="__span-20-15"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">lava.dag(&#39;a_conn_id&#39;,</span><span class="nv"> </span><span class="s">group=&#39;a_batch&#39;,</span><span class="nv"> </span><span class="s">table=&#39;a_schema.dags&#39;,</span><span class="nv"> </span><span class="s">realm=realm)</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span></code></pre></div>
+<p>Note that the <code>lava.dag()</code> function actually returns a JSON formatted string.
+This works in a YAML source file because valid JSON is also valid YAML. Neat eh?</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Using the <code>lava.dag()</code> function with a lava database connector requires that
+the lava package is installed in the framework virtual environment.</p>
+</div>
+<h3 id="docker-payloads">Docker Payloads<a class="headerlink" href="#docker-payloads" title="Permanent link">&para;</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Lava version 8.1 (Kīlauea) introduced some important changes in this area.
+It is <em>essential</em> to read <a href="#compatibility-notes-for-docker-payloads">Backward Compatibility Notes for Docker
+Payloads</a> if running an earlier
+version.</p>
+</div>
+<p>Directories directly under <code>lava-payloads</code> with names ending in <code>.docker</code> are
+assumed to contain the code for lava <a href="06-jobs-job-types.html#job-type-docker">docker</a>
+jobs.</p>
+<p>The build process is essentially:</p>
+<ol>
+<li>
+<p>Create a clean copy of the source tree.</p>
+</li>
+<li>
+<p>Any files in the <code>env/</code> directory of the source tree are Jinja rendered
+    using the environment configuration file. This provides one possible
+    mechanism to include environment specific information in the build.</p>
+</li>
+<li>
+<p>Any Jupyter notebooks (<code>*.ipynb</code>) are converted to Python.</p>
+</li>
+<li>
+<p>If the source directory already contains a <code>Dockerfile</code>, that will be Jinja
+    rendered using the environment configuration file and used to build the
+    image.</p>
+</li>
+<li>
+<p>If the source directory does not contain a <code>Dockerfile</code>, a
+    <a href="#the-default-dockerfile">default</a> one is used.</p>
+</li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>These components are placed in the container in <code>/lava</code> and owned by the
+user <code>lava</code>. However, by default, the container will be run with the
+effective user ID of the lava worker. This is required so that any items
+left by the container in the $LAVA_TMP area can be read by the worker. Take
+care when building containers to account for the different user IDs at build
+and run time.</p>
+</div>
+<p>The install process will create an appropriate ECR repo and push the image. The
+uninstall process will delete the ECR repo.</p>
+<h4 id="the-default-dockerfile">The Default Dockerfile<a class="headerlink" href="#the-default-dockerfile" title="Permanent link">&para;</a></h4>
+<p>The default <code>Dockerfile</code> supplied with the framework should suffice in most
+cases. It effectively emulates the packaging process for pkg payloads but builds
+a docker image instead of a zip file.</p>
+<p>The payload files are installed in the <code>/lava</code> directory in the container. The
+files are owned by root and are globally readable inside the container. Any
+files that are user executable in the source directory are made globally
+executable inside the container.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>The <code>/lava</code> directory is <strong>not</strong> added to any <code>*PATH</code> environment
+variables by default.</p>
+</div>
+<p>If the root directory of the source tree contains a <code>requirements.txt</code> file,
+then Python modules listed therein, including any dependencies, are installed as
+part of the image build. If the root directory contains a
+<code>requirements-nodeps.txt</code> file, then Python modules listed therein, excluding
+any dependencies, are included.</p>
+<p>If the default <code>Dockerfile</code> is not adequate, a custom one can be created. A
+simple <code>Dockerfile</code> might look something like the following, but keep in mind
+the <a href="06-jobs-job-types.html#docker-runtime-configuration">runtime configuration</a> to ensure permissions
+are set correctly inside the container when building the image.</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-21-1">FROM ghcr.io/jin-gizmo/lava/amzn2023/base
+</span><span id="__span-21-2">
+</span><span id="__span-21-3"># Copy our code into the image
+</span><span id="__span-21-4">COPY * /install/
+</span><span id="__span-21-5">
+</span><span id="__span-21-6"># Point at the right pip repo. The Makefile will supply the value.
+</span><span id="__span-21-7">ARG PIP_INDEX_URL
+</span><span id="__span-21-8">ENV PIP_INDEX_URL $PIP_INDEX_URL
+</span><span id="__span-21-9">
+</span><span id="__span-21-10">RUN \
+</span><span id="__span-21-11">    cd /install ; \
+</span><span id="__span-21-12">    echo My code is here ; \
+</span><span id="__span-21-13">    ls -lR : \
+</span><span id="__span-21-14">    python3 -m pip install -r requirements.txt --upgrade
+</span></code></pre></div>
+<h4 id="docker-platform-architecture-selection">Docker Platform Architecture Selection<a class="headerlink" href="#docker-platform-architecture-selection" title="Permanent link">&para;</a></h4>
+<p>As of version 8.1 (Kīlauea), the lava job framework supports building docker
+payload images for a specific target platform architecture.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Currently, the capability to generate cross-platform images is only supported
+when using Docker Desktop with multi-platform support enabled.</p>
+</div>
+<p>Image platform selection is controlled by the <code>docker-&gt;platform</code> key in the
+environment configuration file. This key may have one of the following values.</p>
+<table>
+<thead>
+<tr>
+<th>Docker platform</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>host</code></td>
+<td>Use the default behaviour of the build host docker platform. The platform selected will be dependent on some combination of the architecture of the base image and the build host, as is usual for docker.</td>
+</tr>
+<tr>
+<td><code>linux/amd64</code></td>
+<td>Build an image for x86_64 platforms.</td>
+</tr>
+<tr>
+<td><code>linux/arm</code></td>
+<td>Build an image for ARM platforms, such as Mac M series and AWS Graviton.</td>
+</tr>
+<tr>
+<td>unspecified</td>
+<td>Build an image for x86_64 platforms.</td>
+</tr>
+</tbody>
+</table>
+<p>For a cross-platform build to work as expected, the base image must either be a
+multi-platform image or have itself been built for the target platform. Most
+standard operating system base images, such as Amazon Linux 2023 and Ubuntu 
+Linux are multi-platform. As of version 8.1 (Kīlauea), the <a href="15-lava-and-docker.html#docker-images-for-lava">lava docker
+images</a> are also multi-platform.</p>
+<h4 id="compatibility-notes-for-docker-payloads">Compatibility Notes for Docker Payloads<a class="headerlink" href="#compatibility-notes-for-docker-payloads" title="Permanent link">&para;</a></h4>
+<p>This is a bit complicated but please bear with me ...</p>
+<p>To understand platform compatibility when deploying a docker payload, the
+fundamental principle is that <strong>the docker image must contain a platform version
+that matches the host running the lava worker</strong>.</p>
+<p>If lava workers are being run on x86 AWS EC2 instances
+(<code>linux/amd64</code> in docker terminology), job payload docker images must be, or
+contain, a <code>linux/amd64</code> version.</p>
+<p>This, in turn, implies that the base image for the payload is either:</p>
+<ol>
+<li>
+<p>A single platform <code>linux/amd64</code> image; or</p>
+</li>
+<li>
+<p>A multi-platform image that</p>
+<ul>
+<li>includes a <code>linux/amd64</code> platform version; <em>and</em></li>
+<li>the build process, implicitly or explicitly, directs the use of the
+    <code>linux/amd64</code> platform version.</li>
+</ul>
+</li>
+</ol>
+<p>If every machine in the dev / build / run chain is x86, no problems. That was
+the world view for lava versions prior to version 8.1. The <a href="15-lava-and-docker.html#docker-images-for-lava">lava docker
+images</a>, commonly used as payload base images, were
+built only for x86. Any derived images would inevitably be x86.</p>
+<p>Unfortunately, if a multi-platform base image, such as any of the common
+operating system base images, was used on a M-series Mac build machine, the
+result would be an ARM (<code>linux/arm64</code>) payload which would not run on an x86 AWS
+EC2 worker. The lava job framework provided no way to specify what output
+architecture was required.</p>
+<p>It also meant that the <a href="15-lava-and-docker.html#docker-images-for-lava">lava docker images</a> could not
+run on ARM machines, except under emulation.</p>
+<p>Lava version 8.1 (Kīlauea) introduced some key changes in this area:</p>
+<ol>
+<li>
+<p>The <a href="15-lava-and-docker.html#docker-images-for-lava">lava docker
+   images</a> are multi-platform images supporting x86
+   (<code>linux/amd64</code>) and ARM (<code>linux/arm64</code>).</p>
+</li>
+<li>
+<p>The lava job framework includes the ability to explicitly specify the target
+    platform for docker payloads, rather than relying on some implicit
+    combination of the platform types available in the base image and the
+    platform type of the build host.</p>
+</li>
+</ol>
+<p>So far, so good.</p>
+<p>New projects using the v8.1 lava job framework allow the user to control the
+target platform using the <code>docker-&gt;platform</code> key in the environment
+configuration file. It defaults to <code>linux/amd64</code>. This should work fine on x86
+and M-series Mac build machines using <a href="https://docs.docker.com/desktop/">Docker
+Desktop</a> with emulation.</p>
+<p><em>What happens when working with existing projects using an older version of the
+lava job framework?</em> I hear you ask. It depends:</p>
+<ol>
+<li>
+<p>Existing, deployed docker payloads and projects without docker payloads.  <br />
+<em>No impact.</em></p>
+</li>
+<li>
+<p>Rebuilding and deploying docker payloads from an x86 build host.  <br />
+<em>No impact.</em></p>
+</li>
+<li>
+<p>Rebuilding and deploying from an ARM build host (e.g. M-series Mac)  <br />
+<em>This (probably) would have worked prior to v8.1. Now, it will not. The lava
+   job framework version must be updated to v8.1 (or later). See <a href="#updating-the-framework-in-an-existing-project">Updating the
+   Framework in an Existing
+   Project</a>. The
+   <code>docker-&gt;platform</code> key should be added to the <code>config/*.yaml</code> files, but will
+   default to <code>linux/amd64</code> if not present.</em></p>
+</li>
+</ol>
+<h3 id="exe-payloads">Exe Payloads<a class="headerlink" href="#exe-payloads" title="Permanent link">&para;</a></h3>
+<p>Single file Python and Shell scripts directly under <code>lava-payloads</code> are copied
+as is when deployed.</p>
+<p>SQL scripts are <a href="https://jinja.palletsprojects.com/">Jinja</a> rendered at
+build/deploy time using the specified environment configuration file, in the
+same way as the DynamoDB table specifications.</p>
+<p>Jupyter notebooks are converted to Python scripts for deployment.</p>
+<h3 id="pkg-payloads">Pkg Payloads<a class="headerlink" href="#pkg-payloads" title="Permanent link">&para;</a></h3>
+<p>Directories directly under <code>lava-payloads</code> with names ending in <code>.pkg</code> are
+assumed to contain the code for lava <a href="06-jobs-job-types.html#job-type-pkg">pkg</a> jobs.</p>
+<p>The build process is essentially:</p>
+<ol>
+<li>
+<p>Create a clean copy of the source tree.</p>
+</li>
+<li>
+<p>Any files in the <code>env/</code> directory of the source tree are Jinja rendered
+    using the environment configuration file. This provides one possible
+    mechanism to include environment specific information in the build.</p>
+</li>
+<li>
+<p>Any Jupyter notebooks (<code>*.ipynb</code>) are converted to Python.</p>
+</li>
+<li>
+<p>If the root directory of the source tree contains a
+    <code>requirements.txt</code> file, then Python modules listed therein, including any
+    dependencies, are included.</p>
+</li>
+<li>
+<p>If the root directory contains a <code>requirements-nodeps.txt</code> file, then Python
+    modules listed therein, excluding any dependencies, are included.</p>
+</li>
+<li>
+<p>Zip up everything and place it in the <code>dist</code> area of the project.</p>
+</li>
+</ol>
+<h2 id="miscellaneous-components">Miscellaneous Components<a class="headerlink" href="#miscellaneous-components" title="Permanent link">&para;</a></h2>
+<p>Lava jobs sometimes require other components that may, or may not, be deployed
+as part of a job but which don't naturally belong in the lava payloads area in
+S3.</p>
+<p>For example, jobs may require some tables to be pre-created before the job runs.
+The SQL to create the tables would be one such miscellaneous component. Another
+example might be
+<a href="https://docs.aws.amazon.com/redshift/latest/dg/copy-usage_notes-copy-from-json.html">JSONPath</a>
+files for a Redshift COPY operation for JSON data.</p>
+<p>These components can be placed in the <code>misc</code> (miscellaneous) directory.</p>
+<p>Any SQL scripts (<code>*.sql</code>) placed in the <code>misc</code> directory are
+<a href="https://jinja.palletsprojects.com/">Jinja</a> rendered at build/deploy time into
+the <code>dist</code> directory using the specified environment configuration file, in the
+same way as the DynamoDB table specifications.</p>
+<p>By default, no other build or installation action is performed for anything in
+the <code>misc</code> directory.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Do not edit <code>misc/Makefile</code> as this file will be replaced in the event of
+a framework update.</p>
+</div>
+<p>If some additional build or installation action is
+required, the appropriate means to achieve this is to create a custom makefile
+<code>Makefile.local</code>. This will be detected by the framework and invoked. This
+makefile must implement the following targets, although they don't have to
+do anything if not required:</p>
+<ul>
+<li>dist</li>
+<li>pre-install</li>
+<li>install</li>
+<li>uninstall.</li>
+</ul>
+<p>The recommended approach is to copy the file <code>misc/Makefile.local.sample</code> to
+<code>misc/Makefile.local</code> and customise as required.</p>
+<h2 id="building-the-deployable-components">Building the Deployable Components<a class="headerlink" href="#building-the-deployable-components" title="Permanent link">&para;</a></h2>
+<p>Once the lava components are created, the installable components are created
+thus:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-22-1"><span class="c1"># cd to the project root directory then ...</span>
+</span><span id="__span-22-2">
+</span><span id="__span-22-3"><span class="c1"># Activate the virtualenv</span>
+</span><span id="__span-22-4"><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+</span><span id="__span-22-5">
+</span><span id="__span-22-6"><span class="c1"># Build the lava artefacts</span>
+</span><span id="__span-22-7">make<span class="w"> </span>dist<span class="w"> </span><span class="nv">env</span><span class="o">=</span>&lt;ENV&gt;
+</span></code></pre></div>
+<p>The value of the <code>env</code> parameter must correspond to one of the environment
+configuration YAML files in the <code>config</code> directory.</p>
+<p>The deployable components will be built and placed in the <code>dist/&lt;ENV&gt;</code>
+directory.</p>
+<h2 id="installing-deployable-components">Installing Deployable Components<a class="headerlink" href="#installing-deployable-components" title="Permanent link">&para;</a></h2>
+<p>The lava components can be installed using:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1"><span class="c1"># cd to the project root directory then ...</span>
+</span><span id="__span-23-2">
+</span><span id="__span-23-3"><span class="c1"># Activate the virtualenv</span>
+</span><span id="__span-23-4"><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+</span><span id="__span-23-5">
+</span><span id="__span-23-6"><span class="c1"># Deploy the lava artefacts</span>
+</span><span id="__span-23-7">make<span class="w"> </span>install<span class="w"> </span><span class="nv">env</span><span class="o">=</span>&lt;ENV&gt;
+</span></code></pre></div>
+<p>This will do the following:</p>
+<ol>
+<li>
+<p>Build any out of date artefacts.</p>
+</li>
+<li>
+<p>Perform some basic pre-installation checks (e.g. verify permission to write
+    to the payloads area in S3).</p>
+</li>
+<li>
+<p>Backup any existing payloads in the realm S3 bucket under the <code>__bak__</code>
+    prefix.</p>
+</li>
+<li>
+<p>Deploy the DynamoDB table entries and payload components.</p>
+</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>No backup is made of existing DynamoDB entries prior to uploading new ones.</p>
+</div>
+<p>To perform an installation without the pre-installation checks use:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-24-1"><span class="c1"># Deploy the lava artefacts without pre-install checks.</span>
+</span><span id="__span-24-2">make<span class="w"> </span>_install<span class="w"> </span><span class="nv">env</span><span class="o">=</span>&lt;ENV&gt;
+</span></code></pre></div>
+<h2 id="uninstalling-deployable-components">Uninstalling Deployable Components<a class="headerlink" href="#uninstalling-deployable-components" title="Permanent link">&para;</a></h2>
+<p>The lava components can be uninstalled using:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-25-1"><span class="c1"># cd to the project root directory then ...</span>
+</span><span id="__span-25-2">
+</span><span id="__span-25-3"><span class="c1"># Activate the virtualenv</span>
+</span><span id="__span-25-4"><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+</span><span id="__span-25-5">
+</span><span id="__span-25-6"><span class="c1"># Remove the lava artefacts</span>
+</span><span id="__span-25-7">make<span class="w"> </span>uninstall<span class="w"> </span><span class="nv">env</span><span class="o">=</span>&lt;ENV&gt;
+</span></code></pre></div>
+<p>To clean up the local <code>dist</code> area:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-26-1"><span class="c1"># cd to the project root directory then ...</span>
+</span><span id="__span-26-2">
+</span><span id="__span-26-3">make<span class="w"> </span>clean
+</span></code></pre></div>
+<h2 id="health-checking-deployable-components">Health Checking Deployable Components<a class="headerlink" href="#health-checking-deployable-components" title="Permanent link">&para;</a></h2>
+<p>See also <a href="10-installation-operation.html#maintaining-dynamodb-table-entries">Maintaining DynamoDB Table Entries</a>.</p>
+<h3 id="code-hygiene">Code Hygiene<a class="headerlink" href="#code-hygiene" title="Permanent link">&para;</a></h3>
+<p>The lava job framework incorporates some basic code health checks. The checks
+can be run using:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-27-1">make<span class="w"> </span>check
+</span><span id="__span-27-2">
+</span><span id="__span-27-3"><span class="c1"># or ...</span>
+</span><span id="__span-27-4">
+</span><span id="__span-27-5">etc/git-hooks/pre-commit
+</span></code></pre></div>
+<p>The checks are also run prior to any installation process. Installation is
+blocked if the checks fail.</p>
+<p>If the framework was used to automatically initialise Git for the project then
+the checking process is also configured as a pre-commit hook.</p>
+<table>
+<thead>
+<tr>
+<th>Check Type</th>
+<th>Tool</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python quality</td>
+<td><a href="https://flake8.pycqa.org/en/latest/">flake8</a></td>
+<td>Performs a range of PEP8 compliance and other code health checks, including compliance with <a href="https://github.com/psf/black">black</a> formatting. The configuration file for flake8 is contained in <code>.flake8</code> and for black in <code>pyproject.toml</code>.</td>
+</tr>
+<tr>
+<td>YAML correctness</td>
+<td><a href="https://yamllint.readthedocs.io">yamllint</a></td>
+<td>Performs correctness and style checks on the project YAML files. The configuration file is in <code>.yamllint.yaml</code>.</td>
+</tr>
+<tr>
+<td>Config alignment</td>
+<td>Builtin</td>
+<td>Compares the key structures in the configuration files in the <code>config</code> directory and highlights any differences. Generally, configuration files for a project correlate to different target realms (e.g. test vs prod). While the configuration values will vary by environment, the key hierarchies should be identical. The only configuration option is the choice between <code>warning</code> and <code>strict</code> modes which is specified in <code>etc/git-hooks/pre-commit</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>The following command will apply <a href="https://github.com/psf/black">black</a>
+formatting to project Python files:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-28-1">make<span class="w"> </span>black
+</span><span id="__span-28-2">
+</span><span id="__span-28-3"><span class="c1"># or ...</span>
+</span><span id="__span-28-4">
+</span><span id="__span-28-5">black<span class="w"> </span>lava-payloads<span class="w"> </span>misc
+</span><span id="__span-28-6">
+</span><span id="__span-28-7"><span class="c1"># or even ...</span>
+</span><span id="__span-28-8">
+</span><span id="__span-28-9">black
+</span></code></pre></div>
+<h3 id="configuration-drift-detection">Configuration Drift Detection<a class="headerlink" href="#configuration-drift-detection" title="Permanent link">&para;</a></h3>
+<p>Changes to a lava job framework based project should always be done via a <code>make
+install</code> from an appropriately managed Git repo to ensure that the deployed
+components are fully aligned with the committed contents of the repo.</p>
+<p>Deviation from this practice can result in misalignment between deployed
+components and the repo contents; aka <em>drift</em>.</p>
+<p>The lava job framework supports drift detection for the DynamoDB table entries.
+To detect differences between the repo contents and the deployed table entries,
+run the following command:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-29-1">make<span class="w"> </span>diff<span class="w"> </span><span class="nv">env</span><span class="o">=</span>...
+</span></code></pre></div>
+<p>Note that fields starting with <code>x-</code> / <code>X-</code> are excluded from drift comparisons.</p>
+<h2 id="updating-the-framework-in-an-existing-project">Updating the Framework in an Existing Project<a class="headerlink" href="#updating-the-framework-in-an-existing-project" title="Permanent link">&para;</a></h2>
+<p>The lava framework can be updated for an existing project by obtaining the new
+framework package <code>cookiecutter-lava-&lt;NEW-VERSION&gt;.zip</code> and applying it over the
+top of the project.</p>
+<p>This process is automated by the framework itself. A backup is made first as
+part of the process in case of problems. However it is strongly recommended to
+do a <code>git commit</code> and <code>git push</code> before starting the process.</p>
+<p>The update process is relatively straightforward when updating from a framework
+version of 5.1.0 (Tungurahua) or above. Updating earlier versions is possible
+with a little bit of fiddling.</p>
+<h4 id="updating-from-lava-version-510-tungurahua-or-above">Updating from Lava Version 5.1.0 (Tungurahua) or Above<a class="headerlink" href="#updating-from-lava-version-510-tungurahua-or-above" title="Permanent link">&para;</a></h4>
+<p>The process is:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-30-1"><span class="c1"># Go to the project root directory. Then ...</span>
+</span><span id="__span-30-2"><span class="c1"># Commit and push your code just in case. Then ...</span>
+</span><span id="__span-30-3"><span class="c1"># Deposit the new package at the root of the project directory. Then ...</span>
+</span><span id="__span-30-4">
+</span><span id="__span-30-5"><span class="c1"># Activate the virtual environment</span>
+</span><span id="__span-30-6"><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+</span><span id="__span-30-7">
+</span><span id="__span-30-8"><span class="c1"># Run the update process</span>
+</span><span id="__span-30-9">make<span class="w"> </span>update<span class="w"> </span><span class="nv">pkg</span><span class="o">=</span>cookiecutter-lava-&lt;NEW-VERSION&gt;.zip
+</span></code></pre></div>
+<p>This will do a backup of the project into a zip file, rerun the cookiecutter
+using the new package and apply the new framework components over the existing
+project.</p>
+<h4 id="updating-from-lava-versions-prior-to-510-tungurahua">Updating from Lava Versions Prior to 5.1.0 (Tungurahua)<a class="headerlink" href="#updating-from-lava-versions-prior-to-510-tungurahua" title="Permanent link">&para;</a></h4>
+<p>The process is:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-31-1"><span class="c1"># Go to the project root directory. Then ...</span>
+</span><span id="__span-31-2"><span class="c1"># Commit and push your code just in case. Then ...</span>
+</span><span id="__span-31-3"><span class="c1"># Deposit the new package at the root of the project directory. Then ...</span>
+</span><span id="__span-31-4">
+</span><span id="__span-31-5"><span class="c1"># Extract the `bin` directory from the new framework package</span>
+</span><span id="__span-31-6"><span class="c1"># The quotes are important here.</span>
+</span><span id="__span-31-7">unzip<span class="w"> </span>-j<span class="w"> </span>-d<span class="w"> </span>bin<span class="w"> </span>cookiecutter-lava-&lt;NEW-VERSION&gt;.zip<span class="w"> </span><span class="s1">&#39;*bin/*&#39;</span>
+</span><span id="__span-31-8">chmod<span class="w"> </span>u+x<span class="w"> </span>bin/*
+</span><span id="__span-31-9">
+</span><span id="__span-31-10"><span class="c1"># Activate the virtual environment</span>
+</span><span id="__span-31-11"><span class="nb">source</span><span class="w"> </span>venv/bin/activate
+</span><span id="__span-31-12">
+</span><span id="__span-31-13"><span class="c1"># Run the update process</span>
+</span><span id="__span-31-14"><span class="nv">PATH</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/bin:<span class="nv">$PATH</span><span class="w"> </span>make<span class="w"> </span>update<span class="w"> </span><span class="nv">pkg</span><span class="o">=</span>cookiecutter-lava-&lt;NEW-VERSION&gt;.zip
+</span></code></pre></div>
+<p>Note that later versions of the framework move the framework's
+<code>requirements.txt</code> file into the <code>etc</code> directory. After the update the
+<code>requirements.txt</code> in the base directory can be deleted if there are no locally
+added packages. If there are, only those packages need to be retained in that file.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; Origin Energy 2025
+    </div>
+  
+</div>
+      <div class="md-footer-social">
+        <div class="md-copyright">
+          <div class="md-copyright__highlight">
+            v8.2.0 (Kilauea)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,2657 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="AWS based distributed scheduler and job runner">
+      
+      
+        <meta name="author" content="Murray Andrews">
+      
+      
+      
+        <link rel="prev" href="04-dynamodb-tables.html">
+      
+      
+        <link rel="next" href="06-jobs-job-types.html">
+      
+      
+      <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
+    
+    
+      
+        <title>Job Dispatch - Lava User Guide</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.84d31ad4.min.css">
+      
+        
+        <link rel="stylesheet" href="assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="css/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#the-lava-dispatch-process" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="Lava User Guide" class="md-header__button md-logo" aria-label="Lava User Guide" data-md-component="logo">
+      
+  <img src="img/lava-icons/svg/256/lava-icon-256-opaque.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Lava User Guide
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Job Dispatch
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        
+
+<a href="https://github.com/jin-gizmo/lava" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lava on GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="Lava User Guide" class="md-nav__button md-logo" aria-label="Lava User Guide" data-md-component="logo">
+      
+  <img src="img/lava-icons/svg/256/lava-icon-256-opaque.svg" alt="logo">
+
+    </a>
+    Lava User Guide
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+<a href="https://github.com/jin-gizmo/lava" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Lava on GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="01-about-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="02-concepts.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Concepts
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="03-architecture.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="04-dynamodb-tables.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    DynamoDB Tables
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Job Dispatch
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="05-job-dispatch.html" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Dispatch
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scheduled-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduled Dispatch
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scheduled Dispatch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initialising-the-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initialising the Scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jump-starting-the-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jump-starting the Scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scheduling-the-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling the Scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matching-jobs-to-dispatchers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Matching Jobs to Dispatchers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#suspending-the-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Suspending the Scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schedule-specifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schedule Specifications
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#job-initiated-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Job Initiated Dispatch
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Job Initiated Dispatch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-dispatch-job-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Dispatch Job Type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-dispatch-job-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Dispatch Job Action
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-dispatch-helper" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Dispatch Helper
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Dispatch Helper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-style-dispatch-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI-Style Dispatch Requests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#json-dispatch-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      JSON Dispatch Requests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dispatching-jobs-from-s3-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dispatching Jobs from S3 Events
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dispatching Jobs from S3 Events">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rendering-of-dispatch-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rendering Dispatch Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#about-s3-event-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      About S3 Event Types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#s3-event-deduplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      S3 Event Deduplication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-s3-triggers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing S3 Triggers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuring-s3-bucket-notification-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuring S3 Events
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuring-amazon-eventbridge-for-s3-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuring EventBridge for S3 Events
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dispatching-jobs-from-amazon-eventbridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dispatching from EventBridge
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dispatching from EventBridge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-eventbridge-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing EventBridge Dispatch
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direct-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Direct Dispatch
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Direct Dispatch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-dispatch-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Dispatch Interface
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#handling-of-parameters-and-globals-during-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters & Globals During Dispatch
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters &amp; Globals During Dispatch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#job-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#globals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Globals
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#globals-owned-by-lava" class="md-nav__link">
+    <span class="md-ellipsis">
+      Globals Owned by Lava
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-with-event-triggered-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use with Event Triggered Dispatch
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="06-jobs-job-types.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Jobs & Job Types
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="07-connectors.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Connectors
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="08-job-actions.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Actions
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="09-lava-state-manager.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava State Manager
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="10-installation-operation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation & Operation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="11-lava-job-framework.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava Job Framework
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="12-developing-lava-jobs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Developing Lava Jobs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="13-jinja-rendering-in-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Jinja Rendering in Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="14-enhancing-lava.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Enhancing Lava
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="15-lava-and-docker.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Lava and Docker
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="16-commands-utilities.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Commands & Utilities
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="17-job-framework-samples.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Job Framework Samples
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="18-api.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="19-cloudformation-templates.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    CloudFormation Templates
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="20-faq.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    FAQ
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="21-release-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Notes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="22-credits.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Credits
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="23-known-issues.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Known Issues
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scheduled-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduled Dispatch
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Scheduled Dispatch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#initialising-the-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initialising the Scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#jump-starting-the-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Jump-starting the Scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#scheduling-the-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scheduling the Scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matching-jobs-to-dispatchers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Matching Jobs to Dispatchers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#suspending-the-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      Suspending the Scheduler
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#schedule-specifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Schedule Specifications
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#job-initiated-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Job Initiated Dispatch
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Job Initiated Dispatch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-dispatch-job-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Dispatch Job Type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-dispatch-job-action" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Dispatch Job Action
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-dispatch-helper" class="md-nav__link">
+    <span class="md-ellipsis">
+      The Dispatch Helper
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The Dispatch Helper">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-style-dispatch-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      CLI-Style Dispatch Requests
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#json-dispatch-requests" class="md-nav__link">
+    <span class="md-ellipsis">
+      JSON Dispatch Requests
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dispatching-jobs-from-s3-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dispatching Jobs from S3 Events
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dispatching Jobs from S3 Events">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rendering-of-dispatch-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rendering Dispatch Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#about-s3-event-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      About S3 Event Types
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#s3-event-deduplication" class="md-nav__link">
+    <span class="md-ellipsis">
+      S3 Event Deduplication
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-s3-triggers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing S3 Triggers
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuring-s3-bucket-notification-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuring S3 Events
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuring-amazon-eventbridge-for-s3-events" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuring EventBridge for S3 Events
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dispatching-jobs-from-amazon-eventbridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dispatching from EventBridge
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dispatching from EventBridge">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#testing-eventbridge-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing EventBridge Dispatch
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direct-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Direct Dispatch
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Direct Dispatch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#python-dispatch-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python Dispatch Interface
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#handling-of-parameters-and-globals-during-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters & Globals During Dispatch
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameters &amp; Globals During Dispatch">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#job-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#globals" class="md-nav__link">
+    <span class="md-ellipsis">
+      Globals
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#globals-owned-by-lava" class="md-nav__link">
+    <span class="md-ellipsis">
+      Globals Owned by Lava
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-with-event-triggered-dispatch" class="md-nav__link">
+    <span class="md-ellipsis">
+      Use with Event Triggered Dispatch
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="the-lava-dispatch-process" x-nav="Job Dispatch">The Lava Dispatch Process<a class="headerlink" href="#the-lava-dispatch-process" title="Permanent link">&para;</a></h1>
+<p>The underlying mechanism for the lava job dispatch process is very simple. A
+JSON formatted message containing a job ID is sent via AWS SQS to a worker. The
+SQS queue for any worker is named <code>lava-&lt;REALM&gt;-&lt;WORKER&gt;</code>.</p>
+<p>The worker retrieves the message, extracts the job details from the <a href="04-dynamodb-tables.html#the-jobs-table">jobs
+table</a> and then runs the job if it is enabled
+and the worker is the one named in the job specification.</p>
+<p>There are several mechanisms that can initiate the sending of the SQS dispatch
+message:</p>
+<ul>
+<li>
+<p><a href="#scheduled-dispatch">Scheduled dispatch</a></p>
+</li>
+<li>
+<p><a href="#job-initiated-dispatch">Job initiated dispatch</a></p>
+</li>
+<li>
+<p><a href="#dispatching-jobs-from-s3-events">AWS S3 event triggered dispatch</a></p>
+</li>
+<li>
+<p><a href="#dispatching-jobs-from-amazon-eventbridge">Amazon EventBridge triggered dispatch</a></p>
+</li>
+<li>
+<p><a href="#the-dispatch-helper">The Dispatch Helper</a></p>
+</li>
+<li>
+<p><a href="#direct-dispatch">Direct dispatch</a>.</p>
+</li>
+</ul>
+<h2 id="scheduled-dispatch">Scheduled Dispatch<a class="headerlink" href="#scheduled-dispatch" title="Permanent link">&para;</a></h2>
+<p>Dispatch events can be scheduled by a <em>dispatcher</em>. A dispatcher is just a
+worker that runs the <a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job type.
+This job type builds a crontab containing invocations of the <code>lava-dispatcher</code>
+utility to dispatch jobs in accordance with the schedules specified in the job
+specifications.</p>
+<p>A realm can have multiple dispatchers. For example, a realm may need to schedule
+jobs in multiple timezones (e.g. local and UTC) in which case there would be two
+dispatchers, each operating in its respective timezone. However, a given job
+must specify a single dispatcher.</p>
+<p>The <a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job must also be dispatched
+periodically to create and refresh the crontab. Clearly, there is a chicken and
+egg problem here in that an initial dispatch of the
+<a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job is required to create the
+first crontab.</p>
+<p>There are two ways to achieve this, manually or with a worker jump-start.</p>
+<h3 id="initialising-the-scheduler">Initialising the Scheduler<a class="headerlink" href="#initialising-the-scheduler" title="Permanent link">&para;</a></h3>
+<p>The <a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job can be dispatched
+manually whenever required. When dispatching a
+<a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job, the <code>dispatcher</code> parameter
+must be provided.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><span class="c1"># This command will force the dispatching worker to (re-)build its crontab.</span>
+</span><span id="__span-0-2"><span class="c1"># It will include dispatches for jobs aimed at &lt;DISPATCHER&gt;</span>
+</span><span id="__span-0-3">
+</span><span id="__span-0-4">lava-dispatcher<span class="w"> </span>--realm<span class="w"> </span>&lt;REALM&gt;<span class="w"> </span>--worker<span class="w"> </span>&lt;DISPATCH-WORKER&gt;<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-0-5"><span class="w">    </span>&lt;LAVASCHED_JOB_ID&gt;<span class="w"> </span>--param<span class="w"> </span><span class="nv">dispatcher</span><span class="o">=</span>&lt;DISPATCHER&gt;
+</span></code></pre></div>
+<p>The problem with this approach is for dispatchers that are started spontaneously
+(e.g. by an auto scaler). A manual intervention is then required to dispatch the
+first <a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job or else not much lava
+will flow.</p>
+<h3 id="jump-starting-the-scheduler">Jump-starting the Scheduler<a class="headerlink" href="#jump-starting-the-scheduler" title="Permanent link">&para;</a></h3>
+<p>The lava worker has a <code>--jump-start</code> option. When the worker starts, this
+option forces it to search the <a href="04-dynamodb-tables.html#the-jobs-table">jobs table</a>
+for any enabled <a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> jobs for which
+it is the designated worker and dispatch them immediately.</p>
+<p>This option is safe to use on any worker but does require a full scan of the
+<a href="04-dynamodb-tables.html#the-jobs-table">jobs table</a>.</p>
+<h3 id="scheduling-the-scheduler">Scheduling the Scheduler<a class="headerlink" href="#scheduling-the-scheduler" title="Permanent link">&para;</a></h3>
+<p>Of course, the <a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> jobs should
+also have their own schedule specified to refresh the crontab as changes are
+made in the <a href="04-dynamodb-tables.html#the-jobs-table">jobs table</a>. It is recommended to
+schedule the <a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> jobs to run every
+10 or 15 minutes. The job makes a reasonable effort to avoid updating the
+crontab when nothing has changed. It is also careful to avoid disturbing
+entries in the crontab that don't belong to lava.</p>
+<h3 id="matching-jobs-to-dispatchers">Matching Jobs to Dispatchers<a class="headerlink" href="#matching-jobs-to-dispatchers" title="Permanent link">&para;</a></h3>
+<p>This is a typical job specification for a
+<a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job. Note the two different
+<code>dispatcher</code> items that serve related but separate purposes.</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><span class="p">{</span>
+</span><span id="__span-1-2"><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Rebuild the crontab for the dispatcher&quot;</span><span class="p">,</span>
+</span><span id="__span-1-3"><span class="w">  </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sydney&quot;</span><span class="p">,</span>
+</span><span id="__span-1-4"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-1-5"><span class="w">  </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><span class="w">  </span><span class="nt">&quot;owner&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-1-7"><span class="w">  </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-8"><span class="w">    </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sydney&quot;</span><span class="p">,</span>
+</span><span id="__span-1-9"><span class="w">    </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-10"><span class="w">      </span><span class="nt">&quot;CRON_TZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Australia/Sydney&quot;</span><span class="p">,</span>
+</span><span id="__span-1-11"><span class="w">      </span><span class="nt">&quot;PATH&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/usr/local/bin:/bin:/usr/bin&quot;</span>
+</span><span id="__span-1-12"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-1-13"><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-1-14"><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+</span><span id="__span-1-15"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0-59/15 * * * *&quot;</span><span class="p">,</span>
+</span><span id="__span-1-16"><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lavasched&quot;</span><span class="p">,</span>
+</span><span id="__span-1-17"><span class="w">  </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;core&quot;</span>
+</span><span id="__span-1-18"><span class="p">}</span>
+</span></code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>This PATH specification in the environment clause above is <strong>critical</strong> when
+using the <a href="10-installation-operation.html#the-lava-ec2-ami">lava AMI</a>. If not specified, <strong>cron</strong> will use
+the default system version of Python rather than the preferred version
+installed in <code>/usr/local/bin</code> and the dispatcher may fail. Silently.</p>
+</div>
+<p>Each <a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job specification must
+contain both</p>
+<ol>
+<li>
+<p>A <code>dispatcher</code> field in the job specification.</p>
+<p>This indicates which dispatcher will dispatch the
+<a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job itself.</p>
+</li>
+<li>
+<p>A <code>dispatcher</code> parameter in the job specifications <code>parameter</code> object.</p>
+<p>This indicates which jobs will be included in the crontab built by the job.
+It is matched against the <code>dispatcher</code> field for all jobs in the table.</p>
+</li>
+</ol>
+<h3 id="suspending-the-scheduler">Suspending the Scheduler<a class="headerlink" href="#suspending-the-scheduler" title="Permanent link">&para;</a></h3>
+<p>If there is a need to temporarily disable scheduled job dispatch from a given
+dispatcher, change <strong>both</strong> of the <code>dispatcher</code> values in the
+<a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job specification to a value
+that will not match any other job. Once the crontab updates, no jobs other than
+the <a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job will be run. This is
+much simpler than changing all of the other jobs and still allows the scheduled
+dispatch process to be re-enabled when required.</p>
+<p>For example:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><span class="p">{</span>
+</span><span id="__span-2-2"><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Rebuild the crontab for the dispatcher&quot;</span><span class="p">,</span>
+</span><span id="__span-2-3"><span class="w">  </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;**Disabled** Sydney&quot;</span><span class="p">,</span>
+</span><span id="__span-2-4"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-2-5"><span class="w">  </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-2-6"><span class="w">  </span><span class="nt">&quot;owner&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-2-7"><span class="w">  </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-8"><span class="w">    </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;**Disabled** Sydney&quot;</span><span class="p">,</span>
+</span><span id="__span-2-9"><span class="w">    </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-10"><span class="w">      </span><span class="nt">&quot;CRON_TZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Australia/Sydney&quot;</span><span class="p">,</span>
+</span><span id="__span-2-11"><span class="w">      </span><span class="nt">&quot;PATH&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/usr/local/bin:/bin:/usr/bin&quot;</span><span class="p">,</span>
+</span><span id="__span-2-12"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-2-13"><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-2-14"><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+</span><span id="__span-2-15"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0-59/15 * * * *&quot;</span><span class="p">,</span>
+</span><span id="__span-2-16"><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lavasched&quot;</span><span class="p">,</span>
+</span><span id="__span-2-17"><span class="w">  </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;core&quot;</span>
+</span><span id="__span-2-18"><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="schedule-specifications">Schedule Specifications<a class="headerlink" href="#schedule-specifications" title="Permanent link">&para;</a></h3>
+<p>Each job that is to be dispatched on a schedule must have a <code>schedule</code> field in
+the job specification that is used to derive the time component of the
+dispatcher crontab entries.</p>
+<p>The value of this field is either:</p>
+<ul>
+<li>
+<p>A string containing a conventional crontab timing specification.</p>
+</li>
+<li>
+<p>A <a href="#lava-scheduling-objects">lava scheduling object</a> as
+    described below.</p>
+</li>
+<li>
+<p>A list of an arbitrary mixture of the above.</p>
+</li>
+</ul>
+<p>This means that one job can have multiple crontab entries to allow more complex
+scheduling permutations without the need to duplicate the entire job
+specification.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>The syntax of crontab strings must be compatible with the dispatch worker's
+cron implementation. It is strongly recommended to avoid the non-standard
+extensions to cron found on some systems. <a href="https://crontab.guru">Crontab Guru</a>
+is a useful syntax helper / checker. Having said that, some of the <code>@</code>
+forms can be useful shortcuts. The <code>@reboot</code> form is a bit special in that it
+will be dispatched only when the dispatcher node reboots.</p>
+</div>
+<h4 id="lava-scheduling-objects">Lava Scheduling Objects<a class="headerlink" href="#lava-scheduling-objects" title="Permanent link">&para;</a></h4>
+<p>A <em>lava scheduling object</em> is a map with the following fields:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>crontab</td>
+<td>String</td>
+<td>Yes</td>
+<td>A conventional crontab timing specification.</td>
+</tr>
+<tr>
+<td>from</td>
+<td>String</td>
+<td>No</td>
+<td>An ISO 8601 datetime string specifying when the schedule object becomes active. Default is midnight, 01/01/0001</td>
+</tr>
+<tr>
+<td>to</td>
+<td>String</td>
+<td>No</td>
+<td>An ISO 8601 datetime string specifying when the schedule object ceases to active. Default is midnight, 31/12/9999</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>from</code> and <code>to</code> fields allow specific schedules to be active only within
+defined time periods. If <code>from</code> is less than <code>to</code>, the schedule is active only
+between those two times. If <code>from</code> is greater than <code>to</code>, the schedule is active
+only outside those two times.</p>
+<p><img alt="" src="img/schedule-from-to.png" /></p>
+<p>The <code>from</code> and <code>to</code> fields are each timezone aware. If no timezone is specified, the
+local timezone of the worker running the
+<a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job is assumed.</p>
+<h4 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h4>
+<p>The simplest form of schedule is a simple crontab string:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><span class="p">{</span>
+</span><span id="__span-3-2"><span class="w">  </span><span class="err">...</span>
+</span><span id="__span-3-3"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 12 * * Mon&quot;</span><span class="p">,</span>
+</span><span id="__span-3-4"><span class="w">  </span><span class="err">...</span>
+</span><span id="__span-3-5"><span class="p">}</span>
+</span></code></pre></div>
+<p>This one will run the job at midday on weekdays and 2pm on weekends.</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><span class="p">{</span>
+</span><span id="__span-4-2"><span class="w">  </span><span class="err">...</span>
+</span><span id="__span-4-3"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-4-4"><span class="w">    </span><span class="s2">&quot;0 12 * * 1-5&quot;</span><span class="p">,</span>
+</span><span id="__span-4-5"><span class="w">    </span><span class="s2">&quot;0 14 * * 0,6&quot;</span>
+</span><span id="__span-4-6"><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-4-7"><span class="w">  </span><span class="err">...</span>
+</span><span id="__span-4-8"><span class="p">}</span>
+</span></code></pre></div>
+<p>This one will run the job daily at midday before 30 June 2019 and daily at 2pm
+after that. Note that in this example, UTC is specified in the date entries.</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><span class="p">{</span>
+</span><span id="__span-5-2"><span class="w">  </span><span class="err">...</span>
+</span><span id="__span-5-3"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-5-4"><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-5-5"><span class="w">      </span><span class="nt">&quot;crontab&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 12 * * *&quot;</span><span class="p">,</span>
+</span><span id="__span-5-6"><span class="w">      </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-06-30T00:00:00Z&quot;</span>
+</span><span id="__span-5-7"><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-5-8"><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-5-9"><span class="w">      </span><span class="nt">&quot;crontab&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 14 * * *&quot;</span><span class="p">,</span>
+</span><span id="__span-5-10"><span class="w">      </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-06-30T00:00:00Z&quot;</span>
+</span><span id="__span-5-11"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-5-12"><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-5-13"><span class="w">  </span><span class="err">...</span>
+</span><span id="__span-5-14"><span class="p">}</span>
+</span></code></pre></div>
+<p>This one will run the job daily at midday, except during February 2019 when it
+is not active. Note that <code>from</code> is greater than <code>to</code> in this case and the lack
+of timezone means the local timezone of the worker running the
+<a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job will be used.</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><span class="p">{</span>
+</span><span id="__span-6-2"><span class="w">  </span><span class="err">...</span>
+</span><span id="__span-6-3"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-4"><span class="w">    </span><span class="nt">&quot;crontab&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 12 * * *&quot;</span><span class="p">,</span>
+</span><span id="__span-6-5"><span class="w">    </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-03-01T00:00:00&quot;</span><span class="p">,</span>
+</span><span id="__span-6-6"><span class="w">    </span><span class="nt">&quot;to:&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-02-01T00:00:00&quot;</span>
+</span><span id="__span-6-7"><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-6-8"><span class="w">  </span><span class="err">...</span>
+</span><span id="__span-6-9"><span class="p">}</span>
+</span></code></pre></div>
+<h2 id="job-initiated-dispatch">Job Initiated Dispatch<a class="headerlink" href="#job-initiated-dispatch" title="Permanent link">&para;</a></h2>
+<p>Lava has two mechanisms by which a job can dispatch other jobs.</p>
+<h3 id="the-dispatch-job-type">The Dispatch Job Type<a class="headerlink" href="#the-dispatch-job-type" title="Permanent link">&para;</a></h3>
+<p>The <a href="06-jobs-job-types.html#job-type-dispatch">dispatch</a> job type initiates the
+dispatch of other jobs. This could be used, for example, as a step in a job
+<a href="06-jobs-job-types.html#job-type-chain">chain</a>.</p>
+<h3 id="the-dispatch-job-action">The Dispatch Job Action<a class="headerlink" href="#the-dispatch-job-action" title="Permanent link">&para;</a></h3>
+<p>Job <a href="08-job-actions.html#job-actions">actions</a> are conditionally executed when a
+job succeeds or fails. One of the available action types is the <a href="08-job-actions.html#action-type-dispatch">dispatch
+action</a>.</p>
+<h2 id="the-dispatch-helper">The Dispatch Helper<a class="headerlink" href="#the-dispatch-helper" title="Permanent link">&para;</a></h2>
+<p>The dispatch helper is an AWS Lambda function that provides a simplified
+mechanism for an external component to dispatch a lava job. It accepts simple,
+dispatch requests and constructs the necessary messages within the lava
+environment to complete the dispatch process.</p>
+<p>The dispatch helper can accept dispatch requests via the following mechanisms:</p>
+<ul>
+<li>
+<p>SNS</p>
+</li>
+<li>
+<p>SQS</p>
+</li>
+<li>
+<p>Amazon EventBridge</p>
+</li>
+<li>
+<p>direct invocation.</p>
+</li>
+</ul>
+<p>The standard CloudFormation template will setup an SNS topic,
+<code>lava-&lt;REALM&gt;-dispatch</code> and subscribe the dispatch helper lambda function to it.
+Other SNS topics or SQS queues can be created and subscribed manually as
+required.</p>
+<p>Two request formats are accepted:</p>
+<ol>
+<li>
+<p><a href="#cli-style-dispatch-requests">CLI-style format</a></p>
+</li>
+<li>
+<p><a href="#json-dispatch-requests">JSON format</a>.</p>
+</li>
+</ol>
+<p><img alt="" src="img/dispatcher.svg" /></p>
+<h3 id="cli-style-dispatch-requests">CLI-Style Dispatch Requests<a class="headerlink" href="#cli-style-dispatch-requests" title="Permanent link">&para;</a></h3>
+<p>The dispatch request message sent to the dispatch helper must be in the
+following format:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-7-1"><span class="c1"># One or more lines like the following. Shell style comments and blank lines</span>
+</span><span id="__span-7-2"><span class="c1"># are ignored. Shell style lexing is applied.</span>
+</span><span id="__span-7-3">
+</span><span id="__span-7-4">&lt;JOB_ID&gt;<span class="w"> </span><span class="o">[</span>-d<span class="w"> </span>DURATION<span class="o">]</span><span class="w"> </span><span class="o">[</span>-g<span class="w"> </span>&lt;GLOBAL&gt;<span class="o">=</span>&lt;VALUE&gt;<span class="o">]</span><span class="w"> </span>...<span class="w"> </span><span class="o">[</span>-p<span class="w"> </span>&lt;PARAM&gt;<span class="o">=</span>&lt;VALUE&gt;<span class="w"> </span><span class="o">]</span><span class="w"> </span>...<span class="w"> </span>
+</span><span id="__span-7-5">
+</span><span id="__span-7-6"><span class="c1"># ... or ...</span>
+</span><span id="__span-7-7">
+</span><span id="__span-7-8">&lt;JOB_ID&gt;<span class="w"> </span><span class="o">[</span>--delay<span class="w"> </span>DURATION<span class="o">]</span><span class="w"> </span><span class="o">[</span>--global<span class="w"> </span>&lt;GLOBAL&gt;<span class="o">=</span>&lt;VALUE&gt;<span class="o">]</span><span class="w"> </span>...<span class="w"> </span><span class="o">[</span>--param<span class="w"> </span>&lt;PARAM&gt;<span class="o">=</span>&lt;VALUE&gt;<span class="w"> </span><span class="o">]</span><span class="w"> </span>...
+</span></code></pre></div>
+<p>For example:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><span class="c1"># Dispatch the job &quot;my-job&quot; with no parameters.</span>
+</span><span id="__span-8-2">my-job
+</span><span id="__span-8-3">
+</span><span id="__span-8-4"><span class="c1"># Dispatch the job &quot;my-job&quot; with some additional parameters.</span>
+</span><span id="__span-8-5">my-job<span class="w"> </span>-p<span class="w"> </span><span class="nv">timeout</span><span class="o">=</span>20m<span class="w"> </span>-p<span class="w"> </span><span class="nv">flow</span><span class="o">=</span>Pahoehoe<span class="w"> </span>-g<span class="w"> </span><span class="nv">planet</span><span class="o">=</span>Mars<span class="w"> </span>-g<span class="w"> </span><span class="nv">name</span><span class="o">=</span><span class="s1">&#39;Alba Mons&#39;</span>
+</span><span id="__span-8-6">
+</span><span id="__span-8-7"><span class="c1"># Dispatch the job &quot;my-job&quot; with a delay of 3 minutes</span>
+</span><span id="__span-8-8">my-job<span class="w"> </span>-d<span class="w"> </span>3m
+</span></code></pre></div>
+<p>This is one way to send a dispatch message via the helper:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><span class="c1"># Get the topic ARN then ...</span>
+</span><span id="__span-9-2">aws<span class="w"> </span>sns<span class="w"> </span>publish<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-9-3"><span class="w">    </span>--topic-arn<span class="w"> </span><span class="s2">&quot;arn:aws:sns:us-west-2:0123456789012:lava-&lt;REALM&gt;-dispatch&quot;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-9-4"><span class="w">    </span>--message<span class="w"> </span><span class="s2">&quot;my-job -p timeout=20m -p flow=Pahoehoe -g planet=Mars -g name=&#39;Alba Mons&#39;&quot;</span>
+</span></code></pre></div>
+<h4 id="parameter-and-global-specifications">Parameter and Global Specifications<a class="headerlink" href="#parameter-and-global-specifications" title="Permanent link">&para;</a></h4>
+<p>When specifying parameters and globals, the name can be a simple name or a dot
+separated hierarchical name. The dispatch helper will convert the names into a
+matching JSON structure that is included in the dispatch message. When the lava
+worker receives the dispatch message, it will merge this structure into the
+corresponding parameter or globals structure extracted from the <a href="04-dynamodb-tables.html#the-jobs-table">jobs
+table</a>.</p>
+<p>For example, consider the following message sent to the dispatch helper:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1">my-job<span class="w"> </span>-p<span class="w"> </span><span class="nv">timeout</span><span class="o">=</span>1h<span class="w"> </span>-p<span class="w"> </span>vars.location<span class="o">=</span>Isabela<span class="w"> </span>-p<span class="w"> </span>vars.name<span class="o">=</span><span class="s2">&quot;Sierra Negra&quot;</span><span class="w"> </span>-g<span class="w"> </span><span class="nv">country</span><span class="o">=</span>Equador
+</span></code></pre></div>
+<p>The dispatch message sent by the dispatch helper will contain the following.</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-11-1"><span class="p">{</span>
+</span><span id="__span-11-2"><span class="w">    </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-11-3"><span class="w">        </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Equador&quot;</span>
+</span><span id="__span-11-4"><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-11-5"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-11-6"><span class="w">        </span><span class="nt">&quot;timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1h&quot;</span><span class="p">,</span>
+</span><span id="__span-11-7"><span class="w">        </span><span class="nt">&quot;vars&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-11-8"><span class="w">            </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Isabela&quot;</span><span class="p">,</span>
+</span><span id="__span-11-9"><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sierra Negra&quot;</span>
+</span><span id="__span-11-10"><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-11-11"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-11-12"><span class="p">}</span>
+</span></code></pre></div>
+<p>If the job specification in the <a href="04-dynamodb-tables.html#the-jobs-table">jobs table</a>
+contains the following:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-12-1"><span class="p">{</span>
+</span><span id="__span-12-2"><span class="w">    </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-12-3"><span class="w">        </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Replaced at run time&quot;</span><span class="p">,</span>
+</span><span id="__span-12-4"><span class="w">        </span><span class="nt">&quot;ocean&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Atlantic&quot;</span>
+</span><span id="__span-12-5"><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-12-6"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-12-7"><span class="w">        </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run away&quot;</span><span class="p">,</span>
+</span><span id="__span-12-8"><span class="w">        </span><span class="nt">&quot;timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20m&quot;</span><span class="p">,</span>
+</span><span id="__span-12-9"><span class="w">        </span><span class="nt">&quot;vars&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-12-10"><span class="w">            </span><span class="nt">&quot;whatever&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;This will be replaced&quot;</span>
+</span><span id="__span-12-11"><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-12-12"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-12-13"><span class="p">}</span>
+</span></code></pre></div>
+<p>then the final job specification used by the lava worker will be:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-13-1"><span class="p">{</span>
+</span><span id="__span-13-2"><span class="w">    </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-3"><span class="w">        </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Equador&quot;</span><span class="p">,</span>
+</span><span id="__span-13-4"><span class="w">        </span><span class="nt">&quot;ocean&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Atlantic&quot;</span>
+</span><span id="__span-13-5"><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-13-6"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-7"><span class="w">        </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run away&quot;</span><span class="p">,</span>
+</span><span id="__span-13-8"><span class="w">        </span><span class="nt">&quot;timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1h&quot;</span><span class="p">,</span>
+</span><span id="__span-13-9"><span class="w">        </span><span class="nt">&quot;vars&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-10"><span class="w">            </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Isabela&quot;</span><span class="p">,</span>
+</span><span id="__span-13-11"><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sierra Negra&quot;</span>
+</span><span id="__span-13-12"><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-13-13"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-13-14"><span class="p">}</span>
+</span></code></pre></div>
+<p>Notice that the parameters and globals from the dispatch helper override
+similarly named parameters and globals in the job specification, including, in
+this case, the entire <code>vars</code> map in the parameters.</p>
+<h3 id="json-dispatch-requests">JSON Dispatch Requests<a class="headerlink" href="#json-dispatch-requests" title="Permanent link">&para;</a></h3>
+<p>JSON formatted dispatch requests must be in the following format:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-14-1"><span class="p">{</span>
+</span><span id="__span-14-2"><span class="w">  </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-14-3"><span class="w">  </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-14-4"><span class="w">    </span><span class="nt">&quot;g1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-14-5"><span class="w">    </span><span class="nt">&quot;g2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+</span><span id="__span-14-6"><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-14-7"><span class="w">  </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-14-8"><span class="w">    </span><span class="nt">&quot;p1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-14-9"><span class="w">    </span><span class="nt">&quot;p2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+</span><span id="__span-14-10"><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-14-11"><span class="w">  </span><span class="nt">&quot;delay&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;DURATION&gt;&quot;</span>
+</span><span id="__span-14-12"><span class="p">}</span>
+</span></code></pre></div>
+<p>The <code>job_id</code> element is mandatory. All other elements are optional. The values
+for individual <code>globals</code> and <code>parameters</code> can be any supported JSON type (not
+just strings as shown above).</p>
+<p>The dispatch request can be sent to the dispatch help lambda as either:</p>
+<ul>
+<li>
+<p>The body of an SQS or SNS message</p>
+</li>
+<li>
+<p>The payload of a direct lambda invocation</p>
+</li>
+<li>
+<p>The content of an event message produced by Amazon EventBridge.</p>
+</li>
+</ul>
+<p>For example, the following sends a dispatch request directly to the dispatch
+helper lambda using the AWS CLI.</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-15-1"><span class="c1"># Send a dispatch request directly to the dispatch helper for realm &lt;REALM&gt;</span>
+</span><span id="__span-15-2">
+</span><span id="__span-15-3">aws<span class="w"> </span>lambda<span class="w"> </span>invoke<span class="w"> </span>--cli-binary-format<span class="w"> </span>raw-in-base64-out<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-15-4"><span class="w">    </span>--function-name<span class="w"> </span>lava-&lt;REALM&gt;-dispatch<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-15-5"><span class="w">    </span>--invocation-type<span class="w"> </span>Event<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-15-6"><span class="w">    </span>--payload<span class="w"> </span><span class="s1">&#39;{&quot;job_id&quot;: &quot;my-job-id&quot;, &quot;globals&quot;: {&quot;g1&quot;: &quot;GLOB1&quot;}}&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-15-7"><span class="w">    </span>/dev/stdout
+</span></code></pre></div>
+<p>See also
+<a href="#dispatching-jobs-from-amazon-eventbridge">Dispatching Jobs from Amazon EventBridge</a>.</p>
+<h2 id="dispatching-jobs-from-s3-events">Dispatching Jobs from S3 Events<a class="headerlink" href="#dispatching-jobs-from-s3-events" title="Permanent link">&para;</a></h2>
+<p>Lava jobs can be dispatched in response to S3 events. This is done using a realm
+specific Lambda function <strong>s3trigger</strong> which, optionally, gets deployed as a
+function named <code>lava-&lt;REALM&gt;-s3trigger</code> when the main realm CloudFormation stack
+is deployed.</p>
+<p>S3 event messages can be sent to the <strong>s3trigger</strong> lambda as either:</p>
+<ul>
+<li>
+<p>S3 bucket notification events delivered directly from S3, via SNS or via
+    SQS.</p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventBridge.html">Amazon EventBridge</a>
+    messages.</p>
+</li>
+</ul>
+<p>The following diagram shows the various event notification options supported by
+lava.</p>
+<p><img alt="" src="img/s3trigger.svg" /></p>
+<p>Note that the CloudFormation stack will deploy the function, the <a href="04-dynamodb-tables.html#the-s3triggers-table">s3triggers
+table</a> and required IAM components but
+it will not add any entries in the <a href="04-dynamodb-tables.html#the-s3triggers-table">s3triggers
+table</a>, nor will it add any S3
+subscriptions to the lambda function. These steps must be done manually.</p>
+<p>The s3trigger function works thus:</p>
+<ol>
+<li>
+<p>An S3 bucket notification event or Amazon EventBridge event record is passed
+    to the Lambda function.</p>
+</li>
+<li>
+<p>The function looks up the <a href="04-dynamodb-tables.html#the-s3triggers-table">s3triggers table</a>
+    to find entries that match the bucket name and object key. There may be
+    multiple matching entries.</p>
+</li>
+<li>
+<p>If there is no matching s3triggers entry, the final path component of the
+    prefix is removed and the search for matching entries is repeated. This
+    process is repeated until either an entry is found, or all path components
+    have been exhausted.</p>
+</li>
+<li>
+<p>Any matching s3trigger entries with the <code>enabled</code> field set to <code>false</code> are
+    discarded.</p>
+</li>
+<li>
+<p>For each remaining s3trigger entry, any <code>if_*</code> and <code>if_not_*</code> conditions are
+    evaluated. If these checks pass, the job referenced in the s3trigger entry
+    is dispatched.</p>
+</li>
+</ol>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Like lava jobs, s3trigger entries must be explicitly enabled in order to be
+active.</p>
+</div>
+<p>For example, if the bucket name is <code>mybucket</code> and the object key for the S3
+event notification is <code>a/b/c</code>, the  <a href="04-dynamodb-tables.html#the-s3triggers-table">s3triggers
+table</a> will be progressively queried for
+the following table entries until one is found.</p>
+<ul>
+<li>bucket=<code>mybucket</code>, prefix=<code>a/b/c</code></li>
+<li>bucket=<code>mybucket</code>, prefix=<code>a/b</code></li>
+<li>bucket=<code>mybucket</code>, prefix=<code>a</code></li>
+<li>bucket=<code>mybucket</code>, prefix=<code>*</code></li>
+</ul>
+<p>The final query refers to an s3triggers entry for the entire bucket (i.e. an
+empty prefix). This use of <code>*</code> to represent an empty prefix is a consequence of
+DynamoDB's inability to handle empty strings.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>DynamoDB has now been updated to handle empty strings but lava retains the
+requirement to use a <code>*</code> as described above.</p>
+</div>
+<p>Query results are cached for a short period of time to reduce traffic on the
+<a href="04-dynamodb-tables.html#the-s3triggers-table">s3triggers</a> and
+<a href="04-dynamodb-tables.html#the-jobs-table">jobs</a> tables. The cache duration can be
+modified by setting the
+<a href="10-installation-operation.html#configuration-for-s3trigger">S3TRIGGER_CACHE_TTL</a>
+configuration variable. The scope of the cache is limited to each run-time
+instance of the lambda function. This works because AWS Lambda will reuse
+run-time instances where possible.</p>
+<h3 id="rendering-of-dispatch-parameters">Rendering of Dispatch Parameters<a class="headerlink" href="#rendering-of-dispatch-parameters" title="Permanent link">&para;</a></h3>
+<p>The s3trigger entry contains the job_id for the job to be dispatched and may
+also contain a map of parameters for the job and a map of globals that will be
+included in the dispatch.</p>
+<p>These parameters and globals will be rendered using
+<a href="http://jinja.pocoo.org">Jinja</a> unless the s3trigger entry has a <code>jinja</code> field
+set to <code>false</code>. This rendering process allows information related to the S3
+event, such as the bucket name and object key, to be passed to the lava job at
+run time.</p>
+<p>The parameters must be legal values for the job type being dispatched. They will
+be merged in with any parameters in the job specification itself.</p>
+<p>The globals are agnostic of job type and can be provided to any job. They will
+be merged in with any globals in the job specification itself and made available
+to the Jinja rendering process of any job that uses this mechanism.</p>
+<p>The following variables are made available to the renderer.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bucket</td>
+<td>str</td>
+<td>The bucket name.</td>
+</tr>
+<tr>
+<td>key</td>
+<td>str</td>
+<td>The S3 object key.</td>
+</tr>
+<tr>
+<td>event</td>
+<td>dict[str,*]</td>
+<td>The raw S3 event record. The format of this can vary significantly, depending on whether the event message was delivered directly from S3 or via SQS, SNS or EventBridge. Don't use it unless absolutely necessary.</td>
+</tr>
+<tr>
+<td>info</td>
+<td>dict[str,*]</td>
+<td>A canonical extract of the most useful elements from the S3 event record. It is consistent in structure and content across the different event record delivery mechanisms and should be used instead of <code>event</code>.  Normal Jinja syntax can be used to extract components of interest. A sample is shown below.</td>
+</tr>
+<tr>
+<td>utils</td>
+<td>dict[str,runnable]</td>
+<td>A dictionary of <a href="13-jinja-rendering-in-lava.html#jinja-utility-functions">utility functions</a> that can be used in the Jinja markup.</td>
+</tr>
+</tbody>
+</table>
+<p>The <code>info</code> object contains the following elements:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aws_region</td>
+<td>str</td>
+<td>The AWS region for the S3 operation.</td>
+</tr>
+<tr>
+<td>bucket</td>
+<td>str</td>
+<td>The bucket name.</td>
+</tr>
+<tr>
+<td>event_time</td>
+<td>datetime</td>
+<td>A timezone aware datetime for the S3 operation.</td>
+</tr>
+<tr>
+<td>event_type</td>
+<td>str</td>
+<td>The type of S3 operation that caused the event. See <a href="#about-s3-event-types">About S3 Event Types</a> below.</td>
+</tr>
+<tr>
+<td>key</td>
+<td>str</td>
+<td>The S3 object key.</td>
+</tr>
+<tr>
+<td>size</td>
+<td>int</td>
+<td>The size in bytes of the object.</td>
+</tr>
+<tr>
+<td>source_ip</td>
+<td>IPv4Address | IPv6Address</td>
+<td>The source IP address of the S3 operation. See <a href="https://docs.python.org/3/library/ipaddress.html">ipaddress</a> in the Python standard library documentation.</td>
+</tr>
+</tbody>
+</table>
+<p>A typical <code>info</code> (Python) object looks like this:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><span class="p">{</span>
+</span><span id="__span-16-2">    <span class="s1">&#39;bucket&#39;</span><span class="p">:</span> <span class="s1">&#39;my-bucket&#39;</span><span class="p">,</span>
+</span><span id="__span-16-3">    <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="s1">&#39;HappyFace.jpg&#39;</span><span class="p">,</span>
+</span><span id="__span-16-4">    <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+</span><span id="__span-16-5">    <span class="s1">&#39;event_time&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">tzutc</span><span class="p">()),</span>
+</span><span id="__span-16-6">    <span class="s1">&#39;source_ip&#39;</span><span class="p">:</span> <span class="n">IPv4Address</span><span class="p">(</span><span class="s1">&#39;10.200.240.5&#39;</span><span class="p">),</span>
+</span><span id="__span-16-7">    <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ObjectCreated:Put&#39;</span><span class="p">,</span>
+</span><span id="__span-16-8">    <span class="s1">&#39;aws_region&#39;</span><span class="p">:</span> <span class="s1">&#39;ap-southeast-2&#39;</span>
+</span><span id="__span-16-9"><span class="p">}</span>
+</span></code></pre></div>
+<p>An s3triggers (JSON) entry may then look like this.</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-17-1"><span class="p">{</span>
+</span><span id="__span-17-2"><span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Something interesting just happened.&quot;</span><span class="p">,</span>
+</span><span id="__span-17-3"><span class="w">    </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-17-4"><span class="w">    </span><span class="nt">&quot;prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-17-5"><span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-17-6"><span class="w">    </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-7"><span class="w">        </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{bucket}}&quot;</span><span class="p">,</span>
+</span><span id="__span-17-8"><span class="w">        </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{key}}&quot;</span><span class="p">,</span>
+</span><span id="__span-17-9"><span class="w">        </span><span class="nt">&quot;account-id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{bucket.split(&#39;:&#39;)[4]}}&quot;</span>
+</span><span id="__span-17-10"><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-17-11"><span class="w">    </span><span class="nt">&quot;if_fnmatch&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*.zip&quot;</span><span class="p">,</span>
+</span><span id="__span-17-12"><span class="w">    </span><span class="nt">&quot;if_not_fnmatch&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*ignore*&quot;</span><span class="p">,</span>
+</span><span id="__span-17-13"><span class="w">    </span><span class="nt">&quot;if_size_gt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-17-14"><span class="w">    </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_exe_job&quot;</span><span class="p">,</span>
+</span><span id="__span-17-15"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-16"><span class="w">        </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-17"><span class="w">            </span><span class="nt">&quot;BUCKET&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{bucket}}&quot;</span><span class="p">,</span>
+</span><span id="__span-17-18"><span class="w">            </span><span class="nt">&quot;KEY&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{key}}&quot;</span><span class="p">,</span>
+</span><span id="__span-17-19"><span class="w">            </span><span class="nt">&quot;IP&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{info.source_ip}}&quot;</span><span class="p">,</span>
+</span><span id="__span-17-20"><span class="w">            </span><span class="nt">&quot;EVENT_TIME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{info.event_time.isoformat()}}&quot;</span>
+</span><span id="__span-17-21"><span class="w">            </span><span class="p">}</span>
+</span><span id="__span-17-22"><span class="w">        </span><span class="p">},</span>
+</span><span id="__span-17-23"><span class="w">    </span><span class="nt">&quot;trigger_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_trigger_id&quot;</span>
+</span><span id="__span-17-24"><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="about-s3-event-types">About S3 Event Types<a class="headerlink" href="#about-s3-event-types" title="Permanent link">&para;</a></h3>
+<p>AWS is very inconsistent in values for event types between EventBridge
+messages and the S3 bucket notification configuration mechanisms. Lava can't
+easily fix that without compounding the problem. Sorry.</p>
+<p>For example, when an S3 object is created, the S3 bucket notification
+configuration event will have an <code>eventName</code> field something like
+<code>ObjectCreated:Put</code>. The EventBridge message for the same action will have a
+<code>detail-type</code> field of <code>Object Created</code> and a <code>detail.reason</code> value of
+<code>PutObject</code>. The other S3 event types vary even more than this.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is spectacularly unnecessary and annoying. The only saving grace is that
+it's rarely necessary to use this field in lava. Filtering can be done by the
+AWS service itself in most cases (S3 or EventBridge).</p>
+</div>
+<p>This is how lava populates the <code>info.event_type</code> value when Jinja rendering an
+s3trigger specification:</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Value for event_type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S3</td>
+<td>The <code>eventName</code> field is used as-is.</td>
+</tr>
+<tr>
+<td>EventBridge</td>
+<td>The <code>detail-type</code> and <code>detail.reason</code> fields are joined with a colon and all whitespace removed. e.g. Putting a file in S3 will yield <code>ObjectCreated:PutObject</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>See the
+<a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/ev-events.html">EventBridge message structure</a>
+documentation for more information.</p>
+<h3 id="s3-event-deduplication">S3 Event Deduplication<a class="headerlink" href="#s3-event-deduplication" title="Permanent link">&para;</a></h3>
+<p>AWS does not guarantee that an individual S3 event will generate a single event
+notification. Duplicate event messages are <em>very</em> rare, except when AWS S3
+bucket replication is configured which seems to generate multiple event
+notifications more often.</p>
+<p>Duplicate event notifications tend to occur within a small number of seconds of
+each other and can cause problems for lava jobs as two instances of a job
+operating on the same S3 object will be dispatched at almost the same time.</p>
+<p>The lava s3trigger lambda provides a level of support for reducing the risk of
+message duplication by, optionally, caching S3 object data for received
+notifications and discarding duplicates. The following attributes are compared
+to determine if an event notification is a duplicate:</p>
+<ul>
+<li>
+<p>bucket name</p>
+</li>
+<li>
+<p>object key</p>
+</li>
+<li>
+<p>object size</p>
+</li>
+<li>
+<p>event type.</p>
+</li>
+</ul>
+<p>The effectiveness of this mechanism is pretty good but it is limited by these
+factors:</p>
+<ul>
+<li>
+<p>The cache is time limited.</p>
+</li>
+<li>
+<p>The cache is size limited.</p>
+</li>
+<li>
+<p>As the cache is within the lambda itself, it relies on duplicate messages
+    being received by the same warm invocation instance of the s3trigger lambda.</p>
+</li>
+</ul>
+<p>The caching process is disabled by default and the cache configuration is
+configurable via the
+<a href="10-installation-operation.html#configuration-for-s3trigger">S3TRIGGER_DEDUP_CACHE_SIZE</a>
+and
+<a href="10-installation-operation.html#configuration-for-s3trigger">S3TRIGGER_DEDUP_TTL</a>
+parameters.</p>
+<p>If a more robust deduplication mechanism is required, it needs to be implemented
+outside lava (e.g. using a FIFO SQS queue to feed messages to s3trigger).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Be aware that the <em>duplicate</em> S3 event messages can have different message
+ID fields so some external logic would be required to explicitly set the SQS
+message deduplication ID if a FIFO queue is used. Are we having fun yet?</p>
+</div>
+<h3 id="testing-s3-triggers">Testing S3 Triggers<a class="headerlink" href="#testing-s3-triggers" title="Permanent link">&para;</a></h3>
+<p>Testing an S3 trigger requires that the s3trigger Lambda function is invoked
+with a well-formed AWS S3 bucket notification event. There are essentially three
+ways to do this:</p>
+<ol>
+<li>
+<p>Configure S3 or EventBridge to send the notifications appropriately and then
+    drop the object of interest in S3. Repeating the test involves copying the
+    object back on top of itself.</p>
+<p>While this will work fine, it can be cumbersome to do manually, particularly
+if multiple objects are involved. It can also have unintended side effects
+if it triggers other unrelated actions.</p>
+</li>
+<li>
+<p>Construct an Amazon EventBridge message in the appropriate format and use the
+    AWS CLI to submit the message on the default event bus.</p>
+</li>
+<li>
+<p>Generate artificial bucket notification events and use those to invoke the
+    lambda directly.</p>
+<p>Lava comes with a simple shell script <code>etc/s3lambda.sh</code> to do this. Run
+<code>etc/s3lambda.sh -h</code> to get help.</p>
+</li>
+</ol>
+<h3 id="configuring-s3-bucket-notification-events">Configuring S3 Bucket Notification Events<a class="headerlink" href="#configuring-s3-bucket-notification-events" title="Permanent link">&para;</a></h3>
+<p>The s3trigger lambda function can receive S3 bucket notification events via any
+of the following mechanisms:</p>
+<ol>
+<li>
+<p>Direct subscription of the lambda function to the source bucket.</p>
+</li>
+<li>
+<p>Via SQS, where the source bucket has been configured to send event
+    notifications to an SQS queue.</p>
+</li>
+<li>
+<p>Via SNS, where the source bucket has been configured to send event
+    notifications to an SNS topic.</p>
+</li>
+</ol>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>In each case, it is strongly recommended to configure the trigger from the
+AWS Lambda console, not from the SNS/SQS/S3 console to avoid arcane IAM
+permission issues.</p>
+</div>
+<h3 id="configuring-amazon-eventbridge-for-s3-events">Configuring Amazon EventBridge for S3 Events<a class="headerlink" href="#configuring-amazon-eventbridge-for-s3-events" title="Permanent link">&para;</a></h3>
+<p>The process is basically this:</p>
+<ol>
+<li>
+<p>Configure the bucket to send notifications to Amazon EventBridge for all
+    events. All events on that bucket will be sent to the default event bus.</p>
+</li>
+<li>
+<p>Create a rule on the default event bus to capture events of interest.</p>
+<ul>
+<li>The rule name <strong>must</strong> be in the form <code>lava.&lt;REALM&gt;.*</code>.</li>
+<li>The event pattern should select S3 objects of interest.</li>
+<li>The target list must include the lambda <code>lava-&lt;REALM&gt;-s3trigger</code>.</li>
+<li>The rule input (i.e. what gets sent to the lambda) must be set to
+    <strong>Matched event</strong>.</li>
+</ul>
+</li>
+</ol>
+<p>An event pattern will look something like this:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-18-1"><span class="p">{</span>
+</span><span id="__span-18-2"><span class="w">    </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aws.s3&quot;</span><span class="p">],</span>
+</span><span id="__span-18-3"><span class="w">    </span><span class="nt">&quot;detail-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Object Created&quot;</span><span class="p">],</span>
+</span><span id="__span-18-4"><span class="w">    </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-5"><span class="w">        </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-6"><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;my-bucket&quot;</span><span class="p">]</span>
+</span><span id="__span-18-7"><span class="w">        </span><span class="p">},</span>
+</span><span id="__span-18-8"><span class="w">        </span><span class="nt">&quot;object&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-9"><span class="w">            </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-18-10"><span class="w">                </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;an-interesting-prefix&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-18-11"><span class="w">            </span><span class="p">]</span>
+</span><span id="__span-18-12"><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-18-13"><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-18-14"><span class="p">}</span>
+</span></code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The <a href="11-lava-job-framework.html#creating-amazon-eventbridge-rules">lava job framework</a> provides
+built-in support for creating EventBridge rules suitable for triggering jobs
+from S3 events.</p>
+</div>
+<p>More information:</p>
+<ul>
+<li>
+<p><a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/EventBridge.html">Amazon S3 Event Notifications using EventBridge</a></p>
+</li>
+<li>
+<p><a href="https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html">Amazon EventBridge event patterns</a></p>
+</li>
+</ul>
+<h2 id="dispatching-jobs-from-amazon-eventbridge">Dispatching Jobs from Amazon EventBridge<a class="headerlink" href="#dispatching-jobs-from-amazon-eventbridge" title="Permanent link">&para;</a></h2>
+<p><a href="https://aws.amazon.com/eventbridge/">Amazon EventBridge</a> is an increasingly
+pervasive event management and distribution tool within AWS environments. It
+gathers events from a number of sources, selects events of interest based on
+user defined criteria and sends those events to one or more targets for response
+/ processing.</p>
+<p>Events in an EventBridge event bus can be used to trigger the dispatch of lava
+jobs using the <a href="#the-dispatch-helper">lava dispatch helper</a>.</p>
+<p>The <a href="#the-dispatch-helper">lava dispatch helper</a> is a lambda
+function that that can receive dispatch requests via SQS and SNS. It can also
+handle appropriately formatted dispatch requests sent from EventBridge directly
+to the dispatch helper lambda function.</p>
+<p>The manual setup process is:</p>
+<ol>
+<li>
+<p>Go to the Amazon EventBridge console and create a new event rule.</p>
+</li>
+<li>
+<p>Fill in the event pattern / event bus settings as required.</p>
+</li>
+<li>
+<p>Under <strong>Select Targets</strong>, select the realm dispatch lambda function and
+    enable <strong>Input Transformer</strong>. This requires specification of an
+    <strong>Input Path</strong> and an <strong>Input Template</strong>.</p>
+</li>
+<li>
+<p>The <strong>Input Path</strong> selects fields from incoming event messages and makes
+    them available for injection into the message sent to the dispatch helper
+    lambda function. Use it to select whatever fields from the input event are
+    needed in the lava dispatch request.</p>
+</li>
+<li>
+<p>The <strong>Input Template</strong> is the message that actually gets sent to the
+    dispatch lambda. The message must be a JSON formatted object that complies
+    with the <a href="#json-dispatch-requests">JSON dispatch request format</a>.</p>
+</li>
+</ol>
+<p>This process is automated when EventBridge rules are created using the
+<a href="11-lava-job-framework.html#creating-amazon-eventbridge-rules">lava job framework</a>.</p>
+<h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
+<p>As an example, consider a requirement to dispatch a lava job in response to an
+AWS EC2 auto scaling event, with the EC2 instance ID and auto scaling group name
+passed as globals to the lava job.</p>
+<p>The auto scaling event message in the event bus looks like this:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-19-1"><span class="p">{</span>
+</span><span id="__span-19-2"><span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span id="__span-19-3"><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-19-4"><span class="w">  </span><span class="nt">&quot;detail-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC2 Instance Launch Successful&quot;</span><span class="p">,</span>
+</span><span id="__span-19-5"><span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aws.autoscaling&quot;</span><span class="p">,</span>
+</span><span id="__span-19-6"><span class="w">  </span><span class="nt">&quot;account&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123456789012&quot;</span><span class="p">,</span>
+</span><span id="__span-19-7"><span class="w">  </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-10-11T11:23:51Z&quot;</span><span class="p">,</span>
+</span><span id="__span-19-8"><span class="w">  </span><span class="nt">&quot;region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ap-southeast-2&quot;</span><span class="p">,</span>
+</span><span id="__span-19-9"><span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-19-10"><span class="w">    </span><span class="s2">&quot;arn:aws:autoscaling:ap-southeast2:123456789012:autoScalingGroup:...&quot;</span><span class="p">,</span>
+</span><span id="__span-19-11"><span class="w">    </span><span class="s2">&quot;arn:aws:ec2:ap-southeast-2:123456789012:instance/i-0cefe067f7c6ee173&quot;</span>
+</span><span id="__span-19-12"><span class="w">  </span><span class="p">],</span>
+</span><span id="__span-19-13"><span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-14"><span class="w">    </span><span class="nt">&quot;StatusCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;InProgress&quot;</span><span class="p">,</span>
+</span><span id="__span-19-15"><span class="w">    </span><span class="nt">&quot;AutoScalingGroupName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myAutoScalingGroup&quot;</span><span class="p">,</span>
+</span><span id="__span-19-16"><span class="w">    </span><span class="nt">&quot;ActivityId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-19-17"><span class="w">    </span><span class="nt">&quot;Details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-18"><span class="w">      </span><span class="nt">&quot;Availability Zone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ap-southeast-2a&quot;</span><span class="p">,</span>
+</span><span id="__span-19-19"><span class="w">      </span><span class="nt">&quot;Subnet ID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;subnet-745bae91&quot;</span>
+</span><span id="__span-19-20"><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-19-21"><span class="w">    </span><span class="nt">&quot;RequestId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-19-22"><span class="w">    </span><span class="nt">&quot;EndTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-10-11T11:23:51Z&quot;</span><span class="p">,</span>
+</span><span id="__span-19-23"><span class="w">    </span><span class="nt">&quot;EC2InstanceId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i-0cefe067f7c6ee173&quot;</span><span class="p">,</span>
+</span><span id="__span-19-24"><span class="w">    </span><span class="nt">&quot;StartTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-10-11T11:16:43Z&quot;</span><span class="p">,</span>
+</span><span id="__span-19-25"><span class="w">    </span><span class="nt">&quot;Cause&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+</span><span id="__span-19-26"><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-19-27"><span class="p">}</span>
+</span></code></pre></div>
+<p>As the lava job requires the name of the auto scaling group and the
+affected EC2 instance ID as job globals, the <strong>Input Path</strong> would look like
+this:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-20-1"><span class="p">{</span>
+</span><span id="__span-20-2"><span class="w">  </span><span class="nt">&quot;asg_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.detail.AutoScalingGroupName&quot;</span><span class="p">,</span>
+</span><span id="__span-20-3"><span class="w">  </span><span class="nt">&quot;instance&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.detail.EC2InstanceId&quot;</span>
+</span><span id="__span-20-4"><span class="p">}</span>
+</span></code></pre></div>
+<p>The <strong>Input Template</strong> uses <code>&lt;input_path_var&gt;</code> to select values from the <strong>Input
+Path</strong>. The <strong>Input Template</strong> that constructs the dispatch request looks like
+this:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-21-1"><span class="p">{</span>
+</span><span id="__span-21-2"><span class="w">  </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-job-id&quot;</span><span class="p">,</span>
+</span><span id="__span-21-3"><span class="w">  </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-21-4"><span class="w">      </span><span class="nt">&quot;instance&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;instance&gt;&quot;</span><span class="p">,</span>
+</span><span id="__span-21-5"><span class="w">      </span><span class="nt">&quot;asg_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;asg_name&gt;&quot;</span>
+</span><span id="__span-21-6"><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-21-7"><span class="p">}</span>
+</span></code></pre></div>
+<h3 id="testing-eventbridge-dispatch">Testing EventBridge Dispatch<a class="headerlink" href="#testing-eventbridge-dispatch" title="Permanent link">&para;</a></h3>
+<p>Testing of the configuration involves EventBridge receiving and processing an
+event that meets the selection criteria for the event rule. If it is not easy to
+have this occur naturally, it is straightforward to hand-craft a message and use
+the AWS CLI to send it.</p>
+<p>First create a JSON formatted file (e.g. <code>events.json</code>) containing the event(s).
+This only requires enough details to meet the EventBridge rule filtering
+criteria and to support the information required to create the message for the
+target.</p>
+<p>For example:</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-22-1"><span class="p">[</span>
+</span><span id="__span-22-2"><span class="w">  </span><span class="p">{</span>
+</span><span id="__span-22-3"><span class="w">    </span><span class="nt">&quot;Source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
+</span><span id="__span-22-4"><span class="w">    </span><span class="nt">&quot;Detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{ \&quot;AutoScalingGroupName\&quot;: \&quot;...\&quot;, \&quot;EC2InstanceId\&quot;: \&quot;...\&quot; }&quot;</span><span class="p">,</span>
+</span><span id="__span-22-5"><span class="w">    </span><span class="nt">&quot;Resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-22-6"><span class="w">      </span><span class="s2">&quot;resource1&quot;</span><span class="p">,</span>
+</span><span id="__span-22-7"><span class="w">      </span><span class="s2">&quot;resource2&quot;</span>
+</span><span id="__span-22-8"><span class="w">    </span><span class="p">],</span>
+</span><span id="__span-22-9"><span class="w">    </span><span class="nt">&quot;DetailType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myDetailType&quot;</span>
+</span><span id="__span-22-10"><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-22-11"><span class="p">]</span>
+</span></code></pre></div>
+<p>Note that <code>Detail</code> is a string containing a JSON encoded object.  Send the
+message, thus:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-23-1">aws<span class="w"> </span>events<span class="w"> </span>put-events<span class="w"> </span>--entries<span class="w"> </span>file://events.json
+</span></code></pre></div>
+<h2 id="direct-dispatch">Direct Dispatch<a class="headerlink" href="#direct-dispatch" title="Permanent link">&para;</a></h2>
+<p>The mechanism underlying the dispatch process is the placement of an
+appropriately formatted message onto a specific worker fleet's SQS queue. Lava
+provides a number interfaces for this purpose.</p>
+<ul>
+<li>
+<p>The <a href="16-commands-utilities.html#lava-dispatcher-utility">lava-dispatcher</a> CLI utility.</p>
+</li>
+<li>
+<p>A <a href="#python-dispatch-interface">Python interface</a>.</p>
+</li>
+<li>
+<p>The lava GUI.</p>
+</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Do not</strong> attempt to create your own dispatch messages for posting directly
+on the SQS worker queue. It will end in tears. Trust me on this.</p>
+</div>
+<h3 id="python-dispatch-interface">Python Dispatch Interface<a class="headerlink" href="#python-dispatch-interface" title="Permanent link">&para;</a></h3>
+<p>The recommended way to generate a direct dispatch in Python is to use the lava
+libraries. Refer to the API documentation for more information.</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-24-1"><span class="kn">from</span><span class="w"> </span><span class="nn">lava.lavacore</span><span class="w"> </span><span class="kn">import</span> <span class="n">dispatch</span>
+</span><span id="__span-24-2">
+</span><span id="__span-24-3"><span class="n">run_id</span> <span class="o">=</span> <span class="n">dispatch</span><span class="p">(</span><span class="n">realm</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">,</span> <span class="n">job_id</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="handling-of-parameters-and-globals-during-dispatch">Handling of Parameters and Globals During Dispatch<a class="headerlink" href="#handling-of-parameters-and-globals-during-dispatch" title="Permanent link">&para;</a></h2>
+<p>In addition to specifying the job to be dispatched, dispatch messages may also
+contain job parameter values and named global values. Values specified in the
+dispatch message will override any similarly named parameter or global in the
+job specification.</p>
+<p>This provides a mechanism for job specifications to be more generic, with
+specific values being supplied at run-time.</p>
+<h3 id="job-parameters">Job Parameters<a class="headerlink" href="#job-parameters" title="Permanent link">&para;</a></h3>
+<p>Job parameters are job type specific and must match the requirements of the job
+type. The parameters for a job are determined by the following order of
+precedence:</p>
+<ol>
+<li>
+<p>Parameters defined in the dispatch message.</p>
+</li>
+<li>
+<p>Parameters defined in the job specification.</p>
+</li>
+</ol>
+<h3 id="globals">Globals<a class="headerlink" href="#globals" title="Permanent link">&para;</a></h3>
+<p>Globals are not job type specific and can be provided to any job type. Moreover,
+globals are passed to child jobs by the <a href="06-jobs-job-types.html#job-type-chain">chain</a>
+<a href="06-jobs-job-types.html#job-type-dispatch">dispatch</a> and 
+<a href="06-jobs-job-types.html#job-type-dag">dag</a> job types. Globals are also
+passed to downstream jobs initiated as a result of a
+<a href="08-job-actions.html#action-type-dispatch">dispatch</a> post-job action.</p>
+<p>This then provides a mechanism for a job to receive generic global values when
+dispatched (e.g. by an S3 event) which are then made available to
+child/downstream jobs, irrespective of job type. Global values are made
+available to the Jinja rendering process for any job type that supports this
+capability. Refer to individual <a href="06-jobs-job-types.html#jobs-and-job-types">job types</a>
+for more information.</p>
+<p>Global values for a job are determined by the following order of precedence 
+(highest to lowest):</p>
+<ol>
+<li>
+<p>Globals in the dispatch message.</p>
+</li>
+<li>
+<p>Globals in the dispatching job, if any.</p>
+</li>
+<li>
+<p>Globals in the job specification.</p>
+</li>
+</ol>
+<h3 id="globals-owned-by-lava">Globals Owned by Lava<a class="headerlink" href="#globals-owned-by-lava" title="Permanent link">&para;</a></h3>
+<p>Global names within a job specification may not start with <code>lava</code> (case
+insensitive). This prefix is reserved for lava's use.</p>
+<p>Lava jobs have a concept of <em>master job</em> and <em>parent job</em>. For a simple,
+stand-alone job, the master job, the parent job and the current job are all one
+and the same. In a hierarchy of jobs formed when jobs start other jobs via
+<a href="06-jobs-job-types.html#job-type-chain">chain</a> jobs,
+<a href="06-jobs-job-types.html#job-type-dispatch">dispatch</a> jobs,
+<a href="06-jobs-job-types.html#job-type-dag">dag</a> jobs,
+or
+<a href="08-job-actions.html#action-type-dispatch">dispatch</a> post-job actions, the master
+job is the initial job at the top of the hierarchy. The parent job is the job
+that caused the current job to run.</p>
+<p>For a single level hierarchy resulting from a chain job, the master and parent
+are the same. In a multi-level hierarchy, they will differ, as shown below.</p>
+<p><img alt="" src="img/master-parent.png" /></p>
+<p>Lava adds its own globals under <code>globals.lava</code> that capture information relating
+to the master and parent jobs.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>foreach_index</td>
+<td>int</td>
+<td>For children of <a href="06-jobs-job-types.html#job-type-foreach">foreach</a> jobs, this is the loop iteration counter, starting at zero.</td>
+</tr>
+<tr>
+<td>iteration</td>
+<td>int</td>
+<td>The iteration (run attempt) number for the job. See <a href="06-jobs-job-types.html#job-retries">Job Retries</a> for more information.</td>
+</tr>
+<tr>
+<td>master_job_id</td>
+<td>str</td>
+<td>The <code>job_id</code> of the master job.</td>
+</tr>
+<tr>
+<td>master_start</td>
+<td>datetime</td>
+<td>The local start time of the master job, including timezone.</td>
+</tr>
+<tr>
+<td>master_ustart</td>
+<td>datetime</td>
+<td>The UTC start time of the master job, including timezone.</td>
+</tr>
+<tr>
+<td>parent_job_id</td>
+<td>str</td>
+<td>The <code>job_id</code> of the parent job.</td>
+</tr>
+<tr>
+<td>parent_start</td>
+<td>datetime</td>
+<td>The local start time of the parent job, including timezone.</td>
+</tr>
+<tr>
+<td>parent_ustart</td>
+<td>datetime</td>
+<td>The UTC start time of the parent job, including timezone.</td>
+</tr>
+</tbody>
+</table>
+<p>All jobs started from the same master job have access to the <code>job_id</code> of the
+master job and the local and UTC timestamps for when it started. These can be
+useful for constructing Jinja render values that are guaranteed to be
+consistent across all jobs started from a common master (e.g. for use in
+filenames).</p>
+<div class="language-jinja highlight"><pre><span></span><code><span id="__span-25-1"><span class="c">{# This might be useful in a filename #}</span>
+</span><span id="__span-25-2"><span class="cp">{{</span> <span class="nv">globals.lava.master_ustart.strftime</span><span class="o">(</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="o">)</span> <span class="cp">}}</span>
+</span></code></pre></div>
+<h3 id="use-with-event-triggered-dispatch">Use with Event Triggered Dispatch<a class="headerlink" href="#use-with-event-triggered-dispatch" title="Permanent link">&para;</a></h3>
+<p>The <a href="04-dynamodb-tables.html#the-s3triggers-table">s3triggers table</a> permits the
+inclusion of globals which will be passed on to any jobs when dispatched.
+These will override similarly named globals in the job specification.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; Origin Energy 2025
+    </div>
+  
+</div>
+      <div class="md-footer-social">
+        <div class="md-copyright">
+          <div class="md-copyright__highlight">
+            v8.2.0 (Kilauea)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.f55a23d4.min.js"></script>
+      
+    
+  </body>
+</html>
