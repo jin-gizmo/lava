@@ -1,0 +1,119 @@
+#!/bin/bash
+
+# Backup the DynamoDB entries for a specified lava realm.
+
+PROG=$(basename "$0")
+
+# ------------------------------------------------------------------------------
+function usage {
+	cat >&2 <<!
+
+usage: $PROG [options] realm zip-file
+
+Backup the DynamoDB entries for a specified lava realm. The output is a zip file.
+
+positional arguments:
+  realm               Realm name.
+  zip-file            Name of the output zip file. Can be on the local machine
+                      or in S3 (s3://....). 
+
+optional arguments:
+  -h | --help         Print help and exit.
+  -y | --yaml         Output the entries in YAML format. The default is JSON.
+
+A lava job specification suitable for backing up the current realm is:
+
+{
+  "description": "Backup the DynamoDB entries for the realm",
+  "dispatcher": "Sydney",
+  "enabled": true,
+  "job_id": "lava/dynamo-backup",
+  "owner": "lava",
+  "parameters": {
+    "args": [
+      "{{realm.realm}}",
+      "{{realm.s3_temp}}/lava/dynamo-backup/{{ustart.strftime('%Y-%m-%d')}}.zip"
+    ]
+  },
+  "payload": "lava-backup",
+  "schedule": "0 19 * * *",
+  "type": "cmd",
+  "worker": "core"
+}
+
+Dispatcher, worker and schedule will need to be adjusted.
+
+!
+}
+
+# ------------------------------------------------------------------------------
+function info {
+	echo "$*"
+}
+
+function abort {
+	echo "$*" >&2
+	exit 1
+}
+
+# ------------------------------------------------------------------------------
+# Process command line arguments
+
+
+while true
+do
+	case "$1"
+	in
+		-h | --help)	usage; exit 0;;
+		-y | --yaml)	yaml=--yaml; shift;;
+		--)		shift; break;;
+		-*)		usage; exit 1;;
+		*)		break;
+	esac
+done
+
+[ $# -ne 2 ] && usage && exit 1
+realm="$1"
+zipfile="$2"
+
+# ------------------------------------------------------------------------------
+TMPDIR=$(mktemp -d)
+z=3
+trap '/bin/rm -rf $TMPDIR; exit $z' 0
+
+if [[ "$2" =~ ^s3:// ]]
+then
+	s3_loc="$2"
+	zipfile="$TMPDIR/data.zip"
+fi
+
+# Do the backups
+for dataset in jobs connections s3triggers
+do
+	echo "Dumping $dataset ..."
+	# shellcheck disable=SC2086
+	lava-dump --table "$dataset" --realm "$realm" --dir "$TMPDIR/data/$dataset" --quiet $yaml
+	[ $? -ne 0 ] && abort "Data dump failed"
+done
+
+# Extract only the realm entry we're interested in.
+echo "Dumping realms entry for $realm ..."
+# shellcheck disable=SC2086
+lava-dump --table realms "$realm" --dir "$TMPDIR/data/realms" --quiet $yaml
+
+echo "Zipping ..."
+(
+	cd "$TMPDIR/data" || exit 1
+	zip -q -r - .
+) > "$zipfile"
+[ $? -ne 0 ] && exit
+
+if [ "$s3_loc" != "" ]
+then
+	echo "Uploading to S3 ..."
+	aws s3 cp "$zipfile" "$s3_loc" || exit
+fi
+
+echo Done
+
+z=0

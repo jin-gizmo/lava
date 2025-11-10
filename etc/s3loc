@@ -1,0 +1,163 @@
+#!/usr/bin/env python3
+
+"""
+Normalise an S3 location into a user specifiable format.
+
+This is a special purpose gizmo used by the deploy and AMI builder processes
+to get the bucket and prefix components from an S3 location and format them
+however is required.
+
+Usage: s3loc [-f format] s3_location [base]
+
+Arguments:
+----------
+    - s3-location:  An S3 location If it starts with s3:// it is used as is. If
+                    not base must be specified and the s3_location is assumeed
+                    to be relative to base.
+    - base:         An optional base location for s3_location.
+    - format:       Jinja format specification. The vars b (bucket) and k (key)
+                    are provided. Default is s3://{{b}}/{{k}}
+
+"""
+
+from __future__ import annotations
+
+import os
+import re
+import sys
+from argparse import ArgumentParser, Namespace
+
+from jinja2 import Template
+
+PROG = os.path.basename(sys.argv[0])
+
+DEFAULT_FMT = 's3://{{b}}/{{k}}'
+
+
+# ------------------------------------------------------------------------------
+def s3_split(s: str) -> tuple[str, str]:
+    """
+    Split an S3 object name into bucket and prefix components.
+
+    :param s:       The object name. Typically bucket/prefix but the following
+                    are also accepted:
+
+                    ::
+
+                        s3:bucket/prefix
+                        s3://bucket/prefix
+                        /bucket/prefix
+
+    :return:        A tuple (bucket, prefix)
+
+    """
+
+    # Clean off any s3:// type prefix
+    for p in 's3://', 's3:':
+        if s.startswith(p):
+            s = s[len(p) :]
+            break
+
+    t = s.lstrip('/').split('/', 1)
+
+    if not t[0]:
+        raise ValueError(f'Invalid S3 object name: {s}')
+    return t[0], t[1].lstrip('/') if len(t) > 1 else ''
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> Namespace:
+    """Process the command line arguments."""
+
+    argp = ArgumentParser(
+        prog=PROG,
+        description='Normalise an S3 location into a user specifiable format.',
+    )
+
+    argp.add_argument(
+        '-/',
+        '--slash',
+        action='store_const',
+        const='/',
+        default='',
+        help=(
+            'Ensure there is exactly one slash between all components, including'
+            ' between the base and the S3 location.'
+        ),
+    )
+    argp.add_argument(
+        '-f',
+        '--format',
+        action='store',
+        default=DEFAULT_FMT,
+        help=(
+            'Jinja format specification.The vars b (bucket) and k (key)'
+            f' are provided. Default is {DEFAULT_FMT}.'
+        ),
+    )
+
+    argp.add_argument(
+        '-s',
+        '--strip',
+        action='store_true',
+        help='Strip any trailing / from the key.',
+    )
+
+    argp.add_argument(
+        's3_location',
+        metavar='s3-location',
+        action='store',
+        help=(
+            'An S3 location. If it starts with s3:// it is used as is. If not,'
+            ' the base argument must be specified and the S3 location is assumed'
+            ' to be relative to base.'
+        ),
+    )
+
+    argp.add_argument(
+        'base',
+        action='store',
+        nargs='?',
+        help=(
+            'An optional base for s3-location if the latter does not start with'
+            ' s3://. A leading s3:// in base is ignored and everything up to the'
+            ' first / is assumed to be the bucket name. No / is added between'
+            ' the s3-location and base so if this is required it must be in the'
+            ' specified base value or the -/ , --slash option used.'
+        ),
+    )
+
+    return argp.parse_args()
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """Showtime."""
+
+    args = process_cli_args()
+
+    if not args.s3_location.startswith('s3://'):
+        if not args.base:
+            raise ValueError('base must be specified for relative S3 locations')
+        args.s3_location = f'{args.base}{args.slash}{args.s3_location}'
+
+    if args.slash:
+        args.s3_location = re.sub('/+', '/', args.s3_location)
+
+    bucket, key = s3_split(args.s3_location)
+    if args.strip:
+        key = key.rstrip('/')
+    print(Template(args.format).render(b=bucket, k=key))
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)

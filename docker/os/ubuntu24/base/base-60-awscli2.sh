@@ -1,0 +1,1 @@
+../../../common/base/base-60-awscli2.sh

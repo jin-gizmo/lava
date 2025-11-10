@@ -1,0 +1,39 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava docker connection parameters
+
+type: object
+
+properties:
+  email:
+    description: Email address for registry login.
+    type: string
+    format: email
+  password:
+    description: SSM parameter containing the password for authenticating to the registry.
+    type: string
+    minLength: 1
+  registry:
+    description: Either the URL for a standard registry or ecr[:account-id].
+    oneOf:
+      - type: string
+        format: uri
+        not:
+          pattern: '^ecr(:\d+)?$'
+      - type: string
+        pattern: '^ecr(:\d+)?$'
+  server:
+    description: URL for the docker server.
+    type: string
+    format: uri
+  timeout:
+    description: Timeout on docker API calls in seconds.
+    type: integer
+    minimum: 0
+  tls:
+    description: Use TLS when connecting to the docker server
+    $ref: lava.common.boolean
+  user:
+    description: User name for authenticating to the registry.
+    type: string
+    minLength: 1

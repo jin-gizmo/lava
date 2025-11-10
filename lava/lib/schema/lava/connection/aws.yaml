@@ -1,0 +1,53 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava aws connection parameters
+
+type: object
+
+oneOf:
+  - type: object
+    required:
+      - access_keys
+    properties:
+      access_keys:
+        description: The name of an encrypted SSM parameter containing the access keys.
+        type: string
+        minLength: 1
+      region:
+        description: The AWS region name.
+        type: string
+        pattern: '^[a-z]{2}-[a-z]+-\d+$'
+  - type: object
+    required:
+      - role_arn
+    properties:
+      role_arn:
+        description: ARN of role to assume.
+        type: string
+        pattern: '^arn:aws:iam:'
+      duration:
+        description: Duration of the assumed role session.
+        $ref: lava.common.duration
+      external_id:
+        description: Name of SSM parameter containing external ID.
+        type: string
+        minLength: 1
+      policy:
+        description: Inline policy for assumed role session.
+        type: object
+      policy_arns:
+        description: ARN (or list of ARNs) for managed policies for assumed role session.
+        oneOf:
+          - type: string
+            pattern: '^arn:aws:iam:'
+          - type: array
+            items:
+              type: string
+              pattern: '^arn:aws:iam:'
+      region:
+        description: The AWS region name.
+        type: string
+        pattern: '^[a-z]{2}-[a-z]+-\d+$'
+      tags:
+        description: Tags to apply to the assumed role session.
+        type: object

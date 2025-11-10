@@ -1,0 +1,58 @@
+#- cmd job specifics
+#-
+#- This is the list of vars to prompt for when building
+#= payload: Command to run
+
+type: cmd
+
+## #############################################################################
+## The payload is the command string. This will be parsed using standard Linux
+## shell lexical analysis to determine the executable and arguments. Additional
+## arguments can also be specified with the args parameter
+##
+payload: "{{ payload }}"
+
+## #############################################################################
+## Job parameters
+
+parameters:
+  ## ---------------------------------------------------------------------------
+  ## Mandatory params
+
+  ## ---------------------------------------------------------------------------
+  ## Optional params
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## A list of additional arguments for the executable(s) specified in payload.
+  ##
+  # args:
+  #   - "arg1"
+  #   - "arg2"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## A map of additional environment variables for the exe.
+  ##
+  # env:
+  #   env_var1: "value1"
+  #   env_var2: "value2"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Enable / disable jinja rendering. Default is true. If false, disable Jinja
+  ## rendering of the args. Default true.
+  ##
+  # jinja: true
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Job timeout. Default is 10 minutes. Values are in the form nnX where nn is
+  ## a number and X is s (seconds), m (minutes) or h (hours). If payload is a
+  ## list, this is applied to each individual exe.
+  ##
+  # timeout: "10m"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## A map of variables injected when the command arguments and environment are
+  ## Jinja rendered.
+  ##
+  # vars:
+  #   var1: value1
+  #   var2: value2

@@ -1,0 +1,17 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava generic connection parameters
+
+type: object
+
+properties:
+  attributes:
+    description: A map comprising the attributes for the connector.
+    type: object
+    items:
+      oneOf:
+        - type: string
+        - type: object
+
+required:
+  - attributes

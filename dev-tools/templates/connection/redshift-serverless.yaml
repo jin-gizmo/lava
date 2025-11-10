@@ -1,0 +1,88 @@
+#- Redshift Serveress connector specifics
+#-
+#- This is the list of vars to prompt for when building
+#= host: Redshift serverless workgroup endpoint address
+#= port: Post number
+#= database: Database name
+#= user: User name
+#= password: SSM parameter containing password (excluding realm prefix)
+#-
+
+type: redshift-serverless
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Conditional fields - Required but may come from Secrets Manager
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The name of the database within the Redshift Serverless namespace.
+##
+database: "{{ database }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The Redshift serverless workgroup endpoint address.
+##
+host: "{{ host }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The name of an encrypted SSM parameter containing the password.
+## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+## If not provided, IAM authentication to Redshift Serverless is attempted.
+##
+password: "/lava/<{ realm }>/{{ password }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Port number.
+##
+port: {{ port }}
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## User name. This is required except when using secrets managaer or IAM based
+## authentication.
+##
+user: "{{ user }}"
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Name of an SSM parameter containing an external ID to use when assuming the
+## IAM role specified by role_arn.
+##
+# external_id: ...
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Name of a secret in AWS Secrets Manager
+# secret_id: /lava/<{ realm }>/secret-name
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The password duration when generating temporary IAM user credientials.
+##
+# password_duration: "15m"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## don't fold database object names to lower case when quoting for db_from_s3 jobs
+##
+# preserve_case: False
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## ARN of IAM role to be assumed when generating temporary IAM user credentials.
+##
+# role_arn: ...
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Set to true to enable SSL. Default is false.
+##
+# ssl: false
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The subtype specifies the driver to use.
+# subtype: pg8000
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Name of the workgroup associated with the database. Used when generating
+## temporary IAM user credentials. Defaults to the first component of the host.
+##
+# workgroup: ...

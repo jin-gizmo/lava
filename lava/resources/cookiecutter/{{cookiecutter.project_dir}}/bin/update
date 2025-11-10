@@ -1,0 +1,246 @@
+#!/bin/bash
+
+# Apply a framework update. Basically we have to rerun the cookiecutter to
+# create a complete new project then migrate stuff into the old project.
+#
+# Cookiecutter is really not much help with this process. Its replay function is
+# essentially useless for this purpose as you cannot mix replay and interactive
+# params. Try to preserve as much project setup history as possible using
+# default context vars in a custom cookiecutter config file.
+#
+# Usage: update new-pkg.zip [target-dir]
+
+CC_CONFIG=.config.json
+
+# ------------------------------------------------------------------------------
+function info {
+	echo "[34m$*[0m" >& 2
+}
+
+function warning {
+	echo "[35;1mWARNING: $*[0m" >& 2
+}
+
+function error {
+	echo "[31;1mERROR: $*[0m" >& 2
+}
+
+function abort {
+	error "$*"
+	exit 1
+}
+
+# ------------------------------------------------------------------------------
+# Try to a key value from a JSON or YAML file. If the source file doesn't exist,
+# or the value is not present, return the default value specified.
+#
+# Usage: get_var file var_name default_value
+
+function get_var {
+	[ ! -f "$1" ] && echo "$3" && return 0
+
+	result=$(echo "+{$2}+" | jinja -d+ --file "$1")
+	[ "$result" != "" ] && echo "$result" && return 0
+	echo "$3"
+}
+
+# ------------------------------------------------------------------------------
+# Compare lava version numbers in the form major.minor.patch.
+# Usage: version_gt v1 v2
+# Returns 0 if v1 < v2
+
+function version_lt {
+	v1=$(python3 -c "print(''.join([f'{int(n):05d}' for n in '$1'.split('.')]))")
+	v2=$(python3 -c "print(''.join([f'{int(n):05d}' for n in '$2'.split('.')]))")
+	test "$v1" -lt "$v2"
+}
+
+# ------------------------------------------------------------------------------
+# Get the framework version as a string major.minor.patch
+
+function get_version {
+	[ -f etc/version ] && cut -f1 -d' ' etc/version && return 0
+	echo '0.0.0'
+}
+
+# ------------------------------------------------------------------------------
+# Hack to create a cookiecutter default context for a config file in YAML format
+# from a previous cookiecutter replay file (in JSON).
+
+function cc_config_to_default_context {
+	python3 -c '
+import json, sys, yaml
+cc_conf = json.load(sys.stdin)
+ctxt = { "default_context": { k: v for k, v in cc_conf["cookiecutter"].items() if k[0] != "_"}}
+yaml.dump(ctxt, sys.stdout)
+'
+}
+
+
+# ------------------------------------------------------------------------------
+
+pkg="$1"
+targetdir="${2:-.}"
+
+# shellcheck disable=SC2154
+[ "$VIRTUAL_ENV" == "" ] && abort Activate virtual environment first
+
+[ "$pkg" == "" ] && abort "Usage: $0 pkg [target-dir]"
+[[ "$pkg" =~ .*\.zip ]] || abort Package must be a zip file
+[ ! -f "$pkg" ] && abort "$pkg: no such file"
+[ ! -d "$targetdir" ] && abort "$targetdir: no such directory"
+
+# ------------------------------------------------------------------------------
+
+cd "$targetdir" || exit 1
+
+# Check if this looks like a framework based project
+
+for d in config lava-connections lava-jobs lava-payloads lava-triggers
+do
+	[ ! -d "$d" ] && abort "$targetdir: not a lava framework directory"
+done
+[ ! -f Makefile ] && abort "$targetdir: not a lava framework directory"
+
+# ------------------------------------------------------------------------------
+# First create a backup
+
+backup=$(basename "$(pwd)")-$(date +%FT%T).zip
+info "Backing up current config to $backup"
+zip -9 --quiet -r -o "$backup" --exclude \
+	'venv/*' \
+	'dist/*' \
+	'*.pyc' \
+	'*__pycache__/*' \
+	'*.swp' \
+	'*.ipynb' \
+	'*.zip' \
+	'*.tar.*' \
+	'*-info/*' \
+	'*.DS_Store' \
+	-- \
+	*
+
+# ------------------------------------------------------------------------------
+
+TMP=/tmp/lava-framework.$$
+mkdir -p $TMP || exit 1
+# shellcheck disable=SC2064
+trap "error Update failed -- restore from $backup; /bin/rm -rf $TMP; exit 1" 0
+
+
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+# Create a replay file that will contain the values supplied in the previous
+# cookiecutter run as much as possible. In order to inject hese into this run we
+# have this tortuous process of converting them into efault context vars in a
+# cookiecutter config file as replay function is absolutely useless.
+
+info Checking existing configuration
+
+old_ver=$(get_version)
+replay_file=$TMP/replay.json
+config_file=$TMP/config.yaml
+proj_dir=$(basename "$(pwd)")
+
+if [ -f $CC_CONFIG ]
+then
+	# We're in luck -- have a recording from last time
+	cp $CC_CONFIG $replay_file
+	old_proj_dir=$(get_var $CC_CONFIG cookiecutter.project_dir)
+	if [ "$old_proj_dir" != "$proj_dir" ]
+	then
+		warning "Project dir ($proj_dir) has changed from original ($old_proj_dir)."
+		warning "Be careful to use \"$proj_dir\" for \"project_dir\" when cookiecutter runs."
+	fi
+else
+	# Have to mock up a cookiecutter replay file. Try to work out some vars
+	# from one of the existing config files.
+	proj_name=$(get_var $CC_CONFIG cookiecutter.project_name "$proj_dir")
+	# shellcheck disable=SC2012
+	old_conf=$(ls config/*.yaml | head -1)
+
+	if [ "$old_conf" != "" ]
+	then
+		environment=$(basename "${old_conf%.*}")
+		realm=$(get_var "$old_conf" realm)
+		owner=$(get_var "$old_conf" owner)
+		job_prefix=$(get_var "$old_conf" prefix.job)
+		payload_prefix=$(get_var "$old_conf" prefix.payload)
+		s3trigger_prefix=$(get_var "$old_conf" prefix.s3trigger)
+		docker_prefix=$(get_var "$old_conf" prefix.docker_repo)
+		rule_prefix=$(get_var "$old_conf" prefix.rule)
+		realm=$(get_var "$old_conf" realm)
+	fi
+
+	cat > $replay_file <<-!
+	{
+	    "cookiecutter": {
+	        "project_dir": "$proj_dir"
+	        , "project_name": "$proj_name"
+	!
+
+	[ "$environment" != "" ] && echo ", \"environment\": \"$environment\"" >> $replay_file
+	[ "$realm" != "" ] && echo ", \"realm\": \"$realm\"" >> $replay_file
+	[ "$owner" != "" ] && echo ", \"owner\": \"$owner\"" >> $replay_file
+	[ "$job_prefix" != "" ] && echo ", \"job_prefix\": \"$job_prefix\"" >> $replay_file
+	[ "$payload_prefix" != "" ] && echo ", \"payload_prefix\": \"$payload_prefix\"" >> $replay_file
+	[ "$s3trigger_prefix" != "" ] && echo ", \"s3trigger_prefix\": \"$s3trigger_prefix\"" >> $replay_file
+	[ "$docker_prefix" != "" ] && echo ", \"docker_prefix\": \"$docker_prefix\"" >> $replay_file
+	[ "$rule_prefix" != "" ] && echo ", \"rule_prefix\": \"$rule_prefix\"" >> $replay_file
+	echo "}}" >> $replay_file
+fi
+
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+# Create a cookiecutter config file from our replay file and run cookiecutter.
+
+mkdir -p $TMP/proj
+
+cc_config_to_default_context < $replay_file > $config_file
+
+info Running cookiecutter with new package
+
+cp "$pkg" $TMP || exit 1
+(
+	set -e
+	cd $TMP/proj
+	cookiecutter --config-file "$config_file" "../$(basename "$pkg")"
+) || exit 1
+
+# This should have created a new project layout in $TMP/proj/$proj_dir/...
+new_proj="$TMP/proj/$proj_dir"
+[ ! -d "$new_proj" ] && abort "Failed to inflate new package"
+
+# Get rid of config dir because we don't want to mangle existing config
+/bin/rm -rf "$new_proj/config"
+
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+# Replicate the new framework components into existing project structure.
+
+info Overlaying new package on existing project
+
+rsync -v --recursive "$new_proj/" ./ || exit 1
+
+trap '/bin/rm -rf $TMP' 0
+
+
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+# Backward compatibility checks
+
+
+if version_lt "$old_ver" 5.1.0
+then
+	# See if we have any subdirs in lava-* that don't start with underscore.
+	# Earlier versions of the framework ignored subdirs but will now treat
+	# them as containing full DynamoDB table object specs.
+	subdirs=$(find lava-jobs lava-triggers lava-connections -type d ! -path '*/_*' -mindepth 1)
+	[ "$subdirs" ] && \
+		warning "Directories may need to be renamed with leading _ and references updated : $subdirs"
+
+	# See if there is an old requirements.txt file
+	[ -f requirements.txt ] && \
+		warning "requirements.txt may not be required now -- possibly covered by etc/requirements.txt"
+fi
+
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+
+info 'You should now deactivate the virtualenv and run "make init"'

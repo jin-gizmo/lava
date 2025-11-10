@@ -1,0 +1,108 @@
+#- sqlv job specifics
+#-
+#- This is the list of vars to prompt for when building
+#= conn_id: Database connector ID
+#= payload: Location of SQL script
+
+type: sqlv
+
+## #############################################################################
+## The payload is a location in S3 relative to the s3_payloads area. It can be
+## either an object key, in which case a single file is downloaded, or a prefix
+## ending in /, in which case all files under that prefix will be downloaded and
+## run in lexicographic order.
+##
+payload: "{{ payload }}"
+
+## #############################################################################
+## Job parameters
+
+parameters:
+  ## ---------------------------------------------------------------------------
+  ## Mandatory params
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## The connection ID for the database.
+  ##
+  conn_id: "{{ conn_id }}"
+
+  ## ---------------------------------------------------------------------------
+  ## Optional params
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Fetch this many rows at a time.
+  ##
+  # batch_size: 1024
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Column delimiter. Default is pipe (|)
+  ##
+  # delimiter: "|"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## As for csv.writer. Default is excel.
+  ##
+  # dialect: "excel"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## As for csv.writer. Default false.
+  ##
+  # doubleqoute: false
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## As for csv.writer.
+  ##
+  # escapechar: null
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Output format for SELECTs
+  ##
+  # format: csv
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Add a header for SELECT outputs if true. Default is false.
+  ##
+  # header: false
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Enable / disable jinja rendering. Default is true. If false, disable Jinja
+  ## rendering of the args. Default true.
+  ##
+  # jinja: true
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## As for csv.writer. Default "
+  ##
+  # quotechar: '"'
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## As for csv.writer QUOTE_* parameters (without the QUOTE_ prefix). Default
+  ## minimal (i.e. QUOTE_MINIMAL).
+  ##
+  # quoting: "minimal"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Suppress splitting of payload files into individual SQL statements.
+  ## Default: false (i.e. allow splitting).
+  ##
+  # raw: false
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Timeout for each job component script. Default is 10 minutes. Values are in
+  ## the form nnX where nn is a number and X is s (seconds), m (minutes) or
+  ## h (hours).
+  ##
+  # timeout: "10m"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## If true, auto-commit is disabled and the sequence of SQLs is run within a
+  ## transaction. If false, auto-commit is enabled. Default false.
+  ##
+  # transaction: false
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## A map of variables injected when the SQL is Jinja rendered.
+  ##
+  # vars:
+  #   var1: "value1"
+  #   var2: "value2"

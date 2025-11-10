@@ -1,0 +1,100 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "AWSMETRIC" "1" "June 2016" "MA" "AWStools"
+.
+.SH "NAME"
+\fBawsmetric\fR \- Run a command and send result metrics to AWS CloudWatch
+.
+.SH "SYNOPSIS"
+\fBawsmetric\fR \-\-namespace NAMESPACE [options] \-\- command [command\-args]
+.
+.SH "DESCRIPTION"
+\fBAwsmetric\fR runs a command, times how long it takes and submits AWS CloudWatch custom metricis with the results (time and exit status)\.
+.
+.SH "OPTIONS"
+.
+.SS "General Options"
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help and exit\.
+.
+.TP
+\fB\-c\fR, \fB\-\-no\-colour\fR, \fB\-\-no\-color\fR
+Don\'t use colour in output\.
+.
+.TP
+\fB\-d\fR \fIName\fR=\fIvalue\fR,\.\.\., \fB\-\-dimensions\fR \fIName\fR=\fIvalue\fR,\.\.\.
+CloudWatch dimensions to associate with the resulting metrics\. These are comma separated \fIName\fR=\fIvalue\fR pairs that further characterise the resultant metric\.
+.
+.TP
+\fB\-n\fR \fINAMESPACE\fR, \fB\-\-namespace\fR \fINAMESPACE\fR
+CloudWatch namespace for the metric data\. This option is required\. Values beginning with \fIAWS/\fR are not permitted\.
+.
+.TP
+\fB\-t\fR \fITIMEOUT\fR, \-\-timeout \fITIMEOUT\fR
+Timeout for command execution in seconds\. Default is 30 seconds\. A timeout will result in a value of the status code metric of 254\. See also the \fB\-z\fR option\.
+.
+.TP
+\fB\-z\fR, \fB\-\-zero\fR
+Return a metric value of 0 for any of the run\-time metrics in the event of a command timeout\. The default is to not return any run\-time value if a timeout occurs\.
+.
+.TP
+\fIcommand\fR
+The command to run\. This argument is required\. Note that the command is run directly and not via a shell\. To avoid confusion between arguments for \fBawsmetric\fR and those of the command, the \fIcommand\fR argument should be preceded by a \fB\-\-\fR pseudo\-option\. This will ensure all subsequent options are supplied to the command rather than \fBawsmetric\fR\.
+.
+.TP
+\fIcommand\-args\fR
+Any arguments the command itself may require\.
+.
+.SS "Metric Selection Options"
+The following options specify which metrics are generated and submitted to CloudWatch\. One or more of the following must be provided\.
+.
+.TP
+\fB\-e\fR \fIMETRIC\-NAME\fR, \fB\-\-exit\-status\-metric\fR \fIMETRIC\-NAME\fR
+Name of the CloudWatch metric for the exit status of the \fIcommand\fR\. The value is a unit\-less integer between 0 and 255\.
+.
+.TP
+\fB\-E\fR \fIMETRIC\-NAME\fR, \fB\-\-exit\-success\-metric\fR \fIMETRIC\-NAME\fR
+Name of the CloudWatch metric for the success of the command\. This is the exit status of the command mapped with all non\-zero values mapped to 1\.
+.
+.TP
+\fB\-r\fR \fIMETRIC\-NAME\fR, \fB\-\-realtime\-s\-metric\fR \fIMETRIC\-NAME\fR
+Name of the CloudWatch metric for the real run\-time of the command in seconds\. Typically only one of \fB\-r\fR and \fB\-R\fR would be used, depending on the normal run\-time of the command\.
+.
+.TP
+\fB\-R\fR \fIMETRIC\-NAME\fR, \fB\-\-realtime\-ms\-metric\fR \fIMETRIC\-NAME\fR
+Name of CloudWatch metric for the real run\-time of the command in milliseconds\.
+.
+.SS "AWS CLI Options"
+The following options are passed directly to underlying AWS CLI calls\.
+.
+.TP
+\fB\-\-cli\-connect\-timeout\fR \fIint\fR
+As for the AWS CLI\.
+.
+.TP
+\fB\-\-cli\-read\-timeout\fR \fIint\fR
+As for the AWS CLI\.
+.
+.TP
+\fB\-\-debug\fR
+As for the AWS CLI\. This option will result in lots of generally unhelpful output\.
+.
+.TP
+\fB\-\-profile\fR \fIprofile\-id\fR
+As for the AWS CLI\.
+.
+.TP
+\fB\-\-region arg\fR
+As for the AWS CLI\.
+.
+.SH "SEE ALSO"
+Refer to the \fBput\-metric\-data\fR command in the AWS CloudWatch CLI for more information\.
+.
+.SH "AUTHOR"
+Murray Andrews
+.
+.SH "LICENCE"
+BSD 3\-clause licence \fIhttp://opensource\.org/licenses/BSD\-3\-Clause\fR\.

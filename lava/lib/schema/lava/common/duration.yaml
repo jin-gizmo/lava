@@ -1,0 +1,14 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: A lava duration specification
+
+description: >-
+  A "duration" is a string in the form nnX where nn is a number and X is s
+  (seconds), m (minutes) or h (hours), d (days) or w (weeks). If X is not
+  specified, seconds are assumed. A durations is always >= 0.
+
+oneOf:
+  - type: number
+    minimum: 0
+  - type: string
+    pattern: '^[0-9]*(\.[0-9]*)?[smhdw]?$'

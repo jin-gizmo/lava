@@ -1,0 +1,5 @@
+jinja2
+# See https://github.com/boto/botocore/pull/2924
+# requests==2.29.00
+requests
+packaging

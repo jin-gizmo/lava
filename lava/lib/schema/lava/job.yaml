@@ -1,0 +1,181 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava job specification
+
+type: object
+
+properties:
+  cw_metrics:
+    description: Enable/disable generation of CloudWatch custom metrics for this job.
+    $ref: lava.common.boolean
+  description:
+    description: A short description of the job.
+    type: string
+    minLength: 1
+  dispatcher:
+    description: An identifier specifying the dispatcher for the job.
+    type: string
+  enabled:
+    description: Whether or not the job is enabled. Defaults to false.
+    oneOf:
+      - $ref: lava.common.boolean
+      - type: string
+  event_log:
+    description: Record the specified information in the events table.
+  globals:
+    description: >-
+      A map of named values that are made available for Jinja rendering of job
+      actions and job parameters for those job types that use Jinja parameter
+      rendering. Global names cannot start with "lava".
+    type: object
+    propertyNames:
+      not:
+        pattern: '^lava'
+  iteration_delay:
+    description: The delay between attempts to run the job as a duration.
+    $ref: lava.common.duration
+  iteration_limit:
+    description: The number of attempts that will be made to run the job.
+    type: integer
+    minimum: 0
+  job_id:
+    description: The job identifier which must be unique for the realm.
+    type: string
+    minLength: 1
+  max_run_delay:
+    description: >-
+      The maximum allowed delay between when a job is dispatched and when it is
+      run.
+    $ref: lava.common.duration
+  max_tries:
+    description: >-
+      By default, if a lava worker fails mid-job, SQS will resubmit the dispatch
+      request at the end of the visibility timeout. If max_tries is set to a
+      positive integer value, then the dispatch message will be discarded when
+      the SQS message ApproximateReceiveCount exceeds the specified value.
+    type: integer
+    minimum: 0
+  on_fail:
+    description: Job specific on_fail actions for the job
+    type: array
+    items:
+      $ref: lava.job.action
+  on_retry:
+    description: Job specific on_retry actions for the job
+    type: array
+    items:
+      $ref: lava.job.action
+  on_success:
+    description: Job specific on_success actions for the job
+    type: array
+    items:
+      $ref: lava.job.action
+  owner:
+    description: Identifies the owner of the job.
+    type: string
+    minLength: 1
+  # For parameters -- see also the mix-in below for job specifics
+  parameters:
+    description: A map of parameters that will be passed to the job.
+    type: object
+  payload:
+    description: >-
+      The job payload. The type and format is job type dependent. Currently, a
+      value is required even for job types that do not need it. In this case set
+      the value to null.
+    oneOf:
+      - type: 'null'
+      - type: string
+      - type: array
+      - type: object
+  schedule:
+    description: Job schedule
+    anyOf:
+      - $ref: lava.common.schedule
+      - type: array
+        items:
+          $ref: lava.common.schedule
+      # We also allow empty / null schedules here assuming dispatcher is not
+      # specified or valid. This is a bit of an indulgence as it seems lots of
+      # people do this instead of leaving schedule out.
+      - type: string
+        maxLength: 0
+      - type: 'null'
+      # Also allow "--" schedules because the job framework wrongly encourages this.
+      - type: string
+        pattern: "^--$"
+  state:
+    description: A map of state items keyed on state_id
+    type: object
+  type:
+    description: Job type
+    type: string
+    minLength: 1
+  worker:
+    description: The name of a worker that can run the job.
+    type: string
+    minLength: 1
+
+# Mix-in for the job parameters for each type
+allOf:
+  - if: { properties: { type: { const: chain } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.chain } } }
+  - if: { properties: { type: { const: cmd } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.cmd } } }
+  - if: { properties: { type: { const: dag } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.dag } } }
+  - if: { properties: { type: { const: db_from_s3 } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.db_from_s3 } } }
+  - if: { properties: { type: { const: dispatch } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.dispatch } } }
+  - if: { properties: { type: { const: docker } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.docker } } }
+  - if: { properties: { type: { const: exe } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.exe } } }
+  - if: { properties: { type: { const: foreach } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.foreach } } }
+  - if: { properties: { type: { const: lavasched } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.lavasched } } }
+  - if: { properties: { type: { const: exe } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.exe } } }
+  - if: { properties: { type: { const: log } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.log } } }
+  - if: { properties: { type: { const: pkg } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.pkg } } }
+  - if: { properties: { type: { const: redshift_unload } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.redshift_unload } } }
+  - if: { properties: { type: { const: sharepoint_get_doc } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.sharepoint_get_doc } } }
+  - if: { properties: { type: { const: sharepoint_get_list } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.sharepoint_get_list } } }
+  - if: { properties: { type: { const: sharepoint_get_multi_doc } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.sharepoint_get_multi_doc } } }
+  - if: { properties: { type: { const: sharepoint_put_doc } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.sharepoint_put_doc } } }
+  - if: { properties: { type: { const: sharepoint_put_list } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.sharepoint_put_list } } }
+  - if: { properties: { type: { const: smb_get } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.smb_get } } }
+  - if: { properties: { type: { const: smb_put } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.smb_put } } }
+  - if: { properties: { type: { const: sql } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.sql } } }
+  - if: { properties: { type: { const: sqlc } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.sqlc } } }
+  - if: { properties: { type: { const: sqli } } }
+    # Same params as sql job
+    then: { properties: { parameters: { $ref: lava.job.parameters.sql } } }
+  - if: { properties: { type: { const: sqlv } } }
+    then: { properties: { parameters: { $ref: lava.job.parameters.sqlv } } }
+
+patternProperties:
+  ^[xX]-:
+    description: X-* fields are ignored by lava.
+
+required:
+  - job_id
+  - payload
+  - type
+  - worker
+
+unevaluatedProperties: false

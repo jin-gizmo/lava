@@ -1,0 +1,791 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Build a new Lava worker",
+  "Metadata": {
+    "Cfdoc": {
+      "Description": [
+        "This template builds the core components for a new Lava worker.",
+        "The realm must have been created previously."
+      ],
+      "Author": "Murray Andrews"
+    }
+  },
+  "Parameters": {
+    "Version": {
+      "Type": "String",
+      "Description": "Lava version (read only).",
+      "Default": "STOP - Wrong template. Use the built version from dist/cfn not src from cfn/",
+      "AllowedPattern": "^?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "realm": {
+      "Description": "Name of the realm",
+      "Type": "String",
+      "AllowedPattern": "[a-z]([a-z0-9_]){2,10}"
+    },
+    "worker": {
+      "Description": "Name of the worker",
+      "Type": "String",
+      "AllowedPattern": "[a-z]([-a-z0-9_]){2,10}"
+    },
+    "messageRetentionPeriod": {
+      "Description": "Message retention period on the worker queue (seconds). Default 1 day.",
+      "Type": "Number",
+      "Default": "86400",
+      "MinValue": "1800",
+      "ConstraintDescription": "Must be >= 1800 (30 minutes)."
+    },
+    "visibilityTimeout": {
+      "Description": "Visibility timeout on the worker queue (seconds). Default 1 hour.",
+      "Type": "Number",
+      "Default": 3600,
+      "MinValue": "300",
+      "ConstraintDescription": "Must be >= 300 (5 minutes)."
+    },
+    "createWorkerInstance": {
+      "Description": "Should I create resources required for a worker compute instance?",
+      "Type": "String",
+      "AllowedValues": [ "Yes", "No"],
+      "Default": "Yes"
+    },
+    "rootVolumeSize": {
+      "Description": "Size in GB of root volume. Set to 0 for AMI default.",
+      "Type": "Number",
+      "Default": 0,
+      "MinValue": 0,
+      "ConstraintDescription": "Volume size must be >=0."
+    },
+    "tmpVolumeSize": {
+      "Description": "Size in GB of second volume mounted on /tmp. Set to 0 to remove.",
+      "Type": "Number",
+      "Default": 500,
+      "MinValue": 0,
+      "MaxValue": 2000,
+      "ConstraintDescription": "Volume size must be between 0 and 2000 GB."
+    },
+    "swapSize": {
+      "Description": "Swap size in Gibibytes (0 = no swapping).",
+      "Type": "Number",
+      "Default": "0",
+      "MinValue": "0",
+      "ConstraintDescription": "Swap size must be >= 0."
+    },
+    "dockerVolumeSize": {
+      "Description": "Size in GB of volume for docker. Set to 0 to remove.",
+      "Type": "Number",
+      "Default": 100,
+      "MinValue": 0,
+      "MaxValue": 2000,
+      "ConstraintDescription": "Volume size must be between 0 and 2000 GB."
+    },
+    "amiId": {
+      "Description": "Image ID for the latest lava (preferred) or SAK AMI.",
+      "Type": "String"
+    },
+    "secGroups": {
+      "Description": "Security groups for the worker.",
+      "Type": "List<AWS::EC2::SecurityGroup::Id>"
+    },
+    "subnets": {
+      "Description": "Subnets for worker instances.",
+      "Type": "List<AWS::EC2::Subnet::Id>"
+    },
+    "keyPairName": {
+      "Description": "Key pair name for the instances.",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "MinLength": 1,
+      "ConstraintDescription": "Key pair name must be specified."
+    },
+    "workerInstancesDesired": {
+      "Description": "How many worker nodes should I run now?",
+      "Type": "Number",
+      "MinValue": 0,
+      "MaxValue": 10,
+      "Default": "0",
+      "ConstraintDescription": "Must be between 0 and 10."
+    },
+    "workerInstancesMin": {
+      "Description": "Minimum number of worker instances.",
+      "Type": "Number",
+      "MinValue": 0,
+      "MaxValue": 5,
+      "Default": "0",
+      "ConstraintDescription": "Must be between 0 and 5."
+    },
+    "workerInstancesMax": {
+      "Description": "Maximum number of worker instances (must be 1 for dispatcher nodes).",
+      "Type": "Number",
+      "MinValue": 0,
+      "MaxValue": 10,
+      "Default": "0",
+      "ConstraintDescription": "Must be between 0 and 10."
+    },
+    "workerPublicIp" : {
+      "Description": "Assign public IP to workers.",
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "true",
+        "false"
+      ]
+    },
+    "alarmTopic": {
+      "Description": "Name of SNS topic for alarms.",
+      "Type": "String",
+      "MinLength": 1,
+      "ConstraintDescription": "SNS topic name must be specified."
+    },
+    "autoscalingActionTopic": {
+      "Description": "Name of SNS topic for normal autoscaling activity.",
+      "Type": "String"
+    },
+    "createHeartBeatAlarm": {
+      "Description": "Should I create a worker heartbeat alarm?",
+      "Type": "String",
+      "AllowedValues": ["Yes", "No"],
+      "Default": "No"
+    },
+    "maxAllowedQueueDepth": {
+      "Description": "Create an alarm if queue depth exceeds this value. 0 for no alarm.",
+      "Type": "Number",
+      "MinValue": 0,
+      "Default": 0
+    },
+    "queueDepthMinutes": {
+      "Description": "Minutes queue depth exceeds max before alarm (1..300).",
+      "Type": "Number",
+      "Default": "15",
+      "MinValue": "1",
+      "MaxValue": "300"
+    },
+    "autoscalingControlledTermination": {
+      "Description": "Autoscaling controlled termination on worker nodes?",
+      "Type": "String",
+      "Default": "ENABLED",
+      "AllowedValues": [ "ENABLED", "DISABLED" ]
+    },
+    "workerBacklogScalingTarget": {
+      "Description": "Autoscaling worker backlog (0 == disable backlog scaling)",
+      "Type": "Number",
+      "Default": "0",
+      "MinValue": "0"
+    },
+    "realmLambdasDeployed" : {
+      "Description": "Are the realm lambda functions deployed?",
+      "Type": "String",
+      "Default": "Yes",
+      "AllowedValues": [ "Yes", "No" ]
+    },
+    "workerInstanceType": {
+      "Description": "EC2 instance type. Leave blank for capability based provisioning.",
+      "Type": "String"
+    },
+    "workerAllowedInstances": {
+      "Type": "CommaDelimitedList",
+      "Description": "Comma separated list of allowed instance types (GLOBs allowed)"
+    },
+    "workerMemoryMin": {
+      "Type": "Number",
+      "Description": "Minimum memory in MiB for the worker",
+      "MinValue": 0,
+      "Default": 0
+    },
+    "workerMemoryMax": {
+      "Type": "Number",
+      "Description": "Maximum memory in MiB (0 == no limit)",
+      "MinValue": 0,
+      "Default": 0
+    },
+    "workerVCpuMin": {
+      "Type": "Number",
+      "Description": "Minimum number of vCPUs for the worker",
+      "MinValue": 0,
+      "Default": 0
+    },
+    "workerVCpuMax": {
+      "Type": "Number",
+      "Description": "Maximum number of vCPUs for the worker (0 == no limit)",
+      "MinValue": 0,
+      "Default": 0
+    },
+    "workerLocalStorage": {
+      "Type": "String",
+      "Description": "Local (not EBS) storage for workers (included / excluded / required)",
+      "Default": "excluded",
+      "AllowedValues": ["included", "excluded", "required"]
+    },
+    "workerBurstable": {
+      "Type": "String",
+      "Description": "Include burstable instance types (e.g. t-series) for workers (included / excluded / required)",
+      "Default": "included",
+      "AllowedValues": ["included", "excluded", "required"]
+    }
+  },
+  "Outputs": {
+    "Version": {
+      "Description": "Lava version",
+      "Value": { "Ref": "Version" },
+      "Export": { "Name": { "Fn::Sub": "lava:${realm}:${worker}:version" } }
+    }
+  },
+  "Conditions": {
+    "ifCreateInstance": { "Fn::Equals" : [ { "Ref": "createWorkerInstance" }, "Yes"] },
+    "ifSetSizeRootVol": { "Fn::Not": [ { "Fn::Equals" : [ { "Ref": "rootVolumeSize" }, 0] } ] },
+    "ifCreateTmpVol": { "Fn::Not": [ { "Fn::Equals" : [ { "Ref": "tmpVolumeSize" }, 0] } ] },
+    "ifCreateDockerVol": { "Fn::Not": [ { "Fn::Equals" : [ { "Ref": "dockerVolumeSize" }, 0] } ] },
+    "ifCreateHeatbeatAlarm": { "Fn::Equals" : [ { "Ref": "createHeartBeatAlarm" }, "Yes"] },
+    "ifCreateQueueDepthAlarm": { "Fn::Not": [ { "Fn::Equals" : [ { "Ref": "maxAllowedQueueDepth" }, 0] } ] },
+    "ifWorkerBacklogScaling": { "Fn::Not": [ { "Fn::Equals" : [ { "Ref": "workerBacklogScalingTarget" }, 0] } ] },
+    "ifRealmLambdasDeployed": { "Fn::Equals": [ { "Ref": "realmLambdasDeployed" }, "Yes" ] },
+    "ifInstanceType": { "Fn::Not": [ { "Fn::Equals": [ { "Ref": "workerInstanceType"}, "" ] } ] },
+    "ifMaxMemory": { "Fn::Not": [ { "Fn::Equals": [ { "Ref": "workerMemoryMax"}, 0 ] } ] },
+    "ifMaxVCpu": { "Fn::Not": [ { "Fn::Equals": [ { "Ref": "workerVCpuMax"}, 0 ] } ] },
+    "ifKeyPair": { "Fn::Not": [ { "Fn::Equals": [ { "Ref": "keyPairName"}, "" ] } ] }
+  },
+  "Resources": {
+    "iamLavaWorkerRole": {
+      "Type": "AWS::IAM::Role",
+      "Condition": "ifCreateInstance",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "IAM role for worker instances."
+        }
+      },
+      "Properties": {
+        "RoleName": { "Fn::Sub": "lava-${realm}-worker-${worker}" },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          { "Fn::ImportValue": { "Fn::Sub" : "lava:${realm}:iamLavaWorkerPolicyArn" } },
+          "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
+          "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        ]
+      }
+    },
+    "iamWorkerInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Condition": "ifCreateInstance",
+      "Properties": {
+        "Roles": [ { "Ref": "iamLavaWorkerRole"}]
+      }
+    },
+    "sqsWorkerQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "SQS queue for the lava worker to receive dispatched jobs."
+        }
+      },
+      "Properties": {
+        "KmsMasterKeyId": { "Fn::ImportValue": { "Fn::Sub" : "lava:${realm}:kmsUserKeyAlias" } },
+        "MessageRetentionPeriod": { "Ref": "messageRetentionPeriod" },
+        "QueueName": { "Fn::Sub" : "lava-${realm}-${worker}" },
+        "VisibilityTimeout": { "Ref": "visibilityTimeout" },
+        "Tags": [
+          {
+            "Key": "lava:function",
+            "Value": "worker.dispatch"
+          }
+        ]
+      }
+    },
+    "launchtemplateLavaWorker": {
+      "Type": "AWS::EC2::LaunchTemplate",
+      "Metadata": {
+        "CFdoc": {
+          "Description": "Launch template for Lava worker."
+        }
+      },
+      "Condition": "ifCreateInstance",
+      "Properties": {
+        "LaunchTemplateData": {
+          "BlockDeviceMappings": [
+            {
+              "Fn::If": [
+                "ifSetSizeRootVol",
+                {
+                  "DeviceName": "/dev/xvda",
+                  "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "Encrypted": "true",
+                    "VolumeSize": {
+                      "Ref": "rootVolumeSize"
+                    }
+                  }
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            {
+              "Fn::If": [
+                "ifCreateTmpVol",
+                {
+                  "DeviceName": "/dev/xvdb",
+                  "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "Encrypted": "true",
+                    "VolumeSize": {
+                      "Ref": "tmpVolumeSize"
+                    }
+                  }
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            {
+              "Fn::If": [
+                "ifCreateDockerVol",
+                {
+                  "DeviceName": "/dev/xvdc",
+                  "Ebs": {
+                    "DeleteOnTermination": "true",
+                    "Encrypted": "true",
+                    "VolumeSize": {
+                      "Ref": "dockerVolumeSize"
+                    }
+                  }
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            }
+          ],
+          "IamInstanceProfile": {
+            "Name": {
+              "Ref": "iamWorkerInstanceProfile"
+            }
+          },
+          "ImageId": { "Ref": "amiId" },
+          "InstanceType": {
+            "Fn::If": [
+              "ifInstanceType",
+              { "Ref": "workerInstanceType" },
+              { "Ref": "AWS::NoValue" }
+            ]
+          },
+          "KeyName": {
+            "Fn::If": [
+              "ifKeyPair",
+              { "Ref": "keyPairName" },
+              { "Ref": "AWS::NoValue" }
+            ]
+          },
+          "Monitoring": {
+            "Enabled": true
+          },
+          "NetworkInterfaces": [
+            {
+              "Description": {
+                "Fn::Sub": "lava-${realm}-${worker} eth0"
+              },
+              "DeviceIndex": 0,
+              "AssociatePublicIpAddress": {
+                "Ref": "workerPublicIp"
+              },
+              "Groups": {
+                "Ref": "secGroups"
+              }
+            }
+          ],
+          "UserData": {
+            "Fn::Base64": {
+              "Fn::Join": [
+                "\n",
+                [
+                  "{",
+                  {
+                    "Fn::Sub": [
+                      "\"shell0\": \"/usr/local/bin/s3run s3://${s3CodeBucket}/${s3CodePrefix}/${realm}/${worker}/root.boot0.sh s3://${s3CodeBucket}/${s3CodePrefix} ${realm} ${worker}\"",
+                      {
+                        "s3CodeBucket": {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "lava:${realm}:s3CodeBucket"
+                          }
+                        },
+                        "s3CodePrefix": {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "lava:${realm}:s3CodePrefix"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  ",",
+                  {
+                    "Fn::Sub": [
+                      "\"shell\": \"/usr/local/bin/s3run s3://${s3CodeBucket}/${s3CodePrefix}/${realm}/${worker}/root.boot.sh s3://${s3CodeBucket}/${s3CodePrefix} ${realm} ${worker}\"",
+                      {
+                        "s3CodeBucket": {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "lava:${realm}:s3CodeBucket"
+                          }
+                        },
+                        "s3CodePrefix": {
+                          "Fn::ImportValue": {
+                            "Fn::Sub": "lava:${realm}:s3CodePrefix"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  ",",
+                  {
+                    "Fn::Sub": "\"import-users\": { \"users\": \"lava-${realm}-admin\", \"sudoers\": \"lava-${realm}-admin\" }"
+                  },
+                  ",",
+                  {
+                    "Fn::Sub": "\"swap\": { \"size\": ${swapSize} }"
+                  },
+                  "}"
+                ]
+              ]
+            }
+          }
+        },
+        "TagSpecifications": [
+          {
+            "ResourceType": "launch-template",
+            "Tags": [
+              {
+                "Key": "LavaRealm",
+                "Value": {
+                  "Ref": "realm"
+                }
+              },
+              {
+                "Key": "LavaWorker",
+                "Value": {
+                  "Ref": "worker"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "asgLavaWorker": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Metadata": {
+        "CFdoc": {
+          "Description": "Auto scaling group for Lava worker"
+        }
+      },
+      "Condition": "ifCreateInstance",
+      "Properties": {
+        "AutoScalingGroupName": { "Fn::Sub": "lava-${realm}-${worker}" },
+        "MinSize": { "Ref": "workerInstancesMin" },
+        "MaxSize": { "Ref": "workerInstancesMax" },
+        "DesiredCapacity": { "Ref": "workerInstancesDesired" },
+        "HealthCheckGracePeriod": 300,
+        "LaunchTemplate": {
+          "Fn::If": [
+            "ifInstanceType",
+            {
+              "LaunchTemplateId": { "Ref": "launchtemplateLavaWorker" },
+              "Version": { "Fn::GetAtt": [ "launchtemplateLavaWorker", "LatestVersionNumber" ] }
+            },
+            { "Ref": "AWS::NoValue" }
+          ]
+        },
+        "MixedInstancesPolicy": {
+          "Fn::If": [
+            "ifInstanceType",
+            { "Ref": "AWS::NoValue" },
+            {
+              "LaunchTemplate": {
+                "LaunchTemplateSpecification": {
+                  "LaunchTemplateId": { "Ref": "launchtemplateLavaWorker" },
+                  "Version": { "Fn::GetAtt": [ "launchtemplateLavaWorker", "LatestVersionNumber" ] }
+                },
+                "Overrides": [
+                  {
+                    "InstanceRequirements": {
+                      "AllowedInstanceTypes": { "Ref": "workerAllowedInstances" },
+                      "BurstablePerformance": { "Ref": "workerBurstable" },
+                      "MemoryMiB": {
+                        "Min": { "Ref": "workerMemoryMin" },
+                        "Max": { "Fn::If": [ "ifMaxMemory", { "Ref": "workerMemoryMax" }, { "Ref": "AWS::NoValue" } ] }
+                      },
+                      "VCpuCount": {
+                        "Min": { "Ref": "workerVCpuMin" },
+                        "Max": { "Fn::If": [ "ifMaxVCpu", { "Ref": "workerVCpuMax" }, { "Ref": "AWS::NoValue" } ] }
+                      },
+                      "LocalStorage": { "Ref": "workerLocalStorage" },
+                      "InstanceGenerations": [ "current", "previous" ]
+                    }
+                  }
+                ]
+              },
+              "InstancesDistribution": {
+                "OnDemandAllocationStrategy": "lowest-price",
+                "OnDemandBaseCapacity": 0,
+                "OnDemandPercentageAboveBaseCapacity": 100
+              }
+            }
+          ]
+        },
+        "MetricsCollection": [ { "Granularity": "1Minute" } ],
+        "NotificationConfigurations": [
+          {
+            "NotificationTypes": [
+              "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+              "autoscaling:EC2_INSTANCE_TERMINATE_ERROR",
+              "autoscaling:TEST_NOTIFICATION"
+            ],
+            "TopicARN": { "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${alarmTopic}" }
+          },
+          {
+            "NotificationTypes": [
+              "autoscaling:EC2_INSTANCE_LAUNCH",
+              "autoscaling:EC2_INSTANCE_TERMINATE",
+              "autoscaling:TEST_NOTIFICATION"
+            ],
+            "TopicARN": {
+              "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${autoscalingActionTopic}"
+            }
+          }
+        ],
+        "LifecycleHookSpecificationList": [
+          {
+            "DefaultResult": "CONTINUE",
+            "HeartbeatTimeout": 1800,
+            "LifecycleHookName": "terminate",
+            "LifecycleTransition": "autoscaling:EC2_INSTANCE_TERMINATING",
+            "NotificationMetadata": {
+              "Fn::Sub": "{\"realm\": \"${realm}\",\"worker\":\"${worker}\"}"
+            }
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "PropagateAtLaunch": "true",
+            "Value": {
+              "Fn::Sub": "lava-${realm}-${worker}"
+            }
+          },
+          {
+            "Key": "LavaRealm",
+            "PropagateAtLaunch": "true",
+            "Value": {
+              "Ref": "realm"
+            }
+          },
+          {
+            "Key": "LavaWorker",
+            "PropagateAtLaunch": "true",
+            "Value": {
+              "Ref": "worker"
+            }
+          }
+        ],
+        "VPCZoneIdentifier": {
+          "Ref": "subnets"
+        }
+      }
+    },
+    "asgWorkerScalingPolicy": {
+      "Type": "AWS::AutoScaling::ScalingPolicy",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Target tracking scaling policy for worker"
+        }
+      },
+      "Condition": "ifWorkerBacklogScaling",
+      "Properties": {
+        "AutoScalingGroupName": { "Ref": "asgLavaWorker" },
+        "EstimatedInstanceWarmup": 240,
+        "PolicyType": "TargetTrackingScaling",
+        "TargetTrackingConfiguration": {
+          "CustomizedMetricSpecification": {
+            "MetricName": "WorkerBacklog",
+            "Namespace": "Lava",
+            "Statistic": "Average",
+            "Dimensions": [
+              {
+                "Name": "Realm",
+                "Value": { "Ref": "realm" }
+              },
+              {
+                "Name": "Worker",
+                "Value": { "Ref": "worker" }
+              }
+            ]
+          },
+          "TargetValue": { "Ref": "workerBacklogScalingTarget" }
+        }
+      }
+    },
+    "eventsWorkerTerminating": {
+      "Type": "AWS::Events::Rule",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "EventBridge rule for terminating worker."
+        }
+      },
+      "Condition": "ifRealmLambdasDeployed",
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "lava-${realm}-${worker} worker node is terminating"
+        },
+        "EventBusName": "default",
+        "Name": { "Fn::Sub": "lava-${realm}-${worker}-terminating" },
+        "EventPattern": {
+          "Fn::Sub": "{\"source\": [\"aws.autoscaling\"], \"detail-type\": [\"EC2 Instance-terminate Lifecycle Action\"], \"detail\": {\"AutoScalingGroupName\": [\"lava-${realm}-${worker}\"] }}"
+        },
+        "State": { "Ref": "autoscalingControlledTermination" },
+        "Targets": [
+          {
+            "Id": { "Fn::Sub": "lava-${realm}-${worker}-stop-lambda" },
+            "Arn": { "Fn::ImportValue": { "Fn::Sub": "lava:${realm}:lambdaLavaStop" } },
+            "InputPath": "$.detail"
+          },
+          {
+            "Id": { "Fn::Sub": "lava-${realm}-${worker}-log-events" },
+            "Arn": { "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/events/lava" }
+          }
+        ]
+      }
+    },
+    "lambdaLavaStopPermission": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Allow EventBridge to run the stop lambda."
+        }
+      },
+      "Type": "AWS::Lambda::Permission",
+      "Condition": "ifRealmLambdasDeployed",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": { "Fn::ImportValue": { "Fn::Sub": "lava:${realm}:lambdaLavaStop" } },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": { "Fn::GetAtt" : [ "eventsWorkerTerminating", "Arn" ]}
+      }
+    },
+    "alarmLavaWorker": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Metadata": {
+        "CFdoc": {
+          "Description": "Status check failed alarm for Lava worker."
+        }
+      },
+      "Condition": "ifCreateInstance",
+      "Properties": {
+        "ActionsEnabled": "true",
+        "AlarmActions": [ { "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${alarmTopic}" } ],
+        "OKActions": [ { "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${alarmTopic}" } ],
+        "AlarmDescription": { "Fn::Sub": "Lava realm ${realm}, worker ${worker} status check failed for 2 minutes" },
+        "AlarmName": { "Fn::Sub": "lava-${realm}-${worker} Status Check Failed"},
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "AutoScalingGroupName",
+            "Value": { "Ref": "asgLavaWorker" }
+          }
+        ],
+        "EvaluationPeriods": 2,
+        "InsufficientDataActions": [],
+        "MetricName": "StatusCheckFailed",
+        "Namespace": "AWS/EC2",
+        "Period": 60,
+        "Statistic": "Average",
+        "Threshold": "0.0",
+        "TreatMissingData": "notBreaching"
+      }
+    },
+    "logFilterWorkerHeartbeat": {
+      "Type": "AWS::Logs::MetricFilter",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Metric filter on /var/log/lava/<REALM> log group to find heartbeat messages."
+        }
+      },
+      "Condition": "ifCreateHeatbeatAlarm",
+      "Properties": {
+        "FilterPattern": { "Fn::Sub": "{$.event_source=\"lava-worker\" && $.event_type=\"heartbeat\" && $.realm=\"${realm}\" && $.worker=\"${worker}\"}"
+        },
+        "LogGroupName": { "Fn::Sub": "/var/log/lava/${realm}" },
+        "MetricTransformations": [
+          {
+            "MetricName": { "Fn::Sub": "lava-${realm}-${worker}-heartbeat" },
+            "MetricNamespace": "LogMetrics",
+            "MetricValue": "1"
+          }
+        ]
+      }
+    },
+    "alarmLavaHeartbeat": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Metadata": {
+        "CFdoc": {
+          "Description": "Heartbeat alarm for Lava worker."
+        }
+      },
+      "Condition": "ifCreateHeatbeatAlarm",
+      "Properties": {
+        "ActionsEnabled": "true",
+        "AlarmActions": [ { "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${alarmTopic}" } ],
+        "OKActions": [ { "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${alarmTopic}" } ],
+        "AlarmDescription": { "Fn::Sub": "No heartbeat for lava-${realm}-${worker}" },
+        "AlarmName": { "Fn::Sub": "lava-${realm}-${worker}-heartbeat" },
+        "ComparisonOperator": "LessThanThreshold",
+        "Dimensions": [],
+        "EvaluationPeriods": 5,
+        "DatapointsToAlarm": 5,
+        "InsufficientDataActions": [],
+        "MetricName": { "Fn::Sub": "lava-${realm}-${worker}-heartbeat" },
+        "Namespace": "LogMetrics",
+        "Period": 60,
+        "Statistic": "SampleCount",
+        "Threshold": "1.0",
+        "TreatMissingData": "breaching"
+      }
+    },
+    "alarmQueueDepth": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Metadata": {
+        "CFdoc": {
+          "Description": "Queue depth alarm for Lava worker."
+        }
+      },
+      "Condition": "ifCreateQueueDepthAlarm",
+      "Properties": {
+        "ActionsEnabled": "true",
+        "AlarmActions": [ { "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${alarmTopic}" } ],
+        "OKActions": [ { "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${alarmTopic}" } ],
+        "AlarmDescription": { "Fn::Sub": "Too many messages queued for lava-${realm}-${worker}" },
+        "AlarmName": { "Fn::Sub": "lava-${realm}-${worker}-queue-depth" },
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": { "Fn::Sub" : "lava-${realm}-${worker}" }
+          }
+        ],
+        "EvaluationPeriods": { "Ref": "queueDepthMinutes" },
+        "DatapointsToAlarm": { "Ref": "queueDepthMinutes" },
+        "InsufficientDataActions": [],
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 60,
+        "Statistic": "Maximum",
+        "Threshold": { "Fn::Sub": "${maxAllowedQueueDepth}.0" },
+        "TreatMissingData": "ignore"
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+../../../common/full/full-20-oracle.sh

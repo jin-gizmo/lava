@@ -1,0 +1,398 @@
+#!/usr/bin/env python3
+
+"""
+Slice and dice markdown for use with mkdocs.
+
+This will also create the mkdocs.yml "nav" list. Level 1 headings can have a
+trailing '{ x-nav="Short Heading" }' to provide a shorter version of a heading
+to include in the navigation panel while retaining the long form in the body of
+the text. Neat eh?
+
+For the table of contents on the right panel, a short form heading is done like
+this:
+    ## A Long Long Heading { data-toc-label="Short Heading" }
+This is native mkdocs material capability.
+
+WARNING: Only uses a single level of headers.
+
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import sys
+import unicodedata
+from collections.abc import Iterator
+from dataclasses import dataclass
+from shlex import split
+from shutil import copyfile
+
+import yaml
+
+NAV_PLACEHOLDER = '**md-split**'
+
+# The heading regex matches things like:
+#   # Heading L1
+#   # Heading L1 #
+#   ## Heading L2
+#   # Heading too Long for Nav [nav: Short Heading]
+#   ## Heading with attributes { k1="v1" k2="v 2" }
+MD_HEADING_RE = re.compile(
+    r"""
+    (?P<head>\#+)  # heading marker
+    \s+
+    (?P<text>.*?)  # heading text
+    \s*\#*  # Optional trailing heading marker
+    (\s+{(?P<attrs>[^}]*)})?  # Optional trailing attributes in brackets
+    \s*$
+    """,
+    re.VERBOSE,
+)
+
+# This is a bit rough as regex is not the way to match paired parentheses
+# Here we are looking for "](#something)"
+MD_XREF_RE = re.compile(r']\(#(?P<xref>[^)]+)')
+
+# This is a bit rough as regex is not the way to match paired parentheses
+# Here we are looking for "[whatever](something)"
+MD_LINK_RE = re.compile(r'\[(?P<text>[^]]+)]\((?P<href>[^)]+)\)')
+
+HEADER_DEPTH = 1
+MAX_HEADER_DEPTH = 10
+
+__author__ = 'Murray Andrews'
+
+PROG = os.path.basename(sys.argv[0])
+
+
+# ------------------------------------------------------------------------------
+class NumberedHeadingCounter:
+    """
+    Keep track of number headings.
+
+    :param max_depth:
+    """
+
+    # --------------------------------------------------------------------------
+    def __init__(self, max_depth: int = MAX_HEADER_DEPTH):
+        """Create a counter."""
+
+        if max_depth <= 0:
+            raise ValueError(f'Bad max_depth: {max_depth}')
+
+        self.max_depth = max_depth
+        self.counter = [0] * max_depth
+
+    # --------------------------------------------------------------------------
+    def increment(self, level: int) -> None:
+        """
+        Increment the counter at the specified level.
+
+        All lower level counters are reset.
+
+        :param level:       The level number. Levels count from 1.
+        """
+
+        if level > self.max_depth:
+            return
+
+        for n in range(level, self.max_depth):
+            self.counter[n] = 0
+        self.counter[level - 1] += 1
+
+    # --------------------------------------------------------------------------
+    def __str__(self) -> str:
+        """
+        Return the counter as l1.l2...
+
+        :return:
+        """
+
+        return '.'.join([f'{v}' for v in self.counter if v])
+
+    # --------------------------------------------------------------------------
+    def fmt(self, fmt: str = '{:02}') -> str:
+        """
+        Format the heading number as dot separated numbers.
+
+        A specified format is applied to each compontent.
+
+        :return:
+        """
+
+        return '.'.join([fmt.format(v) for v in self.counter if v])
+
+
+# ------------------------------------------------------------------------------
+@dataclass
+class MdLine:
+    """Container for a line of Markdown."""
+
+    line: str  # The input line.
+    is_literal: bool  # If the line is inside a literal block
+    heading_level: int = 0  # 0 means not a header
+    heading_number: str | None = None  # n.m. ...
+    heading_text: str | None = None
+    heading_attrs: Attributes | None = None
+    nav: str | None = None  # If a top level header, the value to be used in the nav: list
+
+    def __post_init__(self):
+        """Set nav from either the x-nav attribute or the heading text itself."""
+        if self.heading_attrs and (nav := self.heading_attrs.get('x-nav')):
+            self.nav = nav
+        else:
+            self.nav = self.heading_text
+
+
+# ------------------------------------------------------------------------------
+class Attributes(dict):
+    """Container for attributes."""
+
+    @classmethod
+    def from_string(cls, s: str | None) -> Attributes:
+        """Parse key="value" pairs, handling escaped quotes."""
+        if not s:
+            return cls()
+        attrs = {}
+        for token in split(s):
+            if '=' in token:
+                key, value = token.split('=', 1)
+                attrs[key] = value
+        return cls(**attrs)
+
+
+# ------------------------------------------------------------------------------
+def sanitise(value: str) -> str:
+    """
+    Turn an arbitrary string into something safe to use as a local filename.
+
+    This code is based on slugify() from Django.
+
+    :param value:       String to sanitise.
+    :return:            Sanitised string
+
+    """
+
+    value = str(value)
+    value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^./=+\w\s-]', '', value).strip().lower()
+    value = re.sub(r'[.]+', '', value)
+    value = re.sub(r'/+', '', value)
+    value = re.sub(r'[-\s]+', '-', value)
+    return value.strip('.-')
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args():
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(
+        prog=PROG, description='Slice and dice a markdown file for use with mkdocs.'
+    )
+
+    argp.add_argument(
+        '-c',
+        '--config',
+        action='store',
+        help='Mkdocs config file. If specified, and the file exists,'
+        'the "nav" key will be updated.',
+    )
+
+    argp.add_argument(
+        '-d',
+        '--dir',
+        action='store',
+        default='.',
+        help='Mkdocs document directory. Default is current directory.',
+    )
+
+    argp.add_argument('md_file', metavar='source.md', action='store', help='Markdown source.')
+
+    return argp.parse_args()
+
+
+# ------------------------------------------------------------------------------
+def md_get_xrefs(line: str) -> list[str]:
+    """
+    Scan a line of markdown for anchor cross references.
+
+    :param line:        Markdown line.
+    :return:            A list of the bit after the # in the reference.
+    """
+
+    return MD_XREF_RE.findall(line)
+
+
+# ------------------------------------------------------------------------------
+def md_header_to_xref(hdr_txt: str) -> str:
+    """
+    Convert markdown header text to valid xref by stripping junk out.
+
+    :param hdr_txt:     Header text.
+    :return:            A valid xref string that can go in [..](#xref)
+    """
+
+    # Delete any xrefs embedded in the header then clean the result
+    return sanitise(MD_LINK_RE.sub(r'\g<text>', hdr_txt))
+
+
+# ------------------------------------------------------------------------------
+def md_scan_headers(md_file: str) -> Iterator[MdLine]:
+    """
+    Scan a markdown file and return individual lines, indicating if they are a header.
+
+    :param md_file:     The source markdown file.
+    :return:            An iterator that yields tuples:
+                            (literal, header-level, heading-num, header-text, line)
+
+                        The literal is a boolean indicating if the line is inside
+                        a literal block.
+                        If the line is not a header then first 3 items are None.
+    """
+
+    heading_ctr = NumberedHeadingCounter()
+    is_literal = False
+
+    with open(md_file) as fp:
+        for line in fp:  # type: str
+            line = line.rstrip('\n')
+            heading_level = None
+            heading_text = None
+            heading_number = None
+            heading_attrs = None
+            nav = None
+
+            if line.startswith('```'):
+                # Headers don't sit in literal blocks
+                is_literal = not is_literal
+            elif not is_literal:
+                m = MD_HEADING_RE.match(line)
+                if m:
+                    # Found a header
+                    heading_attrs = Attributes.from_string(m.group('attrs'))
+                    heading_level = len(m.group('head'))
+                    heading_text = m.group('text')
+                    heading_ctr.increment(heading_level)
+                    heading_number = heading_ctr.fmt()
+
+            yield MdLine(
+                line, is_literal, heading_level, heading_number, heading_text, heading_attrs, nav
+            )
+
+
+# ------------------------------------------------------------------------------
+def md_replace_xrefs(line: str, current_file: str, xref_map: dict[str, str]) -> str:
+    """
+    Replace cross references in a line of markdown.
+
+    This is done by passing it through the xref map which indicates the file in
+    which the xrefs have moved. References local to the current file are left
+    alone.
+
+    So if the input line is:
+        Here is a xref [xref](#somewhere)
+    and the map has:
+        somewhere --> file.md
+    the new line is:
+        Here is a xref [xref](#file.md/somewhere)
+
+    unless the current file is already file.md
+
+    This is very inefficient.
+
+    :param line:            The input line.
+    :param current_file:    Current file name.
+    :param xref_map:
+    :return:
+    """
+
+    xrefs = md_get_xrefs(line)
+
+    for xref in xrefs:
+        if xref not in xref_map:
+            print(f'{current_file}: Unknown cross-reference "{xref}"', file=sys.stderr)
+            continue
+        if xref_map[xref] != current_file:
+            line = re.sub(f'\\(#{xref}\\)', f'({xref_map[xref]}#{xref})', line)
+
+    return line
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Show time.
+
+    :return: status
+    """
+
+    args = process_cli_args()
+
+    if args.config and os.path.exists(args.config):
+        # Backup the config file.
+        copyfile(args.config, args.config + '~')
+        with open(args.config) as fp:
+            config = yaml.safe_load(fp)
+
+    # ----------------------------------------
+    # Pass 1 -- scan the file and build a map of all the headers for fixing
+    #           and anchor references
+
+    fname = None
+    header_map = {}  # old-anchor-text: file
+    for md in md_scan_headers(args.md_file):
+        if md.heading_level:
+            if md.heading_level <= HEADER_DEPTH:
+                # Switch to new file name
+                fname = f'{md.heading_number}-{sanitise(md.nav)}.md'
+            if fname:
+                header_map[md_header_to_xref(md.heading_text)] = fname
+
+    # ----------------------------------------
+    # Pass 2 -- split the file and fix links. Skips stuff before first header.
+
+    out_fp = None
+    nav = []
+
+    for md in md_scan_headers(args.md_file):
+        if md.heading_level and md.heading_level <= HEADER_DEPTH:
+            # Start a new output file
+            if out_fp:
+                out_fp.close()
+            fname = f'{md.heading_number}-{sanitise(md.nav)}.md'
+            out_fp = open(os.path.join(args.dir, fname), 'w')  # noqa SIM115
+            # TODO: This currently works at l1 only
+            nav.append({md.nav: fname})
+
+        if out_fp:
+            print(
+                md.line if md.is_literal else md_replace_xrefs(md.line, fname, header_map),
+                file=out_fp,
+            )
+
+    if out_fp:
+        out_fp.close()
+
+    # ----------------------------------------
+    # Update the nav key in the config.
+    if args.config:
+        try:
+            idx = config['nav'].index(NAV_PLACEHOLDER)
+        except ValueError:
+            raise Exception(f'No {NAV_PLACEHOLDER} entry in nav key in {args.config}')
+        config['nav'][idx : idx + 1] = nav
+
+        with open(args.config, 'w') as fp:
+            yaml.safe_dump(config, fp, default_flow_style=False, indent=2)
+
+    return 0
+
+
+if __name__ == '__main__':
+    exit(main())

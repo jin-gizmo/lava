@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# ex: ft=sh
+
+# Run the lava executables. The purpose of this script is to fiddle with the
+# PYTHONPATH so the modules can be found. The lava-run script must be linked
+# to (e.g. from lava-worker) and run from there rather than directly.
+
+# ------------------------------------------------------------------------------
+# Get the script directory
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ];
+do
+	# resolve $SOURCE until the file is no longer a symlink
+	DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null && pwd)"
+	SOURCE="$(readlink "$SOURCE")"
+	# if $SOURCE was a relative symlink, we need to resolve it relative to
+	# the path where the symlink file was located
+	[[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$(cd -P "$(dirname "$SOURCE")" >/dev/null && pwd)"
+
+# ------------------------------------------------------------------------------
+# Run the appropriate lava CLI utility.
+export PYTHONPATH=$DIR/pylib:$PYTHONPATH
+exec python3 "$DIR/bin/$(basename "$0")" "$@"

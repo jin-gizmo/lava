@@ -1,0 +1,26 @@
+[tool.black]
+
+line-length = 100
+skip-string-normalization = true
+target-version = ['py39']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.idea
+    | \.tox
+    | \.venv
+    | bin
+    | etc
+    | lib
+    | build
+    | docs
+    | doc
+    | dist
+    | venv
+    | untracked
+  )
+)
+'''

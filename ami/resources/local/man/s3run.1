@@ -1,0 +1,117 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "S3RUN" "1" "June 2016" "MA" "AWStools"
+.
+.SH "NAME"
+\fBs3run\fR \- Load a script from AWS S3 and run it
+.
+.SH "SYNOPSIS"
+\fBs3run\fR [options] executable [args\.\.\.]
+.
+.SH "DESCRIPTION"
+\fBS3run\fR loads an executable from AWS S3 and runs it with the specified arguments\.
+.
+.P
+\fBS3run\fR can be run from an EC2 node or a non\-AWS machine\.
+.
+.SH "OPTIONS"
+.
+.TP
+\fIexecutable\fR
+The S3 key for the executable to run\. This can be an absolute location (starting with \fIs3://\fR) or a relative location (without \fIs3://\fR)\. In the latter case, the environment variable S3PATH will be used as a search path for S3 prefixes\. Search path entries must not not start with \fIs3://\fR\. The executable can be anything runnable from the shell on the target machine (binary, script etc\.)\.
+.
+.TP
+\fIargs\fR
+Zero or more arguments that are passed to the executable\.
+.
+.TP
+\fB\-C\fR
+Don\'t use colour in output messages\.
+.
+.TP
+\fB\-c\fR \fIdirectory\fR
+Use the specified directory to cache downloaded files\. If the directory doesn\'t exist it will be created\. The default is \fI~/\.s3run\fR\. Note that even if the \fB\-n\fR (no cache) option is used, the downloaded file will still be stored in the cache for subsequent use\. It is a bad idea for the cache to be broadly writeable\.
+.
+.TP
+\fB\-d\fR \fIdirectory\fR
+Change to the specified directory before running the executable\.
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help and exit\.
+.
+.TP
+\fB\-L\fR \fIlevel\fR
+Print messages of a given severity level or above\. The standard logging level names are available but \fIdebug\fR, \fIinfo\fR, \fIwarning\fR and \fIerror\fR are most useful\. The Default is \fIwarning\fR\.
+.
+.TP
+\fB\-L\fR \fIlog\-target\fR
+Log to the specified target\. This can be either a file name or the name of a syslog facility prefixed with @ (e\.g\. @local0)\. This option suppresses the default behaviour of logging to \fIstderr\fR\. Note that this applies to \fBs3run\fR only, not the executable which does its own thing with logging\.
+.
+.TP
+\fB\-n\fR
+Don\'t use a previously cached version of the executable\. This will force a fresh copy to be downloaded from S3\. By default, a new copy will be downloaded if there is no locally cached copy or the local copy is older than the S3 version\. Note that a call to S3 is always required even if \fB\-n\fR is used\.
+.
+.TP
+\fB\-p\fR \fIprofile\-id\fR
+As for the AWS CLI \fB\-\-profile\fR option\. If \fBs3run\fR is run from an EC2 node, it is generally recommended to use an IAM role with appropriate permissions (see below) rather than use AWS credentials\.
+.
+.TP
+\fB\-R\fR
+For EC2 instances only, the S3 region will be the same as that of the EC2 instance on which \fBs3run\fR is being run\.
+.
+.TP
+\fB\-r\fR \fIaws\-region\fR
+As for the AWS CLI \fB\-\-region\fR option\. See also the \fB\-R\fR option\.
+.
+.SH "EXIT STATUS"
+The exit status will be non\-zero if the executable cannot be run\. If the excutable does run, the exit status of \fBs3run\fR is that of the executable\.
+.
+.SH "ENVIRONMENT"
+If the S3 location of the executable does not start with \fIs3://\fR, \fBS3run\fR will use the environment variable \fIS3PATH\fR as a colon separated list of bucket prefixes to check for the specified executable\. Entries in \fIS3PATH\fR \fImust not\fR begin with s3://\.
+.
+.P
+For example if \fIS3PATH\fR has the value:
+.
+.IP "" 4
+.
+.nf
+
+my\.bucket\.1/scripts:my\.bucket\.2/bin
+.
+.fi
+.
+.IP "" 0
+.
+.P
+then an executable of \fIx\.sh\fR will be looked for in:
+.
+.IP "" 4
+.
+.nf
+
+s3://my\.bucket\.1/scripts/x\.sh
+s3://my\.bucket\.2/bin/x\.sh
+.
+.fi
+.
+.IP "" 0
+.
+.SH "PERMISSIONS"
+If \fBs3run\fR is run from an EC2 instance, the instance should have an associated role that provides read access to the target S3 bucket\.
+.
+.P
+If \fBs3run\fR is run from a non\-EC2 instance, the AWS CLI must be correctly configured to provide read access to the target bucket\.
+.
+.SH "LIMITATIONS"
+A call to S3 is always required, even if the \fB\-n\fR (no cache) option is not used\.
+.
+.SH "WARNINGS"
+The security risks are all yours\. Its a really bad idea to run a script from a remote source blindly\.
+.
+.SH "AUTHOR"
+Murray Andrews
+.
+.SH "LICENCE"
+BSD 3\-clause licence \fIhttp://opensource\.org/licenses/BSD\-3\-Clause\fR\.

@@ -1,0 +1,20 @@
+#- generic connector specifics
+#-
+#- This is the list of vars to prompt for when building
+
+type: generic
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Mandatory fields
+
+attributes:
+  attr1: Sample value
+  attr2:
+    type: ssm
+    parameter: ssm-parameter-name
+
+## -----------------------------------------------------------------------------
+## Optional fields

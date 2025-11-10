@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Lava fiddles with Python path which can break AWS CLI. Need to undo that.
+
+PYTHONPATH='' /usr/bin/aws "$@"

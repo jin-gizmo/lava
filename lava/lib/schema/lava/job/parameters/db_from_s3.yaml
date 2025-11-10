@@ -1,0 +1,78 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava db_from_s3 job parameters specification
+
+type: object
+
+properties:
+  args:
+    description: Database type specific arguments.
+  bucket:
+    # Note this may not look like a bucket in a job spec due to Jinja rendering.
+    description: The name of the S3 bucket from which the data is copied.
+    type: string
+    minLength: 1
+  columns:
+    description: A list of SQL column specifications.
+    type: array
+    items:
+      type: string
+      minLength: 1
+  db_conn_id:
+    description: The connection ID for a target database.
+    type: string
+    minLength: 1
+  jinja:
+    description: If false, disable Jinja rendering of the parameters and globals.
+    $ref: lava.common.boolean
+  key:
+    description: The key in the S3 bucket from which the data is copied.
+    type: string
+    minLength: 1
+  min_size:
+    description: Avoid loading files below the specified size.
+    $ref: lava.common.size
+  mode:
+    description: Update mode for the target table.
+    type: string
+    enum:
+      - abort
+      - append
+      - drop
+      - delete
+      - switch
+      - truncate
+  s3_conn_id:
+    description: The connection ID for AWS S3.
+    type: string
+    minLength: 1
+  s3_iam_role:
+    description: The IAM role name used to allow access to the source data in S3.
+    type: string
+    minLength: 1
+  schema:
+    description: Target schema name.
+    type: string
+    minLength: 1
+  skip_missing:
+    description: Skip missing files without throwing an error.
+    $ref: lava.common.boolean
+  table:
+    description: Target table name.
+    type: string
+    minLength: 1
+  vars:
+    description: >-
+      A map of variables injected when the command arguments and environment are
+      Jinja rendered.
+    type: object
+
+required:
+  - bucket
+  - key
+  - db_conn_id
+  - mode
+  - schema
+  - table
+
+additionalProperties: false

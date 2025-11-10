@@ -1,0 +1,47 @@
+#- dispatch job specifics
+#-
+#- This is the list of vars to prompt for when building
+
+type: dispatch
+
+## #############################################################################
+## The payload is either a comma separated list of job_ids or an actual list of
+## job_ids.
+##
+payload:
+  - "job1"
+  - "job2"
+  - "..."
+
+## #############################################################################
+## Job parameters
+
+parameters:
+  ## ---------------------------------------------------------------------------
+  ## Mandatory params
+
+  ## ---------------------------------------------------------------------------
+  ## Optional params
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Dispatch message sending delay in the form nnX where nn is a number and X
+  ## is s (seconds) or m (minutes). The maximum allowed value is 15 minutes.
+  ##
+  # delay: "5m"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## If false, disable Jinja rendering of the payload. Default true.
+  ##
+  # jinja: true
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Prepend the specified value to each job_id in the payload.
+  # job_prefix: "app/myjobs/"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## A map of parameters that will be passed to the jobs being dispatched. This
+  ## is Jinja rendered.
+  ##
+  # parameters:
+  #   p1: "v1"
+  #   p2: "v2"

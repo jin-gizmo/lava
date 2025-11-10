@@ -1,0 +1,172 @@
+#!/usr/bin/env python3
+
+"""Sync a file from the Internet to the local machine."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from shutil import copyfileobj
+from urllib.parse import urlparse
+
+import requests
+from dateutil.parser import parse
+from tqdm import tqdm
+
+PROG = Path(__file__).stem
+
+
+# ------------------------------------------------------------------------------
+@dataclass(frozen=True)
+class FileInfo:
+    """Capture comparable file attributes."""
+
+    mtime: int | float
+    size: int
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(
+        prog=PROG,
+        description=__doc__,
+        epilog=(
+            'The sync process is based on the size and modification time of the'
+            ' web asset. If these match the local file, it is considered to be'
+            ' up to date. Otherwise the web asset will be downloaded to create'
+            ' or replace the local file.'
+        ),
+    )
+
+    argp.add_argument(
+        '-q',
+        '--quiet',
+        action='store_true',
+        help='Suppress progress messages',
+    )
+
+    argp.add_argument(
+        '-c',
+        '--check',
+        action='store_true',
+        help=(
+            'Check if the local file is out of date with respect to the URL'
+            ' but do not download it. Return status is 0 if up to date and'
+            ' 1 otherwise.'
+        ),
+    )
+
+    argp.add_argument(
+        'url',
+        help='The URL of the file to sync.',
+    )
+
+    argp.add_argument(
+        'destination',
+        nargs='?',
+        default='.',
+        help=(
+            'The local file destination. If this is a directory, the last component'
+            ' of the URL path is appened, otherwise it is assumed to be a local'
+            ' file. Symlinks are followed. Defaults to the current directory.'
+        ),
+    )
+
+    return argp.parse_args()
+
+
+# ------------------------------------------------------------------------------
+def get_web_file_info(url: str) -> FileInfo:
+    """Get basic comparable file attributes from a file on Internet."""
+
+    r = requests.head(url, timeout=20)
+    if r.status_code != requests.codes.ok:
+        raise Exception(f'{r.status_code} - {r.reason}')
+
+    try:
+        return FileInfo(
+            mtime=parse(r.headers['Last-Modified']).timestamp(),
+            size=int(r.headers['Content-Length']),
+        )
+    except KeyError as e:
+        raise Exception(f'Could not get {e}')
+
+
+# ------------------------------------------------------------------------------
+def get_web_file(url: str, local_file: Path, size_hint: int = 0, quiet: bool = False) -> None:
+    """Copy a file from the Internet to thw local machine."""
+
+    with requests.get(url, stream=True, timeout=10) as r:
+        if r.status_code != requests.codes.ok:
+            raise Exception(f'{r.status_code} - {r.reason}')
+
+        with open(local_file, 'wb') as fp:
+            if not quiet and sys.stdout.isatty():
+                size = size_hint or get_web_file_info(url).size
+                with tqdm(total=size, unit='B', unit_scale=True, desc=local_file.name) as progress:
+                    for chunk in r.iter_content(chunk_size=1024):
+                        if chunk:
+                            fp.write(chunk)
+                            progress.update(len(chunk))
+            else:
+                copyfileobj(r.raw, fp)
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """Show time."""
+
+    args = process_cli_args()
+
+    try:
+        remote_info = get_web_file_info(args.url)
+    except Exception as e:
+        raise Exception(f'{args.url}: {e}')
+
+    local_file = Path(args.destination)
+    if local_file.is_dir():
+        local_file = Path(args.destination) / urlparse(args.url).path.split('/')[-1]
+    if local_file.exists():
+        if not local_file.is_file():
+            raise Exception(f'{local_file} exists but is not a file')
+        local_file_stat = os.stat(local_file)
+        local_info = FileInfo(mtime=local_file_stat.st_mtime, size=local_file_stat.st_size)
+        update_required = remote_info != local_info
+    else:
+        update_required = True
+
+    if args.check:
+        if not args.quiet:
+            print(f'{local_file} {"needs updating" if update_required else "is up to date"}')
+        return int(update_required)
+
+    if update_required:
+        get_web_file(args.url, local_file, quiet=args.quiet)
+        os.utime(local_file, (remote_info.mtime, remote_info.mtime))
+    elif not args.quiet:
+        print(f'{local_file} is up to date')
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)
+    except KeyboardInterrupt:
+        print('Interrupt', file=sys.stderr)
+        exit(2)

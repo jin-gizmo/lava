@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+
+"""Lava version."""
+
+from lava.version import main
+
+__author__ = 'Murray Andrews'
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    exit(main())

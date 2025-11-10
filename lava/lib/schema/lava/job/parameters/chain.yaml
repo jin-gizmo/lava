@@ -1,0 +1,26 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava chain job parameters specification
+
+type: object
+
+properties:
+  job_prefix:
+    description: Prepend the specified value to each job ID in the payload.
+    type: string
+    minLength: 1
+  start:
+    description: The job_id of the starting point in the chain.
+    type: string
+    minLength: 1
+  can_fail:
+    description: Glob pattern, or list of patterns, matching jobs allowed to fail.
+    anyOf:
+      - type: string
+        minLength: 1
+      - type: array
+        items:
+          type: string
+          minLength: 1
+
+additionalProperties: false

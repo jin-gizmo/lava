@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+
+"""Create a new lava job framework project."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from importlib import resources
+from pathlib import Path
+
+from cookiecutter.main import cookiecutter
+
+import lava
+from lava.lib.argparse import StoreNameValuePair
+from lava.lib.misc import pythonpath_prepended
+from lava.version import __version__
+
+__author__ = 'Murray Andrews'
+
+PROG = Path(__file__).stem
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(
+        prog=PROG, description='Create a new lava job framework project.'
+    )
+
+    argp.add_argument('-v', '--version', action='version', version=__version__)
+
+    argp.add_argument(
+        '--no-input',
+        action='store_true',
+        help=(
+            'Do not prompt for user input. The -p / --param option should'
+            ' be used to specify parameter values.'
+        ),
+    )
+
+    cookie_obj = json.loads(
+        resources.files(lava).joinpath('resources', 'cookiecutter', 'cookiecutter.json').read_text()
+    )
+    cookie_keys = sorted(k for k in cookie_obj if not k.startswith('_'))
+    argp.add_argument(
+        '-p',
+        '--param',
+        dest='params',
+        default={},
+        action=StoreNameValuePair,
+        metavar='KEY=VALUE',
+        help=(
+            'Specify default parameters for the underlying cookiecutter used'
+            ' to create the new lava project. Can be used multiple times.'
+            f' Available parameters are {", ".join(cookie_keys)}.'
+        ),
+    )
+
+    argp.add_argument(
+        'directory',
+        help=(
+            'Create the template source in the specified directory'
+            ' (which must not already exist).'
+        ),
+    )
+
+    return argp.parse_args()
+
+
+# ---------------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Show time.
+
+    :return:    status
+    """
+
+    args = process_cli_args()
+    if (d := Path(args.directory)).exists():
+        raise ValueError(f'{args.directory} already exists')
+
+    template_path = resources.files(lava).joinpath('resources', 'cookiecutter')
+
+    # We want to make the lava package available to the cookiecutter
+    # validation scripts. As cookiecutter runs in a subprocess we need to
+    # mutate PYTHONPATH.
+    # noinspection PyUnresolvedReferences
+    with (
+        pythonpath_prepended(resources.files(lava).parent.resolve()),
+        resources.as_file(template_path) as template_dir,
+    ):
+        new_dir = cookiecutter(
+            str(template_dir),
+            overwrite_if_exists=False,
+            extra_context={
+                'project_name': d.stem,
+                'project_dir': args.directory,
+                '_version': __version__,
+            }
+            | args.params,
+            no_input=args.no_input,
+        )
+    print(f'Created {new_dir}')
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)
+    except KeyboardInterrupt:
+        print('Interrupt', file=sys.stderr)
+        exit(2)

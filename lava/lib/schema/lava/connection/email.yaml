@@ -1,0 +1,36 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava email connection parameters
+
+type: object
+
+properties:
+  from:
+    description: The email address that is sending the email.
+    type: string
+    format: email
+  reply_to:
+    description: The default reply-to email address(es) for messages.
+    anyOf:
+      - type: string
+        format: email
+      - type: array
+        items:
+          type: string
+          format: email
+  subtype:
+    description: Specifies the underlying email handler.
+    type: string
+    enum:
+      - ses
+      - smtp
+
+# Mix-in for the connection parameters for each sub-type
+
+allOf:
+  - if: { properties: { subtype: false } }
+    then: { $ref: lava.connection.email.ses }
+  - if: { properties: { subtype: { const: ses } } }
+    then: { $ref: lava.connection.email.ses }
+  - if: { properties: { subtype: { const: smtp } } }
+    then: { $ref: lava.connection.email.smtp }

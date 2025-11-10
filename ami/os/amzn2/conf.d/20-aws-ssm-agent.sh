@@ -1,0 +1,1 @@
+../../../conf.d/20-aws-ssm-agent.sh

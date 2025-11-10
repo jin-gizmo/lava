@@ -1,0 +1,57 @@
+#- SharePoint connector specifics
+#-
+#- This is the list of vars to prompt for when building
+#= client_name: Application ID
+#= client_secret: SSM parameter containing client secret (exluding realm prefix)
+#= org_base_url: Organisation’s SharePoint base URL
+#= password: SSM parameter containing password (excluding realm prefix)
+#= site_name: SharePoint site name
+#= tenant: Azure AD registered domain ID
+
+type: sharepoint
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Mandatory fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The Application ID that the SharePoint registration portal assigned your app.
+## This resembles a UUID.
+##
+client_name: "{{ client_name }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## SSM parameter containing the client secret.
+## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+##
+client_secret: "/lava/<{ realm }>/{{ client_secret }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The organisation’s SharePoint base URL. e.g. acme.sharepoint.com.
+##
+org_base_url: "{{ org_base_url }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## SSM parameter containing password for authenticating to SharePoint.
+## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+##
+password: "/lava/<{ realm }>/{{ password }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## SharePoint site name.
+##
+site_name: "{{ site_name }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Azure AD registered domain ID.
+tenant: "{{ tenant }}"
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## User name for authenticating to SharePoint.
+##
+# user: "???"

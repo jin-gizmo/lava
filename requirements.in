@@ -1,0 +1,29 @@
+# These are the requirements for the main code bundle.
+# It excludes things needed to build lava but not needed to run it.
+
+# ex: set ft=sh:
+
+boto3
+botocore
+cachetools
+colorama
+cookiecutter
+cx_Oracle
+docker
+jinja2
+jsonschema
+pg8000
+psutil
+pygments
+pymysql
+pysmb
+python-dateutil
+pyyaml
+requests
+smbprotocol
+sqlalchemy
+sqlparse
+graphlib-backport>=1.0.3; python_version < '3.9'
+tabulate
+smart_open[s3]
+packaging

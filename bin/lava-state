@@ -1,0 +1,296 @@
+#!/usr/bin/env python3
+
+"""Command line utility to manipulate lava state items."""
+
+import argparse
+import logging
+import os
+import sys
+
+from jinja2 import Template
+
+from lava.lavacore import LOGNAME
+from lava.lib.argparse import StoreNameValuePair
+from lava.lib.logging import setup_logging
+from lava.lib.state import LavaStateItem, STATE_DEFAULT_TYPE, state_types
+from lava.version import __version__
+
+__author__ = 'Murray Andrews'
+
+PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+LOG = logging.getLogger(LOGNAME)
+LOGLEVEL = 'info'
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(prog=PROG, description='Manipulate lava state items.')
+
+    argp.add_argument('--profile', action='store', help='As for AWS CLI.')
+
+    argp.add_argument(
+        '-r',
+        '--realm',
+        action='store',
+        help=(
+            'Lava realm name. If not specified, the environment variable LAVA_REALM must be set.'
+        ),
+    )
+
+    argp.add_argument('-v', '--version', action='version', version=__version__)
+
+    # ------------------------------
+    # Logging options
+
+    logp = argp.add_argument_group('logging arguments')
+    logp.add_argument(
+        '--no-colour',
+        '--no-color',
+        dest='colour',
+        action='store_false',
+        default=True,
+        help='Don\'t use colour in information messages.',
+    )
+
+    logp.add_argument(
+        '-l',
+        '--level',
+        metavar='LEVEL',
+        default=LOGLEVEL,
+        help=(
+            'Print messages of a given severity level or above. The standard logging level names'
+            ' are available but debug, info, warning and error are most useful.'
+            f' The Default is {LOGLEVEL}.'
+        ),
+    )
+
+    logp.add_argument(
+        '--log',
+        action='store',
+        help='Log to the specified target. This can be either a file'
+        ' name or a syslog facility with an @ prefix (e.g. @local0).',
+    )
+
+    logp.add_argument(
+        '--tag',
+        action='store',
+        default=PROG,
+        help=f'Tag log entries with the specified value. The default is {PROG}.',
+    )
+
+    # ----------------------------------------
+    # Sub parsers
+
+    subp = argp.add_subparsers(dest='command', required=True)
+
+    # . . . . . . . . . . . . . . . . . . . .
+    # "put" command
+
+    c_put = subp.add_parser('put', help='Add / replace a state item.')
+    c_put.set_defaults(func=cmd_put)
+
+    c_put.add_argument('state_id', action='store', help='State ID.')
+
+    c_put_value = c_put.add_mutually_exclusive_group()
+    c_put_value.add_argument(
+        '-p',
+        '--param',
+        metavar='KEY=VALUE',
+        action=StoreNameValuePair,
+        help=(
+            'Add the specified key/value pair to the state item.'
+            ' Can be repeated to set multiple key/value pairs.'
+        ),
+    )
+    c_put_value.add_argument(
+        '-v', '--value', action='store', help='Set the value to the specified string.'
+    )
+
+    c_put.add_argument(
+        '--kms-key',
+        action='store',
+        help=(
+            'The "secure" state item type supports KMS encryption of the value.'
+            ' This argument specifies the KMS key to use, either as a KMS key ARN'
+            ' or a key alias in the form "alias/key-id". Defaults to the "sys"'
+            ' key for the lava realm. Ignored for other state item types.'
+        ),
+    )
+
+    c_put.add_argument(
+        '--publisher',
+        action='store',
+        default=os.environ.get('LAVA_JOB_ID', f'{PROG} CLI'),
+        help=(
+            'Set the state item publisher to the specified value.'
+            ' Default is the contents of the LAVA_JOB_ID environment variable,'
+            f' if set, or else "{PROG} CLI".'
+        ),
+    )
+
+    c_put.add_argument(
+        '--ttl',
+        metavar='DURATION',
+        action='store',
+        help='Time to live as a duration (e.g. 10m, 2h, 1d).',
+    )
+
+    c_put.add_argument(
+        '--type',
+        metavar='STATE_TYPE',
+        action='store',
+        default=STATE_DEFAULT_TYPE,
+        choices=state_types(),
+        help=(
+            f'State item type. Options are {", ".join(state_types())}.'
+            f' Default is {STATE_DEFAULT_TYPE}.'
+        ),
+    )
+
+    # . . . . . . . . . . . . . . . . . . . .
+    # "get" command
+
+    c_get = subp.add_parser('get', help='Get a state item.')
+    c_get.set_defaults(func=cmd_get)
+
+    c_get.add_argument(
+        '-i',
+        '--ignore-missing',
+        action='store_true',
+        help=(
+            'Ignore errors for missing state items and return an empty string.'
+            ' By default, attempting to get a non-existent state item is an error.'
+        ),
+    )
+    c_get.add_argument('state_id', action='store', help='State ID.')
+
+    c_get.add_argument(
+        'template',
+        nargs='?',
+        action='store',
+        default='{{ state }}',
+        help=(
+            'An optional Jinja2 template that will be rendered with the'
+            ' retrieved value as the "state" and "s" parameters. e.g if'
+            ' set to "{{ state }}" (the default) the value is printed as is.'
+        ),
+    )
+
+    # . . . . . . . . . . . . . . . . . . . .
+    args = argp.parse_args()
+
+    if args.state_id.lower().startswith('lava'):
+        c_put.error(f'Bad state_id: {args.state_id}: Values beginning with "lava" are reserved')
+
+    if not args.realm:
+        try:
+            args.realm = os.environ['LAVA_REALM']
+        except KeyError:
+            argp.error(
+                'Lava realm must be specified via -r, --realm or LAVA_REALM environment variable.'
+            )
+
+    return args
+
+
+# ---------------------------------------------------------------------------------------
+def cmd_put(args: argparse.Namespace) -> None:
+    """
+    Insert / replace a state item.
+
+    The namespace argument may contain the following:
+
+    - state_id
+        State ID. Required.
+
+    - param
+        A dictionary of key/value pairs.
+
+    - publisher
+        Arbitrary string to identify the state item publisher.
+
+    - realm:
+        Lava realm
+
+    - type:
+        State item type.
+
+    - ttl:
+        Duration for state item time to live.
+
+    :param args:        The argparse arguments namespace.
+
+    """
+
+    value = args.value or args.param
+    state = LavaStateItem.new(
+        state_id=args.state_id,
+        realm=args.realm,
+        state_type=args.type,
+        ttl=args.ttl,
+        value=value,
+        publisher=args.publisher,
+        kms_key=args.kms_key,
+    )  # type: LavaStateItem
+    state.put()
+
+
+# ---------------------------------------------------------------------------------------
+def cmd_get(args: argparse.Namespace) -> None:
+    """
+    Get a state item.
+
+    The namespace argument may contain the following:
+
+    - state_id
+        State ID. Required.
+
+    :param args:        The argparse arguments namespace.
+    :return:
+    """
+
+    try:
+        value = LavaStateItem.get(state_id=args.state_id, realm=args.realm).value
+    except KeyError:
+        if not args.ignore_missing:
+            raise Exception(f'{args.state_id}: No such state_id')
+        value = ''
+
+    print(Template(args.template).render(s=value, state=value))
+
+
+# ---------------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Do the business.
+
+    :return:    status
+    """
+
+    setup_logging(LOGLEVEL, name=LOGNAME, prefix=PROG)
+    args = process_cli_args()
+    setup_logging(args.level, name=LOGNAME, target=args.log, colour=args.colour, prefix=args.tag)
+
+    args.func(args)
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)
+    except KeyboardInterrupt:
+        print('Interrupt', file=sys.stderr)
+        exit(2)

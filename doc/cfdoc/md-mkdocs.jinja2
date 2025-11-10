@@ -1,0 +1,98 @@
+{#- CFdoc template for including doco into a mkdocs doc set. -#}
+{%- set md_style='standard' %}
+{%  set base_link=cfdoc.name %}
+
+## {{ cfdoc.name }}
+
+{# -------------------------------------------------------------------------- #}
+{% if cfdoc.overview.Description %}
+{% for para in cfdoc.overview.Description %}
+{{ para }}
+{% endfor %}
+{% endif %}
+
+{# -------------------------------------------------------------------------- #}
+{% if cfdoc.parameters %}
+### {{ 'Parameters' | xref(md_style, target=base_link) }}
+
+{# Put parameters in a table #}
+|Parameter|Type|Description|
+|-|-|-|
+{% for param in cfdoc.parameters -%}
+|{{ param | e}}|{{ cfdoc.parameters[param].Type }}|{{ cfdoc.parameters[param].Description | join(" ") }}|
+{% endfor %}
+    {%- if not cfdoc.parameters -%}
+| | | |
+    {% endif %}
+{% endif %}
+
+{# -------------------------------------------------------------------------- #}
+{% if cfdoc.outputs %}
+### {{ 'Outputs' | xref(md_style, target=base_link) }}
+{# Put outputs in a table #}
+|Id|Export as|Description|
+|-|-|-|
+{% for op_id in cfdoc.outputs -%}
+|{{ op_id }}|`#!json {{ cfdoc.outputs[op_id]["Export"] | tojson if cfdoc.outputs[op_id]["Export"] else " " }}`|{{ cfdoc.outputs[op_id]["Description"] }}|
+{% endfor %}
+{% endif %}
+
+{# -------------------------------------------------------------------------- #}
+### {{ 'Resources' | xref(md_style, target=base_link) }}
+
+{% for resgrp in cfdoc.resource_groups if cfdoc.resource_groups[resgrp].Members -%}
+    {{ '* ' }}{{  cfdoc.resource_groups[resgrp].Name | e | xref(md_style) }}
+{% endfor -%}
+
+{#
+Put parameters in each resource group in a table. This only uses some
+of the available attributes.
+-#}
+
+{% for resgrp in cfdoc.resource_groups if cfdoc.resource_groups[resgrp].Members %}
+#### {{ cfdoc.resource_groups[resgrp].Name | xref(md_style, target=base_link) }}
+|Id|Type|Description|
+|-|-|-|
+{% for rsrc_id in cfdoc.resource_groups[resgrp].Members -%}
+|{{ rsrc_id | xref(md_style, target=rsrc_id) }}|{{ cfdoc.resources[rsrc_id].Type | re_match(".*::.*::(.*)") }}|{{ cfdoc.resources[rsrc_id].Description[0] }}|
+{% endfor %}
+{% endfor %}
+
+{# -------------------------------------------------------------------------- #}
+### {{ 'Resource Details' | xref(md_style, target=base_link) }}
+{% for rsrc_id in cfdoc.resources | sort %}
+#### {{ rsrc_id | xref(md_style, target=cfdoc.resource_groups[cfdoc.resources[rsrc_id].Group].Name) }}
+
+=== "Details"
+    |Property|Value|
+    |-|-|
+    {% if "Type" in cfdoc.resources[rsrc_id] -%}
+    |Type|
+        {%- if cfdoc.resources[rsrc_id]['Type'] in cfdoc.plugins.awsdoc.resources -%}
+            [{{ cfdoc.resources[rsrc_id]['Type'] }}]({{ cfdoc.plugins.awsdoc.resources[cfdoc.resources[rsrc_id]['Type']] }} "AWS documentation for this resource type")
+        {%- else -%}
+            {{ cfdoc.resources[rsrc_id]['Type'] }}
+        {%- endif -%}
+    |
+    {%- endif %}
+    {% if "Group" in cfdoc.resources[rsrc_id] -%}
+    |Group|{{ cfdoc.resource_groups[cfdoc.resources[rsrc_id].Group].Name |xref(md_style, target=cfdoc.resource_groups[cfdoc.resources[rsrc_id].Group].Name) }} ({{ cfdoc.resources[rsrc_id]["Group"] |xref(md_style, target=cfdoc.resource_groups[cfdoc.resources[rsrc_id].Group].Name)}})|
+    {% for key in cfdoc.resources[rsrc_id] if key not in ("JSON", "Group", "Type") and cfdoc.resources[rsrc_id][key] -%}
+    |{{ key }}|
+        {%- if cfdoc.resources[rsrc_id][key] is string -%}
+            {{ cfdoc.resources[rsrc_id][key] | e }}
+        {%- else -%}
+            {{ cfdoc.resources[rsrc_id][key] | join(" ") }}
+        {%- endif -%}
+
+    {% endfor %}
+
+{% if cfdoc.resources[rsrc_id].JSON %}
+=== "Source"
+    ```json
+    {{ cfdoc.resources[rsrc_id].JSON | safe | indent(4) }}
+    ```
+{% endif %}
+
+{% endif %}
+{% endfor %}

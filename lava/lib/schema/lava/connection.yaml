@@ -1,0 +1,93 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava connection specification
+
+type: object
+
+properties:
+  conn_id:
+    description: Connection ID.
+    type: string
+    minLength: 1
+  description:
+    description: A short description of the connection.
+    type: string
+    minLength: 1
+  enabled:
+    description: Whether or not the connection is enabled. Defaults to false.
+    $ref: lava.common.boolean
+  owner:
+    description: Identifies the owner of the connection.
+    type: string
+    minLength: 1
+  type:
+    description: Connection type.
+    type: string
+    minLength: 1
+
+patternProperties:
+  ^[xX]-:
+    description: X-* fields are ignored by lava.
+
+required:
+  - conn_id
+  - type
+
+# Mix-in for the connection parameters for each type
+allOf:
+  - if: { properties: { type: { const: aws } } }
+    then: { $ref: lava.connection.aws }
+  - if: { properties: { type: { const: docker } } }
+    then: { $ref: lava.connection.docker }
+  - if: { properties: { type: { const: email } } }
+    then: { $ref: lava.connection.email }
+  - if: { properties: { type: { const: generic } } }
+    then: { $ref: lava.connection.generic }
+  - if: { properties: { type: { const: git } } }
+    then: { $ref: lava.connection.git }
+  - if: { properties: { type: { const: mariadb } } }
+    then: { $ref: lava.connection.mariadb }
+  - if: { properties: { type: { const: mariadb-rds } } }
+    then: { $ref: lava.connection.mariadb-rds }
+  - if: { properties: { type: { const: mssql } } }
+    then: { $ref: lava.connection.mssql }
+  - if: { properties: { type: { const: mysql } } }
+    then: { $ref: lava.connection.mysql }
+  - if: { properties: { type: { const: mysql-aurora } } }
+    then: { $ref: lava.connection.mysql-aurora }
+  - if: { properties: { type: { const: mysql-rds } } }
+    then: { $ref: lava.connection.mysql-rds }
+  - if: { properties: { type: { const: oracle } } }
+    then: { $ref: lava.connection.oracle }
+  - if: { properties: { type: { const: oracle-rds } } }
+    then: { $ref: lava.connection.oracle-rds }
+  - if: { properties: { type: { const: postgres } } }
+    then: { $ref: lava.connection.postgres }
+  - if: { properties: { type: { const: postgres-aurora } } }
+    then: { $ref: lava.connection.postgres-aurora }
+  - if: { properties: { type: { const: postgres-rds } } }
+    then: { $ref: lava.connection.postgres-rds }
+  - if: { properties: { type: { const: psql } } }
+    then: { $ref: lava.connection.psql }
+  - if: { properties: { type: { const: redshift } } }
+    then: { $ref: lava.connection.redshift }
+  - if: { properties: { type: { const: redshift-serverless } } }
+    then: { $ref: lava.connection.redshift-serverless }
+  - if: { properties: { type: { const: ses } } }
+    then: { $ref: lava.connection.ses }
+  - if: { properties: { type: { const: sharepoint } } }
+    then: { $ref: lava.connection.sharepoint }
+  - if: { properties: { type: { const: slack } } }
+    then: { $ref: lava.connection.slack }
+  - if: { properties: { type: { const: smb } } }
+    then: { $ref: lava.connection.smb }
+  - if: { properties: { type: { const: sqlite3 } } }
+    then: { $ref: lava.connection.sqlite3 }
+  - if: { properties: { type: { const: ssh } } }
+    then: { $ref: lava.connection.ssh }
+  - if: { properties: { type: { const: scp } } }
+    then: { $ref: lava.connection.scp }
+  - if: { properties: { type: { const: sftp } } }
+    then: { $ref: lava.connection.sftp }
+
+unevaluatedProperties: false

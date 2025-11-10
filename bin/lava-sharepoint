@@ -1,0 +1,804 @@
+#!/usr/bin/env python3
+
+"""
+Command line utility to invoke the functionality of the sharepoint* jobs.
+
+Relies on the lava connector subsystem.
+
+"""
+
+import argparse
+import logging
+import os
+import sys
+from shutil import rmtree
+from tempfile import mkdtemp
+
+import boto3
+
+from lava.handlers import (
+    sharepoint_get_doc,
+    sharepoint_get_list,
+    sharepoint_get_multi_doc,
+    sharepoint_put_doc,
+    sharepoint_put_list,
+)
+from lava.lavacore import LOGNAME, get_realm_info
+from lava.lib.datetime import now_tz
+from lava.lib.logging import setup_logging
+from lava.version import __version__
+
+__author__ = 'Murray Andrews'
+
+PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+LOG = logging.getLogger(LOGNAME)
+LOGLEVEL = 'info'
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(prog=PROG, description='Operate on SharePoint sites.')
+
+    argp.add_argument('--profile', action='store', help='As for AWS CLI.')
+
+    argp.add_argument(
+        '-c', '--conn-id', dest='conn_id', required=True, action='store', help='Lava connection ID.'
+    )
+
+    argp.add_argument(
+        '-J',
+        '--no-jinja',
+        dest='jinja',
+        action='store_false',
+        help='Disable Jinja rendering of the transfer parameters.',
+    )
+
+    argp.add_argument(
+        '-r',
+        '--realm',
+        action='store',
+        default=os.environ.get('LAVA_REALM'),
+        help=(
+            'Lava realm name. If not specified, the environment variable LAVA_REALM must be set.'
+        ),
+    )
+
+    argp.add_argument(
+        '--tmpdir',
+        action='store',
+        help=(
+            'Place temporary files in the specified directory.'
+            ' This directory must not exist and will be deleted on exit.'
+        ),
+    )
+
+    argp.add_argument('-v', '--version', action='version', version=__version__)
+
+    # ------------------------------
+    # Logging options
+
+    logp = argp.add_argument_group('logging arguments')
+    logp.add_argument(
+        '--no-colour',
+        '--no-color',
+        dest='colour',
+        action='store_false',
+        default=True,
+        help='Don\'t use colour in information messages.',
+    )
+
+    logp.add_argument(
+        '-l',
+        '--level',
+        metavar='LEVEL',
+        default=LOGLEVEL,
+        help=(
+            'Print messages of a given severity level or above. The standard logging level names'
+            ' are available but debug, info, warning and error are most useful.'
+            f' The Default is {LOGLEVEL}.'
+        ),
+    )
+
+    logp.add_argument(
+        '--log',
+        action='store',
+        help='Log to the specified target. This can be either a file'
+        ' name or a syslog facility with an @ prefix (e.g. @local0).',
+    )
+
+    logp.add_argument(
+        '--tag',
+        action='store',
+        default=PROG,
+        help=f'Tag log entries with the specified value. The default is {PROG}.',
+    )
+
+    # ----------------------------------------
+    # Sub parsers
+
+    subp = argp.add_subparsers()
+
+    # . . . . . . . . . . . . . . . . . . . .
+    # "put-doc" command
+
+    c_put_doc = subp.add_parser(
+        'put-doc', aliases=['pd'], help='Copy a file into a SharePoint document library.'
+    )
+    c_put_doc.set_defaults(func=cmd_put_doc)
+
+    c_put_doc.add_argument(
+        '-t', '--title', action='store', help='Document title. This will be jinja rendered.'
+    )
+
+    c_put_doc.add_argument(
+        'file',
+        action='store',
+        help=(
+            'Source file. Values starting with s3:// will be copied from S3.'
+            ' This will be jinja rendered.'
+        ),
+    )
+
+    c_put_doc.add_argument(
+        'path',
+        action='store',
+        metavar='SharePoint-path',
+        help='Target location. Must be in the form library:path. This will be jinja rendered.',
+    )
+
+    # . . . . . . . . . . . . . . . . . . . .
+    # "put-list" command
+
+    c_put_list = subp.add_parser(
+        'put-list', aliases=['pl'], help='Copy a file into a SharePoint list.'
+    )
+
+    c_put_list.set_defaults(func=cmd_put_list)
+
+    c_put_list.add_argument(
+        '--replace',
+        action='store_true',
+        help='Replace existing list contents. Default is to append.',
+    )
+
+    c_put_list.add_argument(
+        'file',
+        action='store',
+        help=(
+            'Source file. Values starting with s3:// will be copied from S3.'
+            ' This will be jinja rendered.'
+        ),
+    )
+
+    c_put_list.add_argument(
+        'list',
+        action='store',
+        metavar='SharePoint-list',
+        help='Target SharePoint list name. This will be jinja rendered.',
+    )
+
+    # . . . . . . . . . . . . . . . . . . . .
+    # "get-doc" command
+
+    c_get_doc = subp.add_parser(
+        'get-doc', aliases=['gd'], help='Copy a file from a SharePoint document library.'
+    )
+    c_get_doc.set_defaults(func=cmd_get_doc)
+
+    c_get_doc.add_argument(
+        '-k',
+        '--kms-key-id',
+        dest='kms_key_id',
+        action='store',
+        help='AWS KMS key to use for uploading data to S3.',
+    )
+
+    c_get_doc.add_argument(
+        'path',
+        action='store',
+        metavar='SharePoint-path',
+        help='Source location. Must be in the form library:path. This will be jinja rendered.',
+    )
+
+    c_get_doc.add_argument(
+        'file',
+        action='store',
+        help=(
+            'Target file. Values starting with s3:// will be copied to S3.'
+            ' This will be jinja rendered.'
+        ),
+    )
+
+    # . . . . . . . . . . . . . . . . . . . .
+    # "get-list" command
+
+    c_get_list = subp.add_parser(
+        'get-list', aliases=['gl'], help='Copy a SharePoint list to a file'
+    )
+    c_get_list.set_defaults(func=cmd_get_list)
+
+    c_get_list.add_argument(
+        '-k',
+        '--kms-key-id',
+        dest='kms_key_id',
+        action='store',
+        help='AWS KMS key to use for uploading data to S3.',
+    )
+
+    c_get_list.add_argument(
+        'list',
+        action='store',
+        metavar='SharePoint-list',
+        help='Source SharePoint list name. This will be jinja rendered.',
+    )
+
+    c_get_list.add_argument(
+        'file',
+        action='store',
+        help=(
+            'Target file. Values starting with s3:// will be copied to S3.'
+            ' This will be jinja rendered.'
+        ),
+    )
+
+    c_get_list.add_argument(
+        '-H',
+        '--no-header',
+        dest='header',
+        action='store_false',
+        help='Don\'t include a header row. A header is included by default.',
+    )
+
+    c_get_list.add_argument('--delimiter', action='store', help='Output field delimiter.')
+
+    c_get_list.add_argument(
+        '--double-quote', dest='doublequote', action='store_true', help='As for csv.writer.'
+    )
+
+    c_get_list.add_argument(
+        '--escape-char', dest='escapechar', action='store', help='As for csv.writer.'
+    )
+
+    c_get_list.add_argument(
+        '--quote-char', dest='quotechar', action='store', help='As for csv.writer.'
+    )
+
+    c_get_list.add_argument(
+        '--quoting',
+        action='store',
+        help='As for csv.writer QUOTE_ parameters (without the QUOTE_ prefix).',
+    )
+
+    # . . . . . . . . . . . . . . . . . . . .
+    # "get-multi-doc" command
+
+    c_get_multi_doc = subp.add_parser(
+        'get-multi-doc',
+        aliases=['gmd'],
+        help='Copy multiple files from a SharePoint document library path.',
+    )
+    c_get_multi_doc.set_defaults(func=cmd_get_multi_doc)
+
+    c_get_multi_doc.add_argument(
+        '-k',
+        '--kms-key-id',
+        dest='kms_key_id',
+        action='store',
+        help='AWS KMS key to use for uploading data to S3.',
+    )
+
+    c_get_multi_doc.add_argument(
+        'path',
+        action='store',
+        metavar='SharePoint-path',
+        help='Source location. Must be in the form library:path. This will be jinja rendered.',
+    )
+
+    c_get_multi_doc.add_argument(
+        'outpath',
+        action='store',
+        help=(
+            'Target path. Values starting with s3:// will be copied to S3 using given bucket '
+            'and key as key prefix. This will be jinja rendered.'
+        ),
+    )
+
+    c_get_multi_doc.add_argument(
+        'glob',
+        action='store',
+        nargs='?',
+        default=None,
+        help='Filter files in sharepoint path on this given glob. This will be jinja rendered.',
+    )
+
+    # ----------------------------------------
+    args = argp.parse_args()
+    if not args.realm:
+        argp.error(
+            'Lava realm must be specified via -r, --realm or LAVA_REALM environment variable.'
+        )
+
+    return args
+
+
+# ------------------------------------------------------------------------------
+def cmd_get_doc(args: argparse.Namespace) -> None:
+    """
+    Get a file from a SharePoint site.
+
+    The namespace argument must contain the following:
+
+        - realm
+            Realm name.
+
+        - conn_id
+            A connection ID for the source SharePoint site.
+
+        - path
+            Source path within the remote SharePoint site. It must be in the form
+            `library:path`.
+
+        - file
+            Target file. If it starts with `s3://` it is assumed to be an object in
+            S3, otherwise a local file. If the local file is not absolute, it is
+            assumed to be relative to the temporary directory. This will be
+            jinja rendered.
+
+        - kms_key_id*
+            AWS KMS key to use for uploading data to S3.
+
+        - jinja
+            Boolean indicating whether Jinja rendering is enabled for the target
+            path and description. Default True.
+
+
+    :param args:        The argparse arguments namespace.
+
+    """
+
+    try:
+        library, path = args.path.split(':')
+    except ValueError:
+        raise Exception(f'{args.path}: Bad path - must be in the form library:path')
+
+    aws_session = boto3.Session(profile_name=args.profile)
+    realm_table = aws_session.resource('dynamodb').Table('lava.realms')
+
+    # Path must be absolute
+    if not path.startswith('/'):
+        path = '/' + path
+
+    # ----------------------------------------
+    # Get realm info
+
+    realm_info = get_realm_info(args.realm, realm_table)
+    LOG.debug(f'Realm info: {realm_info}')
+
+    # ----------------------------------------
+    # Dummy up a lava job specification so we can use the existing lava job handler.
+
+    job_spec = {
+        'job_id': os.environ.get('LAVA_JOB_ID', PROG),
+        'run_id': os.environ.get('LAVA_RUN_ID', f'{PROG}.{os.getpid()}'),
+        'realm': args.realm,
+        'globals': {},
+        'state': {},
+        'max_tries': 0,
+        'ts_start': now_tz(),
+        'parameters': {
+            'conn_id': args.conn_id,
+            'library': library,
+            'path': path,
+            'basedir': os.getcwd(),
+            'file': args.file,
+            'kms_key_id': args.kms_key_id,
+            'jinja': args.jinja,
+        },
+    }
+    LOG.debug(f'Fake job spec: {job_spec}')
+
+    LOG.debug('Running job handler')
+    sharepoint_get_doc.run(
+        job_spec=job_spec,
+        realm_info=realm_info,
+        tmpdir=args.tmpdir,
+        s3tmp=os.environ.get('LAVA_S3_TMP'),
+        aws_session=aws_session,
+    )
+
+
+# ------------------------------------------------------------------------------
+def cmd_get_list(args: argparse.Namespace) -> None:
+    """
+    Get a list from a SharePoint site.
+
+    The namespace argument must contain the following:
+
+        - realm
+            Realm name.
+
+        - conn_id
+            A connection ID for the source SharePoint site.
+
+        - list
+            List name on the SharePoint site.
+
+        - file
+            Target file. If it starts with `s3://` it is assumed to be an object in
+            S3, otherwise a local file. If the local file is not absolute, it is
+            assumed to be relative to the current directory. This will be
+            jinja rendered.
+
+        - jinja
+            Boolean indicating whether Jinja rendering is enabled for the target
+            path and description. Default True.
+
+        - header
+            Boolean indicating whether to include a header line with the column names.
+            Default is True.
+
+        - kms_key_id
+            AWS KMS key to use for uploading data to S3.
+
+        - delimiter*
+            Field delimiter. Default '|'
+
+        - doublequote*
+            as for csv.writer. default false.
+
+        - escapechar*
+            as for csv.writer. default none.
+
+        - quotechar*
+            as for csv.writer. default '"'.
+
+        - quoting*
+            as for csv.writer ``quote_`` parameters (without the ``quote_`` prefix).
+            default "minimal" (quote_minimal).
+
+
+    :param args:        The argparse arguments namespace.
+    """
+
+    aws_session = boto3.Session(profile_name=args.profile)
+    realm_table = aws_session.resource('dynamodb').Table('lava.realms')
+
+    # ----------------------------------------
+    # Get realm info
+
+    realm_info = get_realm_info(args.realm, realm_table)
+
+    # ----------------------------------------
+    # Dummy up a lava job specification so we can use the existing lava job handler.
+
+    job_spec = {
+        'job_id': os.environ.get('LAVA_JOB_ID', PROG),
+        'run_id': os.environ.get('LAVA_RUN_ID', f'{PROG}.{os.getpid()}'),
+        'realm': args.realm,
+        'globals': {},
+        'state': {},
+        'max_tries': 0,
+        'ts_start': now_tz(),
+        'parameters': {
+            'conn_id': args.conn_id,
+            'list': args.list,
+            'file': args.file,
+            'basedir': os.getcwd(),
+            'kms_key_id': args.kms_key_id,
+            'jinja': args.jinja,
+        },
+    }
+
+    for p in ('header', 'delimiter', 'doublequote', 'escapechar', 'quotechar', 'quoting'):
+        if getattr(args, p) is not None:
+            job_spec['parameters'][p] = getattr(args, p)
+
+    LOG.debug(f'Fake job spec: {job_spec}')
+
+    LOG.debug('Running job handler')
+    sharepoint_get_list.run(
+        job_spec=job_spec,
+        realm_info=realm_info,
+        tmpdir=args.tmpdir,
+        s3tmp=os.environ.get('LAVA_S3_TMP'),
+        aws_session=aws_session,
+    )
+
+
+# ------------------------------------------------------------------------------
+def cmd_put_doc(args: argparse.Namespace) -> None:
+    """
+    Put a file into a SharePoint document library.
+
+    The namespace argument must contain the following:
+
+    - realm
+        Realm name.
+
+    - conn_id
+        A connection ID for the target SharePoint site.
+
+    - path
+        Target path within the SharePoint site. Must be in the form 'library:path'.
+        This will be jinja rendered.
+
+    - file
+        Source file. If it starts with `s3://` it is assumed to be an object in
+        S3, otherwise a local file. If the local file is not absolute, it is
+        assumed to be relative to the temporary directory. This will be
+        jinja rendered.
+
+    - title
+        Document title.
+
+    - jinja
+        Boolean indicating whether Jinja rendering is enabled for the target
+        path and description. Default True.
+
+
+    :param args:        The argparse arguments namespace.
+    """
+
+    try:
+        library, path = args.path.split(':')  # type: str, str
+    except ValueError:
+        raise Exception(f'{args.path}: Bad path - must be in the form library:path')
+
+    # Path must be absolute
+    if not path.startswith('/'):
+        path = '/' + path
+
+    aws_session = boto3.Session(profile_name=args.profile)
+    realm_table = aws_session.resource('dynamodb').Table('lava.realms')
+
+    # ----------------------------------------
+    # Get realm info
+
+    realm_info = get_realm_info(args.realm, realm_table)
+    LOG.debug(f'Realm info: {realm_info}')
+
+    # ----------------------------------------
+    # Dummy up a lava job specification so we can use the existing lava job handler.
+
+    job_spec = {
+        'job_id': os.environ.get('LAVA_JOB_ID', PROG),
+        'run_id': os.environ.get('LAVA_RUN_ID', f'{PROG}.{os.getpid()}'),
+        'realm': args.realm,
+        'globals': {},
+        'state': {},
+        'max_tries': 0,
+        'ts_start': now_tz(),
+        'parameters': {
+            'conn_id': args.conn_id,
+            'library': library,
+            'path': path,
+            'basedir': os.getcwd(),
+            'file': args.file,
+            'title': args.title,
+            'jinja': args.jinja,
+        },
+    }
+    LOG.debug(f'Fake job spec: {job_spec}')
+
+    LOG.debug('Running job handler')
+    sharepoint_put_doc.run(
+        job_spec=job_spec,
+        realm_info=realm_info,
+        tmpdir=args.tmpdir,
+        s3tmp=os.environ.get('LAVA_S3_TMP'),
+        aws_session=aws_session,
+    )
+
+
+# ------------------------------------------------------------------------------
+def cmd_put_list(args: argparse.Namespace) -> None:
+    """
+    Put a list onto a SharePoint site.
+
+    The namespace argument must contain the following:
+
+        - realm
+            Realm name.
+
+        - conn_id
+            A connection ID for the target SharePoint site.
+
+        - list
+            List name on the SharePoint site.
+
+        - file
+            Source file. If it starts with `s3://` it is assumed to be an object in
+            S3, otherwise a local file. If the local file is not absolute, it is
+            assumed to be relative to the temporary directory. This will be
+            jinja rendered.
+
+        - jinja
+            Boolean indicating whether Jinja rendering is enabled for the target
+            path and description. Default True.
+
+        - replace
+            Boolean. If True, replace existing contents otherwise append.
+
+    :param args:        The argparse arguments namespace.
+    """
+
+    aws_session = boto3.Session(profile_name=args.profile)
+    realm_table = aws_session.resource('dynamodb').Table('lava.realms')
+
+    # ----------------------------------------
+    # Get realm info
+
+    realm_info = get_realm_info(args.realm, realm_table)
+    LOG.debug(f'Realm info: {realm_info}')
+
+    # ----------------------------------------
+    # Dummy up a lava job specification so we can use the existing lava job handler.
+
+    job_spec = {
+        'job_id': os.environ.get('LAVA_JOB_ID', PROG),
+        'run_id': os.environ.get('LAVA_RUN_ID', f'{PROG}.{os.getpid()}'),
+        'realm': args.realm,
+        'globals': {},
+        'state': {},
+        'max_tries': 0,
+        'ts_start': now_tz(),
+        'parameters': {
+            'conn_id': args.conn_id,
+            'list': args.list,
+            'file': args.file,
+            'basedir': os.getcwd(),
+            'jinja': args.jinja,
+            'mode': 'replace' if args.replace else 'append',
+        },
+    }
+    LOG.debug(f'Fake job spec: {job_spec}')
+
+    LOG.debug('Running job handler')
+    sharepoint_put_list.run(
+        job_spec=job_spec,
+        realm_info=realm_info,
+        tmpdir=args.tmpdir,
+        s3tmp=os.environ.get('LAVA_S3_TMP'),
+        aws_session=aws_session,
+    )
+
+
+# ------------------------------------------------------------------------------
+def cmd_get_multi_doc(args: argparse.Namespace) -> None:
+    """
+    Get multiple file from a SharePoint site and path.
+
+    The namespace argument must contain the following:
+
+        - realm
+            Realm name.
+
+        - conn_id
+            A connection ID for the source SharePoint site.
+
+        - path
+            Source path within the remote SharePoint site. It must be in the form
+            `library:path`.
+
+        - outpath
+            Output path location. If it starts with `s3://` it is assumed to be an
+            bucket and base prefix to use in S3, otherwise a local file. If the
+            local file is not absolute, it is assumed to be relative to the
+            temporary directory. This will be jinja rendered.
+
+        - glob*
+            Filter glob to use on the SharePoint source path. This will be jinja
+            rendered.
+
+        - kms_key_id*
+            AWS KMS key to use for uploading data to S3.
+
+        - jinja
+            Boolean indicating whether Jinja rendering is enabled for the target
+            path and description. Default True.
+
+
+    :param args:        The argparse arguments namespace.
+
+    """
+
+    try:
+        library, path = args.path.split(':')
+    except ValueError:
+        raise Exception(f'{args.path}: Bad path - must be in the form library:path')
+
+    aws_session = boto3.Session(profile_name=args.profile)
+    realm_table = aws_session.resource('dynamodb').Table('lava.realms')
+
+    # Path must be absolute
+    if not path.startswith('/'):
+        path = '/' + path
+
+    # ----------------------------------------
+    # Get realm info
+
+    realm_info = get_realm_info(args.realm, realm_table)
+    LOG.debug(f'Realm info: {realm_info}')
+
+    # ----------------------------------------
+    # Dummy up a lava job specification so we can use the existing lava job handler.
+
+    job_spec = {
+        'job_id': os.environ.get('LAVA_JOB_ID', PROG),
+        'run_id': os.environ.get('LAVA_RUN_ID', f'{PROG}.{os.getpid()}'),
+        'realm': args.realm,
+        'globals': {},
+        'state': {},
+        'max_tries': 0,
+        'ts_start': now_tz(),
+        'parameters': {
+            'conn_id': args.conn_id,
+            'library': library,
+            'path': path,
+            'basedir': os.getcwd(),
+            'outpath': args.outpath,
+            'glob': args.glob,
+            'kms_key_id': args.kms_key_id,
+            'jinja': args.jinja,
+        },
+    }
+    LOG.debug(f'Fake job spec: {job_spec}')
+
+    LOG.debug('Running job handler')
+    sharepoint_get_multi_doc.run(
+        job_spec=job_spec,
+        realm_info=realm_info,
+        tmpdir=args.tmpdir,
+        s3tmp=os.environ.get('LAVA_S3_TMP'),
+        aws_session=aws_session,
+    )
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Do the business.
+
+    :return:    status
+    """
+
+    setup_logging(LOGLEVEL, name=LOGNAME, prefix=PROG)
+    args = process_cli_args()
+    setup_logging(args.level, name=LOGNAME, target=args.log, colour=args.colour, prefix=args.tag)
+
+    if args.tmpdir:
+        os.makedirs(args.tmpdir)
+    else:
+        args.tmpdir = mkdtemp(prefix=f'{PROG}.')
+
+    try:
+        args.func(args)
+    finally:
+        try:
+            rmtree(args.tmpdir, ignore_errors=True)
+        except Exception as e:
+            LOG.warning(f'Cannot remove {args.tmpdir}: {e}')
+        else:
+            LOG.debug(f'Removed {args.tmpdir}')
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)
+    except KeyboardInterrupt:
+        print('Interrupt', file=sys.stderr)
+        exit(2)

@@ -1,0 +1,40 @@
+#- ses connector specifics
+#-
+#- This is the list of vars to prompt for when building
+
+## -----------------------------------------------------------------------------
+## This is a legacy connector. Use email instead.
+## -----------------------------------------------------------------------------
+
+type: ses
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Mandatory fields
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The email address that is sending the email. If not specified, a value must
+## specified at the realm level.
+##
+# from: "y2@colossal.cave"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Reply-to address(es). Can be string or list of strings.
+##
+# reply_to: "bedquilt@colossal.cave"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The email address that bounces and complaints will be forwarded to when
+## feedback forwarding is enabled
+##
+# return_path: "plugh@colossal.cave"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The AWS region name for SES. If not specified, us-east-1 is used.
+##
+# region: "us-east-1"

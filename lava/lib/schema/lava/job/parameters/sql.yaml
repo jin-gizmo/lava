@@ -1,0 +1,79 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava sql/sqli job parameters specification
+
+type: object
+
+properties:
+  batch_size:
+    description: Fetch this many rows at a time.
+    type: integer
+    minValuw: 1
+  conn_id:
+    description: The connection ID for an SQL database.
+    type: string
+    minLength: 1
+  delimiter:
+    description: Single character field delimiter.
+    type: string
+    minLength: 1
+    # Allow for an escape char.
+    maxLength: 2
+  dialect:
+    description: As for csv.writer.
+    type: string
+    minLength: 1
+  doublequote:
+    description: As for csv.writer.
+    $ref: lava.common.boolean
+  escapechar:
+    description: As for csv.writer.
+    oneOf:
+      - type: string
+        minLength: 1
+        # Allow for an escape char.
+        maxLength: 2
+      - type: 'null'
+  header:
+    description: Add a header for SELECT outputs.
+    $ref: lava.common.boolean
+  jinja:
+    description: Enable Jinja rendering.
+    $ref: lava.common.boolean
+  output:
+    description: >-
+      If specified, the output from SELECT statements will be placed in this
+      subdirectory in both the job run temporary area in the local filesystem
+      and in the s3_temp area.
+    type: string
+    minLength: 1
+  quotechar:
+    description: As for csv.writer.
+    type: string
+    minLength: 1
+    # Allow for an escape char.
+    maxLength: 2
+  quoting:
+    description: As for csv.writer QUOTE_* parameters (without the QUOTE_ prefix).
+    type: string
+    enum:
+      - all
+      - minimal
+      - nonnumeric
+      - none
+  raw:
+    description: If true, don't split payload files into individual SQL statements.
+    $ref: lava.common.boolean
+  transaction:
+    description: >-
+      If true, auto-commit is disabled and the sequence of SQLs is run within a
+      transaction. If false, auto-commit is enabled.
+    $ref: lava.common.boolean
+  vars:
+    description: A map of variables injected when the parameters are Jinja rendered.
+    type: object
+
+required:
+  - conn_id
+
+additionalProperties: false

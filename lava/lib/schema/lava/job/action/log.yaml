@@ -1,0 +1,20 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Log action specification
+
+type: object
+
+properties:
+  action:
+    type: string
+    const: log
+  message:
+    description: The message to log.
+    type: string
+    minLength: 1
+
+required:
+  - action
+  - message
+
+additionalProperties: false

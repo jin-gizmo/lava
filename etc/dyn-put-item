@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+
+"""
+Utility to put a JSON formatted item into a DynamoDB table.
+
+This is not possible using the AWS CLI as it requires the wacky DynamoDB style
+JSON.
+
+"""
+
+import argparse
+import decimal
+import json
+import os
+import sys
+
+import boto3
+
+__author__ = 'Murray Andrews'
+__version__ = '2.0.1'
+
+PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(
+        prog=PROG, description='Put a JSON formatted item into a DynamoDB table.'
+    )
+
+    argp.add_argument('--profile', action='store', help='As for AWS CLI.')
+
+    argp.add_argument('-t', '--table', action='store', required=True, help='DynamoDB table name.')
+
+    argp.add_argument('-v', '--version', action='version', version=__version__)
+
+    argp.add_argument(
+        'items',
+        metavar='item.json',
+        nargs='*',
+        help='A JSON formatted item to be added to the table.',
+    )
+
+    return argp.parse_args()
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Do the business.
+
+    :return:        Status
+    """
+
+    args = process_cli_args()
+    aws_session = boto3.Session(profile_name=args.profile)
+    table = aws_session.resource('dynamodb').Table(args.table)
+
+    for item in args.items:
+        print(f'Deploy {item}')
+        with open(item) as jfp:
+            try:
+                data = json.load(jfp, parse_float=decimal.Decimal)
+                if data:
+                    table.put_item(Item=data)
+                else:
+                    print(f'{PROG}: {item}: Skipping null file', file=sys.stderr)
+            except Exception as e:
+                raise Exception(f'{item}: {e}')
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)

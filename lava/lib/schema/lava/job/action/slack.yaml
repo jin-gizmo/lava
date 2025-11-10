@@ -1,0 +1,48 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Slack action specification
+
+type: object
+
+properties:
+  action:
+    type: string
+    const: slack
+  colour:
+    description: Default colour for the sidebar for messages sent using attachment style.
+    type: string
+    minLength: 1
+  from:
+    description: An arbitrary source identifier for display in the Slack message.
+    type: string
+    minLength: 1
+  message:
+    description: The message body.
+    type: string
+    minLength: 1
+  preamble:
+    description: Preamble at the start of the message.
+    type: string
+    minLength: 1
+  slack_conn:
+    description: The name of a slack connector to use.
+    type: string
+    minLength: 1
+  style:
+    description: Display style for Slack messages.
+    type: string
+    enum:
+      - block
+      - attachment
+      - plain
+  subject:
+    description: The message subject.
+    type: string
+    minLength: 1
+
+required:
+  - action
+  - message
+  - slack_conn
+
+additionalProperties: false

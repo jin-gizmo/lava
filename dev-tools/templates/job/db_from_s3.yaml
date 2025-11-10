@@ -1,0 +1,57 @@
+#- db_from_s3 job specifics
+#-
+#- This is the list of vars to prompt for when building
+#= bucket: Source S3 bucket name
+#= key: Source S3 key
+#= db_conn_id: Connection ID for target database
+#= mode: Update mode for the target table
+#= schema: Target schema name
+#= table: Target table name
+
+type: db_from_s3
+
+## #############################################################################
+## The payload is ignored.
+##
+payload: "--"
+
+## #############################################################################
+## Job parameters
+
+parameters:
+  ## ---------------------------------------------------------------------------
+  ## Mandatory params
+
+  db_conn_id: "{{ db_conn_id }}"
+  bucket: "{{ bucket }}"
+  key: "{{ key }}"
+  schema: "{{ schema }}"
+  table: "{{ table }}"
+  mode: "{{ mode }}"
+
+  ## ---------------------------------------------------------------------------
+  ## Optional params
+
+  ## Skip missing files without throwing an error.
+  # skip_missing: false
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## S3 connectivity -- either s3_conn_id or s3_iam_role
+  ##
+  ## The connection ID for AWS S3.
+  # s3_conn_id: "???"
+  ## The IAM role name used to allow access to the source data in S3.
+  # s3_iam_role: "???"
+
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## A list of additional arguments dependent on target DB type
+  # args:
+  #   - "arg1"
+  #   - "arg2"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## List of SQL column specifications.
+  # columns:
+  #  - "col1 VARCHAR(20)"
+  #  - "col2 TIMESTAMP"

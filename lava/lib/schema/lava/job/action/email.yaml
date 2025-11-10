@@ -1,0 +1,53 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Email action specification
+
+type: object
+
+properties:
+  action:
+    type: string
+    const: email
+  email_conn:
+    description: The name of an email connector to use for sending email.
+    type: string
+    minLength: 1
+  from:
+    description: The source email address.
+    type: string
+    format: email
+  message:
+    description: The message body.
+    type: string
+    minLength: 1
+  region:
+    description: The AWS region name for the SES service.
+    type: string
+    pattern: '^[a-z]+-[a-z]+-[0-9]+$'
+  subject:
+    description: The message subject.
+    type: string
+    minLength: 1
+  # Note: To addresses are not Jinja rendered so safe to assert an email type here.
+  to:
+    description: The destination email address(es).
+    anyOf:
+      - type: string
+        format: email
+      - type: array
+        items:
+          type: string
+          format: email
+  attachments:
+    description: Names of files to add as attachments.
+    type: array
+    items:
+      type: string
+
+required:
+  - action
+  - message
+  - subject
+  - to
+
+additionalProperties: false

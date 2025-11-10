@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# Run some health checks. Can be run standalone or as git pre-commit.
+# ------------------------------------------------------------------------------
+
+PYTHON_CHECKS="yes"
+YAML_CHECKS="yes"
+
+# Set to warning or strict to enable.
+CONFIG_CHECKS="{{cookiecutter.config_checks}}"
+
+# {% raw %}
+
+# ------------------------------------------------------------------------------
+function info {
+	echo "[34;1m$*[0m" >& 2
+}
+
+function warning {
+	echo "[35;1mWARNING: $*[0m" >& 2
+}
+
+function error {
+	echo "[31;1mERROR: $*[0m" >& 2
+}
+
+function abort {
+	error "$*"
+	exit 1
+}
+
+# Output to stderr
+exec 1>&2
+
+# ------------------------------------------------------------------------------
+# Python.
+
+if [ "$PYTHON_CHECKS" == "yes" ]
+then
+	info "Checking Python code ..."
+	flake8 . || abort Python checks failed
+
+	# Look for Python files not ending in .py
+	HIDDEN_PYTHON=$(
+		find lava-payloads misc  -type f ! -name '*.py' ! -name '*.sh' \
+			-exec file '{}' \; | grep 'Python script' | cut -d: -f1
+	)
+	if [ "$HIDDEN_PYTHON" != "" ]
+	then
+		# shellcheck disable=SC2086
+		flake8 $HIDDEN_PYTHON || abort Python checks failed
+	fi
+fi
+
+# ------------------------------------------------------------------------------
+# YAML hygiene.
+
+if [ "$YAML_CHECKS" == "yes" ]
+then
+	info "Checking YAML hygiene ..."
+	yamllint . || abort YAML checks failed
+fi
+
+# ------------------------------------------------------------------------------
+# Config file misalignment.
+
+if [ "$CONFIG_CHECKS" != "" ]
+then
+	info "Checking config files for key mismatches ..."
+	bin/yaml_key_diff config/*.yaml
+	if [ $? -ne 0 ]
+	then
+		[ "$CONFIG_CHECKS" != warning ] && abort Config checks failed
+		warning "Config mismatches: I will let it go this time"
+	fi
+fi
+
+# {% endraw %}

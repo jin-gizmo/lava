@@ -1,0 +1,22 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava dispatch job parameters specification
+
+type: object
+
+properties:
+  delay:
+    description: Dispatch delay.
+    $ref: lava.common.duration
+  jinja:
+    description: Enable Jinja rendering of the payload.
+    $ref: lava.common.boolean
+  job_prefix:
+    description: Prepend the specified value to each job ID in the payload.
+    type: string
+    minLength: 1
+  parameters:
+    description: A map of parameters that will be sent with the dispatch.
+    type: object
+
+additionalProperties: false

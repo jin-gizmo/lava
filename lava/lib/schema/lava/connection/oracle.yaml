@@ -1,0 +1,45 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava oracle connection parameters
+
+type: object
+
+# Note that some of these properties are mandatory but marked so here because
+# they can be supplied by AWS Secrets Manager at run-time.
+
+properties:
+  database:
+    description: The name of the database within the database server.
+    type: string
+    minLength: 1
+  edition:
+    description: Oracle version for compatibility in the form x.y[.z]
+    type: string
+    minLength: 1
+  host:
+    description: The database host DNS name or IP address.
+    type: string
+    minLength: 1
+  password:
+    description: The name of an encrypted SSM parameter containing the password.
+    type: string
+    minLength: 1
+  port:
+    description: The database port number.
+    $ref: lava.common.posint
+  secret_id:
+    description: Obtain missing fields from the specified secret in AWS Secrets Manager.
+    type: string
+    minLength: 1
+  service_name:
+    description: The Oracle data base service name.
+    type: string
+    minLength: 1
+  sid:
+    description: The Oracle System Identifier of the database.
+    type: string
+    minLength: 1
+  user:
+    description: Database user name.
+    type: string
+    minLength: 1

@@ -1,0 +1,14 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: A lava boolean specification
+
+# description: Lava is tolerant on boolean values (for now).
+description: Lava boolean
+
+type: boolean
+
+# We make no attempt to cover all variations here. Just common ones.
+# oneOf:
+#  - type: boolean
+#  - type: string
+#    pattern: '^([Tt]rue)|([Ff]alse)$'

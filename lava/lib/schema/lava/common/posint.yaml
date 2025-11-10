@@ -1,0 +1,11 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: A lava positive integer specification
+
+description: Lava is tolerant on integer values (for now).
+
+oneOf:
+  - type: integer
+    minimum: 1
+  - type: string
+    pattern: '^[0-9]+$'

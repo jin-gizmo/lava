@@ -1,0 +1,80 @@
+---
+
+# ANSI colour escape sequences for use with jinja(1)
+
+# c.x - regular (x is colour letter)
+# c.X - bold
+# C.x - bright
+# C.X - bold bright
+# c.0 - reset
+
+c:
+  # Regular
+  k: "\x1b[30m"
+  r: "\x1b[31m"
+  g: "\x1b[32m"
+  y: "\x1b[33m"
+  b: "\x1b[34m"
+  m: "\x1b[35m"
+  c: "\x1b[36m"
+  w: "\x1b[37m"
+  0: "\x1b[0m"
+
+  # Bold
+  K: "\x1b[1;30m"
+  R: "\x1b[1;31m"
+  G: "\x1b[1;32m"
+  Y: "\x1b[1;33m"
+  B: "\x1b[1;34m"
+  M: "\x1b[1;35m"
+  C: "\x1b[1;36m"
+  W: "\x1b[1;37m"
+
+  # Modifiers -- support varies
+  bright: "\x1b[1m"
+  dim: "\x1b[2m"
+  normal: "\x1b[22m"
+  underline: "\x1b[4m"
+  ul: "\x1b[4m"
+  blink: "\x1b[5m"  # Slow blink
+  slow: "\x1b[5m"  # Slow blink
+  fast: "\x1b[6m"  # Fast blink
+  reverse: "\x1b[7m"
+  conceal: "\x1b[8m"
+  crossed: "\x1b[9m"
+
+
+C:
+  # High intensity
+  k: "\x1b[0;90m"
+  r: "\x1b[0;91m"
+  g: "\x1b[0;92m"
+  y: "\x1b[0;93m"
+  b: "\x1b[0;94m"
+  m: "\x1b[0;95m"
+  c: "\x1b[0;96m"
+  w: "\x1b[0;97m"
+  0: "\x1b[0m"
+
+  # Bold high intensity
+  K: "\x1b[1;90m"
+  R: "\x1b[1;91m"
+  G: "\x1b[1;92m"
+  Y: "\x1b[1;93m"
+  B: "\x1b[1;94m"
+  M: "\x1b[1;95m"
+  C: "\x1b[1;96m"
+  W: "\x1b[1;97m"
+
+  # Modifiers -- support varies
+  bright: "\x1b[1m"
+  dim: "\x1b[2m"
+  normal: "\x1b[22m"
+  underline: "\x1b[4m"
+  ul: "\x1b[4m"
+  blink: "\x1b[5m"  # Slow blink
+  slow: "\x1b[5m"  # Slow blink
+  fast: "\x1b[6m"  # Fast blink
+  reverse: "\x1b[7m"
+  conceal: "\x1b[8m"
+  crossed: "\x1b[9m"

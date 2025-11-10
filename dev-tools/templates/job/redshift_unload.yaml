@@ -1,0 +1,77 @@
+#- redshift_unload job specifics
+#-
+#- This is the list of vars to prompt for when building
+#= bucket: Source S3 bucket name
+#= prefix: Source S3 prefix
+#= conn_id: Connection ID for Redshift source cluster
+#= schema: Source schema name
+#= relation: Source table or view
+
+type: redshift_unload
+
+## #############################################################################
+## The payload is ignored.
+##
+payload: "--"
+
+## #############################################################################
+## Job parameters
+
+parameters:
+  ## ---------------------------------------------------------------------------
+  ## Mandatory params
+
+  conn_id: "{{ conn_id }}"
+  bucket: "{{ bucket }}"
+  prefix: "{{ prefix }}"
+  schema: "{{ schema }}"
+
+  # Source relation can be a string or a list
+  relation: "{{ relation }}"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## A list of additional arguments dependent on target DB type
+  args:
+    - "arg1"
+    - "arg2"
+
+  ## ---------------------------------------------------------------------------
+  ## Optional params
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## S3 connectivity -- either s3_conn_id or s3_iam_role
+  ##
+  ## The connection ID for AWS S3.
+  # s3_conn_id: "???"
+  ## The IAM role name used to allow access to the source data in S3.
+  # s3_iam_role: "???"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Disable bucket security checks. Default is false.
+  ##
+  # insecure: false
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Name of the relation to start with when unloading a list of relations. If
+  ## not specified, start at the beginning of the list.
+  ##
+  # start: "relation"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ##  If true, stop when any unload fails otherwise keep moving through the
+  ## unload list. Default is true.
+  ##
+  # stop_on_fail: true
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## A map of variables injected when the S3 target prefix is Jinja rendered.
+  ##
+  # vars:
+  #   var1: "value1"
+  #   var2: "value2"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## An optional WHERE condition for the UNLOAD queries. Do not include the
+  ## WHERE keyword.
+  ##
+  # where: "a where clause common to all source relations"

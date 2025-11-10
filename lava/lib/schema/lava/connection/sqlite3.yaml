@@ -1,0 +1,29 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava sqlite3 connection parameters
+
+type: object
+
+# Note that some of these properties are mandatory but marked so here because
+# they can be supplied by AWS Secrets Manager at run-time.
+
+properties:
+  host:
+    description: The name of the file containing the SQLite3 database.
+    type: string
+    minLength: 1
+  port:
+    description: Required but ignored for sqlite3.
+  preserve_case:
+    description: >-
+      Don't fold database object names to lower case when quoting them for use
+      in db_from_s3 jobs.
+    $ref: lava.common.boolean
+  user:
+    description: Required but ignored for sqlite3.
+    type: string
+
+required:
+  - host
+  - port
+  - user

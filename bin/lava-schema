@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+
+"""Deep schema validator for lava job/connector/trigger specifications."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import os.path
+import sys
+from collections.abc import Iterable
+from fnmatch import fnmatchcase
+from functools import lru_cache, partial
+from typing import Any
+from warnings import filterwarnings
+
+import boto3
+import jsonschema
+
+from lava.lib.aws import dynamo_scan_table
+from lava.lib.jsonschema import (
+    FORMAT_CHECKER,
+    JSON_SCHEMA,
+    LAVA_SCHEMA_INFO,
+    SCHEMA_DIR,
+    jsonschema_resolver_store_from_directory,
+)
+from lava.lib.logging import Fore
+
+# TODO: JsonScheme RefResolver deprecation to be fixed
+filterwarnings('ignore', 'jsonschema.RefResolver', DeprecationWarning)
+
+PROG = os.path.basename(sys.argv[0])
+
+SCHEMA_TYPE_DEFAULT = 'job'
+ERROR_FORMAT = """[{n}] Validator: {err.validator}
+    Path: {err.json_path}
+    Message: {err.message}
+    """
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(
+        prog=PROG,
+        description='Deep schema validation for lava DynamoDB specification objects.',
+    )
+
+    argp.add_argument(
+        '-d',
+        '--dynamodb',
+        action='store_true',
+        help=(
+            'Read lava specifications from DynamoDB instead of the local file system.'
+            ' The lava realm must be specified, either via the -r / --realm option or'
+            ' the LAVA_REALM environment variable.'
+        ),
+    )
+
+    argp.add_argument(
+        '-r',
+        '--realm',
+        action='store',
+        default=os.environ.get('LAVA_REALM'),
+        help=(
+            'Lava realm name. If not specified, the environment variable LAVA_REALM'
+            ' will be used. If --d / --dynamodb is specified, a value must be specified'
+            ' by one of these mechanisms.'
+        ),
+    )
+
+    argp.add_argument(
+        '-s',
+        '--schema-dir',
+        action='store',
+        metavar='DIRNAME',
+        default=SCHEMA_DIR,
+        help=f'Directory containing lava schema specifications. Default is {SCHEMA_DIR}.',
+    )
+    argp.add_argument(
+        '-t',
+        '--type',
+        action='store',
+        choices=LAVA_SCHEMA_INFO,
+        default=SCHEMA_TYPE_DEFAULT,
+        help=(
+            'Use the schema appropriate to the specified lava object type.'
+            f' Options are {", ".join(LAVA_SCHEMA_INFO)}.'
+            f' The default is {SCHEMA_TYPE_DEFAULT}.'
+        ),
+    )
+
+    argp.add_argument(
+        '-v',
+        '--verbose',
+        action='store_true',
+        help=(
+            'Print results for all specifications. By default, only'
+            ' validation failures are printed.'
+        ),
+    )
+
+    argp.add_argument(
+        'spec',
+        metavar='SPEC',
+        nargs='*',
+        help=(
+            'If specified, specifications are read directly from DynamoDB'
+            ' and any SPEC arguments are treated as GLOB style patterns that the'
+            ' ID of the specifications must match.'
+            ' If the -d / --dynamodb option is not specified, JSON formatted'
+            ' lava object specifications are read from the named files.'
+        ),
+    )
+
+    args = argp.parse_args()
+
+    if args.dynamodb and not args.realm:
+        argp.error('Realm must be specified for -d / --dynamodb option.')
+
+    return args
+
+
+# ------------------------------------------------------------------------------
+def lava_specs_local(*filenames: str) -> Iterable[tuple[str, dict]]:
+    """
+    Read lava specifications from files and return them.
+
+    :param filenames:   Names of files containing lava DynamoDB table specs.
+    :return:            An iterator over tuples (file name, contents).
+    """
+
+    for spec_file in filenames:
+        with open(spec_file) as fp:
+            spec = json.load(fp)
+        yield spec_file, spec
+
+
+# ------------------------------------------------------------------------------
+@lru_cache(10)
+def load_table(table_name: str, key: str, aws_session: boto3.Session) -> dict[str, dict[str, Any]]:
+    """
+    Read the entire contents of a table into memory and cache it.
+
+    Be careful with this in terms of memory use and DynamoDB full table scans.
+
+    :param table_name:      Name of the table.
+    :param key:             The table hash key.
+    :param aws_session:     A boto3 Session().
+
+    :return:                A dict of table items keyed on the table key.
+    """
+
+    return {item[key]: item for item in dynamo_scan_table(table_name, aws_session)}
+
+
+# ------------------------------------------------------------------------------
+def lava_specs_dynamo(spec_type: str, realm: str, *patterns: str) -> Iterable[tuple[str, dict]]:
+    """
+    Read lava specifications from DynamoDB.
+
+    :param spec_type:   Determines which table to read.
+    :param realm:       Lava realm.
+    :param patterns:    Zero or more glob patterns. If present, the spec ID must
+                        match one of them.
+    :return:            An iterator over tuples (spec ID, contents).
+    """
+
+    schema_info = LAVA_SCHEMA_INFO[spec_type]
+
+    for spec_id, spec in load_table(
+        f'lava.{realm}.{schema_info.table}', schema_info.key, aws_session=boto3.Session()
+    ).items():
+        if not patterns or any(fnmatchcase(spec_id, p) for p in patterns):
+            yield spec_id, spec
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """Showtime."""
+
+    args = process_cli_args()
+
+    if not os.path.isdir(args.schema_dir):
+        raise Exception(f'Schema directory does not exist: {args.schema_dir}')
+
+    schema = {'$schema': JSON_SCHEMA, '$ref': f'lava.{args.type}'}
+    resolver = jsonschema.RefResolver.from_schema(
+        schema, store=jsonschema_resolver_store_from_directory(args.schema_dir)
+    )
+    validator_cls = jsonschema.validators.validator_for(schema)
+    validator_cls.check_schema(schema)
+    validator = validator_cls(schema, format_checker=FORMAT_CHECKER, resolver=resolver)
+
+    spec_getter = (
+        partial(lava_specs_dynamo, args.type, args.realm) if args.dynamodb else lava_specs_local
+    )
+
+    for spec_id, spec in spec_getter(*args.spec):
+        if validator.is_valid(spec):
+            if args.verbose:
+                print(f'{Fore.GREEN}{spec_id}: OK{Fore.RESET}')
+            continue
+
+        print(f'{Fore.RED}{spec_id}: Failed{Fore.RESET}')
+        for n, error in enumerate(validator.iter_errors(spec), start=1):
+            print(ERROR_FORMAT.format(n=n, err=error))
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)
+    except KeyboardInterrupt:
+        print('Interrupt', file=sys.stderr)
+        exit(2)

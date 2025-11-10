@@ -1,0 +1,75 @@
+#- Redshift connector specifics
+#-
+#- This is the list of vars to prompt for when building
+#= host: Host name
+#= port: Post number
+#= database: Database name
+#= user: User name
+#= password: SSM parameter containing password (excluding realm prefix)
+#-
+
+type: redshift
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Conditional fields - Required but may come from Secrets Manager
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The name of the database within the database server.
+##
+database: "{{ database }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The database host DNS name or IP address.
+##
+host: "{{ host }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The name of an encrypted SSM parameter containing the password.
+## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+## If not provided, IAM authentication to Redshift is attempted.
+##
+password: "/lava/<{ realm }>/{{ password }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Port number.
+##
+port: {{ port }}
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## User name.
+##
+user: "{{ user }}"
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The Redshift cluster identifier. Default is first part of host name.
+##
+# cluster_id: my_cluster
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Name of a secret in AWS Secrets Manager
+# secret_id: /lava/<{ realm }>/secret-name
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The password duration when generating temporary IAM user credientials.
+##
+# password_duration: "15m"
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### don't fold database object names to lower case when quoting for db_from_s3 jobs
+###
+## preserve_case: False
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Set to true to enable SSL. Default is false
+##
+# ssl: false
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The subtype specifies the driver to use.
+# subtype: pg8000

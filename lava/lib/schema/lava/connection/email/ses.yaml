@@ -1,0 +1,13 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava email (ses) connection subtype parameters
+
+properties:
+  region:
+    description: The AWS region name for the SES service.
+    type: string
+    pattern: '^[a-z]{2}-[a-z]+-\d+$'
+  configuration_set:
+    description: An AWS SES configuration set name.
+    type: string
+    minLength: 1

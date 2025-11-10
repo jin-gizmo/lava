@@ -1,0 +1,102 @@
+[tool.black]
+
+line-length = 100
+skip-string-normalization = true
+target-version = ['py39']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.idea
+    | \.tox
+    | \.venv
+    | build
+    | docs
+    | doc
+    | dist
+    | test
+    | venv*
+  )
+)
+'''
+
+[tool.ruff]
+
+line-length = 100
+target-version = 'py39'
+lint.select = [
+    'D', 'E', 'F', 'W', 'C90', 'N', 'UP', 'YTT', 'S', 'B', 'A', 'C4',
+    'ISC', 'ICN', 'PIE', 'T20', 'Q', 'RET', 'SLF',
+    'SIM',  # Simplify
+    # 'ARG' -- Less hassle to use PyCharm for this
+    # Disabled for now:
+    #   ANN - Type annotations (more heat than light at this point)
+    'ERA',  # Commented out code
+    'PL',
+    'RUF',
+]
+
+lint.ignore = [
+    'A005', # Shadows Python standard-library module
+    'D202',
+    'D203',
+    'D212',
+    'D409', # Section underline should match the length of its name - Flake and ruff disagree on this
+    'ANN401',  # Allow Any type
+
+    'S603',  # This is a false alarm as it triggers on every subprocess.check_output
+    'S607',  # Starting a process with a partial path. This annoying if you need PATH
+    'S608',  # SQL injection -- disabled temporarily -- will come back to this.
+
+    'B904',  # Whining about raise ... from err
+    'PIE790',  # Unnecessary pass. I like pass, so up yours.
+    'T201',  # print found -- ridiculous.
+    'Q003',  # Change outer quotes to avoid escaping inner quotes
+    'SIM300',  # Yoda conditions
+    'S110', # `try`-`except`-`pass` detected, consider logging the exception -- in your boot
+    # Most of these are more annoying than useful.
+    # No, I don't want to hear your point of view.
+    'PLR',
+    'PLW',
+    'PLC',
+    'PLR1722',  # Use `sys.exit()` instead of `exit`
+    'PLR0912',  # Too many branches 
+    'PLR0913',  # Too many arguments to function call
+    'PLR0915',  # Too many statements
+
+    'RUF100',  # Unused `noqa` directive
+    'RUF012',  # Temporary -- to be re-enabled: Mutable class attributes should be annotated with `typing.ClassVar`
+    'RUF013',  # Temporary -- to be re-enabled: PEP 484 prohibits implicit `Optional`
+]
+
+lint.external = [
+    # Ruff doesn't support these -- they're flake8 isort
+    'I100',
+    'I201',
+    'I202',
+]
+
+exclude = [
+    '.eggs',
+    '.git',
+    '.idea',
+    '.tox',
+    '.venv',
+    'build',
+    'docs',
+    'doc',
+    'dist',
+    'test',
+    'venv*',
+]
+
+[tool.ruff.lint.mccabe]
+
+max-complexity = 50  # Yeah ... I know
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = 'single'
+multiline-quotes = 'double'
+docstring-quotes = 'double'

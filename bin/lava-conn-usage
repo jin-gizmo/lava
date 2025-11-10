@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+
+"""Find jobs that reference specified connectors."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from collections.abc import Sequence
+from contextlib import suppress
+from fnmatch import fnmatchcase
+
+import boto3
+
+from lava.lib.aws import dynamo_scan_table
+
+__author__ = 'Murray Andrews'
+
+PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+
+# Job parameters that may contain a connection ID
+CONN_PARAMS = ('conn_id', 'db_conn_id', 's3_conn_id', 'docker')
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(
+        prog=PROG, description='Find lava jobs that reference specified connectors.'
+    )
+
+    argp.add_argument('--profile', action='store', help='As for AWS CLI.')
+
+    argp.add_argument(
+        '-i', '--ignore-case', action='store_true', dest='i', help='Matching is case insensitive.'
+    )
+
+    argp.add_argument(
+        '-r',
+        '--realm',
+        action='store',
+        default=os.environ.get('LAVA_REALM'),
+        help=(
+            'Lava realm name. If not specified, the value of the LAVA_REALM'
+            ' environment variable is used. A value must be specified by one'
+            ' of these mechanisms.'
+        ),
+    )
+
+    argp.add_argument(
+        'conn_globs',
+        metavar='connector-glob',
+        nargs='+',
+        action='store',
+        help=(
+            'Report jobs that use connectors that match any of the specified glob style patterns.'
+        ),
+    )
+
+    args = argp.parse_args()
+
+    if not args.realm:
+        argp.error(f'-r / --realm must be specified for the {args.table.title} table')
+
+    return args
+
+
+# ------------------------------------------------------------------------------
+def match_any(s: str, globs: Sequence[str], ignore_case: bool = False) -> bool:
+    """
+    Check if a string matches any glob pattern in a list of patterns.
+
+    :param s:           The string to match.
+    :param globs:       A list of glob style patterns.
+    :param ignore_case: If True ignore case.
+    :return:            True if the string matches any pattern, False otherwise.
+    """
+
+    if ignore_case:
+        s = s.lower()
+        gg = [g.lower() for g in globs]
+    else:
+        gg = globs
+
+    return any(fnmatchcase(s, pattern) for pattern in gg)
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Do the business.
+
+    :return:    status
+    """
+
+    args = process_cli_args()
+    aws_session = boto3.Session(profile_name=args.profile)
+
+    for item in dynamo_scan_table(f'lava.{args.realm}.jobs', aws_session):
+        # Lava jobs can have connections referenced in a few different params
+        # depending on job type
+        connections = []
+        with suppress(KeyError, TypeError):
+            connections.extend(item['parameters']['connections'].values())
+
+        for p in CONN_PARAMS:
+            if not isinstance(p, str):
+                print(
+                    f'{PROG}: Skipping bad connection parameter in item["job_id"]: {p}',
+                    file=sys.stderr,
+                )
+            with suppress(KeyError, TypeError):
+                connections.append(item['parameters'][p])
+
+        for conn in connections:
+            if conn and match_any(conn, args.conn_globs, ignore_case=args.i):
+                print(item['job_id'])
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)

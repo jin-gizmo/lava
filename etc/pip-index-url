@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+
+"""
+Try to work out the appropriate value for the PIP_INDEX_URL.
+
+Pip doesn't make this straightforward as it has its own algorithm for this and
+doesn't really expose it properly with `pip config get`. The command
+`pip config list` does a better job so we use that.
+
+Basically, this is the priority we are using (highest to lowest):
+
+    1.  PIP_INDEX_URL environment var.
+    2.  A value set for the `pip install` command.
+    3.  A default global value.
+"""
+
+import sys
+from contextlib import suppress
+from subprocess import run
+
+# This is the priority order for getting the index-url
+CONFIG_SECTIONS = (':env:', 'install', 'global')
+CONFIG_KEY = 'index-url'
+
+# pip doesn't actually expose a Python API. Sucks eh?
+proc = run(['python3', '-m', 'pip', 'config', 'list'], capture_output=True)
+if proc.returncode:
+    print(f'{sys.argv[0]}:', proc.stderr.decode('utf-8').strip(), file=sys.stderr)
+    exit(1)
+
+pip_config = {}
+for line in proc.stdout.decode('utf-8').splitlines():
+    v = line.split('=', 1)
+    pip_config[v[0]] = v[1].strip('"\'')
+
+for section in CONFIG_SECTIONS:
+    with suppress(KeyError):
+        print(pip_config[f'{section}.{CONFIG_KEY}'])
+        break
+
+exit(0)

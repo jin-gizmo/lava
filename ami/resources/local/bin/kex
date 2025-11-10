@@ -1,0 +1,280 @@
+#!/usr/bin/env python3
+
+"""
+Key extractor (kex).
+
+Extract a single attribute from a structured data file and write the value to
+stdout.  Currently supports JSON, YAML and INI/config files. Useful for making
+values in config files readily accessible to shell scripts.
+
+Copyright (c) 2015, Murray Andrews
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+1.  Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+
+2.  Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
+
+3.  Neither the name of the copyright holder nor the names of its contributors
+    may be used to endorse or promote products derived from this software without
+    specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+"""
+
+import argparse
+import configparser
+import json
+import sys
+from os.path import basename, splitext
+
+import yaml
+
+__author__ = 'Murray Andrews'
+
+PROG = basename(sys.argv[0])
+
+# Map format name to a loader. The value is a function that takes a single
+# stream argument and returns a loaded object. The function should throw some
+# sort of exception if the data is malformed.
+
+FORMAT_TYPES = {
+    'yaml': yaml.safe_load,  # Can also handle some JSON (Is this a good idea?)
+    'json': json.load,
+    'ini': lambda fp: load_ini(fp),  # Lambda allows forward reference
+}
+
+# Map file suffixes to a format type. Everything is mapped to lower case before
+# lookup. Value must be a key in the FORMAT_TYPES dict.
+
+SUFFIXES = {
+    'json': 'json',
+    'jsn': 'json',
+    'yml': 'yaml',
+    'yaml': 'yaml',
+    'ini': 'ini',
+    'cfg': 'ini',
+    'config': 'ini',
+}
+
+
+# ------------------------------------------------------------------------------
+def load_ini(fp):
+    """
+    Load an ini/config file and convert it to a dict.
+
+    :param fp:          Input stream.
+    :type fp:           file
+    :return:            The loaded object.
+    :rtype:             dict[str, T]
+    :raise Exception:   Raise an exception of some kind if load fails.
+    """
+
+    p = configparser.SafeConfigParser()
+    p.read_file(fp)
+
+    d = {}
+
+    # Add any [DEFAULT] section
+    if p.defaults():
+        d['DEFAULT'] = dict(p.defaults())
+
+    for section in p.sections():
+        d[section] = dict(p.items(section))
+
+    return d
+
+
+# ------------------------------------------------------------------------------
+def dget(d, key):
+    """
+    Find the given key in the dict d.
+
+    The key can specify a recursive descent of the dict d using the form
+    k1.k2....kn (dot separated key hierarchy) where k1 is most significant and
+    kn the least.
+
+    :param d:           A dict
+    :param key:         A string used as key into d. Either a sequence of keys as
+                        a dot separated string or a list of keys.
+    :type d:            dict[str, T]
+    :type key:          str | list[str]
+
+    :return:            The specified element of the dict.
+    :rtype:             T
+
+    :raise TypeError:   If d is not a dict.
+    :raise KeyError:    If the key is not present in the dict.
+    """
+
+    if not isinstance(d, dict):
+        raise TypeError(f'Expected dict, got {type(d)}: {d}')
+
+    if not isinstance(key, list):
+        key = key.split('.')
+
+    # Get the next value in the hierarchy
+    val = d[key[0]]
+
+    return val if len(key) == 1 else dget(val, key[1:])
+
+
+# ------------------------------------------------------------------------------
+# noinspection PyShadowingBuiltins
+def print_obj(obj, file=sys.stdout):
+    """
+    Print the object to stdout.
+
+    Lists are printed one entry per line. Dicts are printed one key: value pair
+    per line. The rest are whatever Python fancies.
+
+    :param obj:         Object to print.
+    :param file:        Output file object. Default sys.stdout
+
+    :type obj:          T
+    :type file:         file
+    """
+
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            print(f'{k}={v}', file=file)
+    elif isinstance(obj, list):
+        for v in obj:
+            print(v, file=file)
+    else:
+        print(obj)
+
+
+# ------------------------------------------------------------------------------
+def do_file(key, fp, ftype=None):
+    """
+    Look for the specified key in the given stream. Exceptions propagate.
+
+    :param key:     The key to find.
+    :param fp:      The stream to search.
+    :param ftype:   If the file type cannot be determined from the suffix of the
+                    stream name, assume this file type. Default None.
+    :type key:      str
+    :type fp:       file
+    :type ftype:    str
+
+    :return:        The key value or None if not found.
+    :rtype:         T
+
+    :raise Exception:   If the file cannot be successfully loaded.
+    """
+
+    # ----------------------------------------
+    # Determine file format type
+
+    extension = splitext(fp.name)[1]
+    if extension:
+        ftype = SUFFIXES.get(extension[1:].lower())
+
+    if not ftype:
+        raise Exception(f'{fp.name}: Cannot determine input data format. Use -t/--type option.')
+
+    loader = FORMAT_TYPES.get(ftype)
+    if not loader:
+        raise Exception(f'Unknown format {ftype}')
+
+    # ----------------------------------------
+    # Try to load the object using the given loader
+
+    try:
+        obj = loader(fp)
+    except Exception as e:
+        raise Exception(f'{fp.name}: Cannot load {ftype.upper()} - {e}')
+
+    if not isinstance(obj, dict):
+        print(f'{fp.name}: Content is not a dict')
+
+    try:
+        return dget(obj, key)
+    except (KeyError, TypeError):
+        return None
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Show time.
+
+    :return:    Exit status.
+    """
+
+    argp = argparse.ArgumentParser(
+        description='Key extractor - extract an attribute from a formatted file.', prog=PROG
+    )
+    argp.add_argument(
+        '-i',
+        '--ignore',
+        action='store_true',
+        help='Ignore decoding errors. Default is to abort on errors.',
+    )
+    argp.add_argument(
+        '-t',
+        '--type',
+        metavar='TYPE',
+        dest='ftype',
+        action='store',
+        choices=FORMAT_TYPES.keys(),
+        help=(
+            'Format type ({}). Any input file whose type cannot'
+            ' be determined from the suffix will be assumed to be'
+            ' of this type.'.format(', '.join(FORMAT_TYPES.keys()))
+        ),
+    )
+    argp.add_argument('key', action='store')
+    argp.add_argument(
+        'file',
+        nargs='*',
+        action='store',
+        type=argparse.FileType('r'),
+        help=(
+            'File containing the object. Default stdin.'
+            ' An argument of - also indicates stdin.'
+            ' If multiple files are specified then the search'
+            ' stops with the first file in which the key is found.'
+        ),
+    )
+
+    args = argp.parse_args()
+
+    if not args.file:
+        args.file = [sys.stdin]
+
+    val = None
+    for fp in args.file:
+        try:
+            val = do_file(args.key, fp, ftype=args.ftype)
+        except Exception as e:
+            if not args.ignore:
+                print(f'{PROG}: {e}', file=sys.stderr)
+                return 1
+
+        if val:
+            print_obj(val)
+            break
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    exit(main())

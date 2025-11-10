@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# EC2 only
+
+# Look for a JSON user data structure containing a specified  key.  The value of this
+# key must be either a string specifying a command/script to run or a list of
+# strings representing a sequence of commands. The execution is done in a
+# subshell with stdin redirected from /dev/null, stdout and stderr sent to
+# syslog.  If the command sequence exits successfully, syslog level info is
+# used, otherwise syslog level error is used.
+
+# Usage: userdata-shell userdata-key
+
+# Sample userdata (assumning the user data key is "shell"
+#	{ "shell": "echo hello world" }
+#	{ "shell": ["echo hello world", "echo Resistance is futile > /tmp/borg"] }
+
+PROG=$(basename "$0")
+PATH=$PATH:/usr/local/bin; export PATH
+log_facility=local0
+log_tag=$PROG
+log_level=info
+
+SHELL=/bin/bash
+TMPBASE=/tmp/$PROG.$$
+CMDFILE="${TMPBASE}.sh"
+CMDOUT="${TMPBASE}.out"
+
+# ------------------------------------------------------------------------------
+function error {
+	echo "$PROG: $*" >&2
+	logger -t "$log_tag" -p "${log_facility}.error" "$*"
+}
+
+# Get ec2 meta data
+function meta {
+    d=$(ec2-metadata --"$1" | sed -e '1s/^[^:]*: *//')
+    [ "$d" == "not available" ] && return 1
+    echo "$d"
+}
+
+# ------------------------------------------------------------------------------
+[ $# -ne 1 ] && echo "Usage: $0 userdata-key" >&2 && exit 1
+
+USERDATA_KEY="$1"
+
+# ------------------------------------------------------------------------------
+# Get userdata and look for a "run" key containing either a single command to
+# run or a list of commands.
+
+userdata=$(meta user-data)
+[ $? -ne 0 ] && error "Cannot get user data. Is this an EC2 instance?" && exit 1
+
+[ "$userdata" == "" ] && exit 0
+[[ "$userdata" =~ "404 - Not Found" ]] && exit 0
+
+
+# ------------------------------------------------------------------------------
+# Extract the command(s) from the userdata JSON, stick it in a file and run it.
+
+status=99
+trap '/bin/rm -f "${TMPBASE}"*; exit $status' 0
+
+err=$(echo "$userdata" | kex -t json "$USERDATA_KEY" 2>&1 > "$CMDFILE")
+[ $? -ne 0 ] && error "$err" && status=1 && exit
+[ ! -s "$CMDFILE" ] && status=0 && exit
+
+# Run the command script
+"$SHELL" "$CMDFILE" < /dev/null > "$CMDOUT" 2>&1
+status=$?
+
+# Put any output in syslog
+[ "$status" -ne 0 ] && log_level=error
+[ -s "$CMDOUT" ] && logger -t "$log_tag" -p "${log_facility}.${log_level}" -f "$CMDOUT"
+[ $status -ne 0 ] && error "Run exit status: $status" && exit
+
+exit "$status"
