@@ -1,0 +1,19 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: jsonl foreach specification
+
+type: object
+
+properties:
+  type:
+    type: string
+    const: jsonl
+  filename:
+    type: string
+    minLength: 1
+
+required:
+  - type
+  - filename
+
+additionalProperties: false

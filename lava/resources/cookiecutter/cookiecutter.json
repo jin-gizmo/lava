@@ -1,0 +1,43 @@
+{
+  "_copy_without_render": [
+    "lava-*",
+    "misc",
+    "bin",
+    "templates",
+    "*.tpl"
+  ],
+  "_version": "-- auto injected --",
+  "realm": "",
+  "description": "",
+  "owner": "",
+  "project_name": "my_project",
+  "project_dir": "{{cookiecutter.project_name}}",
+  "pip_index_url": "",
+  "include_lava_libs": [
+    "no",
+    "yes"
+  ],
+  "jupyter_support": [
+    "no",
+    "yes"
+  ],
+  "git_setup": [
+    "yes",
+    "no"
+  ],
+  "config_checks": [
+    "strict",
+    "warning"
+  ],
+  "environment": "dev",
+  "job_prefix": "app/{{cookiecutter.project_name}}",
+  "payload_prefix": "app/{{cookiecutter.project_name}}",
+  "s3trigger_prefix": "app/{{cookiecutter.project_name}}",
+  "rule_prefix": "lava.{{cookiecutter.realm}}.{{cookiecutter.project_name}}",
+  "docker_prefix": "lava/{{cookiecutter.realm}}/{{cookiecutter.project_name}}",
+  "docker_platform": [
+    "linux/amd64",
+    "linux/arm64",
+    "host"
+  ]
+}

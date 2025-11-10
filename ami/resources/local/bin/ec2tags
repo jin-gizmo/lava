@@ -1,0 +1,465 @@
+#!/usr/bin/env python3
+"""
+Get and format the tags for an EC2 instance.
+
++- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+| Note that this is quite old code originally built for the Jindabyne SAK AMI. |
+| It is still useful (and working) but it is antiquated. It predates things    |
+| such as type hints. A minimal amount of rehabilitation has been done as part |
+| of the lava AMI implementation to quieten the quality check but nothing      |
+| more.                                                                        |
+|                                                                              |
+| No, I wouldn't do it like this now either.                                   |
++- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+
+This program uses the AWS CLI, not boto. Why? Well the intention was to have a
+simple standalone script that could run on any linux node without installing
+any other modules. Not much of a reason, but there it is.
+
+Copyright (c) 2016, Murray Andrews
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+1.  Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+
+2.  Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
+
+3.  Neither the name of the copyright holder nor the names of its contributors
+may be used to endorse or promote products derived from this software without
+specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+See licence.txt
+
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import logging
+import subprocess
+import sys
+from os.path import basename
+from typing import Any
+from urllib.request import Request, urlopen
+
+AWS = 'aws'  # AWS command
+
+# Standard AWS CLI args we accept.
+# These take no arguments
+AWS_ARGS_0 = ('debug',)
+# These take 1 argument
+AWS_ARGS_1 = ('profile', 'region', 'cli-connect-timeout', 'cli-read-timeout')
+
+PROG = basename(sys.argv[0])
+LOG = logging.getLogger()
+LOG_LEVEL = 'error'
+
+# ------------------------------------------------------------------------------
+# Clunky support for colour output if colorama is not installed.
+
+try:
+    # noinspection PyUnresolvedReferences
+    import colorama
+
+    # noinspection PyUnresolvedReferences
+    from colorama import Fore, Style
+
+    colorama.init()
+
+except ImportError:
+
+    class Fore:
+        """Basic alternative to colorama colours using ANSI sequences."""
+
+        RESET = '\033[0m'
+        BLACK = '\033[30m'
+        RED = '\033[31m'
+        GREEN = '\033[32m'
+        YELLOW = '\033[33m'
+        BLUE = '\033[34m'
+        MAGENTA = '\033[35m'
+        CYAN = '\033[36m'
+
+    class Style:
+        """Basic alternative to colorama styles using ANSI sequences."""
+
+        RESET_ALL = '\033[0m'
+        BRIGHT = '\033[1m'
+        DIM = '\033[2m'
+        NORMAL = '\033[22m'
+
+
+# ------------------------------------------------------------------------------
+def get_log_level(s):
+    """
+    Convert string log level to the corresponding integer log level.
+
+    :param s:       A string version of a log level (e.g. 'error', 'info').
+                    Case is not significant.
+    :type s:        str
+
+    :return:        The numeric logLevel equivalent.
+    :rtype:         int
+
+    :raises:        ValueError if the supplied string cannot be converted.
+    """
+
+    if not s or not isinstance(s, str):
+        raise ValueError('Bad log level:' + str(s))
+
+    t = s.upper()
+
+    if not hasattr(logging, t):
+        raise ValueError('Bad log level: ' + s)
+
+    return getattr(logging, t)
+
+
+# ------------------------------------------------------------------------------
+class ColourLogHandler(logging.Handler):
+    """Stream handler that writes to stderr with different colours for message levels."""
+
+    # --------------------------------------------------------------------------
+    def __init__(self, colour=True):
+        """
+        Allow colour to be enabled or disabled.
+
+        :param colour:      If True colour is enabled for log messages.
+                            Default True.
+        :type colour:       bool
+
+        """
+
+        super().__init__()
+        self.colour = colour
+
+    # --------------------------------------------------------------------------
+    def emit(self, record):
+        """
+        Print the record to stderr with some colour enhancement.
+
+        :param record:  Log record
+        :type record:   logging.LogRecord
+        :return:
+        """
+
+        if self.colour:
+            if record.levelno >= logging.ERROR:
+                colour = Style.BRIGHT + Fore.RED
+            elif record.levelno >= logging.WARNING:
+                colour = Fore.MAGENTA
+            elif record.levelno >= logging.INFO:
+                colour = Fore.BLACK
+            else:
+                colour = Style.DIM + Fore.BLACK
+
+            print(
+                colour + PROG + ': ' + self.format(record) + Fore.RESET + Style.RESET_ALL,
+                file=sys.stderr,
+            )
+        else:
+            print(PROG + ': ' + self.format(record), file=sys.stderr)
+
+
+# ------------------------------------------------------------------------------
+def aws_ec2_cmd(*args: str | list[str] | dict[str, str], **kwargs: dict[str, str]) -> Any:
+    """
+    Run an AWS ec2 CLI command.
+
+    :param args:    Each arg can be a string, a list of strings or a dict
+    :param kwargs:  Keyword to add to the command.
+
+    :return:        The JSON structure returned by the command.
+    """
+
+    cmd = [AWS, 'ec2']
+
+    for arg in args:
+        if arg is None:
+            continue
+        if isinstance(arg, str):
+            cmd.append(arg)
+        elif isinstance(arg, list):
+            cmd.extend(arg)
+        elif isinstance(arg, dict):
+            for k in arg:
+                if arg[k] is not None:
+                    cmd.extend([k, arg[k]])
+        else:
+            raise ValueError(f'Invalid arg type {type(arg)}: {arg}')
+
+    for k in kwargs:
+        if kwargs[k] is not None:
+            cmd.extend([k, kwargs[k]])
+
+    LOG.debug('Run: %s', ' '.join(cmd))
+    resp_json = subprocess.check_output(cmd)
+    LOG.debug('Done: %s', ' '.join(cmd))
+
+    # Python 2 str has decode function, Python 3 str does not. Grr.
+    return (
+        json.loads(resp_json.decode('utf-8') if isinstance(resp_json, bytes) else resp_json)
+        if resp_json
+        else None
+    )
+
+
+# ------------------------------------------------------------------------------
+def ec2_instance_tags(instance_id, aws_args=None):
+    """
+    Get a dictionary of tags for the specified EC2 instance.
+
+    :param instance_id: EC2 instance ID
+    :param aws_args:    Additional AWS CLI args.
+
+    :type instance_id:  str
+    :type aws_args:     list[str] | dict[str, str]
+
+    :return:            Dictionary of tags.
+    :rtype:             dict
+
+    """
+
+    tags = aws_ec2_cmd(
+        'describe-tags', '--no-paginate', aws_filters({'resource-id': instance_id}), aws_args
+    )
+
+    return {t['Key']: t['Value'] for t in tags['Tags']}
+
+
+# ------------------------------------------------------------------------------
+def aws_filters(filters=None):
+    """
+    Convert a dict into a list of filter args suitable for use in an aws CLI command.
+
+    :param filters:     Dictionary of filter keys/values. Values can be strings
+                        or lists of strings.
+    :type filters:      dict[str, T]
+    :return:            a list of filter args (including the --filter preamble).
+    :rtype:             list[str]
+    """
+
+    if not filters:
+        return []
+
+    return ['--filter'] + [
+        'Name={},Values={}'.format(k, v if isinstance(v, str) else ','.join(v))
+        for k, v in filters.items()
+    ]
+
+
+# ------------------------------------------------------------------------------
+def aws_get_tag(tags, tag_name, default=None):
+    """
+    Extract the value of a tag from the structure return by AWS CLI.
+
+    AWS CLI typically returns tags as a list of dicts with Key and Value keys.
+    This function extracts the value of a tag from such a structure.
+
+    :param tags:        A list of dicts, each of which represents one tag.
+    :param tag_name:    The name of the tag to extract.
+    :param default:     Default value if tag is not present. Default None.
+    :type tags:         list[dict[str, str]]
+    :type tag_name:     str
+    :type default:      str
+
+    :return:            Tag value.
+    :rtype:             str
+    """
+
+    for t in tags:
+        if t.get('Key') == tag_name:
+            return t.get('Value', default)
+
+    return default
+
+
+# ------------------------------------------------------------------------------
+class MetaData:
+    """
+    A bundling construct to simplify access to instance metadata.
+
+    This assumed IMDSv2.
+    """
+
+    META_DATA_BASE_URL = 'http://169.254.169.254'
+    META_DATA_RESOURCES = {'instance-id': 'latest/meta-data/instance-id'}
+
+    # --------------------------------------------------------------------------
+    def __init__(self):
+        """Init."""
+
+        request = Request(  # noqa S310
+            f'{self.META_DATA_BASE_URL}/latest/api/token',
+            method='PUT',
+            headers={'X-aws-ec2-metadata-token-ttl-seconds': '21600'},
+        )
+
+        with urlopen(request) as response:  # noqa: S310
+            if response.code != 200:
+                response.raise_for_status()
+            self.token = response.read()
+
+    # --------------------------------------------------------------------------
+    @property
+    def instance_id(self):
+        """
+        Get the instance ID.
+
+        :return:    The instance ID.
+        :rtype:     str
+        """
+
+        request = Request(  # noqa S310
+            f'{self.META_DATA_BASE_URL}/{self.META_DATA_RESOURCES["instance-id"]}',
+            headers={'X-aws-ec2-metadata-token': self.token},
+        )
+        with urlopen(request) as response:  # noqa: S310
+            if response.code != 200:
+                response.raise_for_status()
+            return response.read().decode('utf-8')
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args():
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(prog=PROG, description='Get tag(s) for an EC2 instance.')
+
+    argp.add_argument(
+        '-c',
+        '--no-colour',
+        '--no-color',
+        dest='no_colour',
+        action='store_true',
+        default=False,
+        help='Don\'t use colour in information messages.',
+    )
+
+    argp.add_argument(
+        '-i',
+        '--instance-id',
+        dest='instance_id',
+        action='store',
+        help='Instance ID. Default is current instance.',
+    )
+
+    argp.add_argument(
+        '-l',
+        '--level',
+        metavar='LEVEL',
+        default=LOG_LEVEL,
+        help=(
+            'Print messages of a given severity level or above.'
+            ' The standard logging level names are available but info,'
+            f' warning and error are most useful. The Default is {LOG_LEVEL}.'
+        ),
+    )
+
+    argp.add_argument(
+        'fmt',
+        metavar='format',
+        action='store',
+        nargs='?',
+        help='Output format as Python {} style. e.g. {tagname}',
+    )
+
+    # Add the AWS CLI standard args.
+    for aws_arg in sorted(AWS_ARGS_0):
+        argp.add_argument(
+            '--' + aws_arg,
+            dest=aws_arg.replace('-', '_'),
+            action='store_true',
+            help='As for AWS CLI.',
+        )
+
+    for aws_arg in sorted(AWS_ARGS_1):
+        argp.add_argument(
+            '--' + aws_arg,
+            metavar='arg',
+            dest=aws_arg.replace('-', '_'),
+            action='store',
+            help='As for AWS CLI.',
+        )
+
+    return argp.parse_args()
+
+
+# ------------------------------------------------------------------------------
+def main():
+    """Show time."""
+
+    args = process_cli_args()
+
+    # ----------------------------------------
+    # Setup some logging
+
+    LOG.setLevel(get_log_level(args.level))
+    LOG.addHandler(ColourLogHandler(colour=not args.no_colour))
+    LOG.debug('Log level set to %s', LOG.getEffectiveLevel())
+
+    # ----------------------------------------
+    # Bundle standard AWS CLI args for use in AWD CLI calls.
+
+    aws_cli_args = ['--' + attr for attr in AWS_ARGS_0 if getattr(args, attr.replace('-', '_'))]
+
+    for attr in AWS_ARGS_1:
+        value = getattr(args, attr.replace('-', '_'))
+        if value is not None:
+            aws_cli_args.extend(['--' + attr, value])
+
+    # ----------------------------------------
+    # Get the instance id and instance tags
+
+    instance_id = args.instance_id if args.instance_id else MetaData().instance_id
+    tags = ec2_instance_tags(instance_id, aws_args=aws_cli_args)
+    LOG.debug('Tags: %s', str(tags))
+
+    if not args.fmt:
+        for t in sorted(tags):
+            print(f'{t}: {tags[t]}')
+        return 0
+
+    # ----------------------------------------
+    # Process the format string. Any unknown tags are simply replaced with ''
+    while True:
+        try:
+            print(args.fmt.format(**tags))
+            return 0
+        except KeyError as e:
+            # Add the missing key
+            LOG.debug('Adding empty tag: %s', e.args[0])
+            tags[e.args[0]] = ''
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    try:
+        exit(main())
+    except Exception as ex:
+        LOG.error('%s', ex)
+        exit(1)
+    except KeyboardInterrupt:
+        LOG.warning('Interrupt')
+        exit(2)

@@ -1,0 +1,129 @@
+#!/bin/bash
+
+# Jinja render the contents of a source directory into a target directory.
+
+PROG=$(basename "$0")
+
+# ------------------------------------------------------------------------------
+function usage {
+	echo "Usage: $PROG [-h] [options] source-dir dest-dir" >&2
+}
+
+function help {
+	usage
+	cat >&2 <<-!
+
+	Jinja render the contents of a source directory into a target directory.
+	The directory hierarchy is preserved.
+
+	Options:
+
+	  -h		Print help and exit
+
+	  -c conf-file	A YAML config file. If specified, any files in the source
+	  		directory will be jinja rendered using this file (using
+			<{ }> jinja delimiters).
+
+	  -L		Follow symlinks in the source directory. If not
+	  		specified, symlinks are skipped. Note that symlinks are
+			not preserved in the destination directory.
+
+	  -p name=val	Add the specified parameter to the jinja rendering
+	  		process. (See -c option.)
+
+	  source-dir	Source directory
+
+	  dest-dir	Destination directory. Cannot be the same as the source
+	  		directory. Will be created if it doesn't exist.
+
+	!
+}
+
+function info {
+	if [ -t 2 ]
+	then
+		echo "[34m$*[0m" >&2
+	else
+		echo "$PROG: INFO: $*" >&2
+	fi
+}
+
+function error {
+	if [ -t 2 ]
+	then
+		echo "[31m$*[0m" >&2
+	else
+		echo "$PROG: ERROR: $*" >&2
+	fi
+}
+
+function abort {
+	error "ABORT: $*"
+	exit 1
+}
+
+# Convert relative path to absolute
+function abspath {
+	cd "$1" || exit 1
+	pwd
+}
+
+# ------------------------------------------------------------------------------
+# shellcheck disable=SC2048,SC2086
+args=$(getopt c:hLp: $*)
+[ $? -ne 0 ] && usage && exit 2
+
+declare -a render_args find_opts
+
+
+# shellcheck disable=SC2086
+set -- $args
+while true
+do
+	case "$1"
+	in
+		-h)	help; exit 0;;
+
+		-c)	render_args+=(--file "$2"); shift 2;;
+		-p)	render_args+=(-p "$2"); shift 2;;
+
+		-L)	find_opts+=(-L); shift;;
+
+		--)	shift; break;;
+		*)	abort "Internal error";;
+	esac
+done
+
+[ $# -ne 2 ] && usage && exit 1
+
+# ------------------------------------------------------------------------------
+
+src_dir=$(abspath "$1")
+[ ! -d "$src_dir" ] && abort "$1: No such directory"
+
+if [ ! -d "$2" ]
+then
+	mkdir -p "$2" || exit 1
+fi
+
+dst_dir=$(abspath "$2")
+
+[ "$src_dir" == "$dst_dir" ] && \
+	abort Source and destination directories are the same 
+
+# ------------------------------------------------------------------------------
+
+# Recreate the source directory structure in the destination
+info Copying directory structure
+(cd "$src_dir" || exit 1; find "${find_opts[@]}" . -type d -print0) | \
+	(cd "$dst_dir" || exit 1; xargs -0 mkdir -p)
+
+# Render the source files
+info "Rendering source files"
+
+(cd "$src_dir" || exit 1; find "${find_opts[@]}" . -type f -not -name '*.swp' | sed -e 's|^\./||') | \
+	while read -r f
+	do
+		info "Rendering $f"
+		jinja --delimiter \< "${render_args[@]}" "$src_dir/$f" > "$dst_dir/$f" || exit 1
+	done

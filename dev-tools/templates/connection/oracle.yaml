@@ -1,0 +1,66 @@
+#- Oracle connector specifics
+#-
+#- This is the list of vars to prompt for when building
+#= host: Host name
+#= port: Post number
+#= user: User name
+#= password: SSM parameter containing password (excluding realm prefix)
+#-
+
+type: oracle
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Conditional fields - Required but may come from Secrets Manager
+
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The database host DNS name or IP address.
+##
+host: "{{ host }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The name of an encrypted SSM parameter containing the password.
+## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+##
+password: "/lava/<{ realm }>/{{ password }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Port number.
+##
+port: {{ port }}
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## User name.
+##
+user: "{{ user }}"
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Name of a secret in AWS Secrets Manager
+# secret_id: /lava/<{ realm }>/secret-name
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Oracle version for compatibility in the form x.y[.z].
+##
+# edition: "x.y.z"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The subtype specifies the driver to use.
+# subtype: cx_oracle
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The Oracle database service name. Generally exactly one of service_name or
+## sid must be specified.
+##
+# service_name: "???"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The Oracle System Identifier of the database. Generally exactly one of
+## service_name or sid must be specified.
+##
+# sid: "???"

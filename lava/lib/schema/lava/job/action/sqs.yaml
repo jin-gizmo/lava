@@ -1,0 +1,43 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: SQS action specification
+
+type: object
+
+properties:
+
+  action:
+    type: string
+    const: sqs
+  dedup_id:
+    description: >-
+      The token used for deduplication of sent messages. This parameter applies
+      only to FIFO queues.
+  delay:
+    description: Message sending delay as duration.
+    $ref: lava.common.duration
+  group_id:
+    description: >-
+      The tag that specifies that a message belongs to a specific message group.
+      This parameter applies only to FIFO queues.
+    type: string
+    minLength: 1
+  message:
+    description: >-
+      The message body. This can be either a string or an object. If it is an
+      object it will be JSON encoded before sending.
+    anyOf:
+      - type: string
+        minLength: 1
+      - type: object
+  queue:
+    description: The name or URL of the queue (not the ARN!).
+    type: string
+    minLength: 1
+
+required:
+  - action
+  - message
+  - queue
+
+additionalProperties: false

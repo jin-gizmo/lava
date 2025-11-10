@@ -1,0 +1,34 @@
+# ex: ft=conf
+
+[flake8]
+max-line-length = 100
+# ami/extras and ami/resources/local/bin are old stuff. Will tidy it one day.
+exclude = venv*,untracked,dist,.git,.idea,doc,test,ami/extras,ami/resources/local/bin
+max-complexity = 50
+import-order-style = pycharm
+application-import-names = lava s3event
+
+ignore = 
+	# Extra whitespace before : - black will add this
+	E203
+	# docstring: Imperative mood
+	D401
+	# docstring: No blank lines allowed after function docstring - crap
+	D202
+	# W503 is not PEP8: line break before binary operator
+	W503
+	# flake8-return: don't assign value to var if use only as return value
+	R504
+	# These are pointlessly annoying and badly implemented
+	RST
+	# A module is shadowing a Python builtin module
+	# ... bit late to mention it now
+	A005
+    # Unnecessary else / elif /... after ... -- Annoying and debatable
+    R505
+    R506
+    R507
+    R508
+
+per-file-ignores =
+    __init__.py: F401,F403

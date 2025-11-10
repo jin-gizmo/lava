@@ -1,0 +1,17 @@
+# Python requirements
+
+# awscli-cwlogs
+boto3
+botocore
+ec2-metadata
+jinja2
+netaddr
+pg8000
+pygments
+# PyGreSQL
+pymysql
+pyyaml
+requests
+shortuuid
+sqlalchemy
+virtualenv

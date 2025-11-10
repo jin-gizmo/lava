@@ -1,0 +1,90 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "EC2TAGS" "1" "March 2016" "MA" "AWStools"
+.
+.SH "NAME"
+\fBec2tags\fR \- Get and format the tags for an EC2 instance
+.
+.SH "SYNOPSIS"
+\fBec2tags\fR [options] [\fIformat\fR]
+.
+.SH "DESCRIPTION"
+\fBEc2tags\fR will get the tags associated with the specified EC2 instance and print them in the specified format\.
+.
+.P
+Note that the machine on which this is run will require HTTPS access to the AWS EC2 API endpoints\. If firewall rules, security groups or network ACLs prevent this, \fBec2tags\fR will not work\.
+.
+.SH "OPTIONS"
+.
+.TP
+\fIformat\fR
+An arbitrary string which may contain \fI{tagname}\fR components that will be replaced by the value of the corresponding tag or an empty string if that tag is not defined\. If no \fIformat\fR is specified, then the available tags and their current values are listed\.
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help and exit\.
+.
+.TP
+\fB\-c\fR, \fB\-\-no\-colour\fR, \fB\-\-no\-color\fR
+Don\'t use colour in information messages\.
+.
+.TP
+\fB\-i\fR \fIINSTANCE\-ID\fR, \fB\-\-instance\-id\fR \fIINSTANCE\-ID\fR
+Instance ID\. If not specified, it is assumed the current machine is an EC2 instance and its tags will be obtained\.
+.
+.TP
+\fB\-l\fR \fILEVEL\fR, \fB\-\-level\fR \fILEVEL\fR
+Print messages of a given severity level or above\. The standard logging level names are available but \fIdebug\fR, \fIinfo\fR, \fIwarning\fR and \fIerror\fR are most useful\. The Default is \fIerror\fR\.
+.
+.TP
+\fB\-\-cli\-connect\-timeout\fR \fIint\fR
+As for the AWS CLI\.
+.
+.TP
+\fB\-\-cli\-read\-timeout\fR \fIint\fR
+As for the AWS CLI\.
+.
+.TP
+\fB\-\-debug\fR
+As for the AWS CLI\. This option will result in lots of generally unhelpful output\.
+.
+.TP
+\fB\-\-profile\fR \fIprofile\-id\fR
+As for the AWS CLI\. If \fBec2tags\fR is run from an EC2 node, it is recommended to use an IAM role with appropriate permissions (see below) rather than use AWS credentials\.
+.
+.TP
+\fB\-\-region arg\fR
+As for the AWS CLI\.
+.
+.SH "IAM PERMISSIONS"
+If \fBec2tags\fR is run from an EC2 instance, the instance should have an associated role that includes the following permissions:
+.
+.IP "" 4
+.
+.nf
+
+{
+    "Version": "2012\-10\-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeTags"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
+.
+.fi
+.
+.IP "" 0
+.
+.SH "AUTHOR"
+Murray Andrews
+.
+.SH "LICENCE"
+BSD 3\-clause licence \fIhttp://opensource\.org/licenses/BSD\-3\-Clause\fR\.

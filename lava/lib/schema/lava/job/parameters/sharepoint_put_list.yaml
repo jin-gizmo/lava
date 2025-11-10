@@ -1,0 +1,91 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava sharepoint_put_list job parameters specification
+
+type: object
+
+properties:
+  basedir:
+    description: >-
+      If the source file is specified as a relative filename, it will be treated
+      as relative to the specified directory.
+    type: string
+  conn_id:
+    description: The connection ID for a SharePoint site.
+    type: string
+    minLength: 1
+  data_columns:
+    description: A comma separated list of column names.
+    type: string
+    minLength: 1
+  delimiter:
+    description: Single character field delimiter.
+    type: string
+    minLength: 1
+    # Allow for an escape char.
+    maxLength: 2
+  doublequote:
+    description: As for csv.writer.
+    $ref: lava.common.boolean
+  error_missing:
+    description: >-
+      If true and there are columns in the source file that are not in the
+      SharePoint list, raise an error. If false, the extra columns are silently
+      ignored.
+    $ref: lava.common.boolean
+  escapechar:
+    description: As for csv.writer.
+    oneOf:
+      - type: string
+        minLength: 1
+        # Allow for an escape char.
+        maxLength: 2
+      - type: 'null'
+  file:
+    description: >-
+      The source file name. If it starts with s3:// it is assumed to be an
+      object in S3, otherwise a local file. If a local file and not absolute, it
+      will be relative to the basedir parameter. The contents must be a CSV data
+      with a single header line. The columns must match the pre-existing list in
+      SharePoint.
+    type: string
+    minLength: 1
+  jinja:
+    description: Enable Jinja rendering.
+    $ref: lava.common.boolean
+  list:
+    description: Name of the list. It must already exist in SharePoint.
+    type: string
+    minLength: 1
+  mode:
+    description: Update mode for the list
+    type: string
+    enum:
+      - append
+      - delete
+      - replace
+      - update
+  quotechar:
+    description: As for csv.reader.
+    type: string
+    minLength: 1
+    # Allow for an escape char.
+    maxLength: 2
+  quoting:
+    description: As for csv.reader QUOTE_* parameters (without the QUOTE_ prefix).
+    type: string
+    enum:
+      - all
+      - minimal
+      - nonnumeric
+      - none
+  vars:
+    description: A map of variables injected when the parameters are Jinja rendered.
+    type: object
+
+additionalProperties: false
+
+required:
+  - conn_id
+  - file
+  - list

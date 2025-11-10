@@ -1,0 +1,195 @@
+#!/bin/bash
+
+# ex: ts=4 sw=4 ai et
+
+# ------------------------------------------------------------------------------
+# Prepare and mount a block device. You must be super-user to run this.  This
+# script is suitable for processing a secondary AWS EBS volume on an AWS Linux
+# instance. It will create a file system if needed, mount the device, set owner,
+# group and permissions and create a soft link to it.
+#
+# Author: Murray Andrews
+#
+# ------------------------------------------------------------------------------
+
+FSTYPE=ext4
+MOUNT_OPTS="defaults,nofail"
+FSTAB=/etc/fstab
+
+PROG=$(basename "$0")
+
+quiet=
+owner=
+group=
+mode=
+link=
+fstype="$FSTYPE"
+mount_opts="$MOUNT_OPTS"
+
+# ------------------------------------------------------------------------------
+function abort {
+    echo "$PROG: $*" >&2
+    exit 2
+}
+
+function info {
+    [ "$quiet" == "" ] && echo "$PROG: $*"
+}
+
+function usage {
+    echo
+    echo "Usage: $PROG [-h] [-q] [-g group] [-l link] [-m mode] [-o owner] [-o mount_opts] [-t fstype] device mount-dir"
+    echo
+}
+
+function help {
+    usage
+
+    cat <<!
+Prepare and mount a block device. You must be super-user to run this.
+This script is suitable for processing a secondary AWS EBS volume on
+an AWS Linux instance.
+
+WARNING:    NVME devices on AWS EC2 instances won't necessarily appear with
+            the device name that you have specified when attaching the
+            volume. Same AWS instance types (e.g. R5 series) are prone to
+            this. You need the nvme command to link the two.
+
+An already mounted file system will not be unmounted although ownership,
+permissions and links to it may be modified depending on options.
+
+/etc/fstab will be updated with new mount details if the device is
+not already mounted.
+
+Positional arguments:
+    device      A block device. A file system will be created on
+                the device if there is not one already present.
+                If this is a symlink to a device, the link is
+                deferenced to get the real device name.
+    mount-dir   The directory on which to mount the device. Must
+                be an absolute path name. It can be an existing
+                directory, otherwise a new directory (and all
+                required parents) will be created.
+
+Optional arguments:
+    -h              Print help and exit.
+    -g group        Set the group of the mount point.
+    -l link         Create a symlink from the specified location to
+                    the mount point.
+    -m mode         Set the mode of the mount point.
+    -o owner        Set the owner of the mount point.
+    -q              Quiet mode. Don't print informational messages.
+    -t fstype       Specify the filesystem type. Default $FSTYPE.
+    -O mount_opts   Mount options. Default $MOUNT_OPTS.
+
+!
+}
+
+# ------------------------------------------------------------------------------
+# shellcheck disable=SC2048,SC2086
+args=$(getopt hqd:g:o:O:m:l:t: $*)
+[ $? -ne 0 ] && usage >&2 && exit 2
+
+# shellcheck disable=SC2086
+set -- $args
+while :
+do
+    case "$1"
+    in
+        -h) help; exit 0;;
+        -g) group="$2"; shift 2;;
+        -l) link="$2"; shift 2;;
+        -m) mode="$2"; shift 2;;
+        -o) owner="$2"; shift 2;;
+        -O) mount_opts="$2"; shift 2;;
+        -q) quiet=yes; shift;;
+        -t) fstype="$2"; shift 2;;
+        --) shift; break;;
+        *)  abort "Internal Error";;
+    esac
+done
+
+[ $# -ne 2 ] && usage && exit 1
+
+# Follow links to get to the real device
+device=$(readlink "$1") || device="$1"
+[[ "$device" =~ ^/dev/ ]] || device="/dev/$device"
+mount="$2"
+
+
+# ------------------------------------------------------------------------------
+[ "$(id -u)" -ne 0 ] && abort You are not root
+
+[[ "$mount" != /* ]] && abort "Mount point $mount is not absolute"
+[ ! -b "$device" ] && abort "$device must be a block special device"
+
+# See if the device is already mounted.
+# shellcheck disable=SC2046
+set -- $(mount | grep -m 1 "^$device on ")
+
+if [ $# -eq 0 ]
+then
+    # Not mounted
+
+    # First see if it has a file system and create one if needed.
+    info "$device is not currently mounted"
+    x=$(blkid -p "$device")
+    if [ "$x" != "" ]
+    then
+        info "$device has a file system"
+    else
+        info "$device has no file system -- will make one"
+        mkfs -t "$fstype" "$device" </dev/null || abort "Could not create file system on $device"
+        info "File system created on $device"
+    fi
+
+    # Check the mount point is ok
+    mkdir -p "$mount" || abort Cannot create mount point
+
+    # Update fstab. This will replace any existing entry in fstab
+    info "Updating $FSTAB"
+    sed -i.$$ "\|^$device |d;" "$FSTAB" || abort "Cannot edit $FSTAB"
+    echo "$device $mount $fstype $mount_opts 0 2" >> "$FSTAB"
+
+    # Now mount it
+    info "Mounting $device"
+    mount "$device" || abort "Cannot mount $device on $mount"
+
+elif [ "$3" == "$mount" ]
+then
+    # Already mounted in the correct place
+    info "$device is already mounted correctly on $3"
+else
+    # Its mounted but in the wrong spot - abort
+    abort "$device is already mounted on $3 instead of $mount"
+fi
+
+# Check owner, group and mode of the mount point
+if [ "$owner" != "" ]
+then
+    chown "$owner" "$mount" || abort "Cannot chown $mount"
+fi
+if [ "$group" != "" ]
+then
+    chgrp "$group" "$mount" || abort "Cannot chgrp $mount"
+fi
+if [ "$mode" != "" ]
+then
+    chmod "$mode" "$mount" || abort "Cannot chmod $mount"
+fi
+
+# Check the link. Any existing symlink will be removed.
+if [ "$link" != "" ]
+then
+    info "Checking symlink $link"
+
+    if [ -e "$link" ]
+    then
+        [ ! -L "$link" ] && abort "$link already exists but is not a symlink"
+        info "Removing existing link $link"
+        /bin/rm -f "$link"
+    fi
+
+    info "Creating new symlink from $link to $mount"
+    ln -s "$mount" "$link" || abort "Cannot create symlink from $link to $mount"
+fi

@@ -1,0 +1,54 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava sharepoint_get_multi_doc job parameters specification
+
+type: object
+
+properties:
+  basedir:
+    description: >-
+      If the target file is specified as a relative filename, it will be treated
+      as relative to the specified directory.
+    type: string
+  conn_id:
+    description: The connection ID for a SharePoint site.
+    type: string
+    minLength: 1
+  glob:
+    description: >-
+      UNIX glob style pattern used to select files in the specified SharePoint
+      folder path area.
+  jinja:
+    description: Enable Jinja rendering.
+    $ref: lava.common.boolean
+  kms_key_id:
+    description: An AWS KMS encryption key to use when uploading to AWS S3.
+    type: string
+    minLength: 1
+  library:
+    description: Source SharePoint library name.
+    type: string
+    minLength: 1
+  outpath:
+    description: >-
+      The destination file location. If it starts with s3:// it is assumed to be
+      a prefix in S3 (add your own trailing / if needed), otherwise a local
+      directory. If a local directory and not absolute, it will be relative to
+      the basedir parameter.
+    type: string
+    minLength: 1
+  path:
+    description: The source document path in SharePoint.
+    type: string
+    minLength: 1
+  vars:
+    description: A map of variables injected when the parameters are Jinja rendered.
+    type: object
+
+additionalProperties: false
+
+required:
+  - conn_id
+  - library
+  - outpath
+  - path

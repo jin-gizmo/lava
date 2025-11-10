@@ -1,0 +1,40 @@
+#- dag job specifics
+#-
+#- This is the list of vars to prompt for when building
+
+type: dag
+
+## #############################################################################
+## The payload is either a map of job dependencies. Keys are successor jobs and
+## values are lists of predecessor jobs or null / [] when no predecessors.
+## job_ids.
+##
+payload:
+  "job1":
+    - "predecessor_1"
+    - "predecessor_2"
+  "job2": "just_one_predecessor"
+  "job3": null
+
+## #############################################################################
+## Job parameters
+
+parameters:
+  ## ---------------------------------------------------------------------------
+  ## Mandatory params
+
+  ## ---------------------------------------------------------------------------
+  ## Optional params
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Prepend the specified value to each job_id in the payload.
+  # job_prefix: "app/myjobs/"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Thread pool size for running child jobs. Don't get carried away.
+  # workers: 4
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Child jobs matching this glob pattern (or any in a list of patterns) are
+  ## allowed to fail without causing the chain to fail.
+  # can_fail: "glob-pattern"

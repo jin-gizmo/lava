@@ -1,0 +1,1226 @@
+#!/usr/bin/env python3
+
+"""
+Start or stop EC2 instances based on run window tags associated with the instances.
+
++- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+| Note that this is quite old code originally built for the Jindabyne SAK AMI. |
+| It is still useful (and working) but it is antiquated. It predates things    |
+| such as type hints. A minimal amount of rehabilitation has been done as part |
+| of the lava AMI implementation to quieten the quality check but nothing      |
+| more.                                                                        |
+|                                                                              |
+| No, I wouldn't do it like this now either.                                   |
++- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+
+This program uses the AWS CLI, not boto. Why? Well, the intention was to have a
+simple standalone script that could run on any linux node without installing
+any other modules. Not much of a reason, but there it is.
+
+Copyright (c) 2016, Murray Andrews
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+1.  Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+
+2.  Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
+
+3.  Neither the name of the copyright holder nor the names of its contributors
+    may be used to endorse or promote products derived from this software without
+    specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import logging
+import os
+import re
+import stat
+import subprocess
+import sys
+from datetime import datetime
+from fnmatch import fnmatch
+from logging.handlers import SysLogHandler, TimedRotatingFileHandler
+from os.path import basename
+
+__author__ = 'Murray Andrews'
+
+AWS = 'aws'  # AWS command
+
+# Standard AWS CLI args we accept.
+# These take no arguments
+AWS_ARGS_0 = ('debug',)
+# These take 1 argument
+AWS_ARGS_1 = ('profile', 'region', 'cli-connect-timeout', 'cli-read-timeout')
+
+PROG = basename(sys.argv[0])
+LOG = logging.getLogger()
+
+LOG_LEVEL = 'info'
+TAG_RUNTIME = 'RunTime'
+
+TAG_RUNCTRL = 'RunControl'  # Override timed running behaviour
+RUNCTRL_NO_STOP = 'no-stop'  # Do not stop instance
+RUNCTRL_NO_START = 'no-start'  # Do not start instance
+RUNCTRL_SKIP = 'skip'  # Do not touch this instance
+
+MIN_RUNTIME = 30  # Minimum allowed run window in minutes
+
+# ------------------------------------------------------------------------------
+# Clunky support for colour output if colorama is not installed.
+
+try:
+    # noinspection PyUnresolvedReferences
+    import colorama
+
+    # noinspection PyUnresolvedReferences
+    from colorama import Fore, Style
+
+    colorama.init()
+
+except ImportError:
+
+    class Fore:
+        """Basic alternative to colorama colours using ANSI sequences."""
+
+        RESET = '\033[0m'
+        BLACK = '\033[30m'
+        RED = '\033[31m'
+        GREEN = '\033[32m'
+        YELLOW = '\033[33m'
+        BLUE = '\033[34m'
+        MAGENTA = '\033[35m'
+        CYAN = '\033[36m'
+
+    class Style:
+        """Basic alternative to colorama styles using ANSI sequences."""
+
+        RESET_ALL = '\033[0m'
+        BRIGHT = '\033[1m'
+        DIM = '\033[2m'
+        NORMAL = '\033[22m'
+
+
+# ------------------------------------------------------------------------------
+def get_log_level(s: str) -> int:
+    """
+    Convert string log level to the corresponding integer log level.
+
+    :param s:       A string version of a log level (e.g. 'error', 'info').
+                    Case is not significant.
+
+    :return:        The numeric logLevel equivalent.
+
+    :raises:        ValueError if the supplied string cannot be converted.
+    """
+
+    if not s or not isinstance(s, str):
+        raise ValueError('Bad log level:' + str(s))
+
+    t = s.upper()
+
+    if not hasattr(logging, t):
+        raise ValueError('Bad log level: ' + s)
+
+    return getattr(logging, t)
+
+
+# ------------------------------------------------------------------------------
+def syslog_address():
+    """
+    Try to work out the syslog address.
+
+    :return:    A value suitable for use as the address arg for SysLogHandler.
+    :rtype:     tuple | str
+    """
+
+    for f in ('/dev/log', '/var/run/syslog'):
+        try:
+            mode = os.stat(f).st_mode
+        except FileNotFoundError:
+            continue
+
+        if stat.S_ISSOCK(mode):
+            return f
+
+    return 'localhost', 514
+
+
+# ------------------------------------------------------------------------------
+class ColourLogHandler(logging.Handler):
+    """Stream handler that writes to stderr with different colours for message levels."""
+
+    # --------------------------------------------------------------------------
+    def __init__(self, colour=True):
+        """
+        Allow colour to be enabled or disabled.
+
+        :param colour:      If True colour is enabled for log messages.
+                            Default True.
+        :type colour:       bool
+
+        """
+
+        super().__init__()
+        self.colour = colour
+
+    # --------------------------------------------------------------------------
+    def emit(self, record):
+        """
+        Print the record to stderr with some colour enhancement.
+
+        :param record:  Log record
+        :type record:   logging.LogRecord
+        :return:
+        """
+
+        if self.colour:
+            if record.levelno >= logging.ERROR:
+                colour = Style.BRIGHT + Fore.RED
+            elif record.levelno >= logging.WARNING:
+                colour = Fore.MAGENTA
+            elif record.levelno >= logging.INFO:
+                colour = Fore.BLACK
+            else:
+                colour = Style.DIM + Fore.BLACK
+
+            print(colour + self.format(record) + Fore.RESET + Style.RESET_ALL, file=sys.stderr)
+        else:
+            print(self.format(record), file=sys.stderr)
+
+
+# ------------------------------------------------------------------------------
+def aws_ec2_cmd(*args, **kwargs):
+    """
+    Run an AWS ec2 CLI command.
+
+    :param args:    Each arg can be a string, a list of strings or a dict
+    :param kwargs:  Keyword to add to the command.
+
+    :type args:     str | list[str | dict[str, str]
+    :type kwargs:   dict
+
+    :return:        The JSON structure returned by the command.
+    :rtype:         T
+    """
+
+    cmd = [AWS, 'ec2']
+
+    for arg in args:
+        if arg is None:
+            continue
+        if isinstance(arg, str):
+            cmd.append(arg)
+        elif isinstance(arg, list):
+            cmd.extend(arg)
+        elif isinstance(arg, dict):
+            for k in arg:
+                if arg[k] is not None:
+                    cmd.extend([k, arg[k]])
+        else:
+            raise ValueError(f'Invalid arg type {type(arg)}: {arg}')
+
+    for k in kwargs:
+        if kwargs[k] is not None:
+            cmd.extend([k, kwargs[k]])
+
+    LOG.debug('Run: %s', ' '.join(cmd))
+    resp_json = subprocess.check_output(cmd)
+    LOG.debug('Done: %s', ' '.join(cmd))
+
+    # Python 2 str has decode function, Python 3 str does not. Grr.
+    return json.loads(resp_json.decode('utf-8') if isinstance(resp_json, bytes) else resp_json)
+
+
+# ------------------------------------------------------------------------------
+def aws_filters(filters=None):
+    """
+    Convert a dict into a list of filter args suitable for use in an aws CLI command.
+
+    :param filters:     Dictionary of filter keys/values. Values can be strings
+                        or lists of strings.
+    :type filters:      dict[str, T]
+    :return:            a list of filter args (including the --filter preamble).
+    :rtype:             list[str]
+    """
+
+    if not filters:
+        return []
+
+    return ['--filter'] + [
+        'Name={},Values={}'.format(k, v if isinstance(v, str) else ','.join(v))
+        for k, v in filters.items()
+    ]
+
+
+# ------------------------------------------------------------------------------
+def aws_get_tag(tags, tag_name, default=None) -> str:
+    """
+    Extract the value of a tag from the structure return by AWS CLI.
+
+    AWS CLI typically returns tags as a list of dicts with Key and Value keys.
+    This function extracts the value of a tag from such a structure.
+
+    :param tags:        A list of dicts, each of which represents one tag.
+    :param tag_name:    The name of the tag to extract.
+    :param default:     Default value if tag is not present. Default None.
+    :type tags:         list[dict[str, str]]
+    :type tag_name:     str
+    :type default:      str
+
+    :return:            Tag value.
+    """
+
+    for t in tags:
+        if t.get('Key') == tag_name:
+            return t.get('Value', default)
+
+    return default
+
+
+# ------------------------------------------------------------------------------
+def aws_ec2_describe_instances(filters=None, aws_args=None):
+    """
+    See the aws ec2 describe-instances CLI command.
+
+    :param filters:     Dictionary of filter keys/values. Values can be strings
+                        or lists of strings.
+    :param aws_args:    Additional AWS CLI args.
+
+    :type filters:      dict[str, T]
+    :type aws_args:     list[str] | dict[str, str]
+
+    :return:            The JSON structure returned by the command.
+    :rtype:             dict
+    """
+
+    return aws_ec2_cmd('describe-instances', '--no-paginate', aws_filters(filters), aws_args)
+
+
+# ------------------------------------------------------------------------------
+def aws_get_startable_instances(
+    vpc_id=None, instance_names=None, min_runtime=MIN_RUNTIME, aws_args=None
+):
+    """
+    Get EC2 instaces that can be started based on RunTime tags.
+
+    This is the set of stopped EC2 instances that have a RunTime tag that
+    indicates the instance is inside a run window with at least min_runtime
+    minutes left. Instances that have a RunControl tag set to 'no-start' or
+    'ignore' are not included.
+
+    :param vpc_id:      The ID (not name) of the VPC in which instances must
+                        reside. If None then selection is not limited to a VPC.
+                        Default None.
+    :param instance_names: A list of instance names (i.e. value of the Name
+                        tag, not the instance ID). Can be glob style patterns.
+                        Only matching instances are processed. If None, then
+                        process all. Default None.
+    :param min_runtime: Instances will not be started unless the run window is
+                        open for at least this many minutes.
+    :param aws_args:    Additional AWS CLI args.
+
+    :type vpc_id:       str
+    :type instance_names: list[str]
+    :type min_runtime:  int
+    :type aws_args:     list[str] | dict[str, str]
+
+    :return:            A dictionary of instances, keyed on instance ID and
+                        the value is the object for that instance returned by
+                        describe-instances.
+    :rtype:             dict[str, T]
+    """
+
+    # ----------------------------------------
+    # Get the stopped instances that have a RunTime tag.
+
+    filters = {
+        'instance-state-name': 'stopped',
+        'tag-key': TAG_RUNTIME,
+        'root-device-type': 'ebs',  # Only start EBS backed nodes.
+    }
+    if vpc_id:
+        filters['vpc-id'] = vpc_id
+
+    stopped_instances = aws_ec2_describe_instances(filters=filters, aws_args=aws_args)
+
+    startables = {}
+
+    # ----------------------------------------
+    # Pick out the instances that don't have an active RunControl tag
+    for reservation in stopped_instances['Reservations']:
+        for instance in reservation['Instances']:
+            try:
+                instance_id = instance['InstanceId']
+            except KeyError:
+                # This really should not happen
+                LOG.error('Got an instance object with no InstanceId - skipping')
+                continue
+
+            LOG.debug('Instance %s: Checking for startability', instance_id)
+
+            tags = instance.get('Tags', {})
+            instance_name = aws_get_tag(tags, 'Name', '')
+
+            # ----------------------------------------
+            # If we have instance patterns, check those to see if this instance is in
+            if instance_names and not glob_match(instance_name, instance_names):
+                LOG.debug(
+                    'Instance %s: Name %s does not match - skipping', instance_id, instance_name
+                )
+                continue
+
+            # --------------------------------
+            # See if instance has a RunControl tag
+            run_lock = aws_get_tag(tags, TAG_RUNCTRL, default='').strip().lower()
+            if run_lock in (RUNCTRL_NO_START, RUNCTRL_SKIP):
+                # Instance is to be left off or ignored.
+                LOG.debug('Instance %s: Run protected - %s=%s', instance_id, TAG_RUNCTRL, run_lock)
+                continue
+
+            # --------------------------------
+            # Skip instances with empty RunTime tags
+            run_time = aws_get_tag(tags, TAG_RUNTIME, default='').strip()
+            if not run_time:
+                LOG.debug(
+                    'Instance %s: Has %s tag but value is empty - skipping',
+                    instance_id,
+                    TAG_RUNTIME,
+                )
+                continue
+
+            # --------------------------------
+            # Analyse the RunTime tag
+            try:
+                runtimes = TimeWindows(run_time)
+                LOG.debug('Instance %s: Runtime %s', instance_id, str(runtimes))
+            except ValueError as e:
+                LOG.warning('Instance %s: %s - skipping', instance_id, str(e))
+                continue
+
+            time_to_run = runtimes.time_in_window()
+
+            if time_to_run == 0:
+                LOG.debug('Instance %s: Not in run window - skipping', instance_id)
+                continue
+
+            if time_to_run < min_runtime:
+                LOG.debug(
+                    'Instance %s: In run window but only %d minutes until it closes - skipping',
+                    instance_id,
+                    time_to_run,
+                )
+                continue
+
+            LOG.debug('Instance %s: Startable - %s=%s', instance_id, TAG_RUNTIME, run_time)
+
+            startables[instance_id] = {
+                'name': instance_name,
+                'runtime': run_time,
+                'info': instance,  # Full details from AWS on the instance
+            }
+
+    return startables
+
+
+# ------------------------------------------------------------------------------
+def aws_get_stopable_instances(vpc_id=None, instance_names=None, aws_args=None):
+    """
+    Get EC2 instaces that can be started based on RunTime tags.
+
+    This is the set of running EC2 instances that have a RunTime tag that
+    indicates the instance is outside its run window. Instances that have a
+    RunControl tag set to 'no-stop' or 'ignore' are not included.
+
+    :param vpc_id:      The ID (not name) of the VPC in which instances must
+                        reside. If None then selection is not limited to a VPC.
+                        Default None.
+    :param instance_names: A list of instance names (i.e. value of the Name
+                        tag, not the instance ID). Can be glob style patterns.
+                        Only matching instances are processed. If None, then
+                        process all. Default None.
+    :param aws_args:    Additional AWS CLI args.
+
+    :type vpc_id:       str
+    :type instance_names: list[str]
+    :type aws_args:     list[str] | dict[str, str]
+
+    :return:            A dictionary of instances, keyed on instance ID and
+                        the value is the object for that instance returned by
+                        describe-instances.
+    :rtype:             dict[str, T]
+    """
+
+    # ----------------------------------------
+    # Get the running instances that have a RunTime tag.
+
+    filters = {
+        'instance-state-name': 'running',
+        'tag-key': TAG_RUNTIME,
+        'root-device-type': 'ebs',  # Cannot stop instance store nodes
+    }
+    if vpc_id:
+        filters['vpc-id'] = vpc_id
+
+    running_instances = aws_ec2_describe_instances(filters=filters, aws_args=aws_args)
+
+    stopables = {}
+
+    # ----------------------------------------
+    # Pick out the instances that don't have an active RunControl tag
+    for reservation in running_instances['Reservations']:
+        for instance in reservation['Instances']:
+            try:
+                instance_id = instance['InstanceId']
+            except KeyError:
+                # This really should not happen
+                LOG.warning('Got an instance object with no InstanceId - skipping')
+                continue
+
+            LOG.debug('Instance %s: Checking for stopability', instance_id)
+
+            tags = instance.get('Tags', {})
+            instance_name = aws_get_tag(tags, 'Name', '')
+
+            # ----------------------------------------
+            # If we have instance patterns, check those to see if this instance is in
+            if instance_names and not glob_match(instance_name, instance_names):
+                LOG.debug(
+                    'Instance %s: Name %s does not match - skipping', instance_id, instance_name
+                )
+                continue
+
+            # --------------------------------
+            # See if instance has a RunControl tag
+            run_lock = aws_get_tag(tags, TAG_RUNCTRL, default='').strip().lower()
+            if run_lock in (RUNCTRL_NO_STOP, RUNCTRL_SKIP):
+                # Instance is to be left on or ignored.
+                LOG.debug('Instance %s: Run protected - %s=%s', instance_id, TAG_RUNCTRL, run_lock)
+                continue
+
+            # --------------------------------
+            # Skip instances with empty RunTime tags
+            run_time = aws_get_tag(tags, TAG_RUNTIME, default='').strip()
+            if not run_time:
+                LOG.debug(
+                    'Instance %s: Has %s tag but value is empty - skipping',
+                    instance_id,
+                    TAG_RUNTIME,
+                )
+                continue
+
+            # --------------------------------
+            # Analyse the RunTime tag
+            try:
+                runtimes = TimeWindows(run_time)
+                LOG.debug('Instance %s: Runtime %s', instance_id, str(runtimes))
+            except ValueError as e:
+                LOG.warning('Instance %s: %s - skipping', instance_id, str(e))
+                continue
+
+            time_to_run = runtimes.time_in_window()
+            if time_to_run > 0:
+                LOG.debug(
+                    'Instance %s: %d minutes until run window closes - skipping',
+                    instance_id,
+                    time_to_run,
+                )
+                continue
+
+            LOG.debug('Instance %s: Stopable - %s=%s', instance_id, TAG_RUNTIME, run_time)
+
+            stopables[instance_id] = {
+                'name': instance_name,
+                'runtime': run_time,
+                'info': instance,  # Full details from AWS on the instance
+            }
+
+    return stopables
+
+
+# ------------------------------------------------------------------------------
+def aws_start_instances(instances, aws_args=None):
+    """
+    Run the aws ec2 start-instances CLI command.
+
+    :param instances:   Either a single instance IDs (str) or a list of instance
+                        IDs to start.
+    :param aws_args:    Additional AWS CLI args.
+
+    :type instances:    str | list[str]
+    :type aws_args:     list[str] | dict[str, str]
+    :return:            The structure returned by the start-instances command.
+    :rtype:             dict
+    """
+
+    return aws_ec2_cmd('start-instances', '--instance-ids', instances, aws_args)
+
+
+# ------------------------------------------------------------------------------
+def aws_stop_instances(instances, aws_args=None):
+    """
+    Run the aws ec2 stop-instances CLI command.
+
+    :param instances:   Either a single instance IDs (str) or a list of instance
+                        IDs to stop.
+    :param aws_args:    AWS CLI standard args.
+
+    :type instances:    str | list[str]
+    :type aws_args:     list[str] | dict[str, str]
+    :return:            The structure returned by the stop-instances command.
+    :rtype:             dict
+    """
+
+    return aws_ec2_cmd('stop-instances', '--instance-ids', instances, aws_args)
+
+
+# ------------------------------------------------------------------------------
+class TimeWindows:
+    """
+    Represents a set of time window specifications.
+
+    Exh time window consists of a day of the week, a start time and and end time.
+
+    """
+
+    DAYS = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su']
+
+    # The lambda nonsense is required because comprehensions have their own scope
+    # noinspection PyArgumentList
+    DAYS_OF_WEEK = (lambda x: {x[i]: i for i in range(len(x))})(DAYS)
+
+    RUNTIME_RE = re.compile(
+        r"""
+        (?P<day>
+            mo|mon|monday|
+            tu|tue|tuesday|
+            we|wed|wednesday|
+            th|thu|thursday|
+            fr|fri|friday|
+            sa|sat|saturday|
+            su|sun|sunday|
+            daily|
+            weekdays|
+            weekends
+        )
+        \s*
+        (
+            \s
+            (?P<starthour>\d{1,2})([.:](?P<startminute>\d{2}))?  # e.g. 9.20 or 09:20
+            \s*-\s*
+            (?P<endhour>\d{1,2})([.:](?P<endminute>\d{2}))?
+        )?
+        $
+    """,
+        re.VERBOSE | re.IGNORECASE,
+    )
+
+    # --------------------------------------------------------------------------
+    def __init__(self, s):
+        """
+        Parse a time window specification string.
+
+        This consists of a semi-colon separated list of individual windows. The
+        latter specifies the day of the week and the start and end hours for the
+        window on that day. All times must be in 24 hour format although the
+        minutes component is optional.
+
+        A runtime specification string looks like:
+
+            Mon 9-17;Mon 20:30-22:30;Tu 10:00-16;Friday 0-24;Saturday
+
+        As well as days of the week (and 2 and 3 char abbreviations), the special
+        values 'daily', 'weekdays', 'weekends' are also recognised. e.g.
+
+            Daily 09:30-17:30
+
+        :param s:       A time window specification string.
+        :type s:        str
+        :raise ValueError:  If the window spec string is malformed.
+
+        """
+
+        self.windows = []
+
+        for winspec in s.split(';'):
+            winspec = winspec.strip()
+            m = re.match(self.__class__.RUNTIME_RE, winspec)
+            if not m:
+                raise ValueError(f'Malformed runtime specification: {winspec}')
+
+            # Expand out the macros for multiple days.
+            day = m.group('day').lower()
+            if day == 'daily':
+                days = self.__class__.DAYS
+            elif day == 'weekdays':
+                days = self.__class__.DAYS[0:5]
+            elif day == 'weekends':
+                days = self.__class__.DAYS[5:7]
+            else:
+                days = [day[0:2].lower()]
+
+            starthour = int(m.group('starthour')) if m.group('starthour') else 0
+            startminute = int(m.group('startminute')) if m.group('startminute') else 0
+            endhour = int(m.group('endhour')) if m.group('endhour') else 24
+            endminute = int(m.group('endminute')) if m.group('endminute') else 0
+            start = 60 * starthour + startminute
+            end = 60 * endhour + endminute
+
+            if (
+                starthour >= 24
+                or startminute > 59
+                or endhour > 24
+                or endminute > 59
+                or (endhour == 24 and endminute != 0)
+                or start >= end
+            ):
+                raise ValueError(f'Invalid time window specification: {winspec}')
+
+            for d in days:
+                self.windows.append(
+                    {
+                        'day': self.__class__.DAYS_OF_WEEK[d],
+                        'start': start,
+                        'end': end,
+                        'starthour': starthour,
+                        'startminute': startminute,
+                        'endhour': endhour,
+                        'endminute': endminute,
+                    }
+                )
+
+    # --------------------------------------------------------------------------
+    def __str__(self):
+        """Concert time window spec back to equivalent string."""
+
+        return ';'.join(
+            [
+                '{} {}:{:02d}-{}:{:02d}'.format(
+                    self.__class__.DAYS[rt['day']],
+                    rt['starthour'],
+                    rt['startminute'],
+                    rt['endhour'],
+                    rt['endminute'],
+                )
+                for rt in self.windows
+            ]
+        )
+
+    # --------------------------------------------------------------------------
+    def time_in_window(self, t=None):
+        """
+        Check if specified datetime is within the runtimes specified for the instance.
+
+        If there are multiple windows in which the given time sits, the one with
+        the greatest time until the end of the window is used.
+
+        :param t:   Datetime. If not specified use the current local time.
+        :type t:    datetime
+
+        :return:    An int indicating how many minutes between the time and the
+                    end of the largest window. If the time is not in any window
+                    then returns 0.
+        :rtype:     int
+        """
+
+        if not t:
+            t = datetime.now()
+
+        t_day = t.weekday()
+        t_min = t.hour * 60 + t.minute
+        window_opening = 0
+
+        for rt in self.windows:
+            if rt['day'] == t_day and rt['start'] <= t_min <= rt['end']:
+                # Time is in the window.
+                minutes_to_end = rt['end'] - t_min
+                if minutes_to_end > window_opening:
+                    # This window has a larger opening
+                    window_opening = minutes_to_end
+
+        return window_opening
+
+
+# ------------------------------------------------------------------------------
+def glob_match(value, glob_list):
+    """
+    Check if the given value matches one of the specified glob patterns.
+
+    :param value:       The value to match.
+    :param glob_list:   A list of glob style glob_list (i.e. Unix file name style).
+
+    :param value:       str
+    :param glob_list:   list[str]
+    :return:            True if there is match, False otherwise.
+    """
+
+    if value is not None:
+        for glob_pat in glob_list:
+            if fnmatch(value, glob_pat):
+                return True
+
+    return False
+
+
+# ------------------------------------------------------------------------------
+def start_instances(
+    vpc_id=None, instance_names=None, readonly=False, min_runtime=MIN_RUNTIME, aws_args=None
+):
+    """
+    Start instances that are stopped and are in a run window.
+
+    Instances must have at least min_runtime minutes before it closes.
+
+    :param vpc_id:      If not None, limit actions to the specified VPC.
+                        Default None.
+    :param instance_names: A list of instance names (i.e. value of the Name
+                        tag, not the instance ID). Can be glob style patterns.
+                        Only matching instances are processed. If None, then
+                        process all. Default None.
+    :param readonly:    If True, just report on what would be started but don't
+                        start anything. Default False.
+    :param min_runtime: Instances will not be started unless the run window is
+                        open for at least this many minutes.
+    :param aws_args:    Additional AWS CLI args.
+
+    :type vpc_id:       str
+    :type instance_names: list[str]
+    :type readonly:     bool
+    :type min_runtime:  int
+    :type aws_args:     list[str] | dict[str, str]
+
+    """
+
+    # ----------------------------------------
+    # Get the startable instances
+
+    startable_instances = aws_get_startable_instances(
+        vpc_id=vpc_id, instance_names=instance_names, min_runtime=min_runtime, aws_args=aws_args
+    )
+
+    if readonly:
+        if startable_instances:
+            print('The following instances are ready to be started:')
+            for instance_id in startable_instances:
+                print(f'- {instance_id} ({startable_instances[instance_id]["name"]})')
+        else:
+            print('No startable instances found')
+
+        return
+
+    # ----------------------------------------
+    # Try starting them one at a time. We do it one at a time rather than in a
+    # single command to improve error capture.
+
+    for instance_id in startable_instances:
+        LOG.debug(
+            'Instance %s: Starting instance with name "%s"',
+            instance_id,
+            startable_instances[instance_id]['name'],
+        )
+        try:
+            result = aws_start_instances(instance_id, aws_args=aws_args)
+        except Exception as e:
+            LOG.error('Instance %s: Attempt to start failed: %s', instance_id, str(e))
+            continue
+
+        for result_info in result['StartingInstances']:
+            if result_info['InstanceId'] == instance_id:
+                LOG.info(
+                    '%s (%s): New state is "%s"',
+                    instance_id,
+                    startable_instances[instance_id]['name'],
+                    result_info['CurrentState']['Name'],
+                )
+
+
+# ------------------------------------------------------------------------------
+def stop_instances(vpc_id=None, instance_names=None, readonly=False, aws_args=None):
+    """
+    Stop instances that are running and are no longer in a run window.
+
+    :param vpc_id:      If not None, limit actions to the specified VPC.
+                        Default None.
+    :param instance_names: A list of instance names (i.e. value of the Name
+                        tag, not the instance ID). Can be glob style patterns.
+                        Only matching instances are processed. If None, then
+                        process all. Default None.
+    :param readonly:    If True, just report on what would be stopped but don't
+                        stop anything. Default False.
+    :param aws_args:    Additional AWS CLI args.
+
+    :type vpc_id:       str
+    :type instance_names: list[str]
+    :type readonly:     bool
+    :type aws_args:     list[str] | dict[str, str]
+
+    """
+
+    # ----------------------------------------
+    # Get the stopable instances
+
+    stopable_instances = aws_get_stopable_instances(
+        vpc_id=vpc_id, instance_names=instance_names, aws_args=aws_args
+    )
+
+    if readonly:
+        if stopable_instances:
+            print('The following instances are ready to be stopped:')
+            for instance_id in stopable_instances:
+                print(f'- {instance_id} ({stopable_instances[instance_id]["name"]})')
+        else:
+            print('No stopable instances found')
+
+        return
+
+    # ----------------------------------------
+    # Try stopping them one at a time. We do it one at a time rather than in a
+    # single command to improve error capture.
+
+    for instance_id in stopable_instances:
+        LOG.debug(
+            'Instance %s: Stopping instance with name "%s"',
+            instance_id,
+            stopable_instances[instance_id]['name'],
+        )
+
+        try:
+            result = aws_stop_instances(instance_id, aws_args=aws_args)
+        except Exception as e:
+            LOG.error('Instance %s: Attempt to stop failed: %s', instance_id, str(e))
+            continue
+
+        for result_info in result['StoppingInstances']:
+            if result_info['InstanceId'] == instance_id:
+                LOG.info(
+                    '%s (%s): New state is "%s"',
+                    instance_id,
+                    stopable_instances[instance_id]['name'],
+                    result_info['CurrentState']['Name'],
+                )
+
+
+# ------------------------------------------------------------------------------
+def check_tags(
+    vpc_id: str = None,
+    instance_names: list[str] = None,
+    colours: bool = True,
+    aws_args: list[str] | dict[str, str] = None,
+) -> None:
+    """
+    Check RunControl and RunTime tags for all instances and report errors.
+
+    :param vpc_id:      If not None, limit actions to the specified VPC.
+                        Default None.
+    :param instance_names: A list of instance names (i.e. value of the Name
+                        tag, not the instance ID). Can be glob style patterns.
+                        Only matching instances are processed. If None, then
+                        process all. Default None.
+    :param colours:     If True some messages may have colour highlights.
+                        Default True.
+    :param aws_args:    Additional AWS CLI args.
+
+    """
+
+    filters = {
+        'tag-key': TAG_RUNTIME,
+        # ... 'root-device-type': 'ebs'  # Only interested in EBS backed nodes.
+    }
+    if vpc_id:
+        filters['vpc-id'] = vpc_id
+
+    check_instances = aws_ec2_describe_instances(filters=filters, aws_args=aws_args)
+
+    highlight = Fore.RED if colours else ''
+    reset = Fore.RESET if colours else ''
+
+    # ----------------------------------------
+    # Get all the instances from the reservations into a single structure
+    # so we can present them in sorted order by instance-id
+    instances = {}
+    for reservation in check_instances['Reservations']:
+        for instance in reservation['Instances']:
+            try:
+                instances[instance['InstanceId']] = instance
+            except KeyError:
+                # This really should not happen
+                LOG.error('Got an instance object with no InstanceId - skipping')
+                continue
+
+    # ----------------------------------------
+    # Process the isntances in instance-id order.
+    for instance_id in sorted(instances):
+        instance = instances[instance_id]
+        tags = instance.get('Tags', {})
+        instance_name = aws_get_tag(tags, 'Name', '')
+
+        # ----------------------------------------
+        # If we have instance patterns, check those to see if this instance is in
+        if instance_names and not glob_match(instance_name, instance_names):
+            LOG.debug('Instance %s: Name %s does not match - skipping', instance_id, instance_name)
+            continue
+
+        # ----------------------------------------
+        # Check the RunTime tag
+
+        run_time = aws_get_tag(tags, TAG_RUNTIME, default='').strip()
+        print(f'{instance_id}: {instance_name}')
+        print(f'{len(instance_id) * " "}  {TAG_RUNTIME} ', end='')
+        if not run_time:
+            print(f'{highlight}Missing{reset}')
+        else:
+            # Analyse the RunTime tag
+            try:
+                runtimes = TimeWindows(run_time)
+            except ValueError:
+                print(f'{highlight}Malformed{reset}: {run_time}')
+            else:
+                print(f'OK: {run_time} --> {runtimes}')
+
+        # ----------------------------------------
+        # Check the RunControl tag
+
+        run_lock = aws_get_tag(tags, TAG_RUNCTRL, default='').strip().lower()
+        if run_lock:
+            print(f'{len(instance_id) * " "}  {TAG_RUNCTRL} ', end='')
+            if run_lock == RUNCTRL_SKIP:
+                print(f'OK: {run_lock} --> Instance will not be started or stopped')
+            elif run_lock == RUNCTRL_NO_STOP:
+                print(f'OK: {run_lock} --> Instance will not be stopped')
+            elif run_lock == RUNCTRL_NO_START:
+                print(f'OK: {run_lock} --> Instance will not be started')
+            else:
+                print(f'{highlight}Invalid{reset}: {run_lock}')
+
+
+# ------------------------------------------------------------------------------
+def setup_logging(level: str, target: str, colour: bool = True) -> None:
+    """
+    Set up logging.
+
+    :param level:   Logging level. The string format of a level (eg 'debug').
+    :param target:  Logging target. Either a file name or a syslog facility name
+                    starting with @ or None.
+    :param colour:  If True and logging to the terminal, colourise messages for
+                    different logging levels. Default True.
+
+    :raise ValueError: If an invalid log level or syslog facility is specified.
+    """
+
+    LOG.setLevel(get_log_level(level))
+    if target:
+        for h in LOG.handlers:
+            LOG.removeHandler(h)
+
+        if target.startswith('@'):
+            # Syslog to specified facility
+
+            if target[1:] not in SysLogHandler.facility_names:
+                raise ValueError(f'Bad syslog facility: {target[1:]}')
+            # SysLogHandler does accept string facility names
+            # noinspection PyTypeChecker
+            h = SysLogHandler(address=syslog_address(), facility=target[1:])
+            h.setFormatter(logging.Formatter(PROG + '[%(process)d]: %(levelname)s: %(message)s'))
+        else:
+            # Log to a file
+            h = TimedRotatingFileHandler(target, when='D', backupCount=7)
+            h.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(message)s'))
+        LOG.addHandler(h)
+        LOG.debug('%s', ' '.join(sys.argv))
+        LOG.debug('Logfile set to %s', target)
+    else:
+        # Just log to stderr.
+        LOG.addHandler(ColourLogHandler(colour=colour))
+    LOG.debug('Log level set to %s', LOG.getEffectiveLevel())
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(
+        prog=PROG,
+        description='Start / stop AWS EC2 instances based on time windows specified in tags.',
+        epilog=(
+            'If neither --start nor --stop are specified, tags values are'
+            ' checked but no instances are modified.'
+        ),
+    )
+
+    argp.add_argument(
+        '-c',
+        '--no-colour',
+        '--no-color',
+        dest='no_colour',
+        action='store_true',
+        default=False,
+        help='Don\'t use colour in information messages.',
+    )
+    argp.add_argument(
+        '-l',
+        '--level',
+        metavar='LEVEL',
+        default=LOG_LEVEL,
+        help=(
+            'Print messages of a given severity level or above.'
+            ' The standard logging level names are available but debug, info,'
+            f' warning and error are most useful. The Default is {LOG_LEVEL}.'
+        ),
+    )
+    argp.add_argument(
+        '--log',
+        action='store',
+        help=(
+            'Log to the specified target. This can be either a file'
+            ' name or a syslog facility with an @ prefix (e.g. @local0).'
+        ),
+    )
+
+    argp.add_argument(
+        '-m',
+        '--minimum-runtime',
+        dest='min_runtime',
+        action='store',
+        metavar='MINUTES',
+        type=int,
+        default=MIN_RUNTIME,
+        help=(
+            'Minimum runtime for started instances. If the available'
+            ' remaining run window for an instance is not at least this'
+            f' many minutes, it will not be started. Default {MIN_RUNTIME}.'
+        ),
+    )
+
+    argp.add_argument(
+        '-r',
+        '--read-only',
+        dest='readonly',
+        action='store_true',
+        help='Check for instances that could be started / stopped but don\'t start / stop them.',
+    )
+    startstop = argp.add_mutually_exclusive_group()
+    startstop.add_argument(
+        '--start',
+        action='store_true',
+        help=(
+            'Start instances that are stopped and are in a run'
+            f' window with at least {MIN_RUNTIME} minutes to run.'
+        ),
+    )
+    startstop.add_argument(
+        '--stop',
+        action='store_true',
+        help='Stop instances that are running and are not in a run window.',
+    )
+
+    argp.add_argument(
+        '--vpc',
+        action='store',
+        help='Limit actions to the specified VPC ID.',
+    )
+
+    argp.add_argument(
+        'instance_names',
+        nargs='*',
+        metavar='instance-name',
+        help='Instance name (not ID). Unix style glob patterns allowed.',
+    )
+
+    # Add the AWS CLI standard args.
+    for aws_arg in sorted(AWS_ARGS_0):
+        argp.add_argument(
+            '--' + aws_arg,
+            dest=aws_arg.replace('-', '_'),
+            action='store_true',
+            help='As for AWS CLI.',
+        )
+
+    for aws_arg in sorted(AWS_ARGS_1):
+        argp.add_argument(
+            '--' + aws_arg,
+            metavar='arg',
+            dest=aws_arg.replace('-', '_'),
+            action='store',
+            help='As for AWS CLI.',
+        )
+
+    return argp.parse_args()
+
+
+# ------------------------------------------------------------------------------
+def main():
+    """Show time."""
+
+    args = process_cli_args()
+    setup_logging(args.level, args.log, not args.no_colour)
+
+    # ----------------------------------------
+    # Bundle standard AWS CLI args
+
+    aws_cli_args = ['--' + attr for attr in AWS_ARGS_0 if getattr(args, attr.replace('-', '_'))]
+
+    for attr in AWS_ARGS_1:
+        value = getattr(args, attr.replace('-', '_'))
+        if value is not None:
+            aws_cli_args.extend(['--' + attr, value])
+
+    # ----------------------------------------
+    # Do the business
+
+    if args.stop:
+        stop_instances(
+            vpc_id=args.vpc,
+            instance_names=args.instance_names,
+            readonly=args.readonly,
+            aws_args=aws_cli_args,
+        )
+    elif args.start:
+        start_instances(
+            vpc_id=args.vpc,
+            instance_names=args.instance_names,
+            readonly=args.readonly,
+            min_runtime=args.min_runtime,
+            aws_args=aws_cli_args,
+        )
+    else:
+        check_tags(
+            vpc_id=args.vpc,
+            instance_names=args.instance_names,
+            colours=not args.no_colour,
+            aws_args=aws_cli_args,
+        )
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)
+    except KeyboardInterrupt:
+        LOG.warning('Interrupt')
+        exit(2)

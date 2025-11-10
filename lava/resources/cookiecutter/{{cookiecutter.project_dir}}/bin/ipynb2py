@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Convert Jupyter notebooks to Python.
+
+PROG=$(basename "$0")
+
+# ------------------------------------------------------------------------------
+function usage {
+	cat <<-!
+	Convert Jupyter notebooks to Python.
+
+	Usage: $PROG [-h] [-T template] [-o output-dir] notebook.ipynb ...
+	!
+}
+
+# ------------------------------------------------------------------------------
+function error {
+	if [ -t 2 ]
+	then
+		echo "[31m$*[0m" >&2
+	else
+		echo "$PROG: ERROR: $*" >&2
+	fi
+}
+
+function abort {
+	error "ABORT: $*"
+	exit 1
+}
+
+# ------------------------------------------------------------------------------
+# Process arguments.
+
+while true
+do
+	case "$1"
+	in
+		-h | --help)	usage; exit 0;;
+		-o | --output-dir)
+			out_dir="$2"; shift 2;;
+		-T | --template)
+			convert_args="$convert_args --template $2"; shift 2;;
+		-*)	usage; exit 1;;
+		*)	break;;
+	esac
+done
+
+# [ $# -eq 0 ] && usage && exit 1
+
+# ------------------------------------------------------------------------------
+for nb
+do
+	base=$(expr "$(basename "$nb")" : '\(.*\)\.ipynb')
+	[ "$base" == "" ] && abort "$base does not appear to be a Jupyter notebook"
+
+	# Write output to specified directory or same directory as notebook
+	py="${out_dir:-$(dirname "$nb")}/${base}.py"
+	# shellcheck disable=SC2086
+	jupyter nbconvert --to python $convert_args --stdout "$nb" > "$py" || exit 1
+
+	# Fix the hashbang to python3
+	sed -i'' -e '1s?^ *#!.*?#!/usr/bin/env python3?' "$py" || exit 1
+
+	chmod u+x "$py" || exit 1
+done

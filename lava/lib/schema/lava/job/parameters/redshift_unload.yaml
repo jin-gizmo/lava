@@ -1,0 +1,96 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava redshift_unload job parameters specification
+
+type: object
+
+properties:
+  args:
+    description: A list of options for the UNLOAD command.
+    type: array
+    items:
+      type: string
+      minLength: 1
+  bucket:
+    # Note this may not look like a bucket in a job spec due to Jinja rendering.
+    description: The name of the S3 bucket to which the data is unloaded.
+    type: string
+    minLength: 1
+  conn_id:
+    description: The connection ID for a Redshift cluster.
+    type: string
+    minLength: 1
+  dateformat:
+    description: >-
+      A Redshift datetime format string that will be applied to DATE fields when
+      unloading.
+    type: string
+    minLength: 1
+  insecure:
+    description: Disable bucket security checks.
+    $ref: lava.common.boolean
+  prefix:
+    description: The prefix in the S3 bucket to which the data is unloaded.
+    type: string
+    minLength: 1
+  relation:
+    description: >-
+      The name of the table or view to be unloaded (without schema) or a list of
+      names.
+    anyOf:
+      - type: string
+        minLength: 1
+      - type: array
+        items:
+          type: string
+          minLength: 1
+  s3_conn_id:
+    description: The connection ID for AWS S3.
+    type: string
+    minLength: 1
+  s3_iam_role:
+    description: The IAM role name used to allow access to the source data in S3.
+    type: string
+    minLength: 1
+  schema:
+    description: The name of the source schema for the object to be unloaded.
+    type: string
+    minLength: 1
+  start:
+    description: >-
+      Name of the relation to start with when unloading a list of relations. If
+      not specified, start at the beginning of the list.
+    type: string
+    minLength: 1
+  stop_on_fail:
+    description: >-
+      If true, stop when any unload fails otherwise keep moving through the
+      unload list.
+    type: boolean
+  vars:
+    description: >-
+      A map of variables injected when the command arguments and environment are
+      Jinja rendered.
+    type: object
+  where:
+    description: >-
+      An optional WHERE condition for the UNLOAD queries. Do not include the
+      WHERE keyword.
+    type: string
+    minLength: 1
+
+required:
+  - args
+  - bucket
+  - conn_id
+  - prefix
+  - relation
+  - schema
+
+additionalProperties: false
+
+oneOf:
+  - required:
+      - s3_conn_id
+  - required:
+      - s3_iam_role

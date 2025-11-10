@@ -1,0 +1,36 @@
+# These are the extra requirements required to build lava but not run it.
+
+# ex: set ft=sh:
+
+pip
+build
+packaging
+
+mkdocs>=1.1.2
+mkdocs-material
+mkdocs-material-extensions
+mkdocstrings[python]
+
+black>=20.8b1
+flake8>=3.8.4
+flake8-black>=0.2.1
+flake8-builtins>=1.5.3
+flake8-docstrings>=1.5.0
+flake8-import-order>=0.18.1
+flake8-return>=1.1.2
+flake8-rst-docstrings>=0.0.14
+pep8-naming>=0.11.1
+
+yamllint>=1.26.0
+openpyxl>=3.0.7
+twine>=3.7.1
+
+ruff
+pytest
+pytest-xdist
+pytest-cov
+moto
+
+cfdoc
+jindr
+tqdm

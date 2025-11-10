@@ -1,0 +1,276 @@
+#!/usr/bin/env python3
+
+"""Utility to query the lava events table."""
+
+import argparse
+import json
+import logging
+import os
+import sys
+from datetime import datetime, timedelta, timezone
+from pprint import pformat
+from typing import Any
+
+import boto3
+from pygments import highlight
+from pygments.formatters.terminal256 import Terminal256Formatter as TerminalFormatter
+from pygments.lexers.data import JsonLexer  # noqa
+
+from lava.lib.aws import dynamo_unmarshall_item
+from lava.lib.datetime import duration_to_seconds
+from lava.lib.logging import setup_logging
+from lava.version import __version__
+
+__author__ = 'Murray Andrews'
+
+PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+LOGNAME = 'lava'  # Set to None to include boto which uses root logger.
+LOGLEVEL = 'info'
+LOG = logging.getLogger(name=LOGNAME)
+
+SINCE_DEFAULT = '1d'
+
+
+# ------------------------------------------------------------------------------
+def fmt_json(obj: Any) -> str:
+    """
+    Format an object as plain JSON.
+
+    :param obj:     The object. Must be JSON serialisable.
+
+    :return:        Formatted object
+    """
+
+    return json.dumps(obj, indent=2, sort_keys=True)
+
+
+# ------------------------------------------------------------------------------
+def fmt_pygments(obj: Any) -> str:
+    """
+    Format an object using Pygments.
+
+    :param obj:     The object. Must be JSON serialisable.
+
+    :return:        Formatted object
+    """
+
+    return highlight(fmt_json(obj), lexer=JsonLexer(), formatter=TerminalFormatter())
+
+
+# ------------------------------------------------------------------------------
+def fmt_pprint(obj: Any) -> str:
+    """
+    Format an object using built-in pprint. Its awful.
+
+    :param obj:     The object. Must be JSON serialisable.
+
+    :return:        Formatted object
+    """
+
+    return pformat(obj, indent=2)
+
+
+FORMATTERS = {k[4:]: v for k, v in globals().items() if k.startswith('fmt_')}
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(prog=PROG, description='Lava event log query utility')
+
+    # ------------------------------
+    # General options
+
+    argp.add_argument('--profile', action='store', help='As for AWS CLI.')
+
+    argp.add_argument('-v', '--version', action='version', version=__version__)
+
+    # ------------------------------
+    # Job options
+
+    jobp = argp.add_argument_group('job options')
+
+    jobp.add_argument(
+        '-e',
+        '--events',
+        action='store',
+        type=int,
+        help=(
+            'Limit output to the specified number of events. Events are sorted by decreasing event'
+            ' time so specifying a limit of 1 will give the most recent event. This option is'
+            ' ignored if run_id is specified.'
+        ),
+    )
+
+    jobp.add_argument('-r', '--realm', required=True, action='store', help='Lava realm name.')
+
+    jobp.add_argument(
+        '-s',
+        '--since',
+        action='store',
+        default=SINCE_DEFAULT,
+        help=(
+            'Only include jobs since this time duration before now. The duration is specified as'
+            ' nnX where nn is a number and X is s (seconds), m (minutes), h (hours) or d (days).'
+            ' If no X then assume seconds. This option is ignored if run_id is specified.'
+            f' Default is {SINCE_DEFAULT}'
+        ),
+    )
+
+    jobp.add_argument(
+        '--status',
+        action='store',
+        help=(
+            'Only include events with the given status.'
+            ' This option is ignored if run_id is specified.'
+        ),
+    )
+
+    jobp.add_argument(
+        'job_id',
+        metavar='job-id',
+        action='store',
+        help='Retrieve records for the specified job-id.',
+    )
+
+    jobp.add_argument(
+        'run_id',
+        metavar='run-id',
+        action='store',
+        nargs='?',
+        help='Retrieve the record for the specified run-id.',
+    )
+
+    # ------------------------------
+    # Logging options
+
+    logp = argp.add_argument_group('logging arguments')
+    logp.add_argument(
+        '-c',
+        '--no-colour',
+        '--no-color',
+        dest='colour',
+        action='store_false',
+        default=True,
+        help='Don\'t use colour in information messages.',
+    )
+
+    logp.add_argument(
+        '-l',
+        '--level',
+        metavar='LEVEL',
+        default=LOGLEVEL,
+        help=(
+            'Print messages of a given severity level or above. The standard logging level names'
+            ' are available but debug, info, warning and error are most useful.'
+            f' The Default is {LOGLEVEL}.'
+        ),
+    )
+
+    # ------------------------------
+    # Output options
+    outp = argp.add_argument_group('output options')
+    outp.add_argument(
+        '-f',
+        '--fmt',
+        '--format',
+        dest='fmt',
+        action='store',
+        choices=FORMATTERS,
+        default='pygments',
+        help='Specify output format.',
+    )
+
+    return argp.parse_args()
+
+
+# ---------------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Do the business.
+
+    :return:    status
+    """
+
+    args = process_cli_args()
+    setup_logging(args.level, name=LOGNAME, colour=args.colour)
+
+    aws_session = boto3.Session(profile_name=args.profile)
+    dynamo = aws_session.client('dynamodb')
+
+    events_table_name = 'lava.' + args.realm + '.events'
+    LOG.debug('Events table is %s', events_table_name)
+
+    paginator = dynamo.get_paginator('query')
+
+    if args.run_id:
+        query_args = {
+            'TableName': events_table_name,
+            'KeyConditionExpression': '#job_id = :job_id AND #run_id = :run_id',
+            'ExpressionAttributeNames': {'#job_id': 'job_id', '#run_id': 'run_id'},
+            'ExpressionAttributeValues': {
+                ':job_id': {'S': args.job_id},
+                ':run_id': {'S': args.run_id},
+            },
+        }
+    else:
+        start_time = (
+            (datetime.now(timezone.utc) - timedelta(seconds=duration_to_seconds(args.since)))
+            .isoformat()
+            .split('.', 1)[0]
+        )
+
+        LOG.debug('tu_event for search is %s', start_time)
+
+        query_args = {
+            'TableName': events_table_name,
+            'IndexName': 'job_id-tu_event-index',
+            'KeyConditionExpression': '#job_id = :job_id AND #tu_event >= :tu_event',
+            'ScanIndexForward': False,
+            'ExpressionAttributeNames': {'#job_id': 'job_id', '#tu_event': 'tu_event'},
+            'ExpressionAttributeValues': {
+                ':job_id': {'S': args.job_id},
+                ':tu_event': {'S': start_time},
+            },
+        }
+
+        if args.status:
+            query_args['FilterExpression'] = '#status = :status'
+            query_args['ExpressionAttributeNames']['#status'] = 'status'
+            # Pycharm inspections bug
+            # noinspection PyTypeChecker
+            query_args['ExpressionAttributeValues'][':status'] = {'S': args.status}
+
+    response_iterator = paginator.paginate(**query_args)
+    items = []
+    for response in response_iterator:
+        items.extend(response['Items'])
+
+    if args.events is None or args.events <= 0:
+        args.events = len(items)
+
+    # Print out the required number of events in increasing timestamp order
+    # black any flake8 fight over E203
+    for item in items[args.events - 1 :: -1]:  # noqa E203
+        print(FORMATTERS[args.fmt](dynamo_unmarshall_item(item)))
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        LOG.error('%s', ex)
+        exit(1)
+    except KeyboardInterrupt:
+        LOG.warning('Interrupt')
+        exit(2)

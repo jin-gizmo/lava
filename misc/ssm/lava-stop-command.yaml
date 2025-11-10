@@ -1,0 +1,66 @@
+---
+schemaVersion: "2.2"
+description: "Signal lava daemons to stop and wait for them to finish"
+
+parameters:
+  Signal:
+    type: "String"
+    description: "Signal to use"
+    default: "SIGHUP"
+    allowedValues:
+      - "SIGHUP"
+      - "SIGTERM"
+      - "SIGKILL"
+  LogLevel:
+    type: "String"
+    description: "Logging level"
+    allowedValues:
+      - "debug"
+      - "info"
+      - "warning"
+    default: "info"
+  LogTarget:
+    type: "String"
+    description: "Log destination (e.g. local file in /tmp or @local0)"
+    default: "@local0"
+    allowedPattern: "^(@[a-z0-9]*)|(/tmp/[_a-z0-9]+)$"
+  Wait:
+    type: "String"
+    description: "Wait for specified duration for lava workers to stop voluntarily\
+      \ before killing them"
+    default: "2m"
+    allowedPattern: "^[0-9]+[hms]?$"
+  InstanceId:
+    type: "String"
+    description: "Instance ID (auto scaling lifeycle hooks only)"
+    allowedPattern: "^(i-[a-z0-9]+)|()$"
+    default: ""
+  AsgName:
+    type: "String"
+    description: "Auto scaling group name (auto scaling lifeycle hooks only)"
+    allowedPattern: "^(lava-[-_a-zA-Z0-9]+)|()$"
+    default: ""
+  LifecycleToken:
+    type: "String"
+    description: "Lifecycle action token (auto scaling lifeycle hooks only)"
+    allowedPattern: "^([-_a-zA-Z0-9]+)|()$"
+    default: ""
+  LifecycleHook:
+    type: "String"
+    description: "Lifecycle hook name (auto scaling lifeycle hooks only)"
+    allowedPattern: "^([-_a-zA-Z0-9]+)|()$"
+    default: ""
+
+mainSteps:
+  - action: "aws:runShellScript"
+    name: "create_tmp_file"
+    inputs:
+      runCommand:
+        - >-
+          lava-stop --level '{{LogLevel}}' --log '{{LogTarget}}' --signal '{{Signal}}'
+          --no-dispatch
+          --wait '{{Wait}}'
+          --instance-id '{{InstanceId}}'
+          --auto-scaling-group-name '{{AsgName}}'
+          --lifecycle-action-token '{{LifecycleToken}}'
+          --lifecycle-hook-name '{{LifecycleHook}}'

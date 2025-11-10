@@ -1,0 +1,44 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava docker job parameters specification
+
+type: object
+
+properties:
+  args:
+    description: A list of additional arguments for the command.
+    type: array
+    items:
+      anyOf:
+        - type: string
+        - type: number
+  command:
+    description: The command to run in the container.
+    type: string
+    minLength: 1
+  connections:
+    description: A dictionary with keys that are connection labels and the values are conn_id
+    type: object
+  docker:
+    description: The conn_id for connecting to docker.
+    type: string
+    minLength: 1
+  env:
+    description: A map of additional environment variables for the command.
+    type: object
+  host_config:
+    description: A map of container host configuration parameters.
+    type: object
+  jinja:
+    description: Enable Jinja rendering of the payload.
+    $ref: lava.common.boolean
+  timeout:
+    description: Timeout before lava kills the job.
+    $ref: lava.common.duration
+  vars:
+    description: >-
+      A map of variables injected when the command arguments and environment are
+      Jinja rendered.
+    type: object
+
+additionalProperties: false

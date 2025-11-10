@@ -1,0 +1,39 @@
+#- foreach job specifics
+#-
+#- This is the list of vars to prompt for when building
+
+type: foreach
+
+## #############################################################################
+## The payload is the job_id for the child job to be run iteratively.
+##
+payload: "child_job_id"
+
+## #############################################################################
+## Job parameters
+
+parameters:
+  ## ---------------------------------------------------------------------------
+  ## Mandatory params
+
+  foreach:
+    type: "iterator type"  # e.g. inline, csv etc.
+    param1: ...  # These are type dependent
+    param2: ...
+
+  ## ---------------------------------------------------------------------------
+  ## Optional params
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Child job iterations are allowed to fail without causing the main job to fail.
+  # can_fail: false
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Enable / disable jinja rendering. Default is true. If false, disable Jinja
+  ## rendering of the args. Default true.
+  ##
+  # jinja: true
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Abort without running any jobs if the loop is longer than this.
+  # limit: 5

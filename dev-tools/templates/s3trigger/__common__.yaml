@@ -1,0 +1,55 @@
+#- Template for a lava s3trigger specification.
+#-
+#- This is the list of vars to prompt for when building
+#-
+#= trigger_id: Trigger ID (excluding any prefix)
+#= job_id:     Job identifier for the lava job that will be dispatched
+#= bucket:     Bucket name
+#= prefix:     Object prefix (no trailing /, use * for bucket root)
+#-
+## #############################################################################
+## Mandatory fields
+##
+trigger_id: "<{ prefix.s3trigger }>/{{ trigger_id }}"
+enabled: true
+job_id: "<{ prefix.job }>/{{ job_id }}"
+bucket: "{{ bucket }}"
+prefix: "{{ prefix }}"
+
+## #############################################################################
+## Optional fields
+##
+description: "..."
+owner: "<{ owner }>"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Dispatch message sending delay in the form nnX where nn is a number and X
+## is s (seconds) or m (minutes). The maximum allowed value is 15 minutes.
+##
+# delay: "5m"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Enable / disable jinja rendering. Default is true. If false, disable Jinja
+## rendering of the parameters and globals.
+##
+# jinja: true
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Globals for the dispatched job
+##
+# globals:
+#   global1: val1
+#   global2: val2
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Parameters for the dispatched job
+##
+# parameters:
+#   param1: val1
+#   param2: val2
+
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+##
+# X-whatever: "Some value"

@@ -1,0 +1,20 @@
+{#-
+This file is a modified version of the standard one. We have replaced the
+socials part of the footer with the ability to inject a value via the
+`md_footer_rhs` environment variable.
+-#}
+
+<footer class="md-footer">
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      {% include "partials/copyright.html" %}
+      <div class="md-footer-social">
+        <div class="md-copyright">
+          <div class="md-copyright__highlight">
+            {{ config.extra.environment.md_footer_rhs }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

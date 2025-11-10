@@ -1,0 +1,13 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava action specification
+
+oneOf:
+  - $ref: lava.job.action.dispatch
+  - $ref: lava.job.action.email
+  - $ref: lava.job.action.event
+  - $ref: lava.job.action.log
+  - $ref: lava.job.action.slack
+  - $ref: lava.job.action.sns
+  - $ref: lava.job.action.sqs
+  - $ref: lava.job.action.state

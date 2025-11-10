@@ -1,0 +1,19 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: csv foreach specification
+
+type: object
+
+properties:
+  type:
+    type: string
+    const: csv
+  filename:
+    type: string
+    minLength: 1
+
+required:
+  - type
+  - filename
+
+additionalProperties: false

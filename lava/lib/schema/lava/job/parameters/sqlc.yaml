@@ -1,0 +1,31 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava sqlc job parameters specification
+
+type: object
+
+properties:
+  args:
+    description: A list of additional arguments provided to the database client.
+    type: array
+    items:
+      type: string
+      minLength: 1
+  conn_id:
+    description: The connection ID for an SQL database.
+    type: string
+    minLength: 1
+  jinja:
+    description: Enable Jinja rendering.
+    $ref: lava.common.boolean
+  timeout:
+    description: Timeout before lava kills the job.
+    $ref: lava.common.duration
+  vars:
+    description: A map of variables injected when the parameters are Jinja rendered.
+    type: object
+
+required:
+  - conn_id
+
+additionalProperties: false

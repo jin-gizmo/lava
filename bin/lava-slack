@@ -1,0 +1,232 @@
+#!/usr/bin/env python3
+
+"""
+Command line utility to drive the lava slack connector.
+
+Relies on the lava connector subsystem.
+
+"""
+
+import argparse
+import logging
+import os
+import sys
+
+import boto3
+
+from lava.connection import get_slack_connection
+from lava.lavacore import LOGNAME
+from lava.lib.logging import setup_logging
+from lava.lib.misc import size_to_bytes
+from lava.lib.slack import MAX_MESSAGE_LEN, Slack
+from lava.version import __version__
+
+__author__ = 'Murray Andrews'
+
+PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+LOG = logging.getLogger(LOGNAME)
+LOGLEVEL = 'info'
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(
+        prog=PROG, description='Send Slack messages using lava slack connections.'
+    )
+
+    argp.add_argument('--profile', action='store', help='As for AWS CLI.')
+
+    argp.add_argument('-v', '--version', action='version', version=__version__)
+
+    # ------------------------------
+    # lava arguments
+
+    lavap = argp.add_argument_group('lava arguments')
+
+    lavap.add_argument(
+        '-c',
+        '--conn-id',
+        dest='conn_id',
+        required=True,
+        action='store',
+        help='Lava connection ID. Required.',
+    )
+
+    lavap.add_argument(
+        '-r',
+        '--realm',
+        action='store',
+        help=(
+            'Lava realm name. If not specified, the environment variable LAVA_REALM must be set.'
+        ),
+    )
+
+    # ------------------------------
+    # Slack arguments
+
+    slackp = argp.add_argument_group('slack arguments')
+
+    slackp.add_argument(
+        '--bar-colour',
+        metavar='COLOUR',
+        dest='bar_colour',
+        action='store',
+        help=(
+            'Colour for the sidebar for messages sent using attachment style. This can be any hex'
+            ' colour code or one of the Slack special values good, warning or danger.'
+        ),
+    )
+
+    slackp.add_argument(
+        '--from',
+        metavar='NAME',
+        dest='sender',
+        action='store',
+        help=(
+            'Message sender. If not specified, the value specified'
+            ' in the connection specification, if any, will be used.'
+        ),
+    )
+
+    slackp.add_argument(
+        '--preamble',
+        action='store',
+        help=(
+            'An optional preamble at the start of the message. Useful values include things such'
+            ' as <!here> and <!channel> which will cause Slack to insert @here and @channel alert'
+            ' tags respectively.'
+        ),
+    )
+
+    slackp.add_argument('-s', '--subject', action='store', help='Message subject.')
+
+    slackp.add_argument(
+        '--style',
+        action='store',
+        choices=Slack.STYLES,
+        help=(
+            f'Slack message style. Must be one of {", ".join(sorted(Slack.STYLES))}. If not'
+            f' specified, any value specified in the connection specification will be used'
+            f' or {Slack.STYLE_DEFAULT} as a last resort.'
+        ),
+    )
+
+    # ------------------------------
+    # Message source options.
+
+    srcp = argp.add_argument_group('message source arguments')
+
+    srcp.add_argument(
+        'message',
+        metavar='FILENAME',
+        action='store',
+        nargs='?',
+        type=argparse.FileType('r'),
+        help=(
+            'Name of file containing the message body. If not specified or "-", the body will be'
+            f' read from stdin. Only the first {MAX_MESSAGE_LEN} bytes are read.'
+        ),
+    )
+
+    # ------------------------------
+    # Logging options
+
+    logp = argp.add_argument_group('logging arguments')
+
+    logp.add_argument(
+        '--no-colour',
+        '--no-color',
+        dest='colour',
+        action='store_false',
+        default=True,
+        help='Don\'t use colour in information messages.',
+    )
+
+    logp.add_argument(
+        '-l',
+        '--level',
+        metavar='LEVEL',
+        default=LOGLEVEL,
+        help=(
+            'Print messages of a given severity level or above. The standard logging level names'
+            ' are available but debug, info, warning and error are most useful.'
+            f' The Default is {LOGLEVEL}.'
+        ),
+    )
+
+    logp.add_argument(
+        '--log',
+        action='store',
+        help='Log to the specified target. This can be either a file'
+        ' name or a syslog facility with an @ prefix (e.g. @local0).',
+    )
+
+    logp.add_argument(
+        '--tag',
+        action='store',
+        default=PROG,
+        help=f'Tag log entries with the specified value. The default is {PROG}.',
+    )
+
+    args = argp.parse_args()
+
+    args.message = args.message if args.message else sys.stdin
+
+    if not args.realm:
+        try:
+            args.realm = os.environ['LAVA_REALM']
+        except KeyError:
+            argp.error(
+                'Lava realm must be specified via -r, --realm or LAVA_REALM environment variable.'
+            )
+
+    return args
+
+
+# ---------------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Do the business.
+
+    :return:    status
+    """
+
+    setup_logging(LOGLEVEL, name=LOGNAME, prefix=PROG)
+    args = process_cli_args()
+    setup_logging(args.level, name=LOGNAME, target=args.log, colour=args.colour, prefix=args.tag)
+
+    message = args.message.read(size_to_bytes(MAX_MESSAGE_LEN))
+
+    aws_session = boto3.Session(profile_name=args.profile)
+    slack_conn = get_slack_connection(args.conn_id, args.realm, aws_session=aws_session)
+
+    slack_conn.send(
+        message=message,
+        subject=args.subject,
+        sender=args.sender,
+        style=args.style,
+        colour=args.bar_colour,
+        preamble=args.preamble,
+    )
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)
+    except KeyboardInterrupt:
+        print('Interrupt', file=sys.stderr)
+        exit(2)

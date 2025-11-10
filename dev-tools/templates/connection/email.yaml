@@ -1,0 +1,37 @@
+#- email connector specifics
+#-
+#- This is the list of vars to prompt for when building
+
+type: ses
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Mandatory fields
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The email handler subtype. Default is ses.
+# subtype: ses
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The email address that is sending the email. If not specified, a value must
+## specified at the realm level.
+##
+# from: "y2@colossal.cave"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Reply-to address(es). Can be string or list of strings.
+##
+# reply_to: "bedquilt@colossal.cave"
+
+## -----------------------------------------------------------------------------
+## ses subtype specific fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The AWS region name for SES. If not specified, us-east-1 is used.
+##
+# region: "us-east-1"

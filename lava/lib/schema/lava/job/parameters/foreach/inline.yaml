@@ -1,0 +1,20 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: inline foreach specification
+
+type: object
+
+properties:
+  type:
+    type: string
+    const: inline
+  values:
+    type: array
+    items:
+      type: object
+
+required:
+  - type
+  - values
+
+additionalProperties: false

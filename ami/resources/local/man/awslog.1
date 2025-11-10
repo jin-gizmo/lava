@@ -1,0 +1,186 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "AWSLOG" "1" "June 2016" "MA" "AWStools"
+.
+.SH "NAME"
+\fBawslog\fR \- Retrieve contents of a log stream from AWS CloudWatch
+.
+.SH "SYNOPSIS"
+\fBawslog\fR [options] stream\-selection\-option [time\-selection\-options]
+.
+.SH "DESCRIPTION"
+\fBAwslog\fR locates and fetches the contents of log streams from AWS CloudWatch\.
+.
+.P
+As well as being able to retrieve log events from a specified stream, it also has some convenience features to quickly locate syslog event records and interface flow logs from EC2 instances and flow logs for specified IP addresses\.
+.
+.SH "OPTIONS"
+.
+.SS "General Options"
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help and exit\.
+.
+.TP
+\fB\-c\fR, \fB\-\-no\-colour\fR, \fB\-\-no\-color\fR
+Don\'t use colour in output\.
+.
+.TP
+\fB\-f\fR \fIFORMAT\fR, \fB\-\-format\fR \fIFORMAT\fR
+Format event records according to the specified \fIFORMAT\fR\. See \fBEVENT RECORD FORMATTING\fR below\. The default format is:
+.
+.IP
+{B}{s} {t\.iso}{X} {m}
+.
+.TP
+\fB\-g\fR \fIGROUP\fR, \fB\-\-group\fR \fIGROUP\fR
+Limit actions to the specified CloudWatch log group\.
+.
+.TP
+\fB\-r\fR \fIREGEX\fR, \fB\-\-regex\fR \fIREGEX\fR
+Only print events whose message matches the given regex\. Python regex syntax applies\.
+.
+.TP
+\fB\-R\fR \fINOT_REGEX\fR, \fB\-\-not\-regex\fR \fINOT_REGEX\fR
+Don\'t print events whose message matches the given regex\. This is applied after the \fB\-r\fR regex is applied (if present)\.
+.
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR
+Print more information on AWS CLI commands and other debugging level information\. Unrelated to the \fB\-\-debug\fR option which is passed to the AWS CLI\.
+.
+.TP
+\fB\-\-cli\-connect\-timeout\fR \fIint\fR
+As for the AWS CLI\.
+.
+.TP
+\fB\-\-cli\-read\-timeout\fR \fIint\fR
+As for the AWS CLI\.
+.
+.TP
+\fB\-\-debug\fR
+As for the AWS CLI\. This option will result in lots of generally unhelpful output\.
+.
+.TP
+\fB\-\-profile\fR \fIprofile\-id\fR
+As for the AWS CLI\.
+.
+.TP
+\fB\-\-region arg\fR
+As for the AWS CLI\.
+.
+.SS "Log Stream Selection Options"
+The following options select the log stream(s) from which events will be printed\. Exactly one of the following options is required\. If the \fB\-g\fR option is supplied then only that log group will be searched, otherwise all available log groups will be searched for the requested log stream(s)\.
+.
+.TP
+\fB\-l\fR, \fB\-\-list\fR
+List available log streams\. No event records are printed\.
+.
+.TP
+\fB\-s\fR \fISTREAM\fR, \fB\-\-stream\fR \fISTREAM\fR
+Print event records from the specified log stream\.
+.
+.TP
+\fB\-i\fR \fINAME\fR, \fB\-\-instance\-log\fR \fINAME\fR
+Look for an EC2 instance with the specified name (Name tag), find its instance ID and then look for a stream named after the instance ID\. This is useful for Linux nodes that use the AWSlog service to deliver syslogs to CloudWatch\. The default configuration for the AWSlog service on AWS Linux nodes will create a \fI/var/log/messages\fR log group with log streams named after the instance ID\.
+.
+.TP
+\fB\-n\fR \fINAME\fR, \fB\-\-instance\-net\fR \fINAME\fR
+Look for an EC2 instance with the specified name (Name tag), find the ID(s) of all network interfaces currently attached and look for log streams with names based on the interface ID(s)\. This is useful for locating VPC flow logs related to the instance, but can be misleading if an interface has moved between nodes\.
+.
+.TP
+\fB\-e\fR \fINAME\fR, \fB\-\-eni\fR \fINAME\fR
+Look for Elastic Network Interfaces with the specified name (Name tag), find their interface IDs and look for log streams that start with those IDs\. This is useful for locating VPC flow logs for an interface\.
+.
+.TP
+\fB\-p\fR \fIIP\fR, \fB\-\-ip\fR \fIIP\fR
+Look for Elastic Network Interfaces with the specified IP address (public or private), find their interface IDs and look for log streams that start with that ID\. This is useful for locating VPC flow logs for an IP address\.
+.
+.SS "Log Event Time Selection Options"
+The argumet for each of these options can be a duration string (meaning this period of time prior to the current time) or a date/time stream\.
+.
+.P
+Duration strings consist of an integer followed by a single character time unit: \fIw\fR, \fId\fR, \fIh\fR, \fIm\fR, \fIs\fR (weeks, days, hours, minutes, seconds)\. If no unit is provided, seconds are assumed\. e\.g\. \fI4h\fR means 4 hours\.
+.
+.P
+Date/times are in one of the following formats:
+.
+.IP "" 4
+.
+.nf
+
+   yyyy\-mm\-ddTHH:MM:SS (e\.g\. 2015\-12\-25T16:10:00 like ISO\-8601)
+   yyyy\-mm\-dd HH:MM:SS (e\.g\. 2015\-12\-25 16:10:00)
+   yyyymmdd HH:MM:SS (e\.g\. 20151225 16:10:00)
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Seconds are optional for each of these formats\.
+.
+.P
+All date/times are in local time\.
+.
+.TP
+\fB\-S\fR \fISTART\fR, \fB\-\-start\fR \fISTART\fR
+Start time for the log events to print\. If start time is after end time they will be silently swapped\. Default is \fI30m\fR (i\.e 30 minutes before current local time)\.
+.
+.TP
+\fB\-E\fR \fIEND\fR, \fB\-\-end\fR \fIEND\fR
+End time for the log events to print\. Default is current time\.
+.
+.SH "EVENT RECORD FORMATTING"
+Event records can be formatted using the \fB\-f\fR, \fB\-\-format\fR option\. This allows particular fields from each record to be selected and presented as required\. The syntax is based on the {attribute} style of the Python string formatter\.
+.
+.P
+The following attributes are available for each event record:
+.
+.TP
+\fBi\fR
+Event record ingestion time\. If used as \fI{i}\fR the raw timestamp is printed, while \fI{i\.iso}\fR will print the timestamp in ISO\-8601 format and \fI{i\.ctime}\fR will print traditional Unix ctime format for the locale\. It is also possible to use any of the single character directives supported by \fBstrftime(3)\fR to select a component of the timestamp in a particular format\. For example, \fI{i\.b}\fR will print the national representation of the abbreviated month name\.
+.
+.TP
+\fBg\fR
+Log group name\.
+.
+.TP
+\fBm\fR
+The event message text\. Since Python string format() is used, its formatting capabilities are available\. e\.g\. \fI{m:\.30}\fR will print the first 30 characters of the message\.
+.
+.TP
+\fBs\fR
+Log stream name\.
+.
+.TP
+\fBt\fR
+The event timestamp\. The same formatting controls as for \fI{i}\fR are available\.
+.
+.TP
+\fBR\fR, \fBG\fR, \fBB\fR, \fBC\fR, \fBM\fR, \fBY\fR, \fBK\fR
+Print the following text in red, green, blue, cyan, magenta, yellow or black respectively (unless the \fB\-c\fR, \fB\-\-no\-colour\fR option is used)\.
+.
+.TP
+\fBX\fR
+Reset colour printing to default\.
+.
+.P
+For example, the following will print the event timestamp hours and minutes in blue followed by the message text in the default colour\.
+.
+.IP "" 4
+.
+.nf
+
+{B}{t\.H}:{t\.M}{X} {m}
+.
+.fi
+.
+.IP "" 0
+.
+.SH "AUTHOR"
+Murray Andrews
+.
+.SH "LICENCE"
+BSD 3\-clause licence \fIhttp://opensource\.org/licenses/BSD\-3\-Clause\fR\.

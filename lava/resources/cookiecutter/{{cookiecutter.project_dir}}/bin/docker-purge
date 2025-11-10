@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Purge docker images. Like docker rmi but removes the base image (not just
+# image tags).
+
+# Usage: docker-purge [img-name ...]
+
+PROG=$(basename "$0")
+
+# ------------------------------------------------------------------------------
+function error {
+	if [ -t 2 ]
+	then
+		echo "[31m$*[0m" >&2
+	else
+		echo "$PROG: ERROR: $*" >&2
+	fi
+}
+
+function abort {
+	error "ABORT: $*"
+	exit 1
+}
+
+# Get the image ID for the specified docker image. Returns empty if image not
+# found
+function docker_img_id {
+	docker inspect "$1" 2>/dev/null | \
+		python -c "import json, sys; print(json.load(sys.stdin)[0]['Id'])" 2>/dev/null
+}
+
+# ------------------------------------------------------------------------------
+
+images=$(
+	for img
+	do
+		img_id=$(docker_img_id "$img")
+		[ "$img_id" == "" ] && error "$img: no such docker image" && continue
+		echo "$img_id"
+	done | sort -u
+)
+
+# shellcheck disable=SC2086
+docker rmi -f $images

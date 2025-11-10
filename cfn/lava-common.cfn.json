@@ -1,0 +1,280 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Components common to all lava realms",
+  "Metadata": {
+    "Cfdoc": {
+      "Description": [
+        "This template builds components that are shared across all lava realms.",
+        "There should be a very limited number of these."
+      ],
+      "Author": "Murray Andrews"
+    }
+  },
+  "Parameters": {
+    "Version": {
+      "Type": "String",
+      "Description": "Lava version (read only).",
+      "Default": "STOP - Wrong template. Use the built version from dist/cfn not src from cfn/",
+      "AllowedPattern": "^?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+
+    }
+  },
+  "Outputs": {
+    "Version": {
+      "Description": "Lava common stack version",
+      "Value": { "Ref": "Version"},
+      "Export": { "Name": "lava:version" }
+    }
+  },
+  "Resources": {
+    "ssmDocumentLavaStop": {
+      "Type": "AWS::SSM::Document",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "SSM command document to stop lava daemons on a worker instance"
+        }
+      },
+      "Properties": {
+        "Name": "lava-StopWorkerDaemons",
+        "DocumentType": "Command",
+        "DocumentFormat": "JSON",
+        "TargetType": "/AWS::EC2::Instance",
+        "Content": {
+          "description": "Signal lava daemons to stop and wait for them to finish.",
+          "schemaVersion": "2.2",
+          "parameters": {
+            "ExecutionTimeout": {
+              "default": "3600",
+              "description": "Execution timeout in seconds",
+              "type": "String",
+              "allowedPattern": "^\\d+$"
+            },
+            "LogLevel": {
+              "allowedValues": [
+                "debug",
+                "info",
+                "warning"
+              ],
+              "default": "info",
+              "description": "Logging level",
+              "type": "String"
+            },
+            "Signal": {
+              "allowedValues": [ "SIGHUP", "SIGKILL" ],
+              "default": "SIGHUP",
+              "description": "SIGHUP for controlled shutdown. SIGKILL for hard kill.",
+              "type": "String"
+            },
+            "StopDispatch": {
+              "allowedValues": [ "yes", "no" ],
+              "default": "yes",
+              "description": "Prevent scheduled dispatches from this instance?",
+              "type": "String"
+            },
+            "Wait": {
+              "allowedPattern": "^[0-9]+[hms]?$",
+              "default": "15m",
+              "description": "Wait for specified duration for lava workers to stop voluntarily before killing them.",
+              "type": "String"
+            }
+          },
+          "mainSteps": [
+            {
+              "name": "stopWorkerDaemons",
+              "action": "aws:runShellScript",
+              "inputs": {
+                "timeoutSeconds": "{{ExecutionTimeout}}",
+                "runCommand": [
+                  "LOG='logger -s -p local0.info -t lava-stop'",
+                  "[ '{{StopDispatch}}' == 'yes' ] && STOP_DISPATCH=--no-dispatch",
+                  "lava-stop --level '{{LogLevel}}' --log @local0 --signal '{{Signal}}' --wait '{{Wait}}' $STOP_DISPATCH",
+                  "$LOG lava daemons stopped"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ssmDocumentLavaReboot": {
+      "Type": "AWS::SSM::Document",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "SSM command document to do controlled reboot on a lava instance."
+        }
+      },
+      "Properties": {
+        "Name": "lava-RebootWorkerInstance",
+        "DocumentType": "Command",
+        "DocumentFormat": "JSON",
+        "TargetType": "/AWS::EC2::Instance",
+        "Content": {
+          "description": "Controlled reboot of a lava instance (includes security updates).",
+          "schemaVersion": "2.2",
+          "parameters": {
+            "ExecutionTimeout": {
+              "default": "3600",
+              "description": "Execution timeout in seconds",
+              "type": "String",
+              "allowedPattern": "^\\d+$"
+            },
+            "LogLevel": {
+              "allowedValues": [
+                "debug",
+                "info",
+                "warning"
+              ],
+              "default": "info",
+              "description": "Logging level",
+              "type": "String"
+            },
+            "Signal": {
+              "allowedValues": [ "SIGHUP", "SIGKILL" ],
+              "default": "SIGHUP",
+              "description": "SIGHUP for controlled shutdown. SIGKILL for hard kill.",
+              "type": "String"
+            },
+            "Wait": {
+              "allowedPattern": "^\\d+[hms]?$",
+              "default": "15m",
+              "description": "Wait for specified duration for lava workers to stop voluntarily before killing them.",
+              "type": "String"
+            }
+          },
+          "mainSteps": [
+            {
+              "action": "aws:runShellScript",
+              "name": "rebootWorkerInstance",
+              "inputs": {
+                "timeoutSeconds": "{{ExecutionTimeout}}",
+                "runCommand": [
+                  "LOG='logger -s -p local0.info -t lava-reboot'",
+                  "[ -f /tmp/no-reboot ] && /bin/rm -f /tmp/no-reboot && $LOG Reboot complete && exit 0",
+                  "$LOG Installing any available security updates",
+                  "yum update --security -y",
+                  "$LOG Stopping lava worker daemons",
+                  "lava-stop --level '{{LogLevel}}' --log @local0 --signal '{{Signal}}' --wait '{{Wait}}'",
+                  "touch /tmp/no-reboot || exit 1",
+                  "$LOG Rebooting",
+                  "exit 194"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ssmDocumentSecUpdate": {
+      "Type": "AWS::SSM::Document",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": [
+            "SSM command document to check if security updates are available for",
+            "a lava worker instance and install and reboot if there are."
+          ]
+
+        }
+      },
+      "Properties": {
+        "Name": "lava-SecurityUpdate",
+        "DocumentType": "Command",
+        "DocumentFormat": "JSON",
+        "TargetType": "/AWS::EC2::Instance",
+        "Content": {
+          "description": "If security updates available for lava instance, apply them and reboot",
+          "schemaVersion": "2.2",
+          "parameters": {
+            "ExecutionTimeout": {
+              "default": "3600",
+              "description": "Execution timeout in seconds",
+              "type": "String",
+              "allowedPattern": "^\\d+$"
+            },
+            "LogLevel": {
+              "allowedValues": [
+                "debug",
+                "info",
+                "warning"
+              ],
+              "default": "info",
+              "description": "Logging level",
+              "type": "String"
+            },
+            "MinUpDays": {
+              "default": "0",
+              "description": "Skip if instance hasn't been up for this many days.",
+              "type": "String",
+              "allowedPattern": "^\\d+$"
+            },
+            "Signal": {
+              "allowedValues": [
+                "SIGHUP",
+                "SIGKILL"
+              ],
+              "default": "SIGHUP",
+              "description": "SIGHUP for controlled shutdown of lava daemons. SIGKILL for hard kill.",
+              "type": "String"
+            },
+            "Wait": {
+              "default": "15m",
+              "description": "Wait for specified duration for lava workers to stop voluntarily before killing them.",
+              "type": "String",
+              "allowedPattern": "^\\d+[hms]?$"
+            }
+          },
+          "mainSteps": [
+            {
+              "action": "aws:runShellScript",
+              "name": "secUpdates",
+              "inputs": {
+                "timeoutSeconds": "{{ExecutionTimeout}}",
+                "runCommand": [
+                  "LOG='logger -s -p local0.info -t lava-secupdate'",
+                  "$LOG Starting",
+                  "INSTANCE=$(ec2-metadata -i | cut -d' ' -f2)",
+                  "export AWS_DEFAULT_REGION=$(ec2-metadata -z | cut -d' ' -f2 | sed -e 's/.$//')",
+                  "NAME=$(aws ec2 describe-tags --filters \"Name=resource-id,Values=$INSTANCE\" \"Name=key,Values=Name\" --query 'Tags[0].Value' --output text)",
+                  "EVENT_MSG='{\"Source\":\"lava\",\"DetailType\":\"Lava Worker Instance Patching Notification\",\"Detail\":\"{\\\"instance-id\\\":\\\"'$INSTANCE'\\\",\\\"instance-name\\\":\\\"'$NAME'\\\",\\\"info\\\":\\\"Reboot complete\\\"}\"}'",
+                  "[ -f /tmp/no-reboot ] && aws events put-events --entries \"$EVENT_MSG\"",
+                  "[ -f /tmp/no-reboot ] && /bin/rm -f /tmp/no-reboot && $LOG Reboot complete && exit 0",
+                  "UPDAYS=$(awk '{ printf(\"%d\", $1/60/60/24); }' /proc/uptime)",
+                  "[ $UPDAYS -lt {{MinUpDays}} ] && $LOG Instance has only been up $UPDAYS days - skip && exit 0",
+                  "yum check-update --security --quiet",
+                  "[ $? -ne 100 ] && $LOG No security updates available - skip && exit 0",
+                  "$LOG Installing security updates",
+                  "yum update --security --quiet -y",
+                  "needs-restarting -r && $LOG No reboot required && exit 0",
+                  "$LOG Stopping lava worker daemons",
+                  "lava-stop --level '{{LogLevel}}' --log @local0 --signal '{{Signal}}' --wait '{{Wait}}'",
+                  "touch /tmp/no-reboot || exit 1",
+                  "EVENT_MSG='{\"Source\":\"lava\",\"DetailType\":\"Lava Worker Instance Patching Notification\",\"Detail\":\"{\\\"instance-id\\\":\\\"'$INSTANCE'\\\",\\\"instance-name\\\":\\\"'$NAME'\\\",\\\"info\\\":\\\"Rebooting after security patching\\\"}\"}'",
+                  "aws events put-events --entries \"$EVENT_MSG\"",
+                  "$LOG Rebooting",
+                  "exit 194"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "logsPolicyToLogEvents": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": [
+            "Allow EventBridge rules to write to log group aws/events/lava.",
+            "This is generally not needed as EventBridge will have already",
+            "added a broader permission but just in case."
+          ]
+        }
+      },
+      "Type": "AWS::Logs::ResourcePolicy",
+      "Properties": {
+        "PolicyName": "TrustEventsToStoreLavaLogEvents",
+        "PolicyDocument": {
+          "Fn::Sub": "{\"Statement\": [{\"Action\": [\"logs:CreateLogStream\", \"logs:PutLogEvents\"], \"Effect\": \"Allow\", \"Principal\": {\"Service\": [\"delivery.logs.amazonaws.com\", \"events.amazonaws.com\"]}, \"Resource\": \"arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/events/lava:*\", \"Sid\": \"TrustEventsToStoreLavaLogEvent\"}], \"Version\": \"2012-10-17\"}"
+        }
+      }
+    }
+  }
+}

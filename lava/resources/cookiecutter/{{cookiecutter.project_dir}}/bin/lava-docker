@@ -1,0 +1,165 @@
+#!/bin/bash
+
+# Package a directory of code into a docker image for a lava "docker" job.
+
+PROG=$(basename "$0")
+
+# Set this to "plain" to see the full build output for debugging
+DOCKER_PROGRESS=auto
+
+# ------------------------------------------------------------------------------
+function usage {
+	echo "Usage: $PROG [-h] [options] source-dir [Dockerfile]" >&2
+}
+
+function help {
+	usage
+	cat >&2 <<-!
+
+Package up the contents of a directory into a docker image for deployment
+as a lava docker job.
+
+Options:
+
+  -h            Print help and exit
+
+  -b build-arg  As per docker build --build-arg
+
+  -c conf-file  A YAML config file. If specified, the Dockerfile and any files
+                in the env/ directory will be jinja rendered using this file
+                (using <{ }> jinja delimiters).
+
+  -i iidfile    Write the image ID to the specified file.
+
+  -p name=val   Add the specified parameter to the jinja rendering process.
+
+  -P platform   The target platform architecture for docker containers.
+
+  -t image-tag  Image name and optionally a tag in the 'name:tag' format.
+
+  -T template   Use the named template when converting Jupyter notebooks to Python.
+
+  source-dir    The directory containing the source code.
+
+  Dockerfile    If the source directory contains a Dockerfile then that will
+                always be used. If not, then use the file specified by this
+                argument as a fallback.
+
+!
+}
+
+function info {
+	if [ -t 2 ]
+	then
+		echo "[34m$*[0m" >&2
+	else
+		echo "$PROG: INFO: $*" >&2
+	fi
+}
+
+function error {
+	if [ -t 2 ]
+	then
+		echo "[31m$*[0m" >&2
+	else
+		echo "$PROG: ERROR: $*" >&2
+	fi
+}
+
+function abort {
+	error "ABORT: $*"
+	exit 1
+}
+
+# ------------------------------------------------------------------------------
+# shellcheck disable=SC2086,SC2048
+args=$(getopt b:c:i:hp:P:t:T: $*)
+[ $? -ne 0 ] && usage && exit 2
+
+declare -a docker_args render_args ipynb2py_args
+
+# shellcheck disable=SC2086
+set -- $args
+while true
+do
+	case "$1"
+	in
+		-h)	help; exit 0;;
+
+		-b)	docker_args+=(--build-arg "$2"); shift 2;;
+		-i)	docker_args+=(--iidfile "$2"); shift 2;;
+		-t)	docker_args+=(--tag "$2"); shift 2;;
+
+		-c)	render_args+=(--file "$2"); shift 2;;
+		-p)	render_args+=(-p "$2"); shift 2;;
+                -P)
+			# Specify platform.
+			case "$2"
+			in
+				host)	docker_platform= ;;
+				linux/*) docker_platform="--platform=$2" ;;
+				*)	abort "Bad platform: $2" ;;
+			esac
+			shift 2;;
+		-T)	ipynb2py_args+=(--template "$2"); shift 2;;
+
+		--)	shift; break;;
+		*)	abort "Internal error";;
+	esac
+done
+
+[ $# -ne 1 -a $# -ne 2 ] && usage && exit 1
+
+src_dir="$1"
+[ ! -d "$src_dir" ] && abort "$src_dir: No such directory"
+
+if [ -f "$src_dir/Dockerfile" ]
+then
+	dockerfile="$src_dir/Dockerfile"
+elif [ "$2" != "" -a -f "$2" ]
+then
+	dockerfile="$2"
+else
+	abort No Dockerfile
+fi
+
+# ------------------------------------------------------------------------------
+z=3
+TMP=/tmp/docker.$$
+trap '/bin/rm -rf $TMP; exit $z' 0
+mkdir -p $TMP
+shopt -s nullglob
+
+# Copy contents to temp area -- follow symlinks
+info Copying source
+cp -RL "$src_dir" $TMP/src
+
+# Prepare Dockerfile and any env/* files
+# If there are no render args we have nothing to render into the files, so skip.
+if [ ${#render_args[@]} != "" ]
+then
+	info Rendering Dockerfile and env files
+	jinja --delimiter \< "${render_args[@]}" < "$dockerfile" > $TMP/src/Dockerfile
+	dockerfile=$TMP/src/Dockerfile
+
+	if [ -d $TMP/src/env ]
+	then
+		find $TMP/src/env -type f | while read -r f
+		do
+			jinja --delimiter \< "${render_args[@]}" < "$f" > "$f.$$"
+			cat "$f.$$" > "$f"
+			/bin/rm -f "$f.$$"
+		done
+	fi
+		
+fi
+
+# Convert any Jupyter notebooks to Python
+find $TMP/src -name '*.ipynb' -type f -print0 | xargs -0 ipynb2py "${ipynb2py_args[@]}" || exit
+find $TMP/src -name '*.ipynb' -type f -delete
+
+# Do the docker build
+info Building docker image
+docker buildx build --progress="$DOCKER_PROGRESS" --rm --force-rm -f "$dockerfile" \
+	"${docker_args[@]}" "$docker_platform" $TMP/src
+z=0

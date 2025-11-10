@@ -1,0 +1,41 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava pkg job parameters specification
+
+type: object
+
+properties:
+  args:
+    description: A list of additional arguments for the command.
+    type: array
+    items:
+      anyOf:
+        - type: string
+        - type: number
+  command:
+    description: >-
+      The name of the entry point executable in the bundle, relative to the root
+      of the bundle.
+    type: string
+    minLength: 1
+  connections:
+    description: >-
+      A dictionary with keys that are connection labels and the values are
+      conn_id.
+    type: object
+  env:
+    description: A map of additional environment variables for the command.
+    type: object
+  jinja:
+    description: Enable Jinja rendering of the payload.
+    $ref: lava.common.boolean
+  timeout:
+    description: Timeout before lava kills the job.
+    $ref: lava.common.duration
+  vars:
+    description: >-
+      A map of variables injected when the command arguments and environment are
+      Jinja rendered.
+    type: object
+
+unevaluatedProperties: false

@@ -1,0 +1,37 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Event action specification
+
+type: object
+
+properties:
+  action:
+    type: string
+    const: event
+  detail_type:
+    description: The event detail type.
+    type: string
+    minLength: 1
+  detail:
+    description: Event detail.
+    anyOf:
+      - type: string
+      - type: object
+  event_bus:
+    description: The event bus name.
+    type: string
+    minLength: 1
+  resources:
+    description: A list of resources.
+    type: array
+    items:
+      type: string
+  source:
+    description: The event source.
+    type: string
+    minLength: 1
+
+required:
+  - action
+
+additionalProperties: false

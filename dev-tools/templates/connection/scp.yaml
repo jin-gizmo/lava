@@ -1,0 +1,21 @@
+#- scp connector specifics
+#-
+#- This is the list of vars to prompt for when building
+#= ssm_param: SSM parameter containing SSH private key (excluding realm prefix)
+
+type: scp
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Mandatory fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The name of an encrypted SSM parameter containing the SSH private key.
+## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+##
+ssh_key: "/lava/<{ realm }>/{{ ssm_param }}"
+
+## -----------------------------------------------------------------------------
+## Optional fields

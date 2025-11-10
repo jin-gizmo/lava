@@ -1,0 +1,65 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "KEX" "1" "October 2016" "MA" "ToolBox"
+.
+.SH "NAME"
+\fBkex\fR \- extract keys from structured data files (JSON, YAML etc\.)
+.
+.SH "SYNOPSIS"
+\fBkex\fR [options] \fIkey\fR [\fIfile\fR [\fIfile\fR \.\.\.]]
+.
+.SH "DESCRIPTION"
+\fBKex\fR extracts a specified key from a formatted data file\. Currently supports YAML, JSON and INI (config) files\. Kex will try to determine the file type from the file suffix\. If this is not possible, use the \fB\-t\fR, \fB\-\-type\fR option\.
+.
+.P
+This is useful to allow shell scripts to read a designated configuration value from a structured file\.
+.
+.SH "OPTIONS"
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help and exit\.
+.
+.TP
+\fB\-i\fR, \fB\-\-ignore\fR
+Ignore decoding errors\. Default is to abort on errors\.
+.
+.TP
+\fB\-t\fR \fItype\fR, \fB\-\-type\fR \fItype\fR
+Format type (\fIyaml\fR, \fIjson\fR or \fIini\fR)\. Any input file whose type cannot be determined from the suffix will be assumed to be of this type\. This option is required when input is supplied via stdin as there is no filename suffix to enable determination of format type\.
+.
+.TP
+\fIkey\fR
+The key to extract\. The key can specify a recursive descent of the configuration data using the form \fIk1\.k2\.\.\.\.kn\fR (dot separated key hierarchy) where \fIk1\fR is the most significant and \fIkn\fR the least\.
+.
+.TP
+\fIfile\fR \.\.\.
+One or more data/config files\. These will be searched in the specified order for the key\. The search stops at the first occurrence\. A filename of \fB\-\fR refers to stdin\. If no file arguments are provided, stdin is used\.
+.
+.SH "EXAMPLES"
+Given the YAML file (sample\.yaml):
+.
+.IP "" 4
+.
+.nf
+
+level1:
+    level2a: hello
+    level2b: world
+.
+.fi
+.
+.IP "" 0
+.
+.P
+The command \fBkex level1\.level2a sample\.yaml\fR will print \fBhello\fR\.
+.
+.SH "AUTHOR"
+Murray Andrews
+.
+.SH "SEE ALSO"
+JMESPath  \fIjmespath\.org\fR
+.
+.SH "LICENCE"
+BSD 3\-clause licence \fIhttp://opensource\.org/licenses/BSD\-3\-Clause\fR\.

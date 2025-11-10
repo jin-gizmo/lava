@@ -1,0 +1,62 @@
+# This file contains parameters to be made available for Jinja rendering of
+# the deployable components.
+#
+# They are referenced in the lava deployment artefacts using a variation on
+# usual Jinja syntax:
+#
+#{% raw %}
+#   <{...}> instead of {{...}}
+#   <#...#> instead of {#...#}
+#   <%...%> instead of {% %}
+#{% endraw %}
+#
+# For example <{ realm }> would insert the lava realm name and <{ prefix.job }>
+# would insert the job_id prefix for the project.
+
+# ------------------------------------------------------------------------------
+# WARNING: Keys in this section MUST be present or the framework will break.
+#          DO NOT delete any of them.
+
+# Target lava realm
+realm: "{{cookiecutter.realm}}"
+
+prefix:
+  # Prefixes for ID fields in DynamoDB
+  # Lava conventions are to use / as a separator in these.
+  job: "{{cookiecutter.job_prefix}}"
+  payload: "{{cookiecutter.payload_prefix}}"
+  s3trigger: "{{cookiecutter.s3trigger_prefix}}"
+  docker_repo: "{{cookiecutter.docker_prefix}}"
+  # Prefix for EventBridge rule IDs (rule name)
+  # Must be in the form "lava.REALM.*" (no slashes)
+  rule: "{{cookiecutter.rule_prefix}}"
+
+docker:
+  # Base image for docker jobs.
+  base_img: ghcr.io/jin-gizmo/lava/amzn2023/base
+  # Platform can be of "host", "linux/arm64", "linux/amd64" or
+  # "linux/amd64,linux/arm64". The base image must support the requested platform.
+  platform: "{{cookiecutter.docker_platform}}"
+
+# ------------------------------------------------------------------------------
+# Keys in this section are suggested for use in lava DynamoDB record specs such
+# as job specs. The framework doesn't depend on these though.
+
+description: "{{cookiecutter.description}}"
+owner: "{{cookiecutter.owner}}"
+
+worker:
+  main: "core"
+
+dispatcher:
+  main: "--"
+  none: "--"
+
+schedule:
+  main: "--"
+
+# ------------------------------------------------------------------------------
+# Put whatever variables you want to be available when Jinja renders the lava
+# deployment artefacts.
+
+myvar: stuff

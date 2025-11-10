@@ -1,0 +1,27 @@
+# This file contains environment independent information used to build a
+# particular OS type of lava AMI. Environment specific stuff is in the deploy
+# configuration file.
+
+# Note that the Makefile will render the architecture into the AMI name.
+# Typically one of x86_64 or arm64
+
+# The ami_ref is the tail of an AWS SSM parameter name containing the ID of the
+# base AMI. AWS provides a bunch of these parameters to simplify finding common
+# AMIs. See https://docs.aws.amazon.com/linux/al2023/ug/ec2.html.
+
+os:
+  amzn2:
+    description: Amazon Linux 2
+    ami_ref: amzn2-ami-hvm-{{ arch }}-gp2
+
+  amzn2023:
+    description: Amazon Linux 2023
+    ami_ref: al2023-ami-kernel-default-{{ arch }}
+
+arch:
+  x86_64:
+    # Build instance type
+    instance_type: t3.large
+
+  arm64:
+    instance_type: t4g.large

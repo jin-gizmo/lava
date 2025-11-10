@@ -1,0 +1,30 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava slack connection parameters
+
+type: object
+
+properties:
+  colour:
+    description: Default colour for the sidebar for Slack messages sent using attachment style.
+    type: string
+    minLength: 1
+  from:
+    description: An arbitrary source identifier for display in Slack messages.
+    type: string
+    minLength: 1
+  preamble:
+    description: Default preamble at the start of Slack messages.
+    type: string
+    minLength: 1
+  style:
+    description: Display style for Slack messages.
+    type: string
+    minLength: 1
+  webhook_url:
+    description: The webhook URL provided by Slack for sending messages.
+    type: string
+    format: uri
+
+required:
+  - webhook_url

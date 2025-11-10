@@ -1,0 +1,49 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava sharepoint_put_doc job parameters specification
+
+type: object
+
+properties:
+  basedir:
+    description: >-
+      If the source file is specified as a relative filename, it will be treated
+      as relative to the specified directory.
+    type: string
+  conn_id:
+    description: The connection ID for a SharePoint site.
+    type: string
+    minLength: 1
+  file:
+    description: >-
+      The source file name. If it starts with s3:// it is assumed to be an
+      object in S3, otherwise a local file. If a local file and not absolute, it
+      will be relative to the basedir parameter.
+    type: string
+    minLength: 1
+  jinja:
+    description: Enable Jinja rendering.
+    $ref: lava.common.boolean
+  library:
+    description: Source SharePoint library name.
+    type: string
+    minLength: 1
+  path:
+    description: The source document path in SharePoint.
+    type: string
+    minLength: 1
+  title:
+    description: A title for the document.
+    type: string
+    minLength: 1
+  vars:
+    description: A map of variables injected when the parameters are Jinja rendered.
+    type: object
+
+additionalProperties: false
+
+required:
+  - conn_id
+  - file
+  - library
+  - path

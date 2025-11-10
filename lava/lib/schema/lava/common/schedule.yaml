@@ -1,0 +1,26 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: lava.common.schedule
+
+title: A lava schedule entry.
+description: >-
+  Lava schedule entries can be a simple crontab specification or a lava schedule
+  specification consisting of a crontab specification and from/to timestamps.
+
+anyOf:
+  - description: Simple crontab
+    type: string
+    pattern: &crontab "^([^ ]+ +){4}[^ ]+$"
+  - description: Lava schedule specification
+    type: object
+    additionalProperties: false
+    required: [crontab]
+    properties:
+      crontab:
+        type: string
+        pattern: *crontab
+      from:
+        type: string
+        format: iso8601
+      to:
+        type: string
+        format: iso8601

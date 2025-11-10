@@ -1,0 +1,47 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava postgres connection parameters
+
+type: object
+
+# Note that some of these properties are mandatory but marked so here because
+# they can be supplied by AWS Secrets Manager at run-time.
+
+properties:
+  database:
+    description: The name of the database within the database server.
+    type: string
+    minLength: 1
+  host:
+    description: The database host DNS name or IP address.
+    type: string
+    minLength: 1
+  password:
+    description: The name of an encrypted SSM parameter containing the password.
+    type: string
+    minLength: 1
+  port:
+    description: The database port number.
+    $ref: lava.common.posint
+  preserve_case:
+    description: >-
+      Don't fold database object names to lower case when quoting them for use
+      in db_from_s3 jobs.
+    $ref: lava.common.boolean
+  secret_id:
+    description: Obtain missing fields from the specified secret in AWS Secrets Manager.
+    type: string
+    minLength: 1
+  ssl:
+    description: Enable SSL.
+    $ref: lava.common.boolean
+  subtype:
+    description: Specifies the underlying DBAPI 2.0 driver.
+    type: string
+    enum:
+      - pg8000
+      - pygresql
+  user:
+    description: Database user name.
+    type: string
+    minLength: 1

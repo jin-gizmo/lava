@@ -1,0 +1,66 @@
+#- AWS connector specifics
+#-
+#- This is the list of vars to prompt for when building
+#= ssm_param_for_access_keys: Name of SSM parameter containing access keys (excluding realm prefix)
+#= ssm_param_for_external_id: Name of SSM parameter containing role external ID (excluding realm prefix)
+
+type: aws
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Mandatory fields
+
+# One of `access_keys` or `role_arn` must be specified.
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The name of an encrypted SSM parameter containing the access keys.
+## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+access_keys: "/lava/<{ realm }>/{{ ssm_param_for_access_keys }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The ARN of a role to assume. The example shows how to construct an ARN in the
+## same account. Otherwise, a full IAM role ARN is required. Cross account roles
+## can be used.
+role_arn: "<{ lava.aws.arn('iam-role', 'some-role') }>"
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Name of an SSM parameter containing a unique identifier that may be required
+## when assuming a (typically cross-account) role.
+external_id: "/lava/<{ realm }>/{{ ssm_param_for_external_id }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The duration of the role session.
+# duration: 1h
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## IAM managed policies to use as managed session policies.
+# policy_arns:
+#   - policy_arn1
+#   - policy_arn2
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## An IAM policy to use as an inline session policy. This should be expressed as
+## a full policy object. Lava will manage conversion to JSON
+# policy:
+#  Version: '2012-10-17'
+#  Statement:
+#    - Sid: Stmt1
+#      Effect: Allow
+#      Action: 's3:ListAllMyBuckets'
+#      Resource: '*'
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## A dictionary of tags to apply to the assumed role session.
+# tags:
+#  a: tagA
+#  b: tagB
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The AWS region name. If not specified, the current region is assumed.
+##
+# region: "ap-southeast-2"

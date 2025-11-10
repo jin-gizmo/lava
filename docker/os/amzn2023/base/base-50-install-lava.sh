@@ -1,0 +1,1 @@
+../../../common/base/base-50-install-lava.sh

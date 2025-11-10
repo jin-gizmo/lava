@@ -1,0 +1,107 @@
+# Control file for mkdocs version of the Lava User Guide
+
+site_author: Murray Andrews
+site_name: Lava User Guide
+site_description: AWS based distributed scheduler and job runner
+site_url: ''
+repo_url: "https://github.com/jin-gizmo/lava"
+repo_name: Lava on GitHub
+copyright: "&copy; Origin Energy"
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  features:
+    # - toc.integrate
+    - navigation.instant
+    # The navigation footer is as ugly as sin.
+    # - navigation.footer
+    - content.code.copy
+    - icon:
+        repo: material/github
+  logo: img/lava-icons/svg/256/lava-icon-256-opaque.svg
+  favicon: img/lava-icons/png/256/lava-icon-256-transparent.png
+  font:
+    text: Roboto
+    code: Roboto Mono
+  extra:
+    generator: false
+  palette:
+    - media: (prefers-color-scheme)
+      primary: custom
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+use_directory_urls: false
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.highlight:
+      # anchor_linenums: true
+      # linenums: true
+      guess_lang: false
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra_css:
+  - css/extra.css
+
+exclude_docs: |
+  README.md
+
+not_in_nav: |
+  /index.md
+
+remote_branch: gh-pages
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            heading_level: 2
+            docstring_style: sphinx   # <-- interpret :param:, :returns:, etc.
+            show_root_members_full_path: true
+            show_source: false
+            show_signature_annotations: true
+            show_root_heading: true
+            separate_signature: true
+            docstring_section_style: table
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            merge_init_into_class: true
+            extra:
+              ignore_init_summary: true
+            filters:
+              - "!^_"
+
+hooks:
+  - docs/hooks.py
+
+nav:
+  - "**md-split**"

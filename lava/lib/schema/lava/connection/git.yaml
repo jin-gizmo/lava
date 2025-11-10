@@ -1,0 +1,20 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava git connection parameters
+
+type: object
+
+properties:
+  ssh_key:
+    description: The name of an encrypted SSM parameter containing the SSH private key.
+    type: string
+    minLength: 1
+  ssh_options:
+    description: A list of SSH options as per ssh_config(5)
+    type: array
+    items:
+      type: string
+      minLength: 1
+
+required:
+  - ssh_key

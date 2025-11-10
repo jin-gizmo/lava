@@ -1,0 +1,33 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: SNS action specification
+
+type: object
+
+properties:
+  action:
+    type: string
+    const: sns
+  message:
+    description: >-
+      The message body. This can be either a string or an object. If it is an
+      object it will be JSON encoded before sending.
+    anyOf:
+      - type: string
+        minLength: 1
+      - type: object
+  subject:
+    description: The message subject.
+    type: string
+    minLength: 1
+  topic:
+    description: The topic ARN.
+    type: string
+    pattern: '^arn:aws:sns:'
+
+required:
+  - action
+  - message
+  - topic
+
+additionalProperties: false

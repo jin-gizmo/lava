@@ -1,0 +1,197 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "EC2RUN" "1" "May 2016" "MA" "AWStools"
+.
+.SH "NAME"
+\fBec2run\fR \- Time controlled starting and stopping of AWS EC2 instances\.
+.
+.SH "SYNOPSIS"
+\fBec2run\fR [\fB\-\-start\fR | \fB\-\-stop\fR ] [options] [\fIinstance_name\fR\.\.\.]
+.
+.SH "DESCRIPTION"
+\fBEc2run\fR starts and stops Amazon Web Services (AWS) EC2 instances based on allowed runtimes specified in instance tags\.
+.
+.P
+Note that the machine on which this is run will require HTTPS access to the AWS EC2 API endpoints\. If firewall rules, security groups or network ACLs prevent this, \fBec2run\fR will not work\.
+.
+.P
+\fBEc2run\fR uses the following instance tags to control the starting and stopping of instances\.
+.
+.SS "RunTime"
+This tag contains one or more semi\-colon separated time window specifications that define when the associated instance should be running\.
+.
+.P
+\fBEc2run\fR ignores instances that do not have a \fBRunTime\fR tag\.
+.
+.P
+Each time window specification is of the form \fBDay start_time\-end_time\fR
+.
+.TP
+\fBDay\fR
+The day of the week (either the full day name or the first 2 or 3 characters)\. e\.g\. \fIMo\fR, \fIMon\fR, \fIMonday\fR\. The special values \fIDaily\fR, \fIWeekdays\fR (Monday to Friday) and \fIWeekends\fR (Saturday and Sunday) are also recognised\.
+.
+.TP
+\fBstart_time\-stop_time\fR
+A time window during which the instance is allowed to run\. Each component is a 24 hour time in the form <HH:MM>\. Minutes are optional\. If not specified, or specified as 0:00\-24:00 (or 0\-24) the run window covers the entire day\.
+.
+.P
+For example:
+.
+.TP
+\fBWeekdays\fR
+The instance is allowed to run on all day on weekdays only\.
+.
+.TP
+\fBWeekdays 8\-18; Saturday 8:30\-12:30\fR
+The instance is allowed to run 8am to 6pm Monday to Friday and 8:30am to 12:30pm on Saturday\.
+.
+.TP
+\fBMo 0\-10; Weekdays 9\-12\fR
+The instance is allowed to run from midnight to 10am on Mondays and from 9am to 12pm on Weekdays\. This means that on Mondays the instance can run from midnight to 12pm\. Overlapping time specifications are allowed\.
+.
+.TP
+\fBTue 20:30\-24; weekends\fR
+The instance can run from 10:30pm to midnight on Tuesdays and all day on weekends\.
+.
+.TP
+\fBdaily 1:30\-3:30\fR
+The instance can run every day of the week from 1:30am to 3:30am\.
+.
+.P
+Values are case\-insensitive\.
+.
+.P
+All times are in the local time of the machine on which \fBec2eun\fR is running\.
+.
+.SS "RunControl"
+This optional tag can override the normal start/stop operation of \fBec2run\fR\. Allowed values are:
+.
+.TP
+\fBno\-start\fR
+Instances will not be started when they enter the run window but will be stopped when they are outside the run window\. This is useful for instances that will be manually started but should not be left running permanently\.
+.
+.TP
+\fBno\-stop\fR
+Instances will not be stopped when they fall outside the run window but will be started when they enter the run window\. This is useful to extend the operating period of an instance if it is still being used outside its defined run window\.
+.
+.TP
+\fBskip\fR
+The instance will not be started nor stopped\. The behaviour is the same as if there was no \fBRunTime\fR tag but without the need to remove the tag value\.
+.
+.SH "OPTIONS"
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help and exit\.
+.
+.TP
+\fB\-c\fR, \fB\-\-no\-colour\fR, \fB\-\-no\-color\fR
+Don\'t use colour in information messages\.
+.
+.TP
+\fB\-l\fR \fILEVEL\fR, \fB\-\-level\fR \fILEVEL\fR
+Print messages of a given severity level or above\. The standard logging level names are available but \fIdebug\fR, \fIinfo\fR, \fIwarning\fR and \fIerror\fR are most useful\. The Default is \fIinfo\fR\.
+.
+.TP
+\fB\-\-log\fR \fILOG\fR
+Log to the specified target\. This can be either a file name or the name of a syslog facility prefixed with @ (e\.g\. @local0)\. This option suppresses the default behaviour of logging to \fIstderr\fR\.
+.
+.TP
+\fB\-m\fR \fIMINUTES\fR, \fB\-\-minimum\-runtime\fR \fIMINUTES\fR
+Minimum runtime for started instances\. If the available remaining run window for an instance is not at least this many minutes, it will not be started\. Default 30\.
+.
+.TP
+\fB\-r\fR, \fB\-\-read\-only\fR
+Check for instances that could be started / stopped but don\'t start / stop them\.
+.
+.TP
+\fB\-\-start\fR
+Start instances that are stopped and are in a run window with at least 30 minutes to run (see \fB\-m\fR option)\.
+.
+.TP
+\fB\-\-stop\fR
+Stop instances that are running and are not in a run window\.
+.
+.TP
+\fB\-\-vpc\fR \fIVPC\fR
+Limit actions to the specified VPC ID\.
+.
+.TP
+\fB\-\-cli\-connect\-timeout\fR \fIint\fR
+As for the AWS CLI\.
+.
+.TP
+\fB\-\-cli\-read\-timeout\fR \fIint\fR
+As for the AWS CLI\.
+.
+.TP
+\fB\-\-debug\fR
+As for the AWS CLI\. This option will result in lots of generally unhelpful output\.
+.
+.TP
+\fB\-\-profile\fR \fIprofile\-id\fR
+As for the AWS CLI\. When running \fBec2run\fR from an EC2 node, it is recommended to use an IAM role with appropriate permissions (see below) rather than use AWS credentials\.
+.
+.TP
+\fB\-\-region arg\fR
+As for the AWS CLI\.
+.
+.TP
+\fIinstance\-name\fR
+Limit all operations to the instance with the given name (not ID)\. Multiple names can be provided\. Unix style glob patterns allowed\.
+.
+.P
+If neither \fB\-\-start\fR nor \fB\-\-stop\fR are specified, \fBec2run\fR just checks the tag values and reports any formatting errors\.
+.
+.SH "IAM PERMISSIONS"
+If \fBec2run\fR is being run from an EC2 instance, the instance should have an associated role that includes the following permissions:
+.
+.IP "" 4
+.
+.nf
+
+{
+    "Version": "2012\-10\-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:*",
+                "ec2:DescribeInstances",
+                "ec2:StartInstances",
+                "ec2:StopInstances"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Also, if any of the instances use KMS encrypted volumes, the IAM role must be listed as an authorised user of the relevant KMS keys\. If this is not done, \fBec2run\fR will report that it has started the instances but the start will subsequently fail\.
+.
+.SH "RUNNING FROM CRON"
+\fBEc2run\fR is intended to be run using cron\. It does not require root priveleges\. Typical cron entries would look like:
+.
+.IP "" 4
+.
+.nf
+
+*/5 * * * * /usr/local/bin/ec2run \-\-start \-\-log start\.log \-\-level info \-\-region ap\-southeast\-2
+*/5 * * * * /usr/local/bin/ec2run \-\-stop \-\-log stop\.log \-\-level info \-\-region ap\-southeast\-2
+.
+.fi
+.
+.IP "" 0
+.
+.SH "AUTHOR"
+Murray Andrews
+.
+.SH "LICENCE"
+BSD 3\-clause licence \fIhttp://opensource\.org/licenses/BSD\-3\-Clause\fR\.

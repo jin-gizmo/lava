@@ -1,0 +1,83 @@
+#- SMB connector specifics
+#-
+#- This is the list of vars to prompt for when building
+#= host: Host name
+#= remote_name: SMB server NetBIOS name
+#= user: User name
+#= password: SSM parameter containing password (excluding realm prefix)
+
+type: smb
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Mandatory fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The database host DNS name or IP address.
+##
+host: "{{ host }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## NetBIOS machine name of the remote server.
+##
+remote_name: "{{ remote_name }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## SSM parameter containing password for authenticating to the SMB server.
+## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+##
+password: "/lava/<{ realm }>/{{ password }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## User name for authenticating to the SMB server.
+##
+user: "{{ user }}"
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The connection subtype. Choose between 'pysmb' and 'smbprotocol'. smbprotocol
+## supports encryption and access via DFS. Defaults to 'pysmb'.
+##
+# subtype: "smbprotocol"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The network domain. Defaults to an empty string.
+##
+## In the 'smbprotocol' job subtype, domain can refer to a DFS domain.
+## Connecting via DFS is not supported in the 'pysmb' job subtype.
+##
+# domain: ""
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## A custom port to use. Defaults to 445 if is_direct_tcp is True else 139.
+##
+# port: 445
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## If false, request and transfer files without encryption. If true use encryption.
+##
+## Default is True when using the 'smbprotocol' job subtype.
+## The 'pysmb' job subtype doesn't support encryption.
+##
+# encrypt: false
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## If false, use NetBIOS over TCP/IP. If true use SMB over TCP/IP. Default false.
+##
+# is_direct_tcp: false
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Local NetBIOS machine name that will identify the origin of connections. If
+## not specified, defaults to the first 15 characters of lava-<REALM>
+##
+# my_name: "<{ ('lava-' + realm)[:15] }>"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Indicates whether pysmb should be NTLMv1 or NTLMv2 authentication algorithm
+## for authentication. Default is true.
+##
+# use_ntlm_v2: true

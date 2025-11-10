@@ -1,0 +1,95 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "JINJA" "1" "June 2018" "MA" "ToolBox"
+.
+.SH "NAME"
+\fBjinja\fR \- render a Jinja2 template
+.
+.SH "SYNOPSIS"
+\fBjinja\fR [options] [\fItemplate\fR \.\.\. ]
+.
+.SH "DESCRIPTION"
+\fBJinja\fR renders a Jinja2 template with specified parameters\. This is effectively a command line interface to the Jinja2 templating engine\.
+.
+.P
+\fBJinja\fR is useful for automating the generation of repetitive text elements based on variable data substitution\.
+.
+.SH "OPTIONS"
+.
+.TP
+\fItemplate\fR
+Name of a file containing a Jinja2 template\. If not specified or \-, then read the template from stdin\. If multiple templates are specified, the rendered output of each is concatenated\. See also \fIENVIRONMENT VARIABLES\fR\.
+.
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+Print help and exit\.
+.
+.TP
+\fB\-f\fR \fIparam\-file\fR, \fB\-\-file\fR \fIparam\-file\fR
+Get parameters from the specified file\. File names with a \fI\.json\fR or \fI\.jsn\fR suffix are assumed to be in JSON format, otherwise YAML format is assumed\. Any parameters specified by \fB\-p\fR/\fB\-\-param\fR options or \fB\-l\fR/\fB\-\-list\fR options will override values in the param file\. Can be specified multiple times\. See also \fIENVIRONMENT VARIABLES\fR\.
+.
+.TP
+\fB\-l\fR \fIname\fR=\fIfile\fR, \fB\-\-list\fR \fIname\fR=\fIfile\fR
+Get the values of a list parameter from the specified file, one value per line\. If \- then read stdin\. Multiple list parameters can be specified using multiple \fB\-l\fR/\fB\-\-list\fR arguments\. See also \fIENVIRONMENT VARIABLES\fR\.
+.
+.TP
+\fB\-p\fR \fIname\fR=\fIvalue\fR, \fB\-\-param\fR \fIname\fR=\fIvalue\fR
+Set the value of a parameter to be fed in to the Jinja template\. Multiple parameters can be specified using multiple \fB\-p\fR/\fB\-\-param\fR arguments\.
+.
+.TP
+\fB\-P\fR, \fB\-\-no\-path\fR
+Do not search for list, param and template files in \fIJINJAPATH\fR\. See also \fIENVIRONMENT VARIABLES\fR\.
+.
+.P
+A number of options allow stdin in to be specified as \-\. This can only be used once\.
+.
+.SH "BUILTIN PARAMETERS"
+\fBJinja\fR provides a number of builtin parameters\. These are placed in a dictionary named \fIjinja\fR\. Creation of this dictionary can be suppressed using the \fB\-B\fR/\fB\-\-no\-builtins\fR option\.
+.
+.TP
+ctime
+Current local date/time in ctime(3) format\.
+.
+.TP
+datetime
+Current local date/time in YYYY\-mm\-dd HH:MM:SS format\.
+.
+.TP
+iso_datetime
+Current date/time in ISO8601 format\.
+.
+.TP
+prog
+Name of the program\.
+.
+.TP
+user
+Current user name\.
+.
+.TP
+utc_ctime
+Current UTC date/time in ctime(3) format\.
+.
+.TP
+utc_datetime
+Current UTC date/time in YYYY\-mm\-dd HH:MM:SS format\.
+.
+.P
+\fBJinja\fR also makes the environment variables availab;e in a dictionary named \fIenv\fR\. Creation of this dictionary can be suppressed using the \fB\-E\fR/\fB\-\-no\-environ\fR option\.
+.
+.SH "ENVIRONMENT VARIABLES"
+\fBJinja\fR supports the following environment variables\.
+.
+.TP
+JINJAPATH
+Specifies a search path for list, parameter and template files\. The default is \fI:/usr/local/lib/jinja\fR (i\.e\. current directory followed by \fI/usr/local/lib/jinja\fR)\. Path based file searching can be suppressed using the \fB\-P\fR/\fB\-\-no\-path\fR option\.
+.
+.SH "SEE ALSO"
+http://jinja\.pocoo\.org
+.
+.SH "AUTHOR"
+Murray Andrews
+.
+.SH "LICENCE"
+BSD 3\-clause licence \fIhttp://opensource\.org/licenses/BSD\-3\-Clause\fR\.

@@ -1,0 +1,53 @@
+#
+# ex: set ft=Makefile
+#
+# This is a sample local Makefile to perform non-standard build or installation
+# related actions for components in the misc directory.
+#
+# If required, copy this file to "Makefile.local" and customise as needed. The
+# following targets must be implementated
+#
+#	dist
+#	install
+#	pre-install
+#	uninstall
+#
+# ------------------------------------------------------------------------------
+# Useful stuff ...
+#
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+# The get_config macro is defined in ../etc/Makefile and may be useful:
+#
+# Usage: $(call get_config,var-name)
+# 	Extract a value from the config file or realm info file. The latter is
+# 	accessed as `lava.realm.<NAME>`
+#
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+# The DIST var contains the name of the dist directory for misc for the current
+# environment.
+
+# ------------------------------------------------------------------------------
+# Best not to fiddle with this section
+
+include ../etc/Makefile
+
+ifndef REALM
+%:
+	$(error Run make from the parent directory - not here)
+endif
+
+# ------------------------------------------------------------------------------
+# Customise these as needed but all targets must be retained.
+
+dist:
+	@echo Nothing to do for local $@
+
+pre-install:
+	@echo Nothing to do for local $@
+
+install:
+	@echo Nothing to do for local $@
+
+uninstall:
+	@echo Nothing to do for local $@
+

@@ -1,0 +1,28 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava email (smtp) connection subtype parameters
+
+properties:
+  host:
+    description: The SMTP server host DNS name or IP address.
+    type: string
+    AnyOf:
+      - format: hostname
+      - format: ip4
+      - format: ip6
+  password:
+    description: >-
+      The name of an encrypted SSM parameter containing the SMTP server
+      password.
+    type: string
+    minLength: 1
+  port:
+    description: The SMTP port number.
+    $ref: lava.common.posint
+  tls:
+    description: If true, use SMTP over TLS.
+    $ref: lava.common.boolean
+  user:
+    description: SMTP server user name.
+    type: string
+    minLength: 1

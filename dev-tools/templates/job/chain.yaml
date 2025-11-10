@@ -1,0 +1,37 @@
+#- chain job specifics
+#-
+#- This is the list of vars to prompt for when building
+
+type: chain
+
+## #############################################################################
+## The payload is either a comma separated list of job_ids or an actual list of
+## job_ids.
+##
+payload:
+  - "job1"
+  - "job2"
+  - "..."
+
+## #############################################################################
+## Job parameters
+
+parameters:
+  ## ---------------------------------------------------------------------------
+  ## Mandatory params
+
+  ## ---------------------------------------------------------------------------
+  ## Optional params
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Prepend the specified value to each job_id in the payload.
+  # job_prefix: "app/myjobs/"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## The job_id of the starting point in the chain. Defaults to first in list.
+  # start: "start_job_id"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Child jobs matching this glob pattern (or any in a list of patterns) are
+  ## allowed to fail without causing the chain to fail.
+  # can_fail: "glob-pattern"

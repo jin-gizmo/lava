@@ -1,0 +1,35 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava lavasched job parameters specification
+
+type: object
+
+properties:
+  args:
+    description: >-
+      A list of additional arguments that will be added to the invocation of
+      lava-dispatcher in the crontab entries.
+    type: array
+    items:
+      anyOf:
+        - type: string
+        - type: number
+  dispatcher:
+    description: >-
+      Name of dispatcher, or a list of names, specifying the dispatchers for
+      which schedules should be built.
+    anyOf:
+      - type: string
+        minLength: 1
+      - type: array
+        items:
+          type: string
+          minLength: 1
+  env:
+    description: A map of additional environment variables for the command.
+    type: object
+
+required:
+  - dispatcher
+
+additionalProperties: false

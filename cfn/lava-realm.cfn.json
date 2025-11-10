@@ -1,0 +1,2264 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Build a new Lava realm",
+  "Metadata": {
+    "Cfdoc": {
+      "Description": [
+        "This template builds the core components for a new Lava realm.",
+        "It does not create any Lava workers or add the required entry to the realms table."
+      ],
+      "Author": "Murray Andrews"
+    }
+  },
+  "Parameters": {
+    "Version": {
+      "Type": "String",
+      "Description": "Lava version (read only).",
+      "Default": "STOP - Wrong template. Use the built version from dist/cfn not src from cfn/",
+      "AllowedPattern": "^?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+    },
+    "realm": {
+      "Description": "Name of the realm",
+      "Type": "String",
+      "AllowedPattern": "[a-z]([a-z0-9_]){2,10}"
+    },
+    "createRealmsTable": {
+      "Description": "Should the realms table be created?",
+      "Type": "String",
+      "Default": "No",
+      "AllowedValues": [
+        "Yes",
+        "No"
+      ]
+    },
+    "kmsKeyAdmin": {
+      "Description": "IAM user name of KMS key administrator",
+      "Type": "String",
+      "MinLength": "1",
+      "ConstraintDescription": "Must be specified."
+    },
+    "lavaBucketName": {
+      "Description": "Name of S3 bucket for the realm.",
+      "Type": "String",
+      "MinLength": "1",
+      "ConstraintDescription": "Must be specified."
+    },
+    "logBucketName": {
+      "Description": "Name of S3 bucket for S3 logs.",
+      "Type": "String",
+      "MinLength": "1",
+      "ConstraintDescription": "Must be specified."
+    },
+    "tmpExpiryDays": {
+      "Description": "Expire temp area of lava bucket after this many days.",
+      "Type": "Number",
+      "Default": "3",
+      "MinValue": "1",
+      "ConstraintDescription": "Must be >=1"
+    },
+    "readCapacityDataTables": {
+      "Description": "Read capacity for the Dynamo DB data tables.",
+      "Type": "Number",
+      "Default": "5",
+      "MinValue": "1",
+      "ConstraintDescription": "Must be >= 1"
+    },
+    "writeCapacityDataTables": {
+      "Description": "Write capacity for the Dynamo DB data tables.",
+      "Type": "Number",
+      "Default": "1",
+      "MinValue": "1",
+      "ConstraintDescription": "Must be >= 1"
+    },
+    "readCapacityEventTable": {
+      "Description": "Read capacity for the Dynamo DB event table.",
+      "Type": "Number",
+      "Default": "5",
+      "MinValue": "1",
+      "ConstraintDescription": "Must be >= 1"
+    },
+    "writeCapacityEventTable": {
+      "Description": "Write capacity for the Dynamo DB event table.",
+      "Type": "Number",
+      "Default": "5",
+      "MinValue": "1",
+      "ConstraintDescription": "Must be >= 1"
+    },
+    "readCapacityStateTable": {
+      "Description": "Read capacity for the Dynamo DB state table.",
+      "Type": "Number",
+      "Default": "3",
+      "MinValue": "1",
+      "ConstraintDescription": "Must be >= 1"
+    },
+    "writeCapacityStateTable": {
+      "Description": "Write capacity for the Dynamo DB state table.",
+      "Type": "Number",
+      "Default": "3",
+      "MinValue": "1",
+      "ConstraintDescription": "Must be >= 1"
+    },
+    "s3CodeBucket": {
+      "Description": "S3 bucket containining Lava code.",
+      "Type": "String",
+      "MinLength": 1,
+      "ConstraintDescription": "Must be specified."
+    },
+    "s3CodePrefix": {
+      "Description": "Prefix in S3 bucket containining Lava code.",
+      "Type": "String",
+      "MinLength": 1,
+      "ConstraintDescription": "Must be specified."
+    },
+    "lambdaVersion": {
+      "Description": "Code version of lambda bundles (e.g. 2.3.1). If blank, no lambdas are deployed.",
+      "Type": "String"
+    },
+    "lambdaArchitecture": {
+      "Description": "Lambda machine architecture",
+      "Type": "String",
+      "AllowedValues": [
+        "arm64",
+        "x86_64"
+      ],
+      "Default": "arm64"
+    },
+    "lambdaRuntime": {
+      "Description": "Lambda runtime",
+      "Type": "String",
+      "AllowedValues": [
+        "python3.11",
+        "python3.12",
+        "python3.13"
+      ],
+      "Default": "python3.11"
+    },
+    "lambdaTimeout": {
+      "Description": "Timeout for the lambdas (seconds)",
+      "Type": "Number",
+      "Default": 60,
+      "MinValue": 15,
+      "MaxValue": 900,
+      "ConstraintDescription": "Must be between 15 and 900."
+    },
+    "lambdaMemory": {
+      "Description": "Memory for the lambdas (Mb)",
+      "Type": "Number",
+      "Default": 200,
+      "MinValue": 160,
+      "ConstraintDescription": "A minimum of 160Mb is recommended for py3.11. Py3.12/3.13 will use more."
+    },
+    "workerStopMinutes": {
+      "Description": "Allow workers this many minutes to stop gracefully.",
+      "Type": "Number",
+      "Default": 5,
+      "MinValue": 0,
+      "MaxValue": 720,
+      "ConstraintDescription": "Must be between 0 and 720 (12 hours)."
+    },
+    "autoscalingHeartbeatMinutes": {
+      "Description": "Send auto scaling heartbeats at this frequency when workers are terminating.",
+      "Type": "Number",
+      "Default": 5,
+      "MinValue": 1,
+      "MaxValue": 30,
+      "ConstraintDescription": "Must be between 1 and 30."
+    },
+    "lambdaMetricsSchedule": {
+      "Description": "Enable the scheduler for the metrics lambda?",
+      "Type": "String",
+      "Default": "ENABLED",
+      "AllowedValues": [
+        "ENABLED",
+        "DISABLED"
+      ]
+    },
+    "lavaGroupTag": {
+      "Description": "Value for the lava:group tag on resources (e.g. prod).",
+      "Type": "String",
+      "MinLength": 2,
+      "MaxLength": 40
+    }
+  },
+  "Conditions": {
+    "ifCreateRealmsTable": { "Fn::Equals": [ { "Ref": "createRealmsTable" }, "Yes" ] },
+    "ifCreateLambdas": { "Fn::Not": [ { "Fn::Equals": [ { "Ref": "lambdaVersion" }, "" ] } ] }
+  },
+  "Outputs": {
+    "Version": {
+      "Description": "Lava version",
+      "Value": { "Ref": "Version" },
+      "Export": { "Name": { "Fn::Sub": "lava:${realm}:version" } }
+    },
+    "s3LavaBucket": {
+      "Description": "Name of lava realm bucket for payloads and tmp space.",
+      "Value": { "Ref": "s3LavaBucket" },
+      "Export": { "Name": { "Fn::Sub": "lava:${realm}:s3LavaBucketName" } } },
+    "s3CodeBucket": {
+      "Description": "S3 bucket where Lava base code resides.",
+      "Value": { "Ref": "s3CodeBucket" },
+      "Export": { "Name": { "Fn::Sub": "lava:${realm}:s3CodeBucket" } }
+    },
+    "s3CodePrefix": {
+      "Description": "S3 prefix where Lava base code resides.",
+      "Value": { "Ref": "s3CodePrefix" },
+      "Export": { "Name": { "Fn::Sub": "lava:${realm}:s3CodePrefix" } }
+    },
+    "iamLavaWorkerPolicy": {
+      "Description": "ARN of the lava worker IAM policy.",
+      "Value": { "Ref": "iamLavaWorkerPolicy" },
+      "Export": { "Name": { "Fn::Sub": "lava:${realm}:iamLavaWorkerPolicyArn" } }
+    },
+    "kmsUserKeyAlias": {
+      "Description": "Alias for the KMS user key for the realm.",
+      "Value": { "Ref": "kmsUserAlias" },
+      "Export": { "Name": { "Fn::Sub": "lava:${realm}:kmsUserKeyAlias" } }
+    },
+    "lambdaLavaStop": {
+      "Description": "ARN of the lava stop lambda for controlled worker shutdown",
+      "Value": { "Fn::GetAtt": [ "lambdaLavaStop", "Arn" ] },
+      "Condition": "ifCreateLambdas",
+      "Export": { "Name": { "Fn::Sub": "lava:${realm}:lambdaLavaStop" } }
+    },
+    "lavaGroupTag": {
+      "Description": "Value for the lava:group tag on resources.",
+      "Value": { "Ref": "lavaGroupTag" },
+      "Export": { "Name": { "Fn::Sub": "lava:${realm}:lavaGroupTag" } }
+    }
+  },
+  "Resources": {
+    "dynTableRealm": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Lava realms table. There must be one of these per AWS account."
+        }
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "Condition": "ifCreateRealmsTable",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "realm",
+            "AttributeType": "S"
+          }
+        ],
+        "TableName": "lava.realms",
+        "KeySchema": [
+          {
+            "AttributeName": "realm",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": {
+            "Ref": "readCapacityDataTables"
+          },
+          "WriteCapacityUnits": {
+            "Ref": "writeCapacityDataTables"
+          }
+        },
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "Tags": [
+          { "Key":  "lava:group", "Value": "*" }
+        ]
+      }
+    },
+    "dynTableJobs": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Lava jobs table. There must be one of these per lava realm."
+        }
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          { "AttributeName": "dispatcher", "AttributeType": "S" },
+          { "AttributeName": "job_id", "AttributeType": "S" }
+        ],
+        "TableName": { "Fn::Sub": "lava.${realm}.jobs" },
+        "KeySchema": [
+          { "AttributeName": "job_id", "KeyType": "HASH" }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": { "Ref": "readCapacityDataTables" },
+          "WriteCapacityUnits": { "Ref": "writeCapacityDataTables" }
+        },
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "dispatcher-index",
+            "KeySchema": [
+              { "AttributeName": "dispatcher", "KeyType": "HASH" },
+              { "AttributeName": "job_id", "KeyType": "RANGE" }
+            ],
+            "Projection": {
+              "ProjectionType": "INCLUDE",
+              "NonKeyAttributes": [ "worker", "schedule" ]
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": { "Ref": "readCapacityDataTables" },
+              "WriteCapacityUnits": { "Ref": "writeCapacityDataTables" }
+            }
+          }
+        ],
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "Tags": [
+          { "Key":  "lava:realm", "Value": { "Ref": "realm" } },
+          { "Key":  "lava:group", "Value": { "Ref": "lavaGroupTag" } }
+        ]
+      }
+    },
+    "dynTableState": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Lava transient state table. There must be one of these per lava realm."
+        }
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "state_id",
+            "AttributeType": "S"
+          }
+        ],
+        "TableName": { "Fn::Sub": "lava.${realm}.state" },
+        "KeySchema": [
+          {
+            "AttributeName": "state_id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": { "Ref": "readCapacityStateTable" },
+          "WriteCapacityUnits": { "Ref": "writeCapacityStateTable" }
+        },
+        "TimeToLiveSpecification": {
+          "AttributeName": "ttl",
+          "Enabled": true
+        },
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "Tags": [
+          { "Key":  "lava:realm", "Value": { "Ref": "realm" } },
+          { "Key":  "lava:group", "Value": { "Ref": "lavaGroupTag" } }
+        ]
+      }
+    },
+    "dynTableConnections": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Lava connections table. There must be one of these per lava realm."
+        }
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "conn_id",
+            "AttributeType": "S"
+          }
+        ],
+        "TableName": {
+          "Fn::Sub": "lava.${realm}.connections"
+        },
+        "KeySchema": [
+          {
+            "AttributeName": "conn_id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": {
+            "Ref": "readCapacityDataTables"
+          },
+          "WriteCapacityUnits": {
+            "Ref": "writeCapacityDataTables"
+          }
+        },
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "Tags": [
+          { "Key":  "lava:realm", "Value": { "Ref": "realm" } },
+          { "Key":  "lava:group", "Value": { "Ref": "lavaGroupTag" } }
+        ]
+      }
+    },
+    "dynTableEvents": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Lava events table. There must be one of these per lava realm."
+        }
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "job_id",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "run_id",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "tu_event",
+            "AttributeType": "S"
+          }
+        ],
+        "TableName": {
+          "Fn::Sub": "lava.${realm}.events"
+        },
+        "KeySchema": [
+          {
+            "AttributeName": "job_id",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "run_id",
+            "KeyType": "RANGE"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": {
+            "Ref": "readCapacityEventTable"
+          },
+          "WriteCapacityUnits": {
+            "Ref": "writeCapacityEventTable"
+          }
+        },
+        "LocalSecondaryIndexes": [
+          {
+            "IndexName": "job_id-tu_event-index",
+            "KeySchema": [
+              {
+                "AttributeName": "job_id",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "tu_event",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          }
+        ],
+        "TimeToLiveSpecification": {
+          "AttributeName": "ttl",
+          "Enabled": true
+        },
+        "Tags": [
+          { "Key":  "lava:realm", "Value": { "Ref": "realm" } },
+          { "Key":  "lava:group", "Value": { "Ref": "lavaGroupTag" } }
+        ]
+      }
+    },
+    "dynTableS3Triggers": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Lava s3triggers table. There can be one of these per lava realm."
+        }
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "trigger_id",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "bucket",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "prefix",
+            "AttributeType": "S"
+          }
+        ],
+        "TableName": {
+          "Fn::Sub": "lava.${realm}.s3triggers"
+        },
+        "KeySchema": [
+          {
+            "AttributeName": "trigger_id",
+            "KeyType": "HASH"
+          }
+        ],
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "s3trigger-index",
+            "KeySchema": [
+              {
+                "AttributeName": "bucket",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "prefix",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": {
+                "Ref": "readCapacityDataTables"
+              },
+              "WriteCapacityUnits": {
+                "Ref": "writeCapacityDataTables"
+              }
+            }
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": {
+            "Ref": "readCapacityDataTables"
+          },
+          "WriteCapacityUnits": {
+            "Ref": "writeCapacityDataTables"
+          }
+        },
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "Tags": [
+          { "Key":  "lava:realm", "Value": { "Ref": "realm" } },
+          { "Key":  "lava:group", "Value": { "Ref": "lavaGroupTag" } }
+        ]
+      }
+    },
+    "s3LavaBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Lava realm bucket for payloads and tmp space."
+        }
+      },
+      "Properties": {
+        "BucketName": {
+          "Ref": "lavaBucketName"
+        },
+        "AccessControl": "Private",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "aws:kms",
+                "KMSMasterKeyID": { "Ref": "kmsUserKey" }
+              }
+            }
+          ]
+        },
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "Id": "AbortIncompleteMultipartUpload",
+              "AbortIncompleteMultipartUpload": {
+                "DaysAfterInitiation": 1
+              },
+              "Status": "Enabled"
+            },
+            {
+              "Id": "Expire tmp area",
+              "ExpirationInDays": {
+                "Ref": "tmpExpiryDays"
+              },
+              "Prefix": "tmp/",
+              "Status": "Enabled"
+            }
+          ]
+        },
+        "LoggingConfiguration": {
+          "DestinationBucketName": { "Ref": "logBucketName" },
+          "LogFilePrefix": { "Fn::Sub": "${lavaBucketName}/" }
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        }
+      }
+    },
+    "snsLavaNotices": {
+      "Type": "AWS::SNS::Topic",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": [
+            "SNS topic for lava notices.",
+            "Whether or not it is used depends on lava jobs."
+          ]
+        }
+      },
+      "Properties": {
+        "TopicName": {
+          "Fn::Sub": "lava-${realm}-notices"
+        },
+        "DisplayName": "LavaNotice",
+        "Tags": [
+          {
+            "Key": "lava:function",
+            "Value": "realm.notices"
+          }
+        ]
+      }
+    },
+    "snsDispatchHelper": {
+      "Type": "AWS::SNS::Topic",
+      "Condition": "ifCreateLambdas",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "SNS topic for the dispatch helper lambda to receive dispatch requests."
+        }
+      },
+      "Properties": {
+        "TopicName": {
+          "Fn::Sub": "lava-${realm}-dispatch"
+        },
+        "DisplayName": "LavaDsptch",
+        "KmsMasterKeyId": { "Ref": "kmsUserAlias" },
+        "Tags": [
+          {
+            "Key": "lava:function",
+            "Value": "realm.dispatch-helper"
+          }
+        ]
+      }
+    },
+    "kmsSysKey": {
+      "Type": "AWS::KMS::Key",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "System KMS key for lava realm."
+        }
+      },
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "System key for lava realm ${realm}"
+        },
+        "Enabled": true,
+        "EnableKeyRotation": true,
+        "KeyPolicy": {
+          "Version": "2012-10-17",
+          "Id": "key-consolepolicy-3",
+          "Statement": [
+            {
+              "Sid": "Enable IAM User Permissions",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root" }
+              },
+              "Action": "kms:*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "Allow access for Key Administrators",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:user/${kmsKeyAdmin}" }
+              },
+              "Action": [
+                "kms:Create*",
+                "kms:Describe*",
+                "kms:Enable*",
+                "kms:List*",
+                "kms:Put*",
+                "kms:Update*",
+                "kms:Revoke*",
+                "kms:Disable*",
+                "kms:Get*",
+                "kms:Delete*",
+                "kms:TagResource",
+                "kms:UntagResource",
+                "kms:ScheduleKeyDeletion",
+                "kms:CancelKeyDeletion"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "kmsSysAlias": {
+      "Type": "AWS::KMS::Alias",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "System KMS key alias for lava realm."
+        }
+      },
+      "Properties": {
+        "AliasName": {
+          "Fn::Sub": "alias/lava-${realm}-sys"
+        },
+        "TargetKeyId": {
+          "Ref": "kmsSysKey"
+        }
+      }
+    },
+    "kmsUserKey": {
+      "Type": "AWS::KMS::Key",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "User KMS key for lava realm."
+        }
+      },
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "User key for lava realm ${realm}"
+        },
+        "Enabled": true,
+        "EnableKeyRotation": true,
+        "KeyPolicy": {
+          "Version": "2012-10-17",
+          "Id": "key-consolepolicy-3",
+          "Statement": [
+            {
+              "Sid": "Enable IAM User Permissions",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root"
+                }
+              },
+              "Action": "kms:*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "Allow access for Key Administrators",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:user/${kmsKeyAdmin}"
+                }
+              },
+              "Action": [
+                "kms:Create*",
+                "kms:Describe*",
+                "kms:Enable*",
+                "kms:List*",
+                "kms:Put*",
+                "kms:Update*",
+                "kms:Revoke*",
+                "kms:Disable*",
+                "kms:Get*",
+                "kms:Delete*",
+                "kms:TagResource",
+                "kms:UntagResource",
+                "kms:ScheduleKeyDeletion",
+                "kms:CancelKeyDeletion"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "kmsUserAlias": {
+      "Type": "AWS::KMS::Alias",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "User KMS key alias for lava realm."
+        }
+      },
+      "Properties": {
+        "AliasName": {
+          "Fn::Sub": "alias/lava-${realm}-user"
+        },
+        "TargetKeyId": {
+          "Ref": "kmsUserKey"
+        }
+      }
+    },
+    "iamLavaAdminPolicy": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Admin policy for lava realm - part 1."
+        }
+      },
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "lava-${realm}-admin"
+        },
+        "Description": {
+          "Fn::Sub": "Admin policy for lava realm ${realm}"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "s3:ListAllMyBuckets",
+              "Resource": "*",
+              "Effect": "Allow",
+              "Sid": "ListAllBuckets"
+            },
+            {
+              "Sid": "GetLavaBucketInfo",
+              "Action": [
+                "s3:ListBucket",
+                "s3:GetBucket*",
+                "s3:GetEncryptionConfiguration",
+                "s3:GetInventoryConfiguration",
+                "s3:GetLifecycleConfiguration",
+                "s3:GetMetricsConfiguration"
+              ],
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "s3LavaBucket",
+                    "Arn"
+                  ]
+                }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ReadWriteLavaBucket",
+              "Action": [
+                "s3:GetObject*",
+                "s3:PutObject",
+                "s3:ListMultipartUploadParts",
+                "s3:DeleteObject"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:s3:::${s3LavaBucket}/*"
+                }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ListSqsQueues",
+              "Action": "sqs:ListQueues",
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "AccessSqsQueues",
+              "Action": [
+                "sqs:DeleteMessage",
+                "sqs:GetQueueUrl",
+                "sqs:ReceiveMessage",
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:ListQueueTags"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:lava-${realm}-*"
+              },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "DescribeSsmParams",
+              "Action": "ssm:DescribeParameters",
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ManageSsmParams",
+              "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:PutParameter",
+                "ssm:DeleteParameter",
+                "ssm:DeleteParameters"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/lava/${realm}/*"
+              },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ListSecrets",
+              "Action": [
+                "secretsmanager:ListSecrets",
+                "secretsmanager:GetRandomPassword"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Sid": "ManageSecrets",
+              "Action": [
+                "secretsmanager:CancelRotateSecret",
+                "secretsmanager:CreateSecret",
+                "secretsmanager:DeleteResourcePolicy",
+                "secretsmanager:DeleteSecret",
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:GetResourcePolicy",
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:ListSecretVersionIds",
+                "secretsmanager:PutResourcePolicy",
+                "secretsmanager:PutSecretValue",
+                "secretsmanager:RestoreSecret",
+                "secretsmanager:RotateSecret",
+                "secretsmanager:TagResource",
+                "secretsmanager:UntagResource",
+                "secretsmanager:UpdateSecret",
+                "secretsmanager:UpdateSecretVersionStage",
+                "secretsmanager:ValidateResourcePolicy"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Sub": "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/lava/${realm}/*"
+              }
+            },
+            {
+              "Sid": "ListAllDynamoTables",
+              "Action": [
+                "dynamodb:ListTables",
+                "dynamodb:ListBackups"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Sid": "AccessDynamoDBLavaTables",
+              "Action": [
+                "dynamodb:ListTagsOfResource",
+                "dynamodb:GetItem",
+                "dynamodb:BatchGetItem",
+                "dynamodb:DescribeTable",
+                "dynamodb:DescribeTimeToLive",
+                "dynamodb:DescribeContinuousBackups",
+                "dynamodb:Query",
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.realms"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.*"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.jobs/index/*"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.events/index/*"
+                }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "UpdateDynamoDBLavaTables",
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:PartiQLUpdate",
+                "dynamodb:PartiQLInsert",
+                "dynamodb:PartiQLDelete"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.*"
+              },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ListKMSkeys",
+              "Action": [
+                "kms:ListKeys",
+                "kms:ListAliases"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Sid": "UseKMSkeys",
+              "Effect": "Allow",
+              "Action": [
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:DescribeKey"
+              ],
+              "Resource": [
+                { "Fn::GetAtt": [ "kmsSysKey", "Arn" ] },
+                { "Fn::GetAtt": [ "kmsUserKey", "Arn" ] }
+              ]
+            },
+            {
+              "Sid": "KMSattachPersistentResources",
+              "Effect": "Allow",
+              "Action": [
+                "kms:CreateGrant",
+                "kms:ListGrants",
+                "kms:RevokeGrant"
+              ],
+              "Resource": [
+                { "Fn::GetAtt": [ "kmsSysKey", "Arn" ] },
+                { "Fn::GetAtt": [ "kmsUserKey", "Arn" ] }
+              ],
+              "Condition": {
+                "Bool": {
+                  "kms:GrantIsForAWSResource": "true"
+                }
+              }
+            },
+            {
+              "Sid": "ListSNStopics",
+              "Effect": "Allow",
+              "Action": "sns:ListTopics",
+              "Resource": "*"
+            },
+            {
+              "Fn::If": [
+                "ifCreateLambdas",
+                {
+                  "Sid": "PublishToSNSdispatchHelper",
+                  "Effect": "Allow",
+                  "Action": [
+                    "sns:Publish",
+                    "sns:GetTopicAttributes"
+                  ],
+                  "Resource": { "Ref": "snsDispatchHelper" }
+                },
+                { "Ref": "AWS::NoValue" }
+              ]
+            },
+            {
+              "Sid": "getEcrAuthToken",
+              "Effect": "Allow",
+              "Action": "ecr:GetAuthorizationToken",
+              "Resource": "*"
+            },
+            {
+              "Sid": "ecrDescribeRepos",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:DescribeRegistry",
+                "ecr:DescribeRepositories"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "ReadEcrLavaRepos",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:GetLifecyclePolicyPreview",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:DescribeImages",
+                "ecr:ListTagsForResource",
+                "ecr:ListImages",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetLifecyclePolicy",
+                "ecr:GetRepositoryPolicy"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/dist/lava/*"
+                },
+                {
+                  "Fn::Sub": "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/lava/${realm}/*"
+                }
+              ]
+            },
+            {
+              "Sid": "WriteEcrRealmRepo",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:BatchDeleteImage",
+                "ecr:CompleteLayerUpload",
+                "ecr:CreateRepository",
+                "ecr:DeleteLifecyclePolicy",
+                "ecr:DeleteRepository",
+                "ecr:InitiateLayerUpload",
+                "ecr:PutImage",
+                "ecr:PutImageScanningConfiguration",
+                "ecr:PutImageTagMutability",
+                "ecr:PutLifecyclePolicy",
+                "ecr:StartImageScan",
+                "ecr:StartLifecyclePolicyPreview",
+                "ecr:TagResource",
+                "ecr:UntagResource",
+                "ecr:UploadLayerPart"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/lava/${realm}/*"
+              }
+            },
+            {
+              "Sid": "EventsListAll",
+              "Effect": "Allow",
+              "Action": [
+                "events:List*",
+                "events:TestEventPattern"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "EventsReadWriteRules",
+              "Effect": "Allow",
+              "Action": [
+                "events:DeleteRule",
+                "events:DescribeRule",
+                "events:DisableRule",
+                "events:EnableRule",
+                "events:PutEvents",
+                "events:PutRule",
+                "events:PutTargets",
+                "events:RemoveTargets",
+                "events:TagResource",
+                "events:UntagResource"
+              ],
+              "Resource": { "Fn::Sub": "arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/lava.${realm}.*" }
+            },
+            {
+              "Sid": "AccessLogGroups",
+              "Effect": "Allow",
+              "Action": [
+                "logs:DescribeLogGroups",
+                "logs:GetLogRecord",
+                "logs:GetQueryResults",
+                "logs:StopQuery"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "iamLavaAdminPolicy2": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Admin policy for lava realm - part 2."
+        }
+      },
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "lava-${realm}-admin2"
+        },
+        "Description": {
+          "Fn::Sub": "Admin policy for lava realm ${realm} - part 2"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ReadLavaWorkerLogs",
+              "Effect": "Allow",
+              "Action": [
+                "logs:DescribeLogStreams",
+                "logs:FilterLogEvents",
+                "logs:GetLogEvents",
+                "logs:GetLogGroupFields",
+                "logs:StartQuery"
+              ],
+              "Resource": [
+                { "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/var/log/lava/${realm}" },
+                { "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/var/log/lava/${realm}:*" }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "iamLavaReaderPolicy": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Read access policy for lava realm."
+        }
+      },
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": { "Fn::Sub": "lava-${realm}-reader" },
+        "Description": { "Fn::Sub": "Reader policy for lava realm ${realm}" },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "GetLavaBucketInfo",
+              "Action": [
+                "s3:ListBucket"
+              ],
+              "Resource": [ { "Fn::GetAtt": [ "s3LavaBucket", "Arn" ] } ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ReadLavaBucket",
+              "Action": [
+                "s3:GetObject*"
+              ],
+              "Resource": [
+                { "Fn::Sub": "arn:aws:s3:::${s3LavaBucket}/*" }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ListAllDynamoTables",
+              "Action": [
+                "dynamodb:ListTables"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "AccessDynamoDBLavaTables",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:BatchGetItem",
+                "dynamodb:DescribeTable",
+                "dynamodb:DescribeContinuousBackups",
+                "dynamodb:Query",
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.realms" },
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.*" },
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.jobs/index/*" },
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.events/index/*" }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ListKMSkeys",
+              "Action": [
+                "kms:ListKeys",
+                "kms:ListAliases"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Sid": "UseKMSkeys",
+              "Effect": "Allow",
+              "Action": [
+                "kms:Decrypt",
+                "kms:DescribeKey"
+              ],
+              "Resource": [ { "Fn::GetAtt": [ "kmsUserKey", "Arn" ] } ]
+            },
+            {
+              "Sid": "getEcrAuthToken",
+              "Effect": "Allow",
+              "Action": "ecr:GetAuthorizationToken",
+              "Resource": "*"
+            },
+            {
+              "Sid": "ecrDescribeRepos",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:DescribeRegistry",
+                "ecr:DescribeRepositories"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "ReadEcrLavaRepos",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:GetLifecyclePolicyPreview",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:DescribeImages",
+                "ecr:ListTagsForResource",
+                "ecr:ListImages",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetLifecyclePolicy",
+                "ecr:GetRepositoryPolicy"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/dist/lava/*"
+                },
+                {
+                  "Fn::Sub": "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/lava/${realm}/*"
+                }
+              ]
+            },
+            {
+              "Sid": "EventsListAll",
+              "Effect": "Allow",
+              "Action": [
+                "events:List*",
+                "events:TestEventPattern"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "EventsReadRules",
+              "Effect": "Allow",
+              "Action": "events:DescribeRule",
+              "Resource": { "Fn::Sub": "arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/lava.${realm}.*" }
+            }
+          ]
+        }
+      }
+    },
+    "iamLavaOperatorPolicy": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Operator (incremental) access policy for lava realm."
+        }
+      },
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "lava-${realm}-operator"
+        },
+        "Description": {
+          "Fn::Sub": "Operator add-on policy for lava realm ${realm} : Operator = Reader + this policy"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Fn::If": [
+                "ifCreateLambdas",
+                {
+                  "Sid": "PublishToSNSdispatchHelper",
+                  "Effect": "Allow",
+                  "Action": [
+                    "sns:Publish",
+                    "sns:GetTopicAttributes"
+                  ],
+                  "Resource": { "Ref": "snsDispatchHelper" }
+                },
+                { "Ref": "AWS::NoValue" }
+              ]
+            },
+            {
+              "Sid": "AccessLogGroups",
+              "Effect": "Allow",
+              "Action": [
+                "logs:DescribeLogGroups",
+                "logs:GetLogRecord",
+                "logs:GetQueryResults",
+                "logs:StopQuery"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "ReadLavaWorkerLogs",
+              "Effect": "Allow",
+              "Action": [
+                "logs:DescribeLogStreams",
+                "logs:FilterLogEvents",
+                "logs:GetLogEvents",
+                "logs:GetLogGroupFields",
+                "logs:StartQuery"
+              ],
+              "Resource": [
+                { "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/var/log/lava/${realm}" },
+                { "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/var/log/lava/${realm}:*" }
+              ]
+            },
+            {
+              "Sid": "ListSqsQueues",
+              "Effect": "Allow",
+              "Action": [
+                "sqs:ListQueues"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "ReadSqsQueues",
+              "Effect": "Allow",
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:GetQueueAttributes",
+                "sqs:ListQueueTags"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:lava-${realm}-*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "iamLavaWorkerPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Worker policy for lava realm."
+        }
+      },
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "lava-${realm}-worker"
+        },
+        "Description": {
+          "Fn::Sub": "Worker policy for lava realm ${realm}"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ListAllBuckets",
+              "Effect": "Allow",
+              "Action": "s3:ListAllMyBuckets",
+              "Resource": "*"
+            },
+            {
+              "Sid": "GetLavaBucketInfo",
+              "Action": [
+                "s3:ListBucket"
+              ],
+              "Resource": [
+                { "Fn::GetAtt": [ "s3LavaBucket", "Arn" ] }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ReadLavaBucket",
+              "Action": [
+                "s3:GetObject*"
+              ],
+              "Resource": [
+                { "Fn::Sub": "arn:aws:s3:::${s3LavaBucket}/*" }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "WriteLavaBucketTmp",
+              "Action": "s3:PutObject",
+              "Resource": { "Fn::Sub": "arn:aws:s3:::${s3LavaBucket}/tmp/*" },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "GetCodeBucketInfo",
+              "Action": [
+                "s3:ListBucket"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:s3:::${s3CodeBucket}"
+              },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ReadCodeBucket",
+              "Action": "s3:GetObject*",
+              "Resource": {
+                "Fn::Sub": "arn:aws:s3:::${s3CodeBucket}/${s3CodePrefix}/*"
+              },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ListSqsQueues",
+              "Action": "sqs:ListQueues",
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "AccessSqsQueues",
+              "Action": [
+                "sqs:DeleteMessage",
+                "sqs:GetQueueUrl",
+                "sqs:GetQueueAttributes",
+                "sqs:ReceiveMessage",
+                "sqs:SendMessage"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:lava-${realm}-*"
+              },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ReadSsmParams",
+              "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/lava/${realm}/*"
+              },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ReadSecrets",
+              "Action": [
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:ListSecretVersionIds"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:/lava/${realm}/*"
+              },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "AccessDynamoDBLavaTables",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Query",
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.realms" },
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.*" },
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.jobs/index/*" },
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.events/index/*" }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "WriteDynamoDBLavaTables",
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.events"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.events/index/*"
+                },
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.state"
+                }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "PutCloudWatchMetricData",
+              "Action": "cloudwatch:PutMetricData",
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "LogToCloudWatch",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DescribeLogGroups",
+                "logs:DescribeLogStreams"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "iamLimitedRead",
+              "Action": [
+                "iam:ListUsers",
+                "iam:GetGroup"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "iamGetSshPublicKeys",
+              "Action": [
+                "iam:ListSSHPublicKeys",
+                "iam:GetSSHPublicKey"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "PublishSNS",
+              "Action": "sns:Publish",
+              "Resource": [
+                {
+                  "Ref": "snsLavaNotices"
+                },
+                {
+                  "Fn::Sub": "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:mbot"
+                }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "DescribeEc2",
+              "Effect": "Allow",
+              "Action": "ec2:Describe*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "SendSesEmail",
+              "Action": [
+                "ses:SendEmail",
+                "ses:SendRawEmail",
+                "ses:ListIdentities"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "UseKmsSysKey",
+              "Action": [
+                "kms:Decrypt"
+              ],
+              "Resource": { "Fn::GetAtt": [ "kmsSysKey", "Arn" ] },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "UseKmsUserKey",
+              "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:GenerateDataKey*"
+              ],
+              "Resource": { "Fn::GetAtt": [ "kmsUserKey", "Arn" ] },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "getEcrAuthToken",
+              "Effect": "Allow",
+              "Action": "ecr:GetAuthorizationToken",
+              "Resource": "*"
+            },
+            {
+              "Sid": "ReadEcrLavaRepos",
+              "Effect": "Allow",
+              "Action": [
+                "ecr:GetLifecyclePolicyPreview",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:DescribeImages",
+                "ecr:DescribeRepositories",
+                "ecr:ListTagsForResource",
+                "ecr:ListImages",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetLifecyclePolicy",
+                "ecr:GetRepositoryPolicy"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/dist/lava/*"
+                },
+                {
+                  "Fn::Sub": "arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/lava/${realm}/*"
+                }
+              ]
+            },
+            {
+              "Sid": "AutoscalingLifecycleMgmt",
+              "Effect": "Allow",
+              "Action": [
+                "autoscaling:CompleteLifecycleAction",
+                "autoscaling:RecordLifecycleActionHeartbeat"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/lava-${realm}-*"
+              }
+            },
+            {
+              "Sid": "PutEvents",
+              "Effect": "Allow",
+              "Action": [
+                "events:PutEvents"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:events:${AWS::Region}:${AWS::AccountId}:event-bus/default"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "iamLavaDispatchLambdaPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Policy for the dispatching lambdas for the lava realm."
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "lava-${realm}-dispatch-lambdas"
+        },
+        "Description": {
+          "Fn::Sub": "Policy for dispatching Lambdas for ${realm} realm"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "ListSqsQueues",
+              "Action": "sqs:ListQueues",
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "AccessSqsQueues",
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:GetQueueAttributes",
+                "sqs:SendMessage"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:lava-${realm}-*"
+              },
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "AccessDynamoDBLavaTables",
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:Query"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.*"
+                }
+              ],
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "LogToCloudWatch",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DescribeLogStreams"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "UseKmsUserKey",
+              "Action": [
+                "kms:Decrypt",
+                "kms:Encrypt",
+                "kms:GenerateDataKey*"
+              ],
+              "Resource": {
+                "Fn::GetAtt": [
+                  "kmsUserKey",
+                  "Arn"
+                ]
+              },
+              "Effect": "Allow"
+            }
+          ]
+        }
+      }
+    },
+    "iamLavaStopLambdaPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Policy for the node stopper lambda for the lava realm."
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "lava-${realm}-stop-lambda"
+        },
+        "Description": {
+          "Fn::Sub": "Policy for node stopping Lambda for ${realm} realm"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "LogToCloudWatch",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DescribeLogStreams"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "SsmSendCommandToInstance",
+              "Effect": "Allow",
+              "Action": [
+                "ssm:SendCommand"
+              ],
+              "Resource": [
+                "arn:aws:ec2:*:*:instance/*"
+              ],
+              "Condition": {
+                "StringLike": {
+                  "ssm:resourceTag/LavaRealm": [
+                    {
+                      "Ref": "realm"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Sid": "SsmSendCommandDocument",
+              "Effect": "Allow",
+              "Action": "ssm:SendCommand",
+              "Resource": [
+                {
+                  "Fn::Sub": "arn:aws:ssm:${AWS::Region}::document/AWS-RunShellScript"
+                }
+              ]
+            },
+            {
+              "Action": "ec2:Describe*",
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "iamLavaMetricsLambdaPolicy": {
+      "Type": "AWS::IAM::ManagedPolicy",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Policy for the metrics lambda for the lava realm."
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "ManagedPolicyName": {
+          "Fn::Sub": "lava-${realm}-metricslambda"
+        },
+        "Description": {
+          "Fn::Sub": "Policy for metrics Lambda for ${realm} realm"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "LogToCloudWatch",
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DescribeLogStreams"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Action": "autoscaling:DescribeAutoScalingGroups",
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Sid": "PutCloudWatchMetricData",
+              "Action": "cloudwatch:PutMetricData",
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "ListSqsQueues",
+              "Action": "sqs:ListQueues",
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Sid": "AccessSqsQueues",
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:GetQueueAttributes"
+              ],
+              "Resource": {
+                "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:lava-${realm}-*"
+              },
+              "Effect": "Allow"
+            }
+          ]
+        }
+      }
+    },
+    "iamLavaDispatchLambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "IAM role for dispatching Lambda functions."
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "RoleName": {
+          "Fn::Sub": "lava-${realm}-dispatch-lambda"
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Ref": "iamLavaDispatchLambdaPolicy"
+          }
+        ]
+      }
+    },
+    "iamLavaStopLambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "IAM role for node stopper Lambda function."
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "RoleName": {
+          "Fn::Sub": "lava-${realm}-stop-lambda"
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Ref": "iamLavaStopLambdaPolicy"
+          }
+        ]
+      }
+    },
+    "iamLavaMetricsLambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "IAM role for metrics Lambda function."
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "RoleName": {
+          "Fn::Sub": "lava-${realm}-metrics-lambda"
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Ref": "iamLavaMetricsLambdaPolicy"
+          }
+        ]
+      }
+    },
+    "iamDispatchLambdaInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "Roles": [
+          {
+            "Ref": "iamLavaDispatchLambdaRole"
+          }
+        ]
+      }
+    },
+    "iamLavaAdminGroup": {
+      "Type": "AWS::IAM::Group",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Admin group for lave realm."
+        }
+      },
+      "Properties": {
+        "GroupName": {
+          "Fn::Sub": "lava-${realm}-admin"
+        },
+        "ManagedPolicyArns": [
+          { "Ref": "iamLavaAdminPolicy" },
+          { "Ref": "iamLavaAdminPolicy2" }
+        ],
+        "Path": "/"
+      }
+    },
+    "iamLavaReaderGroup": {
+      "Type": "AWS::IAM::Group",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Reader group for lave realm."
+        }
+      },
+      "Properties": {
+        "GroupName": {
+          "Fn::Sub": "lava-${realm}-reader"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Ref": "iamLavaReaderPolicy"
+          }
+        ],
+        "Path": "/"
+      }
+    },
+    "iamLavaOperator": {
+      "Type": "AWS::IAM::Group",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Operator group for lave realm."
+        }
+      },
+      "Properties": {
+        "GroupName": { "Fn::Sub": "lava-${realm}-operator" },
+        "ManagedPolicyArns": [
+          { "Ref": "iamLavaReaderPolicy" },
+          { "Ref": "iamLavaOperatorPolicy" }
+        ],
+        "Path": "/"
+      }
+    },
+    "lambdaDispatch": {
+      "Type": "AWS::Lambda::Function",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Dispatch Lambda function for the realm."
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "Code": {
+          "S3Bucket": { "Ref": "s3CodeBucket" },
+          "S3Key": { "Fn::Sub": "${s3CodePrefix}/_dist_/lambda/dispatch-${lambdaVersion}.zip" }
+        },
+        "Description": { "Fn::Sub": "Dispatch Lambda function for the lava ${realm} realm." },
+        "Environment": {
+          "Variables": {
+            "LOGLEVEL": "info",
+            "LAVA_REALM": {
+              "Ref": "realm"
+            }
+          }
+        },
+        "FunctionName": { "Fn::Sub": "lava-${realm}-dispatch" },
+        "Handler": "dispatch.lambda_handler",
+        "Architectures": [ { "Ref": "lambdaArchitecture" } ],
+        "MemorySize": { "Ref": "lambdaMemory"},
+        "Role": { "Fn::GetAtt": [ "iamLavaDispatchLambdaRole", "Arn" ] },
+        "Runtime": { "Ref": "lambdaRuntime"},
+        "Timeout": { "Ref": "lambdaTimeout" },
+        "Tags": [
+          {
+            "Key": "lava:function",
+            "Value": "realm.dispatch-helper"
+          }
+        ]
+      }
+    },
+    "snsSubscribeDispatch": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Subscription for the dispatch helper Lambda to the dispatch helper SNS topic."
+        }
+      },
+      "Type": "AWS::SNS::Subscription",
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "TopicArn": {
+          "Ref": "snsDispatchHelper"
+        },
+        "Protocol": "lambda",
+        "Endpoint": { "Fn::GetAtt": [ "lambdaDispatch", "Arn" ] }
+      }
+    },
+    "lamdaDispatchPolicy": {
+      "Type": "AWS::Lambda::Permission",
+      "Condition": "ifCreateLambdas",
+      "DependsOn": "lambdaDispatch",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "Principal": "sns.amazonaws.com",
+        "FunctionName": {
+          "Fn::Sub": "lava-${realm}-dispatch"
+        },
+        "SourceArn": {
+          "Ref": "snsDispatchHelper"
+        }
+      }
+    },
+    "lambdaS3Trigger": {
+      "Type": "AWS::Lambda::Function",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "S3trigger Lambda function for the realm."
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "Code": {
+          "S3Bucket": { "Ref": "s3CodeBucket" },
+          "S3Key": { "Fn::Sub": "${s3CodePrefix}/_dist_/lambda/s3trigger-${lambdaVersion}.zip" } },
+        "Description": { "Fn::Sub": "S3trigger Lambda function for the lava ${realm} realm." },
+        "Environment": {
+          "Variables": {
+            "LOGLEVEL": "info",
+            "LAVA_REALM": { "Ref": "realm" }
+          }
+        },
+        "FunctionName": { "Fn::Sub": "lava-${realm}-s3trigger" },
+        "Handler": "s3trigger.lambda_handler",
+        "Architectures": [ { "Ref": "lambdaArchitecture" } ],
+        "MemorySize": { "Ref": "lambdaMemory"},
+        "Role": { "Fn::GetAtt": [ "iamLavaDispatchLambdaRole", "Arn" ] },
+        "Runtime": { "Ref": "lambdaRuntime"},
+        "Timeout": { "Ref": "lambdaTimeout" },
+        "Tags": [
+          {
+            "Key": "lava:function",
+            "Value": "realm.s3trigger"
+          }
+        ]
+      }
+    },
+    "lambdaLavaStop": {
+      "Type": "AWS::Lambda::Function",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Lambda function to stop daemons on a worker node"
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "Code": {
+          "S3Bucket": { "Ref": "s3CodeBucket" },
+          "S3Key": { "Fn::Sub": "${s3CodePrefix}/_dist_/lambda/stop-${lambdaVersion}.zip" }
+        },
+        "Description": { "Fn::Sub": "Worker node stop Lambda function for the lava ${realm} realm." },
+        "Environment": {
+          "Variables": {
+            "LOGLEVEL": "info",
+            "LAVA_REALM": { "Ref": "realm" },
+            "WAIT_TIME": { "Fn::Sub": "${workerStopMinutes}m" },
+            "LIFECYCLE_HEARTBEAT": { "Fn::Sub": "${autoscalingHeartbeatMinutes}m" }
+          }
+        },
+        "FunctionName": { "Fn::Sub": "lava-${realm}-stop" },
+        "Handler": "stop.lambda_handler",
+        "Architectures": [ { "Ref": "lambdaArchitecture" } ],
+        "MemorySize": { "Ref": "lambdaMemory"},
+        "Role": { "Fn::GetAtt": [ "iamLavaStopLambdaRole", "Arn" ] },
+        "Runtime": { "Ref": "lambdaRuntime"},
+        "Timeout": { "Ref": "lambdaTimeout" },
+        "Tags": [
+          {
+            "Key": "lava:function",
+            "Value": "realm.worker-stop"
+          }
+        ]
+      }
+    },
+    "lambdaLavaMetrics": {
+      "Type": "AWS::Lambda::Function",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Lambda function to produce CloudWatch metrics."
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "Code": {
+          "S3Bucket": { "Ref": "s3CodeBucket" },
+          "S3Key": { "Fn::Sub": "${s3CodePrefix}/_dist_/lambda/metrics-${lambdaVersion}.zip" }
+        },
+        "Description": {
+          "Fn::Sub": "Lambda function to produce CloudWatch metrics for the lava ${realm} realm."
+        },
+        "Environment": {
+          "Variables": {
+            "LOGLEVEL": "info",
+            "LAVA_REALM": { "Ref": "realm" }
+          }
+        },
+        "FunctionName": { "Fn::Sub": "lava-${realm}-metrics" },
+        "Handler": "metrics.lambda_handler",
+        "Architectures": [ { "Ref": "lambdaArchitecture" } ],
+        "MemorySize": { "Ref": "lambdaMemory"},
+        "Role": { "Fn::GetAtt": [ "iamLavaMetricsLambdaRole", "Arn" ] },
+        "Runtime": { "Ref": "lambdaRuntime"},
+        "Timeout": { "Ref": "lambdaTimeout" },
+        "Tags": [
+          {
+            "Key": "lava:function",
+            "Value": "realm.metrics"
+          }
+        ]
+      }
+    },
+    "eventsScheduleMetricsLambda": {
+      "Type": "AWS::Events::Rule",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "EventBridge rule for running metrics lambda function."
+        }
+      },
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "Schedule lava-${realm}-metrics lambda"
+        },
+        "EventBusName": "default",
+        "Name": {
+          "Fn::Sub": "lava-${realm}---metrics-schedule"
+        },
+        "ScheduleExpression": "rate(1 minute)",
+        "State": { "Ref": "lambdaMetricsSchedule" },
+        "Targets": [
+          {
+            "Id": { "Fn::Sub": "lava-${realm}---metrics-lambda" },
+            "Arn": { "Fn::GetAtt": [ "lambdaLavaMetrics", "Arn" ] }
+          }
+        ]
+      }
+    },
+    "lambdaLavaMetricsPermission": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Allow EventBridge to run the schedule for the metrics lambda."
+        }
+      },
+      "Type": "AWS::Lambda::Permission",
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": { "Fn::GetAtt": [ "lambdaLavaMetrics", "Arn" ] },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": { "Fn::GetAtt": [ "eventsScheduleMetricsLambda", "Arn" ] }
+      }
+    },
+    "lambdaS3TriggerPermission": {
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Allow EventBridge rules to invoke the s3trigger lambda."
+        }
+      },
+      "Type": "AWS::Lambda::Permission",
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": { "Fn::GetAtt": [ "lambdaS3Trigger", "Arn" ] },
+        "Principal": "events.amazonaws.com",
+        "SourceAccount": { "Ref": "AWS::AccountId" },
+        "SourceArn": { "Fn::Sub": "arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/lava.${realm}.*" }
+      }
+    }
+  }
+}

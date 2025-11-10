@@ -1,0 +1,9 @@
+include *.md
+include LICENCE.txt
+include lava/VERSION.json
+include requirements.txt requirements-extra.txt
+recursive-include lava/lib/schema *.yaml
+recursive-include lava/resources *
+global-exclude .DS_Store .env
+global-exclude */__pycache__/*
+global-exclude *.pyc

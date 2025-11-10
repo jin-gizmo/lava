@@ -1,0 +1,51 @@
+#!/bin/bash
+# ex: sw=4 ts=4 et ai
+
+# Get ec2 meta data
+function meta {
+    d=$(ec2-metadata --"$1" | sed -e '1s/^[^:]*: *//')
+    [ "$d" == "not available" ] && return 1
+    echo "$d"
+}
+
+instance=$(meta instance-id)
+ami=$(meta ami-id)
+region=$(meta availability-zone | sed 's/[a-z]$//')
+lava_ver=$(lava-worker --version 2>/dev/null)
+[ $? -eq 127 ] && lava_ver="Not installed"
+
+[ -f /etc/os-release ] && . /etc/os-release
+
+if [ "$region" != "" -a "$ami" != "" ]
+then
+    built=$(
+        aws ec2 describe-images --image-ids "$ami" --region "$region" --output text \
+            --query Images[0].CreationDate 2>/dev/null
+        )
+
+    name=$(
+        aws ec2 describe-images --image-ids "$ami" --region "$region" --output text \
+            --query Images[0].Name 2>/dev/null
+        )
+fi
+
+cat << "EOF"
+
+[36m
+ _|
+ _|    _|_|_|  _|      _|    _|_|_|
+ _|  _|    _|  _|      _|  _|    _|
+ _|  _|    _|    _|  _|    _|    _|
+ _|    _|_|_|      _|        _|_|_|
+
+EOF
+cat <<EOF
+Id:     $instance
+AMI:    $name
+AMI Id: $ami
+Built:  $built
+Base:   $PRETTY_NAME
+Lava:   $lava_ver
+[0m
+
+EOF

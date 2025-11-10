@@ -1,0 +1,60 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava smb connection parameters
+
+type: object
+
+# Note that some of these properties are mandatory but marked so here because
+# they can be supplied by AWS Secrets Manager at run-time.
+
+properties:
+  subtype:
+    description: The Python package used for connecting to the SMB server. Default is pysmb.
+    type: string
+    enum:
+      - pysmb
+      - smbprotocol
+  domain:
+    description: The network domain.
+    type: string
+    minLength: 1
+  host:
+    description: DNS name or IP address of the SMB host.
+    type: string
+    minLength: 1
+  is_direct_tcp:
+    description: If false, use NetBIOS over TCP/IP. If true use SMB over TCP/IP.
+    $ref: lava.common.boolean
+  my_name:
+    description: Local NetBIOS machine name that will identify the origin of connections.
+    type: string
+    minLength: 1
+  password:
+    description: The name of an encrypted SSM parameter containing the password.
+    type: string
+    minLength: 1
+  port:
+    description: Connection port number.
+    $ref: lava.common.posint
+  remote_name:
+    description: NetBIOS machine name of the remote server.
+    type: string
+    minLength: 1
+  use_ntlm_v2:
+    description: Use NTLMv2 authentication algorithm for authentication.
+    $ref: lava.common.boolean
+  user:
+    description: User name for authenticating to the SMB server.
+    type: string
+    minLength: 1
+  encrypt:
+    description: >-
+      Use encryption when making requests and transferring files from
+      the SMB server. Default is True.
+    $ref: lava.common.boolean
+
+required:
+  - host
+  - remote_name
+  - user
+  - password

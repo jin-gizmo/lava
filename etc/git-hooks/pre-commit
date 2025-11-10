@@ -1,0 +1,112 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# Run some health checks. Can be run standalone or as git pre-commit.
+# ------------------------------------------------------------------------------
+
+PYTHON_CHECKS="yes"
+SHELL_CHECKS="yes"
+YAML_CHECKS="yes"
+
+# These override .shellcheckrc ... Don't want user settings to pollute the checks.
+SHELL_CHECK_DISABLE=(
+	SC1091  # Not following (e.g. sourced files missing or in different place)
+	SC2166  # Prefer [ p ] && [ q ] as [ p -a q ] is not well-defined ... should fix these one day
+	SC2155  # Declare and assign separately to avoid masking return values. Nah.
+	SC2181  # Check exit code directly with e.g. if mycmd;, not indirectly with $?. Crapola.
+)
+SHELL_CHECK_ENABLE=(
+	add-default-case
+	check-unassigned-uppercase
+)
+
+# ------------------------------------------------------------------------------
+function info {
+	echo "[34;1m$*[0m" >& 2
+}
+
+function warning {
+	echo "[35;1mWARNING: $*[0m" >& 2
+}
+
+function error {
+	echo "[31;1mERROR: $*[0m" >& 2
+}
+
+function abort {
+	error "$*"
+	exit 1
+}
+
+function join {
+	local s
+	IFS=, s="$*"
+	echo "$s"
+}
+
+# Output to stderr
+exec 1>&2
+
+# ------------------------------------------------------------------------------
+# Python.
+
+if [ "$PYTHON_CHECKS" == "yes" ]
+then
+	# Look for Python files not ending in .py
+	HIDDEN_PYTHON=$(
+		find . -type f -perm +u=x ! -name '*.py' ! -name '*.sh' ! -path './venv/*' \
+			! -path './.??*/*' ! -path './doc/*' ! -path './untracked/*' \
+			! -path './dist/*' ! -path './*egg-info*' \
+			! -path './test/*' \
+			-print0 | xargs -0 file | grep 'Python script' | cut -d: -f1
+	)
+
+	info "Checking Python code ..."
+
+	# Ruff is heaps faster than flake8 so we run that first
+	info "... ruff ..."
+	ruff check . || abort Ruff checks failed
+	if [ "$HIDDEN_PYTHON" != "" ]
+	then
+		# shellcheck disable=SC2086
+		ruff check $HIDDEN_PYTHON || abort Ruff checks failed
+	fi
+
+	info "... flake8 ..."
+	flake8 . || abort Flake8 checks failed
+	if [ "$HIDDEN_PYTHON" != "" ]
+	then
+		# shellcheck disable=SC2086
+		flake8 $HIDDEN_PYTHON || abort Flake checks failed
+	fi
+fi
+
+# ------------------------------------------------------------------------------
+# Shell scripts
+if [ "$SHELL_CHECKS" == "yes" ]
+then
+	# Look for shell scripts ... including those not ending in .py
+	ALL_SHELL=$(
+		find . -type f -perm +u=x ! -path './venv*/*' \
+			! -path './.??*/*' ! -path './doc/*' ! -path './untracked/*' \
+			! -path './dist/*' ! -path './*egg-info*' \
+			! -path './test/*' \
+			-print0 | xargs -0 file | grep -i 'shell script' | cut -d: -f1
+	)
+
+	info "Checking Shell scripts ..."
+	exclusions=$(join "${SHELL_CHECK_DISABLE[@]}")
+	enable=$(join "${SHELL_CHECK_ENABLE[@]}")
+	# shellcheck disable=SC2086
+	shellcheck --norc --external-sources --exclude "$exclusions" --enable "$enable" $ALL_SHELL
+
+fi
+
+# ------------------------------------------------------------------------------
+# YAML hygiene.
+
+if [ "$YAML_CHECKS" == "yes" ]
+then
+	info "Checking YAML hygiene ..."
+	yamllint . || abort YAML checks failed
+fi

@@ -1,0 +1,103 @@
+#- sharepoint_get_list job specifics
+#-
+#- This is the list of vars to prompt for when building
+#= conn_id: SharePoint connector ID
+#= file: Destination file name
+#= list: Name of SharePoint list
+
+type: sharepoint_get_list
+
+## #############################################################################
+## The payload is ignored.
+##
+payload: "--"
+
+## #############################################################################
+## Job parameters
+
+parameters:
+  ## ---------------------------------------------------------------------------
+  ## Mandatory params
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## The connection ID for a SharePoint site.
+  ##
+  conn_id: "{{ conn_id }}"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## The source file name. If it starts with s3:// it is assumed to be an
+  ## object in S3, otherwise a local file.
+  ##
+  file: "{{ file }}"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Name of the SharePoint list. It must already exist in SharePoint.
+  ##
+  list: "{{ list }}"
+
+  ## ---------------------------------------------------------------------------
+  ## Optional params
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## If the source file is specified as a relative filename, it will be treated
+  ## as relative to the specified directory. Defaults to the lava temporary
+  ## directory for the job.
+  ##
+  # basedir: "dir"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## A comma separated list of column names. If specified, then only columns
+  ## listed are modified.
+  ##
+  # data_columns: "col1,col2,col3"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Column delimiter. Default is pipe (|)
+  ##
+  # delimiter: "|"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## As for csv.reader. Default false.
+  ##
+  # doubleqoute: false
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## If true and there are columns in the source file that are not in the
+  ## SharePoint list, raise an error. If false, the extra columns are silently
+  ## ignored. Default false.
+  ##
+  # error_missing: false
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## As for csv.reader.
+  ##
+  # escapechar: null
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Enable / disable jinja rendering. Default is true. If false, disable Jinja
+  ## rendering of the args. Default true.
+  ##
+  # jinja: true
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## Put mode. Must be append, delete, replace or update. Default is append.
+  ##
+  # mode: "append"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## As for csv.reader. Default "
+  ##
+  # quotechar: '"'
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## As for csv.reader QUOTE_* parameters (without the QUOTE_ prefix). Default
+  ## minimal (i.e. QUOTE_MINIMAL).
+  ##
+  # quoting: "minimal"
+
+  ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  ## A map of variables injected when the parameters are Jinja rendered.
+  ##
+  # vars:
+  #   var1: "value1"
+  #   var2: "value2"

@@ -1,0 +1,14 @@
+# These are the optional extra requirements for the main code bundle.
+
+# ex: set ft=sh:
+
+# PyGreSQL can be a pain to install sometimes and its optional
+PyGreSQL
+
+# Optional alternative to pg8000 for Redshift
+redshift-connector
+
+pyodbc
+
+# For parquet
+pyarrow

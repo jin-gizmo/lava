@@ -1,0 +1,58 @@
+#- AWS connector specifics
+#-
+#- This is the list of vars to prompt for when building
+
+type: docker
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Mandatory fields
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Email address for registry login
+##
+# email: "John.Bigbooté@eigth.dimension.com"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## User name for authenticating to the registry. Required for private docker
+## repositories. Ignored for ECR registries.
+# user: "..."
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Name of the SSM parameter containing the password for authenticating to the
+## registry. Required for private docker repositories. Ignored for ECR
+## registries. For a given realm, the SSM parameter name must be of the form
+## /lava/<REALM>/... and the value must be a secure string encrypted using the
+## lava-<REALM>-sys KMS key
+##
+# password: "/lava/<{ realm }>/..."
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Either the URL for a standard registry or ecr[:account-id]. In the latter
+## case, lava will connect to the AWS ECR registry in the specified AWS account
+## or the current account if no account-id is specified. If no registry is
+## specified, the default public docker registry is used
+##
+# registry: "aws"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## URL for the docker server. If not specified, then the normal docker
+## environment variables are used. Generally, this means using the local docker
+## daemon accessed via the UNIX socket.
+##
+# server: "..."
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Timeout on docker API calls in seconds
+##
+# timeout: 10
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Use TLS when connecting to the docker server. Default True.
+##
+# tls: true

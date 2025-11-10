@@ -1,0 +1,68 @@
+#- Template for a lava EventBridge rule specification.
+#-
+#- This is the list of vars to prompt for when building
+#-
+#= rule_id:     Rule name
+#-
+## #############################################################################
+## Mandatory fields
+##
+rule_id: "<{ prefix.rule }>.{{ rule_id }}"
+enabled: true
+owner: "<{ owner }>"
+description: "Rule description"
+
+## #############################################################################
+## Optional fields
+##
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Event bus name. This should almost always be left out to use the default bus.
+##
+# event_bus_name: default
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Event pattern. This will almost always be required. The example shown is an
+## S3 object creation event.
+##
+# event_pattern:
+#   detail:
+#     bucket:
+#       name:
+#         - my-bucket
+#     object:
+#       key:
+#         - prefix: a/prefix/in/the/bucket/
+#   detail-type:
+#     - Object Created
+#   source:
+#     - aws.s3
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Schedule expression (cron or rate based). Usually only one of event_pattern
+## and schedule_expression are required.
+##
+# schedule_expression: "rate(1 day)"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The ARN of the IAM role associated with the rule. Not needed for basic use
+## cases such as s3trigger and logging events to CloudWatch.
+##
+# role_arn: "<{ lava.aws.arn('iam-role', 'my-role-name') }>"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Event targets. This is required if you want the rule to do anything. The
+## example shown is for using s3trigger to dispatch a job on an S3 event.
+##
+# targets:
+#   # Construct the ARN for the realm s3trigger lambda
+#   - <{ lava.aws.arn('lambda-function', 'lava-' + realm + '-s3trigger') }>
+#   # Let's log messages in CloudWatch logs
+#   - <{ lava.aws.arn('log-group', '/aws/events/lava') }>
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Tags for the rule.
+##
+# tags:
+#   key1: val1
+#   key2: val2

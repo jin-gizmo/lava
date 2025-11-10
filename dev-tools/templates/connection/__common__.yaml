@@ -1,0 +1,19 @@
+#- Template for a lava connection specification.
+#-
+#- This is the list of vars to prompt for when building
+#-
+#= conn_id:    Connection ID
+#-
+## #############################################################################
+## Mandatory fields
+##
+conn_id: "{{ conn_id }}"
+enabled: true
+
+description: "..."
+owner: "<{ owner }>"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+##
+# X-whatever: "Some value"

@@ -1,0 +1,176 @@
+{
+  "variables": {
+    "ami_id": null,
+    "arch": null,
+    "associate_public_ip": null,
+    "os": null,
+    "instance_type": null,
+    "ip": null,
+    "lava_version": null,
+    "logfile": "packer.log",
+    "manifest": "packer-manifest.json",
+    "python_version": null,
+    "python_short_version": null,
+    "repo": null,
+    "repo_upgrade": "security",
+    "root_device": "/dev/sda1",
+    "s3bucket": null,
+    "s3prefix": null,
+    "security_group_ids": null,
+    "subnet": null,
+    "tarball": "lava-ami.tar.gz",
+    "timezone": null,
+    "tmpdir": "/tmp/packer.{{uuid}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "region": "{{user `region`}}",
+      "source_ami": "{{user `ami_id`}}",
+      "instance_type": "{{user `instance_type`}}",
+      "associate_public_ip_address": "{{ user `associate_public_ip`}}",
+      "ssh_username": "ec2-user",
+      "ami_name": "lava-{{user `lava_version`}}-{{user `os` | clean_resource_name}}-py{{user `python_short_version`}}-{{user `arch`}}-{{isotime | clean_resource_name}}",
+      "ami_description": "Lava standard AMI (v{{user `lava_version`}}). Source AMI {{.SourceAMI}}. Created {{isotime}}",
+      "ssh_pty": true,
+      "encrypt_boot": true,
+      "tags": {
+        "Name": "lava-{{user `lava_version`}}-{{user `os` | clean_resource_name}}-py{{user `python_short_version`}}-{{user `arch`}}-{{isotime | clean_resource_name}}",
+        "OS": "{{user `os`}}",
+        "Repo": "{{user `repo`}}",
+        "SourceAmi": "{{.SourceAMI}}",
+        "LavaVersion": "{{user `lava_version`}}",
+        "PythonVersion": "{{user `python_version`}}"
+      },
+      "ssh_interface": "{{user `ip`}}_ip",
+      "subnet_id": "{{user `subnet`}}",
+      "security_group_ids": "{{user `security_group_ids`}}",
+      "temporary_iam_instance_profile_policy_document": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": "s3:ListBucket",
+            "Resource": "arn:aws:s3:::{{user `s3bucket`}}",
+            "Effect": "Allow"
+          },
+          {
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::{{user `s3bucket`}}/{{user `s3prefix`}}*",
+            "Effect": "Allow"
+          },
+          {
+            "Action": "ec2:DescribeRegions",
+            "Resource": "*",
+            "Effect": "Allow"
+          }
+        ]
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell-local",
+      "inline": [
+        "echo Syncing resources.s3 to s3://{{ user `s3bucket` }}/{{ user `s3prefix` }}", 
+        "aws s3 sync resources.s3/ s3://{{ user `s3bucket` }}/{{ user `s3prefix` }} --exclude '*/.*'"
+      ]
+    },
+    {
+      "type": "shell-local",
+      "inline": [
+        "mkdir -p {{user `tmpdir`}}",
+        "cd os/{{user `os`}}",
+        "tar -hcz --exclude '.DS_Store' --exclude '*.log' --exclude '.*.swp' --exclude 'resources.s3' --exclude '._*' -f {{user `tmpdir`}}/{{user `tarball`}} . && echo Created {{user `tmpdir`}}/{{user `tarball`}}"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sleep 30"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "{{user `tmpdir`}}/{{user `tarball`}}",
+      "destination": "/tmp/",
+      "generated": true
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "set -x",
+        "echo AMI_TYPE=\"lava\" > /tmp/ami-info",
+        "echo AMI_OS=\"{{user `os`}}\" >> /tmp/ami-info",
+        "echo AMI_VERSION=\"{{user `lava_version`}}\" >> /tmp/ami-info",
+        "echo AMI_BASE=\"{{user `ami_id`}}\" >> /tmp/ami-info",
+        "sudo mkdir -p /usr/local/etc",
+        "sudo install -oroot -groot -m0644 /tmp/ami-info /usr/local/etc",
+        "/bin/rm -f /tmp/ami-info",
+        "mkdir -p ~/packer",
+        "cd ~/packer",
+        "tar xzf /tmp/{{user `tarball`}}",
+        "/bin/rm -f /tmp/{{user `tarball`}}"
+      ]
+    },
+    {
+      "type": "shell-local",
+      "command": "/bin/rm -f {{user `tmpdir`}}/{{user `tarball`}}"
+    },
+    {
+      "type": "shell",
+      "script": "ami-build.sh",
+      "environment_vars": [
+        "OS={{user `os`}}",
+        "REPO_UPGRADE={{user `repo_upgrade`}}",
+        "TIMEZONE={{user `timezone`}}",
+        "S3BUCKET={{user `s3bucket`}}",
+        "S3PREFIX={{user `s3prefix`}}",
+        "PYTHON_VERSION={{user `python_version`}}",
+        "AWS_DEFAULT_REGION={{user `region`}}"
+      ]
+    },
+    {
+      "type": "shell",
+      "expect_disconnect": true,
+      "inline": [
+        "echo Rebooting",
+        "sudo /sbin/reboot --no-wall"
+      ]
+    },
+    {
+      "type": "shell-local",
+      "inline": [
+        "echo Waiting for 60 seconds prior to attempting reconnect"
+      ]
+    },
+    {
+      "type": "shell",
+      "pause_before": "60s",
+      "inline": [
+        "echo Reboot complete",
+        "/bin/rm -f ~/.ssh/authorized_keys",
+        "logger -s -t packer-build -p local0.notice Main AMI build script done"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "{{user `logfile`}}",
+      "destination": "packer/",
+      "generated": true
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "{{user `manifest`}}",
+      "strip_path": true,
+      "custom_data": {
+        "OS": "{{user `os`}}",
+        "Repo": "{{user `repo`}}",
+        "SourceAmi": "{{user `ami_id`}}",
+        "LavaVersion": "{{user `lava_version`}}",
+        "PythonVersion": "{{user `python_version`}}"
+      }
+    }
+  ]
+}

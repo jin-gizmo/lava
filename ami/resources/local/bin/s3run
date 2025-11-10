@@ -1,0 +1,312 @@
+#!/bin/bash
+# shellcheck disable=SC2154
+
+# Fetch an executable from S3 and run it with the specified arguments.
+# Some features are only available when run on an EC2 instance.
+
+
+PROG=$(basename "$0")
+
+log_file=
+log_tag="$PROG"
+cache_dir=~/.$PROG
+use_cache=yes
+use_colour=yes
+ANSI_GREY='\033[2m'
+ANSI_RESET='\033[0m'
+ANSI_BLUE='\033[34m'
+ANSI_RED='\033[31m'
+ANSI_YELLOW='\033[33m'
+
+
+# ------------------------------------------------------------------------------
+function usage {
+	echo "Usage: $PROG [-h] [-C] [-n] [-c directory] [-d directory] [-l log-level] [-L log-facility] [-p profile] [-r region] [-t log-tag] executable [args...]"
+}
+
+# ------------------------------------------------------------------------------
+function help {
+	usage
+	cat <<-!
+
+	Run an executable loaded from AWS S3.
+
+	Positional arguments:
+	    executable:		Location of the executable on S3. Can be an absolute
+	    			location (starting with s3://) or a relative location
+	    			(without s3://). In the latter case, the environment
+	    			variable S3PATH will be used as a search path for
+	    			S3 prefixes. Search path entries must not not start
+	    			with S3://.
+	    args:		Arguments supplied to the executable.
+
+	Optional arguments:
+	    -C			Don't use colour in output messages.
+	    -c directory	Use the specified directory to cache downloaded files.
+	    			If the directory doesn't exist it will be created.
+	    			The default is $cache_dir.
+	    -d directory	Change to the specified directory before running the
+	    			executable.
+	    -h			Print help and exit.
+	    -l log-level:	Log level (e.g. debug, info, etc.). Default is warning.
+	    -L log-target:	Name of a file or syslog facility (with a leading @)
+	    			for log messages. If not specified then log messages go
+	    			to stderr. This applies to $PROG, not the executable
+	    			which does its own thing on logging.
+	    -n			Don't use a cached version. This forces a fresh copy
+	    			to be downloaded from S3.
+	    -p profile:		AWS profile. The environment variable AWS_PROFILE
+	    			will be set with the value and can be used in
+	    			executable args.
+	    -R:			Get the region from EC2 instance data. This option
+	    			only works on EC2 instances.
+	    -r region:		AWS region for the S3 fetch. The environment
+	    			variable AWS_REGION will be set with the value.
+	    -t log-tag:		A string with which to tag log messages.
+	    			Default is $PROG.
+
+	!
+}
+
+# ------------------------------------------------------------------------------
+function loglevel {
+	case "$1"
+	in
+		emergency)	echo 0;;
+		alert)		echo 1;;
+		critical)	echo 2;;
+		error)		echo 3;;
+		warning)	echo 4;;
+		notice)		echo 5;;
+		info)		echo 6;;
+		debug)		echo 7;;
+		*)		echo 7;;
+	esac
+}
+
+# ------------------------------------------------------------------------------
+# Usage log level message...
+function log {
+	level="$1"; shift
+	if [ "$log_facility" != "" ]
+	then
+		logger -t "$log_tag" -p "${log_facility}.${level}" -- "$*"
+	elif [ "$(loglevel "$level")" -le "$log_level" ]
+	then
+		if [ "$log_file" != "" ]
+		then	echo "$(date +'%b %e %T') $log_tag: $level: $*" >> "$log_file"
+		else
+			if [ "$use_colour" != "" ]
+			then
+				case "$level"
+				in
+					debug)	colour=$ANSI_GREY;;
+					info)	colour=$ANSI_BLUE;;
+					warning) colour=$ANSI_YELLOW;;
+					error)	colour=$ANSI_RED;;
+					*)	colour= ;;
+				esac
+				echo "${colour}$log_tag: $level: $*${ANSI_RESET}" >&2
+			else
+				echo "$log_tag: $level: $*" >&2
+			fi
+
+		fi
+	fi
+}
+
+# ------------------------------------------------------------------------------
+function error {
+	log error "$*"
+}
+
+# ------------------------------------------------------------------------------
+# Get ec2 meta data
+function meta {
+    d=$(ec2-metadata --"$1" | sed -e '1s/^[^:]*: *//')
+    [ "$d" == "not available" ] && return 1
+    echo "$d"
+}
+
+# ------------------------------------------------------------------------------
+# Run an AWS CLI command, adding region and profile args if appropriate.
+# Var aws_result captures stdout/stderr.
+
+function awscli {
+	AWS=aws
+	[ "$aws_region" != "" ] && AWS="$AWS --region $aws_region"
+	[ "$aws_profile" != "" ] && AWS="$AWS --profile $aws_profile"
+	log debug "$AWS $*"
+	aws_result=$($AWS "$@" 2>&1)
+}
+
+# ------------------------------------------------------------------------------
+# Get a file's mod time in UTC formatted as ISO 8601.
+# Usage: utc_mtime filename
+
+function utc_mtime {
+	python3 -c "import os.path; print(int(os.path.getmtime('$1')))"
+}
+
+# ------------------------------------------------------------------------------
+# Download the specified object from s3 and print the name of the file where
+# it was placed (which will be in the cache dir). If permitted, an existing cache
+# copy will be used if it appears to be current with respect to S3.
+#
+# Usage: s3get s3object
+#
+# The object name must be a fully qualified s3 object name (with leading s3://).
+# The object will be placed in the local cache with a path in the cache equal to
+# the full object name with the s3:// stripped. That means the bucket name must
+# be a well-formed Unix directory name. (AWS bucket naming rules appear to be ok).
+
+function s3get {
+
+	s3obj="$1"
+
+	localobj=$(expr "$s3obj" : 's3://\(.*\)')
+	[ "$localobj" == "" ] && error "Malformed s3 object name: $s3obj" && return 1
+
+	bucket=$(expr "$localobj" : '\([^/]*\)')
+	objkey=$(expr "$localobj" : '[^/]*/\(.*\)')
+
+	localobj="$cache_dir/$localobj"
+	log debug Download target is "$localobj"
+
+	if [ "$use_cache" != "" -a -f "$localobj" ]
+	then
+		# Can try to use a cached version
+		cache_time=$(utc_mtime "$localobj")
+		log debug "Checking cache - cached version mtime is $cache_time"
+
+		awscli s3api get-object --bucket "$bucket" --key "$objkey" --if-modified-since "$cache_time" "$localobj"
+		status=$?
+		if [ $status -ne 0 ]
+		then
+			# Need to check the AWS CLI output because AWS is too
+			# lazy to return useful status codes from the CLI. Grr.
+			if [[ "$aws_result" =~ 'Not Modified' ]]
+			then
+				# Download failed but its ok
+				log debug "$localobj is a current copy of $s3obj"
+				status=0
+			else
+				# Download failed - not ok
+				error "$aws_result"
+				return $status
+			fi
+		else
+			log debug "New copy of $s3obj downloaded to $localobj"
+		fi
+	else
+		# Must get a new copy from S3
+		awscli s3 cp "$s3obj" "$localobj"
+		status=$?
+		[ $status -eq 0 ] && log debug "$s3obj downloaded to $localobj"
+		[ $status -ne 0 ] && error "$aws_result"
+	fi
+	echo "$localobj"
+	return $status
+}
+
+
+# ------------------------------------------------------------------------------
+# Download an object from s3, search S3PATH if present. If it is permitted to
+# use the cache then the cache will be checked first. The name of the downloaded
+# file is printed on stdout.
+
+
+# Usage: s3pathget s3object
+
+function s3pathget {
+
+	s3obj="$1"
+	result=99
+	if [[ "$s3obj" =~ ^s3:// ]]
+	then
+		# Absolute path
+		localobj=$(s3get  "$s3obj")
+		result=$?
+	elif [ "$S3PATH" == "" ]
+	then
+		# Ambiguous but no path - prepend s3:// and have a go
+		s3obj="s3://$s3obj"
+		localobj=$(s3get  "$s3obj")
+		result=$?
+	else
+		# Must be a relative path. Search the path.
+		OIFS="$IFS"
+		IFS=':'
+		# shellcheck disable=SC2086
+		set -- $S3PATH
+		IFS="$OIFS"
+		obj=$(echo "$s3obj" | sed s'/^\/*//')  # Strip leading /
+		for p
+		do
+			s3obj="s3://$p/$obj"
+			localobj=$(s3get  "$s3obj")
+			[ $? -eq 0 ] && result=0 && break
+			log debug Could not download "$s3obj" from S3
+		done
+	fi
+	[ $result -eq 0 ] && log info "$s3obj" available as "$localobj"
+	echo "$localobj"
+	return $result
+}
+
+
+# ------------------------------------------------------------------------------
+# shellcheck disable=SC2048,SC2086
+args=$(getopt Cc:d:hRL:l:np:r:t: $*)
+log_level=$(loglevel warning)
+[ $? -ne 0 ] && usage >&2 && exit 2
+
+# shellcheck disable=SC2086
+set -- $args 
+while true
+do
+	case "$1"
+	in
+		-C)	use_colour=
+			shift;;
+		-c)	cache_dir="$2";
+			mkdir -p "$2" || exit 1
+			shift 2;;
+		-d)	[ ! -d "$2" ] && error "$2: no such directory" && exit 1
+			cd "$2" || exit 1
+			log debug "Directory is now $(pwd)"
+			shift 2;;
+		-h)	help; exit 0;;
+		-L)	log_facility=$(expr "$2" : '^@\(.*\)')
+			[ $? -ne 0 ] && log_file="$2"
+			shift 2;;
+		-l)	log_level=$(loglevel "$2"); shift 2;;
+		-n)	use_cache=
+			shift;;
+		-p)	aws_profile="$2"; AWS_PROFILE="$2";export AWS_PROFILE;shift 2;;
+		-r)	aws_region="$2"; AWS_REGION="$2";export AWS_REGION;shift 2;;
+		-R)	aws_region=$(meta availability-zone | sed s/.$//)
+			[ "$aws_region" == "" ] && error "Cannot get region. Is this an EC2 instance?" && exit 1
+			shift;;
+		-t)	log_tag="$2"; shift 2;;
+		--)	shift; break;;
+		*)	echo "Internal error"; exit 13;;
+	esac
+done
+
+[ $# -lt 1 ] && usage >&2 && exit 2
+
+executable="$1"; shift
+
+# Fetch the script from S3
+local_executable=$(s3pathget "$executable")
+[ $? -ne 0 ] && error "Could not get $executable from S3" && exit 1
+
+# Run it
+chmod 700 "$local_executable"
+log debug "Run: $local_executable $*"
+"$local_executable" "$@"
+exit_status=$?
+log info "$local_executable returned status $exit_status"
+
+exit $exit_status

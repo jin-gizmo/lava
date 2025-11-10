@@ -1,0 +1,590 @@
+#!/usr/bin/env python3
+
+"""
+Time a command and submit AWS CloudWatch custom metrics for run time and exit status.
+
+The reason we don't do this with shell time command is that the output format
+seems to be system and builtin vs binary dependent. Nasty.
+
++- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+| Note that this is quite old code originally built for the Jindabyne SAK AMI. |
+| It is still useful (and working) but it is antiquated. It predates things    |
+| such as type hints. A minimal amount of rehabilitation has been done as part |
+| of the lava AMI implementation to quieten the quality check but nothing      |
+| more.                                                                        |
+|                                                                              |
+| No, I wouldn't do it like this now either.                                   |
++- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+
+This program uses the AWS CLI, not boto. Why? Well, the intention was to have a
+simple standalone script that could run on any linux node without installing
+any other modules. Not much of a reason, but there it is. It's ridiculously
+overcomplicated. Sorry.
+
+Copyright (c) 2016, Murray Andrews
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+1.  Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+
+2.  Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation and/or
+    other materials provided with the distribution.
+
+3.  Neither the name of the copyright holder nor the names of its contributors
+    may be used to endorse or promote products derived from this software without
+    specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+"""
+
+import argparse
+import json
+import logging
+import subprocess
+import sys
+from datetime import datetime, timezone
+from os.path import basename
+
+AWS = 'aws'  # AWS command
+
+# Standard AWS CLI args we accept.
+# These take no arguments
+AWS_ARGS_0 = ('debug',)
+# These take 1 argument
+AWS_ARGS_1 = ('profile', 'region', 'cli-connect-timeout', 'cli-read-timeout')
+
+PROG = basename(sys.argv[0])
+LOG = logging.getLogger()
+
+CMD_TIMEOUT = 30  # Seconds to allow for command run
+TIMEOUT_STATUS = 254  # Status value to return on timeout
+
+# ------------------------------------------------------------------------------
+# Clunky support for colour output if colorama is not installed.
+
+try:
+    # noinspection PyUnresolvedReferences
+    import colorama
+
+    # noinspection PyUnresolvedReferences
+    from colorama import Fore, Style
+
+    colorama.init()
+
+except ImportError:
+
+    class Fore:
+        """Basic alternative to colorama colours using ANSI sequences."""
+
+        RESET = '\033[0m'
+        BLACK = '\033[30m'
+        RED = '\033[31m'
+        GREEN = '\033[32m'
+        YELLOW = '\033[33m'
+        BLUE = '\033[34m'
+        MAGENTA = '\033[35m'
+        CYAN = '\033[36m'
+
+    class Style:
+        """Basic alternative to colorama styles using ANSI sequences."""
+
+        RESET_ALL = '\033[0m'
+        BRIGHT = '\033[1m'
+        DIM = '\033[2m'
+        NORMAL = '\033[22m'
+
+
+# ------------------------------------------------------------------------------
+def get_log_level(s):
+    """
+    Convert string log level to the corresponding integer log level.
+
+    :param s:       A string version of a log level (e.g. 'error', 'info').
+                    Case is not significant.
+    :type s:        str
+
+    :return:        The numeric logLevel equivalent.
+    :rtype:         int
+
+    :raises:        ValueError if the supplied string cannot be converted.
+    """
+
+    if not s or not isinstance(s, str):
+        raise ValueError('Bad log level:' + str(s))
+
+    t = s.upper()
+
+    if not hasattr(logging, t):
+        raise ValueError('Bad log level: ' + s)
+
+    return getattr(logging, t)
+
+
+# ------------------------------------------------------------------------------
+class ColourLogHandler(logging.Handler):
+    """Stream handler that writes to stderr with different colours for message levels."""
+
+    # --------------------------------------------------------------------------
+    def __init__(self, colour=True):
+        """
+        Allow colour to be enabled or disabled.
+
+        :param colour:      If True colour is enabled for log messages.
+                            Default True.
+        :type colour:       bool
+
+        """
+
+        super().__init__()
+        self.colour = colour
+
+    # --------------------------------------------------------------------------
+    def emit(self, record):
+        """
+        Print the record to stderr with some colour enhancement.
+
+        :param record:  Log record
+        :type record:   logging.LogRecord
+        :return:
+        """
+
+        if self.colour:
+            if record.levelno >= logging.ERROR:
+                colour = Style.BRIGHT + Fore.RED
+            elif record.levelno >= logging.WARNING:
+                colour = Fore.MAGENTA
+            elif record.levelno >= logging.INFO:
+                colour = Fore.BLACK
+            else:
+                colour = Style.DIM + Fore.BLACK
+
+            print(
+                colour + PROG + ': ' + self.format(record) + Fore.RESET + Style.RESET_ALL,
+                file=sys.stderr,
+            )
+        else:
+            print(PROG + ': ' + self.format(record), file=sys.stderr)
+
+
+# ------------------------------------------------------------------------------
+class AwsContext:
+    """A context for running AWS CLI commands."""
+
+    # --------------------------------------------------------------------------
+    def __init__(self, aws_args=None):
+        """
+        Create a context.
+
+        :param aws_args:    An optional list of AWS CLI args added to each
+                            command. (e.g. --profile).
+        :type aws_args:     list[str]
+        :return:
+        """
+
+        self.aws_args = aws_args
+
+    # --------------------------------------------------------------------------
+    def __call__(self, *args, **kwargs):
+        """
+        Run an AWS CLI command, process the JSON response and return the response data.
+
+        :param args:    Each arg can be a string, a list of strings or a dict
+        :param kwargs:  Keyword to add to the command.
+
+        :type args:     str | list[str] | dict[str, str]
+        :type kwargs:   dict
+
+        :return:        The JSON structure returned by the command.
+        :rtype:         T
+
+        :raise CalledProcessError: If the CLI call fails. The retcode and
+                        output properties of the exception may be helpful.
+        :raise ValueError: If an invalid argument type is supplied.
+        :raise Exception: Various JSON decode errors if the CLI call returns
+                        invalid JSON. This should really not happen.
+        """
+
+        cmd = ['aws']
+
+        for arg in args:
+            if arg is None:
+                continue
+
+            if isinstance(arg, str):
+                cmd.append(arg)
+            elif isinstance(arg, (int, float)):
+                cmd.append(str(arg))
+            elif isinstance(arg, list):
+                cmd.extend([str(x) for x in arg])
+            elif isinstance(arg, dict):
+                for k in arg:
+                    if arg[k] is not None:
+                        cmd.extend([k, str(arg[k])])
+            else:
+                raise ValueError(f'Invalid arg type {type(arg)}: {arg}')
+
+        for k in kwargs:
+            if kwargs[k] is not None:
+                cmd.extend([k, kwargs[k]])
+
+        # Add in the common arguments
+        cmd.extend(self.aws_args)
+
+        LOG.debug('Run: %s', ' '.join(cmd))
+        try:
+            resp_json = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            LOG.debug('Fail: %s', ' '.join(cmd))
+            LOG.debug('      Retcode=%d', e.returncode)
+            LOG.debug('      Output =%s', e.output)
+            raise
+
+        LOG.debug('Done: %s', ' '.join(cmd))
+
+        if not resp_json:
+            return None
+
+        # Python 2 str has decode function, Python 3 str does not. Grr.
+        return json.loads(resp_json.decode('utf-8') if isinstance(resp_json, bytes) else resp_json)
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    def filters(filters=None):
+        """
+        Convert a dict into a list of filter args suitable for use in an aws CLI command.
+
+        :param filters:     Dictionary of filter keys/values. Values can be strings
+                            or lists of strings.
+        :type filters:      dict[str, T]
+        :return:            A list of filter args (including the --filter preamble).
+        :rtype:             list[str]
+        """
+
+        if not filters:
+            return []
+
+        return ['--filter'] + [
+            'Name={},Values={}'.format(k, v if isinstance(v, str) else ','.join(v))
+            for k, v in filters.items()
+        ]
+
+    # --------------------------------------------------------------------------
+    def put_metric_data(self, namespace, name, value, timestamp, unit=None, dimensions=None):
+        """
+        Put a Cloudwatch metric data element.
+
+        :param namespace:   CloudWatch namespace.
+        :param name:        Metric name
+        :param value:       Metric value
+        :param timestamp:   UTC timestamp for the metric.
+        :param unit:        An optional unit (one of the ones supported by
+                            CloudWatch). Default None.
+        :param dimensions:  Comma separated Name=Value pairs or a dict of values.
+                            See the --dimensions arg of the put-metric-data
+                            command in the AWS CLI for more detail. Default None.
+
+        :type namespace:    str
+        :type name:         str
+        :type value:        T
+        :type timestamp:    datetime.datetime
+        :type unit:         str
+        :type dimensions:   str | dict
+        """
+
+        if isinstance(dimensions, dict):
+            dimensions = ','.join([f'{k}={dimensions[k]}' for k in dimensions])
+
+        self(
+            'cloudwatch',
+            'put-metric-data',
+            '--namespace',
+            namespace,
+            '--metric-name',
+            name,
+            '--value',
+            value,
+            '--timestamp',
+            timestamp.isoformat()[:-3] + 'Z',
+            {'--unit': unit},  # Using a dict allows None values to be skipped
+            {'--dimensions': dimensions},
+        )
+
+
+# ------------------------------------------------------------------------------
+def setup_logging(level: str, target: str, colour: bool = True) -> None:
+    """
+    Set up logging.
+
+    :param level:   Logging level. The string format of a level (eg 'debug').
+    :param target:  Logging target. Either a file name or a syslog facility name
+                    starting with @ or None.
+    :param colour:  If True and logging to the terminal, colourise messages for
+                    different logging levels. Default True.
+
+    :raise ValueError: If an invalid log level or syslog facility is specified.
+    """
+
+    LOG.setLevel(get_log_level(level))
+    if target:
+        for h in LOG.handlers:
+            LOG.removeHandler(h)
+
+        # Log to a file
+        h = logging.FileHandler(target)
+        h.setFormatter(logging.Formatter('%(asctime)s: %(levelname)s: %(message)s'))
+        LOG.addHandler(h)
+        LOG.debug('%s', ' '.join(sys.argv))
+        LOG.debug('Logfile set to %s', target)
+    else:
+        # Just log to stderr.
+        LOG.addHandler(ColourLogHandler(colour=colour))
+    LOG.debug('Log level set to %s', LOG.getEffectiveLevel())
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args():
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(
+        prog=PROG, description='Time a command and submit a custom metric to AWS CloudWatch.'
+    )
+
+    argp.add_argument(
+        '-c',
+        '--no-colour',
+        '--no-color',
+        dest='no_colour',
+        action='store_true',
+        default=False,
+        help='Don\'t use colour in information messages.',
+    )
+    argp.add_argument(
+        '-d',
+        '--dimensions',
+        metavar='Name=value,...',
+        action='store',
+        help='CloudWatch dimensions to associate with the resulting'
+        ' metrics. Format as for the put-metric-data command in the'
+        ' AWS CloudWatch CLI.',
+    )
+    argp.add_argument(
+        '-e',
+        '--exit-status-metric',
+        metavar='METRIC-NAME',
+        dest='m_status',
+        action='store',
+        help='Name of the CloudWatch metric for the exit status of the command.',
+    )
+    argp.add_argument(
+        '-E',
+        '--exit-success-metric',
+        metavar='METRIC-NAME',
+        dest='m_success',
+        action='store',
+        help='Name of the CloudWatch metric for the success of the'
+        ' command. This is the exit status of the command mapped'
+        ' with all non-zero values mapped to 1',
+    )
+    argp.add_argument(
+        '-n',
+        '--namespace',
+        action='store',
+        required=True,
+        help='CloudWatch namespace for the metric data.',
+    )
+    argp.add_argument(
+        '-r',
+        '--realtime-s-metric',
+        metavar='METRIC-NAME',
+        dest='m_realtime_s',
+        action='store',
+        help='Name of the CloudWatch metric for the real run-time of the command in seconds.',
+    )
+    argp.add_argument(
+        '-R',
+        '--realtime-ms-metric',
+        metavar='METRIC-NAME',
+        dest='m_realtime_ms',
+        action='store',
+        help=(
+            'Name of the CloudWatch metric for the real run-time of the command in milliseconds.'
+        ),
+    )
+    argp.add_argument(
+        '-t',
+        '--timeout',
+        action='store',
+        type=int,
+        default=CMD_TIMEOUT,
+        help=(
+            'Timeout for command execution in seconds. A timeout will result in a'
+            ' value of the status code metric of 255. Default is'
+            f' {CMD_TIMEOUT} seconds'
+        ),
+    )
+    argp.add_argument(
+        '-v',
+        '--verbose',
+        action='store_true',
+        help=(
+            'Print more info on AWS CLI commands and other debugging'
+            ' level information. Unrelated to the --debug option which'
+            ' is passed to the AWS CLI.'
+        ),
+    )
+    argp.add_argument(
+        '-z',
+        '--zero',
+        action='store_true',
+        help='Return a metric value of 0 for any of the run-time'
+        ' metrics in the event of a command timeout. The default'
+        ' is to not return any realtime value if a timeout occurs.',
+    )
+
+    argp.add_argument(
+        'command',
+        action='store',
+        help=(
+            'Command to run. To avoid confusion between'
+            f' {PROG} args and these, add a -- pseudo option before this'
+            ' command argument.'
+        ),
+    )
+
+    argp.add_argument(
+        'arg',
+        nargs='*',
+        help='Arguments for the command.',
+    )
+
+    # Add the AWS CLI standard args.
+    for aws_arg in sorted(AWS_ARGS_0):
+        argp.add_argument(
+            '--' + aws_arg,
+            dest=aws_arg.replace('-', '_'),
+            action='store_true',
+            help='As for AWS CLI.',
+        )
+
+    for aws_arg in sorted(AWS_ARGS_1):
+        argp.add_argument(
+            '--' + aws_arg,
+            metavar='arg',
+            dest=aws_arg.replace('-', '_'),
+            action='store',
+            help='As for AWS CLI.',
+        )
+
+    args = argp.parse_args()
+
+    if not (args.m_status or args.m_success or args.m_realtime_s or args.m_realtime_ms):
+        # Logging not setup yet so just print error and exit
+        argp.error('At least one of -e, -E, -r, -R are required.')
+        exit(1)
+
+    return args
+
+
+# ------------------------------------------------------------------------------
+def main():
+    """Show timw."""
+
+    args = process_cli_args()
+    setup_logging('debug' if args.verbose else 'info', '', not args.no_colour)
+
+    # ----------------------------------------
+    # Bundle standard AWS CLI args for use in AWD CLI calls.
+
+    aws_cli_args = ['--' + attr for attr in AWS_ARGS_0 if getattr(args, attr.replace('-', '_'))]
+
+    for attr in AWS_ARGS_1:
+        value = getattr(args, attr.replace('-', '_'))
+        if value is not None:
+            aws_cli_args.extend(['--' + attr, value])
+
+    aws_context = AwsContext(aws_cli_args)
+
+    # ----------------------------------------
+    # Run the command
+
+    cmd = [args.command]
+    cmd.extend(args.arg)
+
+    start = datetime.now(timezone.utc)
+    try:
+        status = subprocess.call(cmd, timeout=args.timeout)
+    except subprocess.TimeoutExpired:
+        LOG.warning('Command %s timed out', args.command)
+        status = TIMEOUT_STATUS
+        realtime = 0 if args.zero else None
+    else:
+        realtime = (datetime.now(timezone.utc) - start).total_seconds()
+        LOG.debug(
+            'Command %s took %f seconds and returned status %s', args.command, realtime, status
+        )
+
+    # ----------------------------------------
+    # Send the results to CloudWatch
+
+    success = 1 if status else 0
+    if args.m_status:
+        aws_context.put_metric_data(
+            args.namespace, args.m_status, status, start, dimensions=args.dimensions
+        )
+
+    if args.m_success:
+        aws_context.put_metric_data(
+            args.namespace, args.m_success, success, start, dimensions=args.dimensions
+        )
+
+    if args.m_realtime_s and realtime is not None:
+        aws_context.put_metric_data(
+            args.namespace,
+            args.m_realtime_s,
+            realtime,
+            start,
+            unit='Seconds',
+            dimensions=args.dimensions,
+        )
+
+    if args.m_realtime_ms and realtime is not None:
+        aws_context.put_metric_data(
+            args.namespace,
+            args.m_realtime_ms,
+            round(realtime * 1000, 3),
+            start,
+            unit='Milliseconds',
+            dimensions=args.dimensions,
+        )
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        LOG.error('%s', ex)
+        exit(1)
+    except KeyboardInterrupt:
+        LOG.warning('Interrupt')
+        exit(2)

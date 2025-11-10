@@ -1,0 +1,79 @@
+# ------------------------------------------------------------------------------
+# This file contains configuration information for one or more target lava
+# environments. It is read by the lava deploy.sh script. It contains things such
+# as S3 deployment locations for the various components and other environment
+# specific config details
+#
+# Top level keys are environment names. Subordinate keys are config items.
+# If a key is not defined for a given environment then the corresponding
+# artefacts are not deployed.
+#
+# S3 locations should either be a fully qualified S3 location or just the prefix.
+# In the latter case the value of _.s3base for the environment is used as the
+# bucket name plus any common prefix. The may contain ${version} which will be
+# replaced with the lava version being deployed.
+# ------------------------------------------------------------------------------
+
+# ******************************************************************************
+# Sample.
+# ******************************************************************************
+
+# This is one environment. Copy and customise to have multiple environments.
+demo:
+  # If other keys don't start with s3:// this base is used. Don't add trailing /.
+  _:
+    s3base: my-deploy-bucket/some-optional-prefix
+
+  # This is the target AWS account ID. Used to make sure we deploy where we intend.
+  account_id: "123456789012"
+
+  # . . . . . . . . . . . . . . . . . . . .
+  # Main lava code bundle.
+  pkg:
+    s3: lava/_dist_/pkg/
+
+  # . . . . . . . . . . . . . . . . . . . .
+  # Worker boot scripts
+  boot:
+    s3: lava/_boot_/
+
+  # . . . . . . . . . . . . . . . . . . . .
+  # Lava job framework cookiecutter bundle
+  #
+  # DEPRECATED - Use lava-new or a prebuilt bundle from
+  #              https://github.com/jin-gizmo/lava/releases
+  #
+  # framework:
+  #  s3: lava/_dist_/framework/
+
+  # . . . . . . . . . . . . . . . . . . . .
+  # Lambda bundles
+  lambda:
+    s3: lava/_dist_/lambda/
+
+  # . . . . . . . . . . . . . . . . . . . .
+  # CloudFormation templates
+  cfn:
+    s3: lava/_dist_/cfn/v${version}/
+
+  # . . . . . . . . . . . . . . . . . . . .
+  # Other is reserved for ... well ... other stuff
+  other:
+    s3:
+
+  # . . . . . . . . . . . . . . . . . . . .
+  # Parameters to build the AMI
+  ami:
+    # Location of additional resources for building the lava AMI.
+    s3: lava/_ami_/
+    # Public or private IP address for the build
+    ip: public
+    # Build instance subnet ID
+    subnet: subnet-...
+    # Security group(s) : comma separated list (no spaces)
+    sg: sg-...
+    # Timezone set on instances created from the AMI.
+    tz: Australia/Sydney
+    # Python version to build from source
+    python:
+      version: 3.11.13

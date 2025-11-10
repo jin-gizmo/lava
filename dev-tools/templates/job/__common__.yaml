@@ -1,0 +1,88 @@
+#- Template for a lava job specification. This file contains the information
+#- common to all job types.
+#-
+#- This is the list of vars to prompt for when building
+#= job_id:  Job ID (exclude prefix provided by the lava job framework)
+#-
+
+## #############################################################################
+## Mandatory fields
+
+enabled: true
+job_id: "<{ prefix.job }>/{{ job_id }}"
+worker: "<{ worker.main }>"
+
+description: "What does this job do?"
+owner: "<{ owner }>"
+
+## #############################################################################
+## Optional fields
+##
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Dispatcher name
+##
+## For scheduled jobs it will be something like...
+# dispatcher: "<{ dispatcher.main }>"
+##
+## For non-scheduled jobs it will be omitted
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## enable/disable generation of CloudWatch custom metrics for this job.
+## If not set, use realm level setting.
+##
+# cw_metrics: true
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Log specified information in the events table before the first iteration
+## commences. Can be a string or an arbitrary object. DON'T LOG SECRETS.
+##
+# event_log: ...
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Limit the number of times a single SQS dispatch message can be processed.
+## Default is 0 which means the limit is determined by SQS queue and worker config.
+##
+# max_tries: 0
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Lava internal retry control
+##
+# iteration_limit: 1
+# iteration_delay: 0s
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Simplest form is cron(1) style schedule.
+##
+# schedule: "<{ schedule.main }>"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Global values.
+##
+# globals:
+#   global1: "value1"
+#   global2: "value2"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Post job actions. If not specified here, the realm level values are used.
+## Can have list of multiple actions.
+##
+# on_success:
+#   - action: action-type
+#     param1: ...
+#     param2: ...
+#
+# on_retry:
+#   - action: action-type
+#     param1: ...
+#     param2: ...
+#
+# on_fail:
+#   - action: action-type
+#     param1: ...
+#     param2: ...
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+##
+# X-whatever: "Some value"

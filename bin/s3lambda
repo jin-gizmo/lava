@@ -1,0 +1,192 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# This script can be used to trigger AWS Lambda function invocations by
+# generating synthetic S3 events. Use -h option for help.
+#
+# ------------------------------------------------------------------------------
+
+PROG=$(basename "$0")
+
+BATCH=5  # Pause between batches
+SLEEP=2  # Sleep for this many seconds between batches
+
+AWS_REGION=$(aws configure get region)
+if [ $? -ne 0 ]
+then
+	echo "$PROG: Cannot determine AWS region" >&2
+	exit 1
+fi
+
+
+# ------------------------------------------------------------------------------
+function usage {
+	cat >&2 <<!
+
+Trigger an AWS Lambda function by generating synthetic S3 event notifications.
+
+Note that the events generated are a basic subset of the real thing but should
+suffice for some use cases.
+
+WARNING: This will not handle S3 keys containing spaces.
+
+Usage: $PROG [options] bucket prefix ...
+
+Options:
+
+    -h		Print help and exit.
+
+    -b size	Batch size. Lambda invocations are done in batches of the
+    		specified size, with a sleep between batches to reduce the risk
+		of API rate limiting or Lambda throttling by AWS. The default
+		is $BATCH.
+
+    -g patten	Only object keys matching the specified bash(1) extended glob
+    		pattern are included.
+
+    -l lambda	Target Lambda function name. If not specified, The Lambda
+    		invocation payloads are generated and printed to stdout.
+
+    -s seconds	Sleep for the specified number of seconds between batches. The
+    		default is $SLEEP seconds.
+
+    -z		Don't skip zero length S3 objects. By default these are ignored.
+
+    bucket	S3 bucket name.
+
+    prefix	S3 prefix(es). A recursive search for objects is performed under
+    		each prefix.
+
+!
+
+}
+
+# ------------------------------------------------------------------------------
+# Make up a lambda payload for an S3 event. Bare bones only.
+# Usage: make_lambda_payload payload-file bucket key size
+function make_lambda_payload {
+	local payload="$1"
+	local bucket="$2"
+	local key=
+	local size="$4"
+	key=$(python3 -c "from urllib.parse import quote_plus; print(quote_plus('$3'))")
+	cat > "$payload"  <<!
+
+{
+    "Records": [
+        {
+            "eventName": "ObjectCreated:Put",
+	    "eventTime": "$(date -u +'%Y-%m-%dT%H:%M:%S').000Z",
+	    "eventSource": "aws:s3",
+	    "awsRegion": "$AWS_REGION",
+            "s3": {
+                "bucket": { "name": "$bucket" },
+                "object": {
+		    "key": "$key",
+		    "size": $size
+		}
+            }
+        }
+    ]
+}
+!
+}
+
+# ------------------------------------------------------------------------------
+function info {
+	if [ -t 2 ]
+	then
+		echo "[34m$*[0m" >&2
+	else
+		echo "$*" >&2
+	fi
+}
+
+
+# ------------------------------------------------------------------------------
+# Process command line options
+
+set -o noglob
+shopt -s extglob
+
+# shellcheck disable=SC2048,SC2086
+args=$(getopt hb:l:g:s:z $*)
+[ $? -ne 0 ] && usage && exit 1
+# shellcheck disable=SC2086
+set -- $args
+
+batch=$BATCH
+sleep=$SLEEP
+glob=
+lambda=
+skip_zero=yes
+
+while true
+do
+	case "$1"
+	in
+		-h)	usage; exit 0;;
+		-b)	batch="$2"; shift 2;;
+		-l)	lambda="$2"; shift 2;;
+		-g)	glob="$2"; shift 2;;
+		-s)	sleep="$2"; shift 2;;
+		-z)	skip_zero=no; shift;;
+		--)	shift; break;;
+		*)	echo "Internal error"; exit 13;;
+	esac
+done
+
+[ $# -lt 2 ] && usage && exit 1
+
+bucket="$1"
+shift
+
+# ------------------------------------------------------------------------------
+
+TMP=$(mktemp -d)
+z=3
+trap '/bin/rm -rf $TMP; exit $z' 0
+declare -i n=0
+
+for prefix
+do
+	aws s3 ls --recursive "$bucket/$prefix" | awk '{print $3, $4}' | while read -r x
+	do
+		# x is size and key
+		# shellcheck disable=SC2086
+		set -- $x
+
+		[ "$skip_zero" == "yes" -a "$1" -eq 0 ] && continue
+		# shellcheck disable=SC2053
+		[[ "$glob" != "" && "$2" != $glob ]] && continue
+
+		# Invoke a batch of invocations and then sleep for a bit to
+		# avoid throttling
+		n=$((n + 1))
+		if [ $n -gt "$batch" ]
+		then
+			n=0
+			[ -t 2 ] && echo "[2m---- END OF BATCH ----[0m" >&2
+			[ "$lambda" != "" -a "$sleep" -gt 0 ] && sleep "$sleep"
+		fi
+
+		info "$2"
+
+		# Dummy up a lambda invocation payload
+		make_lambda_payload "$TMP/payload.json" "$bucket" "$2" "$1"
+
+		if [ "$lambda" != "" ]
+		then
+			# Invoke the lambda
+			aws lambda invoke \
+				--function-name "$lambda" \
+				--invocation-type Event \
+				--payload "file://$TMP/payload.json" "$TMP/out" || exit
+		else
+			# Dry run 
+			cat "$TMP/payload.json"
+		fi
+	done
+done
+
+z=0

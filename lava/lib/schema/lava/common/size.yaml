@@ -1,0 +1,14 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: A lava (data) size specification
+
+description: >-
+  A "size" is a string in the form nnX where nn is a number and X is a
+  case-sensitive unit specifier. If X is not specified, bytes are assumed.
+  A size is always >= 0.
+
+oneOf:
+  - type: number
+    minimum: 0
+  - type: string
+    pattern: '^[0-9]*(\.[0-9]*)?(B|K|KB|M|MB|G|GB|T|TB|P|PB|KiB|MiB|GiB|TiB|PiB)?$'

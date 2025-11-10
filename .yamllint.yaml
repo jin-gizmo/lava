@@ -1,0 +1,38 @@
+# ex: ft=yaml
+
+---
+
+extends: default
+
+ignore: |
+  .git/
+  venv*/
+  .idea/
+  untracked/
+  dist/
+
+rules:
+  comments:
+    require-starting-space: false
+  comments-indentation: disable
+  document-start: disable
+  line-length: disable
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 2
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 2
+  colons:
+    max-spaces-before: 0
+    max-spaces-after: -1
+  commas: {max-spaces-before: 0}
+  empty-values:
+    forbid-in-block-mappings: false
+    forbid-in-flow-mappings: true
+  hyphens:
+    max-spaces-after: 1
+  indentation:
+    spaces: consistent
+  octal-values: {forbid-implicit-octal: true}
+  truthy: {}

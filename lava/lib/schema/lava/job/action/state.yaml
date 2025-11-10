@@ -1,0 +1,49 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: SNS action specification
+
+type: object
+
+properties:
+  action:
+    type: string
+    const: state
+  kms_key:
+    description: >-
+      The secure state item type supports KMS encryption of the value. This
+      field specifies the KMS key to use, either as a KMS key ARN or a key alias
+      in the form alias/key-id.
+    anyOf:
+      - type: string
+        pattern: '^alias/[^ ]*$'
+      - type: string
+        pattern: '^arn:aws:kms:'
+  publisher:
+    description: An arbitrary identifier for the entity posting the event item.
+    type: string
+    minLength: 1
+  state_id:
+    description: The state entry ID.
+    type: string
+    minLength: 1
+    not:
+      pattern: '^lava'
+  ttl:
+    description: Time to live for the state item specified as a duration.
+    $ref: lava.common.duration
+  type:
+    description: The state item type.
+    type: string
+    enum:
+      - json
+      - raw
+      - secure
+  value:
+    description: A JSON encodable object.
+
+required:
+  - action
+  - state_id
+  - value
+
+additionalProperties: false
