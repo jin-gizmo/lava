@@ -1544,7 +1544,7 @@ the <a href="16-commands-utilities.html#lava-new-utility">lava-new</a> utility.<
 </div>
 <div class="tabbed-block">
 <p>The lava framework itself is packaged as a zip file:
-<code>cookiecutter-lava-&lt;VERSION&gt;.zip</code>. If this is not available, it can be
+<code>lava-job-framework-&lt;VERSION&gt;.zip</code>. If this is not available, it can be
 built by cloning the lava repo and running <code>make tools</code>. The zip file will
 be placed in the <code>dist/dev-tools</code> directory.</p>
 <div class="admonition note">
@@ -1562,7 +1562,7 @@ used provided you have access to the lava framework cookiecutter bundle.</p>
 </span><span id="__span-1-8"><span class="c1"># configuration parameters. The parameters &quot;project_name&quot; and &quot;project_dir&quot;</span>
 </span><span id="__span-1-9"><span class="c1"># are particularly important. The others can easily be changed later.</span>
 </span><span id="__span-1-10">
-</span><span id="__span-1-11">cookiecutter<span class="w"> </span>cookiecutter-lava-&lt;VERSION&gt;.zip
+</span><span id="__span-1-11">cookiecutter<span class="w"> </span>lava-job-framework-&lt;VERSION&gt;.zip
 </span></code></pre></div>
 <hr />
 </div>
@@ -2798,7 +2798,7 @@ run the following command:</p>
 <p>Note that fields starting with <code>x-</code> / <code>X-</code> are excluded from drift comparisons.</p>
 <h2 id="updating-the-framework-in-an-existing-project">Updating the Framework in an Existing Project<a class="headerlink" href="#updating-the-framework-in-an-existing-project" title="Permanent link">&para;</a></h2>
 <p>The lava framework can be updated for an existing project by obtaining the new
-framework package <code>cookiecutter-lava-&lt;NEW-VERSION&gt;.zip</code> and applying it over the
+framework package <code>lav-job-framework-&lt;NEW-VERSION&gt;.zip</code> and applying it over the
 top of the project.</p>
 <p>This process is automated by the framework itself. A backup is made first as
 part of the process in case of problems. However it is strongly recommended to
@@ -2816,7 +2816,7 @@ with a little bit of fiddling.</p>
 </span><span id="__span-30-6"><span class="nb">source</span><span class="w"> </span>venv/bin/activate
 </span><span id="__span-30-7">
 </span><span id="__span-30-8"><span class="c1"># Run the update process</span>
-</span><span id="__span-30-9">make<span class="w"> </span>update<span class="w"> </span><span class="nv">pkg</span><span class="o">=</span>cookiecutter-lava-&lt;NEW-VERSION&gt;.zip
+</span><span id="__span-30-9">make<span class="w"> </span>update<span class="w"> </span><span class="nv">pkg</span><span class="o">=</span>lav-job-framework-&lt;NEW-VERSION&gt;.zip
 </span></code></pre></div>
 <p>This will do a backup of the project into a zip file, rerun the cookiecutter
 using the new package and apply the new framework components over the existing
@@ -2829,14 +2829,14 @@ project.</p>
 </span><span id="__span-31-4">
 </span><span id="__span-31-5"><span class="c1"># Extract the `bin` directory from the new framework package</span>
 </span><span id="__span-31-6"><span class="c1"># The quotes are important here.</span>
-</span><span id="__span-31-7">unzip<span class="w"> </span>-j<span class="w"> </span>-d<span class="w"> </span>bin<span class="w"> </span>cookiecutter-lava-&lt;NEW-VERSION&gt;.zip<span class="w"> </span><span class="s1">&#39;*bin/*&#39;</span>
+</span><span id="__span-31-7">unzip<span class="w"> </span>-j<span class="w"> </span>-d<span class="w"> </span>bin<span class="w"> </span>lav-job-framework-&lt;NEW-VERSION&gt;.zip<span class="w"> </span><span class="s1">&#39;*bin/*&#39;</span>
 </span><span id="__span-31-8">chmod<span class="w"> </span>u+x<span class="w"> </span>bin/*
 </span><span id="__span-31-9">
 </span><span id="__span-31-10"><span class="c1"># Activate the virtual environment</span>
 </span><span id="__span-31-11"><span class="nb">source</span><span class="w"> </span>venv/bin/activate
 </span><span id="__span-31-12">
 </span><span id="__span-31-13"><span class="c1"># Run the update process</span>
-</span><span id="__span-31-14"><span class="nv">PATH</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/bin:<span class="nv">$PATH</span><span class="w"> </span>make<span class="w"> </span>update<span class="w"> </span><span class="nv">pkg</span><span class="o">=</span>cookiecutter-lava-&lt;NEW-VERSION&gt;.zip
+</span><span id="__span-31-14"><span class="nv">PATH</span><span class="o">=</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/bin:<span class="nv">$PATH</span><span class="w"> </span>make<span class="w"> </span>update<span class="w"> </span><span class="nv">pkg</span><span class="o">=</span>lav-job-framework-&lt;NEW-VERSION&gt;.zip
 </span></code></pre></div>
 <p>Note that later versions of the framework move the framework's
 <code>requirements.txt</code> file into the <code>etc</code> directory. After the update the
