@@ -17,8 +17,9 @@ from typing import Any
 
 import boto3
 
+from lava import LavaError
 from lava.common import get_lava_param
-from lava.lavacore import IGNORE_FIELDS, LavaError
+from lava.lavacore import IGNORE_FIELDS
 from lava.lib.misc import dict_check
 from .core import CONNECTION_REQUIRED_FIELDS, LOG, cli_connector
 

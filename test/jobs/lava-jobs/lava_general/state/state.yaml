@@ -1,0 +1,55 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test on_success action setting multiple state entries with rendering
+
+type: cmd
+
+job_id: <{ prefix.job }>/general/state/action
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo This job has an action to create state items with rendering
+
+globals:
+  hello: world
+
+on_success:
+  - action: state
+    state_id: test/string
+    value: "Hello {{ globals.hello }}"
+
+  - action: state
+    state_id: test/string/ttl
+    ttl: 1d
+    value: "Hello {{ globals.hello }} with TTL of 1d"
+
+  - action: state
+    state_id: test/dict/json
+    type: json
+    value:
+      hello: "{{ globals.hello }}"
+      now: "{{ job.ts_start.isoformat() }}"
+
+  - action: state
+    state_id: test/dict/raw
+    type: raw
+    value:
+      hello: "{{ globals.hello }}"
+      now: "{{ job.ts_start.isoformat() }}"
+
+  - action: state
+    state_id: test/list/json
+    value:
+      - "Hello {{ globals.hello }}"
+      - "Now {{ job.ts_start.isoformat() }}"
+
+  - action: state
+    state_id: test/list/raw
+    type: raw
+    value:
+      - "Hello {{ globals.hello }}"
+      - "Now {{ job.ts_start.isoformat() }}"
+
+x-lava-nocheck: joborphan

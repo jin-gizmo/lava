@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Set/update the $schema entry in a YAML file.
+
+# Warning: This is a naive implementation, doesn't check YAML-ness etc.
+
+PROG=$(basename "$0")
+
+function usage {
+	cat <<!
+Add /update $schema entries in YAML files. Symlinks are skipped.
+
+Usage: $PROG schema file ...
+!
+}
+
+# ------------------------------------------------------------------------------
+[ $# -lt 2 ] && usage && exit 1
+
+schema="$1"
+shift
+
+# ------------------------------------------------------------------------------
+TMP=$(mktemp -d)
+z=1
+trap '/bin/rm -rf $TMP; exit $z' 0
+set -e
+
+for f
+do
+	echo -n "$f ... "
+	[ -L "$f" ] && echo "skipping symlink" && continue
+	[ ! -f "$f" ] && echo "no such file" && exit
+	awk -v schema="$schema" '
+		BEGIN { schema="$schema: " schema }
+		/^\$schema:/ { lines[NR]=schema; found=1; next }
+		{ lines[NR]=$0 }
+		END { if (!found) print schema "\n"; for (i=1;i<=NR;i++) print lines[i]; }
+	' "$f" > "$TMP/x"
+	# mv "$f" "$f.bak"
+	cp "$TMP/x" "$f"
+	echo "done"
+done
+
+z=0

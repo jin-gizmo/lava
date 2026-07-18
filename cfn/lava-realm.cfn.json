@@ -11,12 +11,6 @@
     }
   },
   "Parameters": {
-    "Version": {
-      "Type": "String",
-      "Description": "Lava version (read only).",
-      "Default": "STOP - Wrong template. Use the built version from dist/cfn not src from cfn/",
-      "AllowedPattern": "^?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
-    },
     "realm": {
       "Description": "Name of the realm",
       "Type": "String",
@@ -187,7 +181,7 @@
   "Outputs": {
     "Version": {
       "Description": "Lava version",
-      "Value": { "Ref": "Version" },
+      "Value": "If you see this, the unbuilt version of the template has been used!!",
       "Export": { "Name": { "Fn::Sub": "lava:${realm}:version" } }
     },
     "s3LavaBucket": {
@@ -620,9 +614,7 @@
         }
       },
       "Properties": {
-        "TopicName": {
-          "Fn::Sub": "lava-${realm}-dispatch"
-        },
+        "TopicName": { "Fn::Sub": "lava-${realm}-dispatch" },
         "DisplayName": "LavaDsptch",
         "KmsMasterKeyId": { "Ref": "kmsUserAlias" },
         "Tags": [
@@ -633,6 +625,58 @@
         ]
       }
     },
+    "sqsDispatchHelper": {
+      "Type": "AWS::SQS::Queue",
+      "Condition": "ifCreateLambdas",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "SQS queue for the dispatch helper lambda to receive dispatch requests."
+        }
+      },
+      "Properties": {
+        "QueueName": { "Fn::Sub": "lava-${realm}-dispatch" },
+        "KmsMasterKeyId": { "Ref": "kmsUserAlias" },
+        "MessageRetentionPeriod": 3600,
+        "VisibilityTimeout": 300
+      }
+    },
+    "sqsDispatchHelperQueuePolicy":{
+      "Type": "AWS::SQS::QueuePolicy",
+      "Condition": "ifCreateLambdas",
+      "Metadata": {
+        "Cfdoc": {
+          "Description": "Resource policy for the dispatch helper SQS queue to allow the SNS topic to send message."
+        }
+      },
+      "Properties": {
+        "Queues": [ { "Ref": "sqsDispatchHelper" } ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AllowSNSPublish",
+              "Effect": "Allow",
+              "Principal": { "Service": "sns.amazonaws.com" },
+              "Action": "sqs:SendMessage",
+              "Resource": { "Fn::GetAtt": [ "sqsDispatchHelper", "Arn" ] },
+              "Condition": {
+                "ArnEquals": { "aws:SourceArn": { "Ref": "snsDispatchHelper" } }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "snsSubscribeDispatchQueue": {
+      "Type": "AWS::SNS::Subscription",
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "TopicArn": { "Ref": "snsDispatchHelper" },
+        "Protocol": "sqs",
+        "Endpoint": { "Fn::GetAtt": [ "sqsDispatchHelper", "Arn" ] },
+        "RawMessageDelivery": true
+      }
+    },
     "kmsSysKey": {
       "Type": "AWS::KMS::Key",
       "Metadata": {
@@ -641,9 +685,7 @@
         }
       },
       "Properties": {
-        "Description": {
-          "Fn::Sub": "System key for lava realm ${realm}"
-        },
+        "Description": { "Fn::Sub": "System key for lava realm ${realm}" },
         "Enabled": true,
         "EnableKeyRotation": true,
         "KeyPolicy": {
@@ -653,18 +695,14 @@
             {
               "Sid": "Enable IAM User Permissions",
               "Effect": "Allow",
-              "Principal": {
-                "AWS": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root" }
-              },
+              "Principal": { "AWS": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root" } },
               "Action": "kms:*",
               "Resource": "*"
             },
             {
               "Sid": "Allow access for Key Administrators",
               "Effect": "Allow",
-              "Principal": {
-                "AWS": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:user/${kmsKeyAdmin}" }
-              },
+              "Principal": { "AWS": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:user/${kmsKeyAdmin}" } },
               "Action": [
                 "kms:Create*",
                 "kms:Describe*",
@@ -723,22 +761,14 @@
             {
               "Sid": "Enable IAM User Permissions",
               "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root"
-                }
-              },
+              "Principal": { "AWS": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root" } },
               "Action": "kms:*",
               "Resource": "*"
             },
             {
               "Sid": "Allow access for Key Administrators",
               "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:user/${kmsKeyAdmin}"
-                }
-              },
+              "Principal": { "AWS": { "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:user/${kmsKeyAdmin}" } },
               "Action": [
                 "kms:Create*",
                 "kms:Describe*",
@@ -754,6 +784,16 @@
                 "kms:UntagResource",
                 "kms:ScheduleKeyDeletion",
                 "kms:CancelKeyDeletion"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Sid": "AllowSnsKmsAccess",
+              "Effect": "Allow",
+              "Principal": { "Service": "sns.amazonaws.com" },
+              "Action": [
+                "kms:GenerateDataKey",
+                "kms:Decrypt"
               ],
               "Resource": "*"
             }
@@ -1138,12 +1178,8 @@
       },
       "Type": "AWS::IAM::ManagedPolicy",
       "Properties": {
-        "ManagedPolicyName": {
-          "Fn::Sub": "lava-${realm}-admin2"
-        },
-        "Description": {
-          "Fn::Sub": "Admin policy for lava realm ${realm} - part 2"
-        },
+        "ManagedPolicyName": { "Fn::Sub": "lava-${realm}-admin2" },
+        "Description": { "Fn::Sub": "Admin policy for lava realm ${realm} - part 2" },
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -1306,9 +1342,7 @@
       },
       "Type": "AWS::IAM::ManagedPolicy",
       "Properties": {
-        "ManagedPolicyName": {
-          "Fn::Sub": "lava-${realm}-operator"
-        },
+        "ManagedPolicyName": { "Fn::Sub": "lava-${realm}-operator" },
         "Description": {
           "Fn::Sub": "Operator add-on policy for lava realm ${realm} : Operator = Reader + this policy"
         },
@@ -1375,6 +1409,20 @@
               "Resource": {
                 "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:lava-${realm}-*"
               }
+            },
+            {
+              "Sid": "UseKMSuserKey",
+              "Effect": "Allow",
+              "Action": [
+                "kms:Encrypt",
+                "kms:Decrypt",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:DescribeKey"
+              ],
+              "Resource": [
+                { "Fn::GetAtt": [ "kmsUserKey", "Arn" ] }
+              ]
             }
           ]
         }
@@ -1672,12 +1720,8 @@
       },
       "Condition": "ifCreateLambdas",
       "Properties": {
-        "ManagedPolicyName": {
-          "Fn::Sub": "lava-${realm}-dispatch-lambdas"
-        },
-        "Description": {
-          "Fn::Sub": "Policy for dispatching Lambdas for ${realm} realm"
-        },
+        "ManagedPolicyName": { "Fn::Sub": "lava-${realm}-dispatch-lambdas" },
+        "Description": { "Fn::Sub": "Policy for dispatching Lambdas for ${realm} realm" },
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -1692,11 +1736,11 @@
               "Action": [
                 "sqs:GetQueueUrl",
                 "sqs:GetQueueAttributes",
-                "sqs:SendMessage"
+                "sqs:SendMessage",
+                "sqs:ReceiveMessage",
+                "sqs:DeleteMessage"
               ],
-              "Resource": {
-                "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:lava-${realm}-*"
-              },
+              "Resource": { "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:lava-${realm}-*" },
               "Effect": "Allow"
             },
             {
@@ -1706,9 +1750,7 @@
                 "dynamodb:Query"
               ],
               "Resource": [
-                {
-                  "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.*"
-                }
+                { "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/lava.${realm}.*" }
               ],
               "Effect": "Allow"
             },
@@ -1730,12 +1772,7 @@
                 "kms:Encrypt",
                 "kms:GenerateDataKey*"
               ],
-              "Resource": {
-                "Fn::GetAtt": [
-                  "kmsUserKey",
-                  "Arn"
-                ]
-              },
+              "Resource": { "Fn::GetAtt": [ "kmsUserKey", "Arn" ] },
               "Effect": "Allow"
             }
           ]
@@ -1818,12 +1855,8 @@
       },
       "Condition": "ifCreateLambdas",
       "Properties": {
-        "ManagedPolicyName": {
-          "Fn::Sub": "lava-${realm}-metricslambda"
-        },
-        "Description": {
-          "Fn::Sub": "Policy for metrics Lambda for ${realm} realm"
-        },
+        "ManagedPolicyName": { "Fn::Sub": "lava-${realm}-metricslambda" },
+        "Description": { "Fn::Sub": "Policy for metrics Lambda for ${realm} realm" },
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -1861,9 +1894,7 @@
                 "sqs:GetQueueUrl",
                 "sqs:GetQueueAttributes"
               ],
-              "Resource": {
-                "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:lava-${realm}-*"
-              },
+              "Resource": { "Fn::Sub": "arn:aws:sqs:${AWS::Region}:${AWS::AccountId}:lava-${realm}-*" },
               "Effect": "Allow"
             }
           ]
@@ -1879,26 +1910,18 @@
       },
       "Condition": "ifCreateLambdas",
       "Properties": {
-        "RoleName": {
-          "Fn::Sub": "lava-${realm}-dispatch-lambda"
-        },
+        "RoleName": { "Fn::Sub": "lava-${realm}-dispatch-lambda" },
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
             {
               "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com"
-              },
+              "Principal": { "Service": "lambda.amazonaws.com" },
               "Action": "sts:AssumeRole"
             }
           ]
         },
-        "ManagedPolicyArns": [
-          {
-            "Ref": "iamLavaDispatchLambdaPolicy"
-          }
-        ]
+        "ManagedPolicyArns": [ { "Ref": "iamLavaDispatchLambdaPolicy" } ]
       }
     },
     "iamLavaStopLambdaRole": {
@@ -1967,11 +1990,7 @@
       "Type": "AWS::IAM::InstanceProfile",
       "Condition": "ifCreateLambdas",
       "Properties": {
-        "Roles": [
-          {
-            "Ref": "iamLavaDispatchLambdaRole"
-          }
-        ]
+        "Roles": [ { "Ref": "iamLavaDispatchLambdaRole" } ]
       }
     },
     "iamLavaAdminGroup": {
@@ -2062,37 +2081,6 @@
             "Value": "realm.dispatch-helper"
           }
         ]
-      }
-    },
-    "snsSubscribeDispatch": {
-      "Metadata": {
-        "Cfdoc": {
-          "Description": "Subscription for the dispatch helper Lambda to the dispatch helper SNS topic."
-        }
-      },
-      "Type": "AWS::SNS::Subscription",
-      "Condition": "ifCreateLambdas",
-      "Properties": {
-        "TopicArn": {
-          "Ref": "snsDispatchHelper"
-        },
-        "Protocol": "lambda",
-        "Endpoint": { "Fn::GetAtt": [ "lambdaDispatch", "Arn" ] }
-      }
-    },
-    "lamdaDispatchPolicy": {
-      "Type": "AWS::Lambda::Permission",
-      "Condition": "ifCreateLambdas",
-      "DependsOn": "lambdaDispatch",
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "Principal": "sns.amazonaws.com",
-        "FunctionName": {
-          "Fn::Sub": "lava-${realm}-dispatch"
-        },
-        "SourceArn": {
-          "Ref": "snsDispatchHelper"
-        }
       }
     },
     "lambdaS3Trigger": {
@@ -2258,6 +2246,16 @@
         "Principal": "events.amazonaws.com",
         "SourceAccount": { "Ref": "AWS::AccountId" },
         "SourceArn": { "Fn::Sub": "arn:aws:events:${AWS::Region}:${AWS::AccountId}:rule/lava.${realm}.*" }
+      }
+    },
+    "lambdaDispatchReceiveFromDispatchSqs": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Condition": "ifCreateLambdas",
+      "Properties": {
+        "EventSourceArn": { "Fn::GetAtt": [ "sqsDispatchHelper", "Arn" ] },
+        "FunctionName": { "Fn::GetAtt": [ "lambdaDispatch", "Arn" ] },
+        "BatchSize": 1,
+        "Enabled": true
       }
     }
   }

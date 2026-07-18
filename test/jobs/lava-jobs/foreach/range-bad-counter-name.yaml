@@ -1,0 +1,31 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - range with illegal counter name
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/range/bad-counter-name
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/action/state/globals
+
+globals:
+  from_the_parent: howdy
+  publisher: null
+
+parameters:
+  foreach:
+    type: range
+    name: lavAx  # Not allowed to start with lava
+    stop: 3
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: 'foreach field names may not start with "lava"'
+  marks:
+    - local

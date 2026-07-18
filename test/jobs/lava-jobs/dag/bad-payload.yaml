@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Bad payload
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/bad-payload
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+# This must be a map not a list
+payload:
+  - <{ prefix.job }>/log/plain: null
+  - <{ prefix.job }>/cmd/hello-world: <{ prefix.job }>/log/plain
+
+parameters:
+  workers: 2
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "payload must be a map"
+  marks:
+    - local

@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Plain log job.
+
+type: log
+
+job_id: <{ prefix.job }>/log/plain
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+payload: --
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

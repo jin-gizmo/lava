@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Run a shell script that accesses a generic connector
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/gen_conn_sh
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+parameters:
+  connections:
+    generic: <{ prefix.conn }>/generic
+
+payload: <{ prefix.payload }>/generic_conn.sh
+
+x-lava-nocheck: joborphan

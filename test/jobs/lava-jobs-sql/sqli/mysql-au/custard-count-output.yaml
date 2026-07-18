@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Aurora MySQL custard count with specified output area
+
+type: sqli
+
+job_id: <{ prefix.job }>/sqli/mysql-au/custard-count-output
+
+payload: "SELECT COUNT(*) FROM <{db.common.schema}>.custard"
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/mysql/aurora
+  output: my_output_area
+
+x-lava-nocheck: joborphan

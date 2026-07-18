@@ -108,7 +108,7 @@ usage is:
 ```bare
 usage: $LAVA_CONN_SPOINT [-J] [-l LEVEL] {put-doc,put-list,get-doc,get-list,get-multi-doc} ...
 
-sub-commands:
+subcommands:
   {put-doc,put-list,get-doc,get-list,get-multi-doc}
     put-doc             Copy a file into a SharePoint document library.
     put-list            Copy a file into a SharePoint list.
@@ -127,7 +127,7 @@ logging arguments:
                         is info.
 ```
 
-Usage for the `get-doc` sub-command:
+Usage for the `get-doc` subcommand:
 
 ```bare
 usage: $LAVA_CONN_SPOINT get-doc [options] SharePoint-path file
@@ -143,7 +143,7 @@ optional arguments:
                         AWS KMS key to use for uploading data to S3.
 ```
 
-Usage for the `get-list` sub-command:
+Usage for the `get-list` subcommand:
 
 ```bare
 usage: $LAVA_CONN_SPOINT get-list [options] SharePoint-list file
@@ -170,7 +170,7 @@ optional arguments:
                         QUOTE_ prefix).
 ```
 
-Usage for the `get-doc` sub-command:
+Usage for the `get-doc` subcommand:
 
 ```bare
 usage: $LAVA_CONN_SPOINT get-doc [options] SharePoint-path file
@@ -186,7 +186,7 @@ optional arguments:
                         AWS KMS key to use for uploading data to S3.
 ```
 
-Usage for the `put-doc` sub-command:
+Usage for the `put-doc` subcommand:
 
 ```bare
 usage: $LAVA_CONN_SPOINT put-doc [options] file SharePoint-path
@@ -202,7 +202,7 @@ optional arguments:
                         Document title. This will be jinja rendered.
 ```
 
-Usage for the `get-multi-doc` sub-command:
+Usage for the `get-multi-doc` subcommand:
 
 ```bare
 usage: $LAVA_CONN_SPOINT get-multi-doc [options] SharePoint-path outpath [glob]

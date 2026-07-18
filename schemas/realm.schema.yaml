@@ -1,0 +1,68 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+$id: "{{ id }}"
+version: "{{ version }}"
+documentation: "{{ documentation }}"
+
+title: Lava realm specification
+
+# Note that realms accept unevaluatedProperties
+
+type: object
+
+properties:
+  realm:
+    description: A unique identifier for the realm.
+    type: string
+    minLength: 1
+
+  config:
+    description: Configuration values to be applied to all workers in the realm.
+    type: object
+
+  s3_key:
+    description: KMS key identifier used when objects are written to S3 by a worker.
+    type: string
+    anyOf:
+      - $ref: '#/$defs/common/arn'
+      - pattern: '^alias/.+'
+
+  s3_payloads:
+    description: Location in S3 where payloads are stored for the realm.
+    type: string
+    pattern: '^s3://[a-z0-9][-.a-z0-9]{1,61}[a-z0-9]/.+'
+
+  s3_temp:
+    description: Location in S3 where job outputs are stored for the realm.
+    type: string
+    pattern: '^s3://[a-z0-9][-.a-z0-9]{1,61}[a-z0-9]/.+'
+
+  on_fail:
+    description: Job specific on_fail actions for the job
+    type: array
+    items:
+      $ref: '#/$defs/realm/action'
+
+  on_retry:
+    description: Job specific on_retry actions for the job
+    type: array
+    items:
+      $ref: '#/$defs/realm/action'
+
+  on_success:
+    description: Job specific on_success actions for the job
+    type: array
+    items:
+      $ref: '#/$defs/realm/action'
+
+patternProperties:
+  ^[xX]-:
+    description: X-* fields are ignored by lava.
+  '^\$schema$':
+    type: string
+
+required:
+  - realm
+  - s3_key
+  - s3_payloads
+  - s3_temp

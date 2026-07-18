@@ -27,7 +27,11 @@ __author__ = 'Murray Andrews'
 
 PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 CHECKSUM_KEY_NAME = 'x-lava-chk'
-IGNORE_KEYS_GLOB = '[xX]-*'
+IGNORE_KEYS_GLOB = {
+    '[xX]-*',  # Lava DynamoDB table item metadata
+    '$*',  # JSON schema metadata (e.g. $realm)
+}
+
 HASH_ALGORITHM = 'sha256'
 TAG_DEFAULT = 'LC'
 

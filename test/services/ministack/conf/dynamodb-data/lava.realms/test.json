@@ -1,0 +1,56 @@
+{
+  "config": {
+    "M": {
+      "CW_METRICS_PERIOD": {
+        "S": "1m"
+      },
+      "CW_METRICS_WORKER": {
+        "BOOL": false
+      },
+      "CW_METRICS_JOB": {
+        "BOOL": false
+      },
+      "STDERR_SIZE": {
+        "N": "-1024"
+      },
+      "PAYLOAD_DOWNLOADER": {
+        "S": "v2"
+      },
+      "SES_FROM": {
+        "S": "ses-default@test.lava.zzz"
+      },
+      "SES_REGION": {
+        "S": "us-east-1"
+      }
+    }
+  },
+  "realm": {
+    "S": "test"
+  },
+  "s3_key": {
+    "S": "alias/aws/s3"
+  },
+  "s3_payloads": {
+    "S": "s3://lava/payloads"
+  },
+  "s3_temp": {
+    "S": "s3://lava/tmp"
+  },
+  "x-workers": {
+    "M": {
+      "core": {
+        "M": {
+          "threads": {
+            "N": "3"
+          },
+          "version": {
+            "S": "8.2.0"
+          },
+          "workers": {
+            "S": "core"
+          }
+        }
+      }
+    }
+  }
+}

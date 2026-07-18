@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+# <% set docker_user=1234 %>
+# <% set docker_group=4321 %>
+
+description: OK - Docker user=<{ docker_user }>, group+=<{ docker_group }>
+
+type: docker
+
+job_id: <{ prefix.job }>/docker/whoami-modified
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ docker.registry }>/lava/amzn2023/base
+
+parameters:
+  command: id
+  docker: <{ prefix.conn }>/docker/base
+  timeout: 10s
+  host_config:
+    user: <{ docker_user }>
+    group_add:
+      - <{ docker_group }>
+
+x-lava-nocheck: joborphan

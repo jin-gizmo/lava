@@ -24,7 +24,9 @@ import smtplib
 from collections.abc import Callable, Iterable
 from contextlib import suppress
 from dataclasses import dataclass
+from email.headerregistry import Address
 from email.message import EmailMessage
+from email.utils import formatdate, make_msgid, parseaddr
 from mimetypes import guess_type
 from typing import Any
 
@@ -32,10 +34,11 @@ import boto3
 from botocore.exceptions import ClientError
 from smart_open import open  # noqa A004
 
+from lava.exceptions import LavaError
+from lava.version import __version_name__, __version_num__
 from .aws import ses_send, ssm_get_param
 from .misc import dict_check, is_html, listify, size_to_bytes, str2bool
 from ..config import config, config_load
-from ..lavacore import LavaError
 
 __author__ = 'Murray Andrews'
 
@@ -55,6 +58,42 @@ def content_type(filename: str) -> tuple[str, str]:
         return 'application', 'octet-stream'
     maintype, subtype = ctype.split('/')
     return maintype, subtype
+
+
+# ------------------------------------------------------------------------------
+def build_address_header(addresses: str | list[str]) -> list[Address]:
+    """
+    Build an address header from a list of addresses.
+
+    :param addresses:   An address, or list of source email addresses. This accepts
+                        email addresses or RFC 5322 (John Smith <j.smith@example.com>).
+    :return:            A list of address headers.
+    :raises ValueError: If address(es) are malformed.
+    """
+
+    if isinstance(addresses, str):
+        addresses = [addresses]
+
+    if not isinstance(addresses, list):
+        raise TypeError('Email addresses must be a string or list of strings')
+
+    result = []
+    for addr in addresses:
+        if not isinstance(addr, str):
+            raise TypeError(f'Email address entries must be strings: {addr}')
+
+        realname, email_address = parseaddr(addr.strip())
+        if not email_address:
+            raise ValueError(f'Bad email address: {addr}')
+
+        try:
+            user, domain = email_address.rsplit('@', 1)
+        except ValueError:
+            raise ValueError(f'Bad email address: {addr}')
+
+        result.append(Address(display_name=realname, username=user, domain=domain))
+
+    return result
 
 
 # ------------------------------------------------------------------------------
@@ -159,15 +198,16 @@ class Emailer:
         if conn_spec['type'] == 'email':
             if 'subtype' in conn_spec:
                 try:
-                    return cls._EMAIL_HANDLERS[conn_spec['subtype']](conn_spec, *args, **kwargs)
+                    handler_cls = cls._EMAIL_HANDLERS[conn_spec['subtype']]
                 except KeyError:
                     raise LavaError(
                         'No email handler for type/subtype'
                         f' {conn_spec["type"]}/{conn_spec["subtype"]}'
                     )
-            else:
-                # Default for email type with no subtype is ses
-                return cls._EMAIL_HANDLERS['ses'](conn_spec, *args, **kwargs)
+                return handler_cls(conn_spec, *args, **kwargs)
+
+            # Default for email type with no subtype is ses
+            return cls._EMAIL_HANDLERS['ses'](conn_spec, *args, **kwargs)
 
         raise LavaError(f'No email handler for type {conn_spec["type"]}')
 
@@ -229,7 +269,9 @@ class Emailer:
         :param to:          Recipient address or iterable of addresses.
         :param cc:          Cc address or iterable of addresses.
         :param sender:      Default From address.
-        :param reply_to:    Default Reply-To address.
+        :param reply_to:    Default Reply-To address(es). If not specified, any
+                            reply-to addresses specified at the connector level
+                            will be used.
         :param attachments: An iterable of either filenames to attach or in-memory
                             attachments.
         :return:            The message.
@@ -244,17 +286,26 @@ class Emailer:
         if not subject or not message:
             raise LavaError('Cannot send email: subject and message must be specified')
 
+        if not reply_to:
+            reply_to = self.conn_spec.get('reply_to')
+        if reply_to and isinstance(reply_to, str):
+            reply_to = [reply_to]
+
         msg = EmailMessage()
 
-        msg['From'] = sender
         msg['Subject'] = subject
+        msg['Date'] = formatdate()
+        msg['Message-ID'] = make_msgid(domain=config('EMAIL_MSGID_DOMAIN') or None)
+        msg['User-Agent'] = f'lava/{__version_num__} ({__version_name__})'
 
-        # Add destination addresses. Note that we deliberately do not include Bcc.
-        for hdr, val in zip(['To', 'Cc', 'Reply-To'], [to, cc, reply_to]):
+        # Add addresses fields. Note that we deliberately do not include Bcc.
+        for hdr, val in zip(['From', 'To', 'Cc', 'Reply-To'], [sender, to, cc, reply_to]):
             if val:
-                msg[hdr] = val
+                msg[hdr] = build_address_header(val)
 
-        msg.set_content(message, subtype='html' if is_html(message) else 'plain')
+        msg.set_content(
+            message, subtype='html' if is_html(message) else 'plain', disposition='inline'
+        )
 
         self.logger.debug('Message (without attachments): %s', msg.as_string())
 
@@ -266,10 +317,11 @@ class Emailer:
         if len(attachments := tuple(attachments or [])) > max_attachments:
             raise LavaError(f'Too many email attachments (max {max_attachments})')
 
-        data, name, maintype, subtype = None, None, None, None
         for n, a in enumerate(attachments, 1):
             if isinstance(a, EmailAttachment):
                 data, name = a.data, a.name
+                if isinstance(data, str):
+                    data = data.encode('utf-8')
                 if len(data) > max_attachment_size:
                     raise LavaError(f'Attachment {name} exceeds (max {max_attachment_size} bytes')
                 maintype, subtype = content_type(a.name)
@@ -448,7 +500,9 @@ class AwsSes(Emailer):
         :param cc:          Cc address or iterable of addresses.
         :param bcc:         Bcc address or iterable of addresses.
         :param sender:      Default From address.
-        :param reply_to:    Default Reply-To address.
+        :param reply_to:    Default Reply-To address(es). If not specified, any
+                            reply-to addresses specified at the connector level
+                            will be used.
         :param attachments: An iterable of either filenames to attach or in-memory
                             attachments.
 
@@ -574,7 +628,9 @@ class SmtpTls(Emailer):
         :param cc:          Cc address or iterable of addresses.
         :param bcc:         Bcc address or iterable of addresses.
         :param sender:      Default From address.
-        :param reply_to:    Default Reply-To address.
+        :param reply_to:    Default Reply-To address(es). If not specified, any
+                            reply-to addresses specified at the connector level
+                            will be used.
         :param attachments: An iterable of either filenames to attach or in-memory
                             attachments.
 

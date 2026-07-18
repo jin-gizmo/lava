@@ -62,9 +62,10 @@ from typing import Any
 import boto3
 from jinja2 import Template
 
+from lava import LavaError
 from lava.common import get_lava_param
 from lava.config import LOGNAME, config
-from lava.lavacore import IGNORE_FIELDS, LavaError
+from lava.lavacore import IGNORE_FIELDS
 from lava.lib.aws import secman_get_json_secret
 from lava.lib.misc import dict_check
 from lava.lib.smb import LavaSMBConnection
@@ -144,9 +145,9 @@ def get_connection_spec(
     # ----------------------------------------
     # Retrieve connection spec from DynamoDB
     try:
-        conn_spec = conn_table.get_item(Key={'conn_id': conn_id})['Item']  # type:dict
+        conn_spec = conn_table.get_item(Key={'conn_id': conn_id})['Item']  # type: dict
     except KeyError:
-        raise Exception(f'{conn_id}: No such connection')
+        raise LavaError(f'{conn_id}: No such connection')
 
     # Set defaults for some optional elements
     conn_spec.setdefault('enabled', False)
@@ -156,7 +157,7 @@ def get_connection_spec(
     try:
         dict_check(conn_spec, required=CONNECTION_REQUIRED_FIELDS, ignore=IGNORE_FIELDS)
     except ValueError as e:
-        raise Exception(f'{conn_id}: Bad connection record: {e}')
+        raise LavaError(f'{conn_id}: Bad connection record: {e}')
 
     LOG.debug(f'Connection record: {conn_spec}')
 
@@ -202,7 +203,7 @@ _SQL_DIALECT_DEFAULT_SUBTYPE = {
     'redshift-serverless': 'pg8000',
     'mssql': 'pyodbc',
     'mysql': 'pymysql',
-    'oracle': 'cx_oracle',
+    'oracle': 'oracledb',  # Prior to v8.3.0 this was 'cx_oracle'
     'sqlite3': 'sqlite3',
 }
 

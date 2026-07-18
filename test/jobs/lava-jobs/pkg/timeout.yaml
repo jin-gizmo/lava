@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - pkg job killed by timeout
+
+type: pkg
+
+job_id: <{ prefix.job }>/pkg/timeout
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sleep.zip
+
+parameters:
+  command: sleep.sh {{vars.sleep}}
+  timeout: 3
+  vars:
+    sleep: 20
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: 'Timed out after .* seconds'
+  marks:
+    - local

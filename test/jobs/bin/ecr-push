@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Push docker images to ECR. The remote repos will be created as needed.
+#
+# Usage: ecr-push [ img-name ... ]
+
+PROG=$(basename "$0")
+
+# ------------------------------------------------------------------------------
+function error {
+	if [ -t 2 ]
+	then
+		echo "[31m$*[0m" >&2
+	else
+		echo "$PROG: ERROR: $*" >&2
+	fi
+}
+
+function info {
+	if [ -t 2 ]
+	then
+		echo "[34m$*[0m" >&2
+	else
+		echo "$PROG: INFO: $*" >&2
+	fi
+}
+
+function abort {
+	error "ABORT: $*"
+	exit 1
+}
+
+# Get the AWS ECR repo URI for the specified docker tag
+function ecr_repo_uri {
+	aws ecr describe-repositories --repository-names "$1" \
+		--query 'repositories[0].repositoryUri' --output text 2>/dev/null
+}
+
+# ------------------------------------------------------------------------------
+
+for img
+do
+	# Get rid of any version tag
+	img=$(expr "$img" : '^\([^:]*\)')
+
+	info "Processing $img"
+
+	# Get the ECR URI for this image tag
+	uri=$(ecr_repo_uri "$img")
+
+	if [ "$uri" == "" ]
+	then
+		info "Creating docker repo in ECR for $img"
+		aws ecr create-repository --repository-name "$img" || abort Repo creation failed
+		uri=$(ecr_repo_uri "$img") || abort "Cannot get URI for new repo"
+	fi
+
+	# Tag the image for the ECR repo and push
+	docker tag "$img" "$uri"
+	docker push "$uri" || abort "Docker push failed for $img"
+done

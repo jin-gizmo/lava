@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Aurora Postgres custard count with IAM auth
+
+type: sqlv
+
+job_id: <{ prefix.job }>/sqlv/psql-local/custard-count-iam
+
+payload: <{ prefix.payload }>/sql.rsc/custard-count.sql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/psql/local
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

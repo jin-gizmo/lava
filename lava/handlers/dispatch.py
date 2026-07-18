@@ -10,8 +10,9 @@ import boto3
 import jinja2
 from dateutil.tz import UTC
 
+from lava import LavaError
 from lava.config import LOGNAME, config
-from lava.lavacore import LavaError, dispatch, jinja_render_vars
+from lava.lavacore import dispatch, jinja_render_vars
 from lava.lib.datetime import duration_to_seconds
 from lava.lib.misc import dict_check, json_default
 

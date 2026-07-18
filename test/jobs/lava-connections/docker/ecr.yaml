@@ -1,0 +1,11 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Docker ECR connection
+owner: "<{ owner }>"
+
+type: docker
+
+conn_id: <{ prefix.conn }>/docker/ecr
+enabled: true
+
+registry: ecr

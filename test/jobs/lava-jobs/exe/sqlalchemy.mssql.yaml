@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Use sqlalchemy with SQL Server
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/sqlalchemy/mssql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sqlalchemy-count.py <{ db.common.schema }>.custard
+
+parameters:
+  connections:
+    db: <{ prefix.conn }>/db/mssql/base
+
+x-lava-nocheck: joborphan

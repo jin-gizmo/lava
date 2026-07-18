@@ -1,0 +1,20 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Local postgres database with PyGreSQL
+owner: "<{ owner }>"
+
+type: postgres
+subtype: pygresql
+
+conn_id: <{ prefix.conn }>/db/psql/local-pygresql
+enabled: true
+
+database:  <{ db.psql_local.database }>
+host: <{ db.psql_local.host }>
+port: <{ db.psql_local.port }>
+ssl_mode: require
+
+user: <{ db.psql_local.user }>
+# Password isn't checked so doesn't matter what we have here so long as it exists
+
+password:  <{ prefix.ssm }>/psql_local/<{ db.psql_aurora.user }>/password

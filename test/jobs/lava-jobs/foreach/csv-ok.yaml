@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - CSV foreach to show global propagation.
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/csv/ok
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/cmd/print-globals
+
+globals:
+  from_the_parent: howdy
+
+parameters:
+  foreach:
+    type: csv
+    filename: '{{ realm.s3_payloads }}/<{ prefix.payload }>/data.raw/custard2.csv'
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

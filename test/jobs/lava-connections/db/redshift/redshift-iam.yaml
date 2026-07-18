@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Redshift connector using IAM to get credentials
+owner: "<{ owner }>"
+
+type: redshift
+
+conn_id: <{ prefix.conn }>/db/redshift/iam
+enabled: true
+
+host: <{ db.redshift.host }>
+port: <{ db.redshift.port }>
+ssl: true
+database: <{ db.redshift.database }>
+
+user: <{ db.redshift.user }>
+
+# cluster_id: <{ db.redshift.name }>

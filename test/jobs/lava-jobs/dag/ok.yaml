@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - A simple dag job
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/ok
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/cmd/sleep-2: null
+  <{ prefix.job }>/cmd/hello-world: <{ prefix.job }>/cmd/sleep-2
+
+parameters:
+  workers: 2
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

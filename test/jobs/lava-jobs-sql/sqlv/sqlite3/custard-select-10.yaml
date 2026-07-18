@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - SQLite3 custard select 10 rows
+
+type: sqlv
+
+job_id: <{ prefix.job }>/sqlv/sqlite3/custard-select-10
+
+payload: <{ prefix.payload }>/sql.rsc/custard-select-noschema.sql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/sqlite3/test
+
+  quoting: nonnumeric
+  delimiter: ","
+
+  transaction: true
+  level: debug
+  vars:
+    limit: 10
+
+x-lava-nocheck: joborphan

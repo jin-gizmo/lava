@@ -1,0 +1,32 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - SQL Server delete load manifest -- with data + empty file
+
+type: db_from_s3
+
+job_id: <{ prefix.job }>/db_from_s3/mssql/delete-manifest-empty-data
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  db_conn_id: <{ prefix.conn }>/db/mssql/base
+
+  bucket: "{{ utils.s3bucket(realm.s3_payloads) }}"
+  key: "{{ utils.s3key(realm.s3_payloads) }}/<{ prefix.payload }>/misc.rsc/custard+empty.csv.manifest"
+
+  schema: <{ db.common.schema }>
+  table: custard
+
+  mode: delete
+  min_size: 100
+
+  args:
+    - MANIFEST
+    - HEADER
+    - GZIP
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Redshift check for application name in stl_connection_log
+
+type: sqlc
+
+job_id: <{ prefix.job }>/sqlc/redshift/appname
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/redshift-stl-connection-log.sql
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/redshift/base
+
+x-lava-nocheck: joborphan

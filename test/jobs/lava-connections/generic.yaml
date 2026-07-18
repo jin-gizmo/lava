@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Generic connection
+owner: "<{ owner }>"
+
+type: generic
+
+conn_id: <{ prefix.conn }>/generic
+enabled: true
+
+attributes:
+  a: String a
+  b: |
+    This is multi-line string b with 3 lines.
+    Line 2.
+    Line 3.
+  c: 30
+  # Float
+  d: 20.4
+  e:
+    type: local
+    value: String for e
+  f:
+    type: ssm
+    parameter: /lava/<{ realm }>/generic
+  g: true
+  h: null

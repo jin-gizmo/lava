@@ -1,0 +1,41 @@
+#- Slack connector specifics
+#-
+#- This is the list of vars to prompt for when building
+#= webhook_url: Slack webhook URL or name of SSM parameter containing it
+
+type: slack
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Mandatory fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Webhook URL provided by Slack for sending messages, or the name of an SSM
+## parameter containing the webhook URL.
+##
+webhook_url: "{{ webhook_url }}"
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Default colour for the sidebar for Slack messages sent using attachment style.
+##
+# colour: "#bbbbbb"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## An arbitrary source identifier for display in Slack messages.
+##
+# from: "lava@<REALM>"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Default preamble at the start of Slack messages.
+##
+# preamble:  ""
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Display style for Slack messages: block, attachment and plain.
+##
+# style: block

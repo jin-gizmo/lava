@@ -1,0 +1,23 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: inline foreach specification
+
+type: object
+
+properties:
+  type:
+    type: string
+    const: inline
+  values:
+    type: array
+    items:
+      type: object
+      propertyNames:
+        not:
+          pattern: "^[lL][aA][vV][aA]"
+
+required:
+  - type
+  - values
+
+additionalProperties: false

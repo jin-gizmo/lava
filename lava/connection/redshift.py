@@ -7,9 +7,11 @@ from typing import Any
 import boto3
 import pg8000
 
+from lava import LavaError
 from lava.config import config
-from lava.lavacore import LOG, LavaError
+from lava.lavacore import LOG
 from lava.lib.datetime import duration_to_seconds
+from lava.lib.ssl import resolve_ssl_mode
 from .aws import assume_role
 from .core import (
     _PYSQL_CONN_HANDLERS,
@@ -19,19 +21,20 @@ from .core import (
 )
 
 try:
+    # noinspection PyPackageRequirements
     import pgdb
 except ImportError:
-    import lava.lib.dbnone as pgdb
+    from lava.lib.dbnone import dbapi_stub
 
-    pgdb.alias = 'PyGreSQL (pgdb)'
+    pgdb = dbapi_stub('PyGreSQL (pgdb)')
 
 try:
+    # noinspection PyPackageRequirements
     import redshift_connector
 except ImportError:
-    import lava.lib.dbnone as redshift_connector
+    from lava.lib.dbnone import dbapi_stub
 
-    redshift_connector.alias = 'Redshift Connector (AWS)'
-
+    redshift_connector = dbapi_stub('Redshift Connector (AWS)')
 
 __author__ = 'Murray Andrews'
 
@@ -226,16 +229,27 @@ def py_rs_connect_redshift(
 
     LOG.debug('Connecting to redshift using Redshift connector')
 
+    ssl_mode = resolve_ssl_mode(**conn_spec)
+
+    if conn_spec.get('ssl_ca_file') or conn_spec.get('ca_cert'):
+        LOG.warning(
+            'Connection %s: ssl_ca_file is ignored for the AWS Redshift connector.'
+            ' Redshift uses AWS-managed certificates.',
+            conn_spec.get('conn_id'),
+        )
+
     db_connect_params = {
         'user': conn_spec['user'],
         'password': conn_spec['password'],
         'host': conn_spec['host'],
         'port': conn_spec['port'],
         'database': conn_spec['database'],
-        'ssl': conn_spec.get('ssl', False),
+        'ssl': bool(ssl_mode),
         # This is not well documented by AWS but it is in the interface
         'application_name': application_name or None,
     }
+    if ssl_mode in ('verify-ca', 'verify-full'):
+        db_connect_params['sslmode'] = ssl_mode
 
     conn = redshift_connector.connect(**db_connect_params)
     conn.autocommit = autocommit

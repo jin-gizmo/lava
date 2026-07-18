@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Print args+env -- args in payload field
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/ok/test2
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  <{ prefix.payload }>/print-args-env.sh
+  realm={{realm.realm}}
+  payload-area={{realm.s3_payloads}}
+
+parameters:
+  connections:
+    git: <{ prefix.conn }>/git
+  env:
+    ZZ1: zz1
+    ZZ2: 'flugelhorn={{vars.h}}'
+  vars:
+    h: flugelhorn
+
+x-lava-nocheck: joborphan

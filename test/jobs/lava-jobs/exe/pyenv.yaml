@@ -1,0 +1,20 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Run a Python exe to print environment
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/pyenv
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/pyenv.py
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

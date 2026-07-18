@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Print timestamps using Jinja
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/timestamps
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo
+
+globals:
+  who: world
+
+parameters:
+  args:
+    - start={{start}}
+    - ustart={{ustart}}
+    - start.%Y%m%d%H%M%S={{ start.strftime('%Y-%m-%d %H:%M:%S')}}
+    - ustart.%Y%m%d%H%M%S={{ ustart.strftime('%Y-%m-%d %H:%M:%S')}}
+    - utcoffset={{start.utcoffset()}}
+
+x-lava-nocheck: joborphan

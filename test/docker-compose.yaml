@@ -1,0 +1,279 @@
+name: lava-test
+
+services:
+
+  smb:
+    container_name: ${COMPOSE_PROJECT_NAME}-smb
+    build: services/smb
+    image: ${COMPOSE_PROJECT_NAME}-smb:latest
+    restart: unless-stopped
+    environment:
+      SMB_USER: "${SMB_USER}"
+      SMB_PASSWORD: "${SMB_PASSWORD}"
+    # Note: Docker Desktop must be configured to allow mapping privileged ports.
+    ports:
+      # NetBIOS over TCP
+      - "127.0.0.1:139:139"
+      # SMB over TCP
+      - "127.0.0.1:445:445"
+    volumes:
+      - ./services/smb/init.d:/smbinit.d:ro
+      - ./services/smb/smb.conf:/etc/samba/smb.conf:ro
+      - ./services/smb/share.x:/smb-data
+    networks:
+      - lava
+    command:
+      - "/bin/bash"
+      - "-c"
+      - >-
+        echo Initialising SMB server
+        && echo "===  Initialising SMB server ==================================================="
+        && (
+        for f in /smbinit.d/*.sh ;
+        do
+          [ ! -x "$$f" ] && continue ;
+          echo Running $$f ;
+          $$f ;
+        done
+        )
+        && echo "===  SMB server done ==========================================================="
+        && smbd --foreground --no-process-group
+
+  postgres:
+    container_name: ${COMPOSE_PROJECT_NAME}-postgres
+    # WARNING: Postgres 18+ changes container layout to a versioned structure.
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      # These are needed by Postgres itself
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: lava
+      POSTGRES_USER: master
+      POSTGRES_PASSWORD: "${DB_ADMIN_PASSWORD}"
+      # These are needed by the init scripts.
+      DB_LAVA_USER: "${DB_LAVA_USER}"
+      DB_LAVA_PASSWORD: "${DB_LAVA_PASSWORD}"
+      HOST_CN: lava-test-postgres
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      # Uncomment this if we want to preserve DB data between runs.
+      # - ./services/postgres/data:/var/lib/postgresql/data
+      - ./services/postgres/init.d:/docker-entrypoint-initdb.d:ro
+      # No :ro here because we want the host certificate exported.
+      - ./services/postgres/postgres:/postgres
+      - ./data:/data:ro
+    networks:
+      - lava
+    entrypoint: [ "/postgres/entrypoint.sh" ]
+    command: [ "postgres", "-c", "config_file=/postgres/postgresql.conf" ]
+
+  mysql:
+    container_name: ${COMPOSE_PROJECT_NAME}-mysql
+    image: mysql:latest
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ADMIN_PASSWORD}"
+      MYSQL_USER: "${DB_LAVA_USER}"
+      MYSQL_PASSWORD: "${DB_LAVA_PASSWORD}"
+      HOST_CN: lava-test-mysql
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      # Uncomment this if we want to preserve DB data between runs.
+      # - ./services/mysql/data:/var/lib/mysql
+      - ./services/mysql/init.d:/docker-entrypoint-initdb.d:ro
+      # Setting the following to ro gives random failures due to permission issues
+      - ./data:/var/lib/mysql-files
+      # No :ro here because we want the host certificate exported.
+      - ./services/mysql/mysql:/mysql
+    networks:
+      - lava
+    entrypoint: [ "/mysql/entrypoint.sh" ]
+    command: [ "mysqld" ]
+
+  mssql:
+    container_name: ${COMPOSE_PROJECT_NAME}-mssql
+    # The standard SQL server image doesn't work on M1 (ARM) architecture.
+    # Closest we cn get is this Azure edge image.
+    build:
+      context: services/mssql
+      dockerfile: Dockerfile
+    image: ${COMPOSE_PROJECT_NAME}-mssql:latest
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      SA_PASSWORD: "${DB_ADMIN_PASSWORD}"
+      MSSQL_TELEMETRY_ENABLED: "FALSE"
+      DB_LAVA_USER: "${DB_LAVA_USER}"
+      DB_LAVA_PASSWORD: "${DB_LAVA_PASSWORD}"
+      HOST_CN: lava-test-mssql
+    networks:
+      - lava
+    ports:
+      - "127.0.0.1:1433:1433"
+    volumes:
+      # Uncomment this if we want to preserve DB data between runs.
+      # - ./services/mssql/data:/var/opt/mssql
+      #      - ./services/mssql/init.d:/dbinit.d
+      - ./services/mssql/mssql.conf:/var/opt/mssql/mssql.conf:ro
+      - ./services/mssql/init.d:/docker-entrypoint-initdb.d:ro
+      - ./data:/data:ro
+      - ./services/mssql/mssql:/mssql
+    command: /mssql/init.sh
+
+  oracle:
+    container_name: ${COMPOSE_PROJECT_NAME}-oracle
+    image: gvenzl/oracle-free:full
+    restart: unless-stopped
+    environment:
+      ORACLE_PASSWORD: "${DB_ADMIN_PASSWORD}"
+      APP_USER: "${DB_LAVA_USER}"
+      APP_USER_PASSWORD: "${DB_LAVA_PASSWORD}"
+      # For server certificate : host common name
+      HOST_CN: lava-test-oracle
+    ports:
+      - "127.0.0.1:1521:1521"
+      - "127.0.0.1:2484:2484"
+    volumes:
+      - ./services/oracle/init.d:/container-entrypoint-initdb.d:ro
+      - ./services/oracle/oracle:/oracle
+      - ./data:/data:ro
+    networks:
+      - lava
+
+  ministack:
+    container_name: ${COMPOSE_PROJECT_NAME}-ministack
+    build:
+      context: services/ministack
+      dockerfile: Dockerfile
+    image: ${COMPOSE_PROJECT_NAME}-ministack:latest
+    restart: unless-stopped
+    environment:
+      MINISTACK_ACCOUNT_ID: 123456789012
+      STATE_DIR: /tmp/ministack-state
+      # Ministack persistence is totally useless. Don't use it.
+      # PERSIST_STATE: 1
+      # S3_PERSIST: 1
+      LAMBDA_EXECUTOR: docker
+      DOCKER_NETWORK: ${COMPOSE_PROJECT_NAME}
+      S3_DATA_DIR: /tmp/ministack-data/s3
+      LAVA_VERSION: ${LAVA_VERSION}
+      LAVA_REALM: test
+      LAVA_WORKER: core
+      AWS_ENDPOINT_URL: http://localhost:4566
+    ports:
+      - "127.0.0.1:4566:4566"
+    volumes:
+      # Ministack persistence is totally useless. Don't use it.
+      # - ./services/ministack/ms-state.dtmp/state:/tmp/ministack-state
+      # - ./services/ministack/ms-state.dtmp/s3:/tmp/ministack-data/s3
+      - ./services/ministack/aws:/root/.aws:ro
+      - ./services/ministack/init.d/post-init:/docker-entrypoint-initaws.d/ready.d:ro
+      - ./services/ministack/conf:/lava/conf:ro
+      - ../dist/cfn:/lava/cfn:ro
+      - ../dist/lambda:/lava/lambda:ro
+      # Allows ministack to start sidecar containers for lambda
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - lava
+
+  slack:
+    container_name: ${COMPOSE_PROJECT_NAME}-slack
+    build:
+      context: services/slack
+      dockerfile: Dockerfile
+      args:
+        NPM_CONFIG_REGISTRY: ${NPM_CONFIG_REGISTRY-}
+    image: ${COMPOSE_PROJECT_NAME}-slack:latest
+    command:
+      - --service
+      - slack
+      - --seed
+      - /emulate/emulate.config.yaml
+    restart: unless-stopped
+    ports:
+      # Starting port defaults to 4000 for active services and increments from there
+      - "127.0.0.1:4000:4000"
+    volumes:
+      - ./services/slack/emulate.config.yaml:/emulate/emulate.config.yaml:ro
+    networks:
+      - lava
+
+  mail:
+    container_name: ${COMPOSE_PROJECT_NAME}-mail
+    # Strictly speaking, we don't need this and could just use the base image
+    # directly, but we're here now.
+    build:
+      context: services/mail
+      dockerfile: Dockerfile
+    image: ${COMPOSE_PROJECT_NAME}-mail:latest
+    environment:
+      MP_DISABLE_VERSION_CHECK: 1
+      MP_VERBOSE: 1
+      MP_LABEL: ${COMPOSE_PROJECT_NAME}
+      SMTP_USER: "${SMTP_USER}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
+      MP_SMTP_AUTH: "${SMTP_USER}:${SMTP_PASSWORD}"
+      # Auto generate self signed cert.
+      MP_SMTP_TLS_CERT: sans:localhost
+      MP_SMTP_TLS_KEY: sans:localhost
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+    volumes:
+      - ./services/mail/init.d:/docker-entrypoint-init.d:ro
+    networks:
+      - lava
+
+  # ----------------------------------------------------------------------------
+  # Build-only images. These provide things such as database CLIs and should
+  # never be run from the compose file.
+  mysql-cli-mariadb:
+    profiles:
+      - build
+    build:
+      context: services/mysql
+      dockerfile: mysql-cli-mariadb.Dockerfile
+    restart: "no"
+    image: mysql-cli-mariadb:latest
+    entrypoint: [ "true" ]
+    command: [ ]
+  mysql-cli-oracle:
+    profiles:
+      - build
+    build:
+      context: services/mysql
+      dockerfile: mysql-cli-oracle.Dockerfile
+    restart: "no"
+    image: mysql-cli-oracle:latest
+    entrypoint: [ "true" ]
+    command: [ ]
+  psql-cli:
+    profiles:
+      - build
+    build:
+      context: services/postgres
+      dockerfile: psql-cli.Dockerfile
+    restart: "no"
+    image: psql-cli:latest
+    entrypoint: [ "true" ]
+    command: [ ]
+  sqlplus-cli:
+    profiles:
+      - build
+    build:
+      context: services/oracle
+      dockerfile: sqlplus-cli.Dockerfile
+    restart: "no"
+    image: sqlplus-cli:latest
+    entrypoint: [ "true" ]
+    command: [ ]
+
+networks:
+  lava:
+    name: ${COMPOSE_PROJECT_NAME}
+    driver: bridge
+    attachable: true

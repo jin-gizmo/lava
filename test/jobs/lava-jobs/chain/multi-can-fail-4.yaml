@@ -1,0 +1,29 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - All jobs allowed to fail and they all do fail
+
+type: chain
+
+job_id: <{ prefix.job }>/chain/multi-can-fail-4
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  - <{ prefix.job }>/exe/exit-123
+  - <{ prefix.job }>/exe/exit-123
+  - <{ prefix.job }>/exe/exit-123
+
+parameters:
+  can_fail: "*"
+
+# No globals
+globals: {}
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

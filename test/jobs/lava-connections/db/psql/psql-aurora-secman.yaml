@@ -1,0 +1,13 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Aurora Postgres using Secrets Manager authentication
+owner: "<{ owner }>"
+
+type: postgres-aurora
+subtype: pg8000
+
+conn_id: <{ prefix.conn }>/db/psql/aurora-sm
+enabled: true
+secret_id: /lava/<{ lava.realm.realm }>/<{ db.psql_aurora.name }>/secman
+
+ssl_mode: require

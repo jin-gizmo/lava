@@ -1,0 +1,29 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - smb_get - source doesn't exist
+
+type: smb_get
+
+job_id: <{ prefix.job }>/smb/pysmb/get-to-s3-fail-no-exist
+
+payload: --
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/smb/<{ smb.name }>/pysmb
+
+  # Source
+  share_name: <{ smb.volume }>
+  path: No such file
+
+  file: "{{ realm.s3_temp }}/test/smb/file-should-not-exist"
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  error_pattern: "Failed with exit status 1"
+  marks:
+    - local

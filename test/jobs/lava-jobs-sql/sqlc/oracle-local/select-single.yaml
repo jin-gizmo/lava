@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Single Oracle SQL*Plus job
+
+type: sqlc
+
+job_id: <{ prefix.job }>/sqlc/oracle-local/select-single
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/onecol-select.sql
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/oracle/local
+  timeout: 30s
+  vars:
+    table: sqlc_oracle_select_single
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

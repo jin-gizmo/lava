@@ -174,6 +174,15 @@ jobs:
 |EMAIL\_MAX\_ATTACHMENT\_SIZE|Size|`2M`|Maximum allowed size of any single attachment in bytes.|
 |EMAIL\_MAX\_SIZE|Size|`5M`|Maximum allowed size of an email message in bytes. This includes the headers, body and attachments.|
 |EMAIL\_MAX\_ATTACHMENTS|Integer|`5`|Maximum number of attachments per email message. Set to zero to disable attachments entirely.|
+|EMAIL_MSGID_DOMAIN|String|None|Set the domain to be used in the `Message-Id` header of email messages. If not specified, a value based on the current hostname will be used. The latter is often not terribly useful when the machine is an ephemeral EC2 instance.|
+
+### Configuration for the [oracle](#connector-type-oracle) Connector { data-toc-label="oracle Connector" }
+
+| Name                   | Type   | Default | Description                                                  |
+| ---------------------- | ------ | ------- | ------------------------------------------------------------ |
+| ORACLE_CONNECTION_MODE | String | `thin`  | Connection mode for the [Python-oracledb](https://oracle.github.io/python-oracledb/) database driver. Must be  one of `thin` or `thick`. If set to `thick`, the Oracle Client libraries must be installed and loadable by the database driver. |
+| ORACLE_LIB_DIR         | String | None    | Location of the Oracle Client libraries that are required for use of `thick` connection mode. If required and not specified, the system settings are used. |
+
 
 
 ### Configuration for the [redshift](#connector-type-redshift) Connector { data-toc-label="redshift Connector" }

@@ -1,0 +1,20 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - echo path in docker container
+
+type: docker
+
+job_id: <{ prefix.job }>/docker/echo-path
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ docker.registry }>/lava/amzn2023/base
+
+parameters:
+  command: /bin/sh -c 'echo $PATH'
+  docker: <{ prefix.conn }>/docker/base
+  timeout: 360s
+
+x-lava-nocheck: joborphan

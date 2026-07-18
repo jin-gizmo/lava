@@ -1,0 +1,172 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: "{{ id }}"
+version: "{{ version }}"
+documentation: "{{ documentation }}"
+
+title: Lava job specification
+
+type: object
+
+properties:
+  cw_metrics:
+    description: Enable/disable generation of CloudWatch custom metrics for this job.
+    type: boolean
+  description:
+    description: A short description of the job.
+    type: string
+    minLength: 1
+  dispatcher:
+    description: An identifier specifying the dispatcher for the job.
+    type: string
+    minLength: 1
+  enabled:
+    description: Whether or not the job is enabled. Defaults to false.
+    oneOf:
+      - type: boolean
+      - type: string
+  event_log:
+    description: Record the specified information in the events table.
+  globals:
+    description: >-
+      A map of named values that are made available for Jinja rendering of job
+      actions and job parameters for those job types that use Jinja parameter
+      rendering. Global names cannot start with "lava".
+    type: object
+    propertyNames:
+      not:
+        pattern: "^[lL][aA][vV][aA]"
+  iteration_delay:
+    description: The delay between attempts to run the job as a duration.
+    $ref: '#/$defs/common/duration'
+  iteration_limit:
+    description: The number of attempts that will be made to run the job.
+    type: integer
+    minimum: 0
+  job_id:
+    description: The job identifier which must be unique for the realm.
+    type: string
+    minLength: 1
+  max_run_delay:
+    description: >-
+      The maximum allowed delay between when a job is dispatched and when it is
+      run.
+    $ref: '#/$defs/common/duration'
+  max_tries:
+    description: >-
+      By default, if a lava worker fails mid-job, SQS will resubmit the dispatch
+      request at the end of the visibility timeout. If max_tries is set to a
+      positive integer value, then the dispatch message will be discarded when
+      the SQS message ApproximateReceiveCount exceeds the specified value.
+    type: integer
+    minimum: 0
+  on_fail:
+    description: Job specific on_fail actions for the job
+    type: array
+    items:
+      $ref: '#/$defs/job/action'
+  on_retry:
+    description: Job specific on_retry actions for the job
+    type: array
+    items:
+      $ref: '#/$defs/job/action'
+  on_success:
+    description: Job specific on_success actions for the job
+    type: array
+    items:
+      $ref: '#/$defs/job/action'
+  owner:
+    description: Identifies the owner of the job.
+    type: string
+    minLength: 1
+  # For parameters -- see also the mix-in below for job specifics
+  parameters:
+    description: A map of parameters that will be passed to the job.
+    type: object
+  payload:
+    description: >-
+      The job payload. The type and format is job type dependent. Currently, a
+      value is required even for job types that do not need it. In this case set
+      the value to null.
+    oneOf:
+      - type: 'null'
+      - type: string
+      - type: array
+      - type: object
+  schedule:
+    description: Job schedule
+    anyOf:
+      - $ref: '#/$defs/schedule'
+      - type: array
+        items:
+          $ref: '#/$defs/schedule'
+      # We also allow empty / null schedules here assuming dispatcher is not
+      # specified or valid. This is a bit of an indulgence as it seems lots of
+      # people do this instead of leaving schedule out.
+      - type: string
+        maxLength: 0
+      - type: 'null'
+      # Also allow "--" schedules because the job framework wrongly encourages this.
+      - type: string
+        pattern: "^--$"
+  state:
+    description: A map of state items keyed on state_id
+    type: object
+  type:
+    description: Job type
+    type: string
+    enum:
+      # {% for job in defs.job['parameters.d'] if not job.endswith('.d') %}
+      - "{{ job }}"
+      # {% endfor %}
+  worker:
+    description: The name of a worker that can run the job.
+    type: string
+    minLength: 1
+
+# Mix-in for the job parameters for each type
+allOf:
+  # {% for job in defs.job['parameters.d'] if not job.endswith('.d') %}
+  - if: { properties: { type: { const: "{{ job }}" } } }
+    then: { properties: { parameters: { $ref: '#/$defs/job/parameters.d/{{ job }}' } } }
+  # {% endfor %}
+
+patternProperties:
+  ^[xX]-:
+    description: X-* fields are ignored by lava.
+  '^\$schema$':
+    type: string
+
+required:
+  - job_id
+  - payload
+  - type
+  - worker
+  - description
+  - owner
+
+unevaluatedProperties: false
+
+$defs:
+  schedule:
+    title: A lava schedule entry.
+    description: >-
+      Lava schedule entries can be a simple crontab specification or a lava schedule
+      specification consisting of a crontab specification and from/to timestamps.
+    anyOf:
+      - description: Simple crontab
+        type: string
+        pattern: &crontab "^([^ ]+ +){4}[^ ]+$"
+      - description: Lava schedule specification
+        type: object
+        additionalProperties: false
+        required: [ crontab ]
+        properties:
+          crontab:
+            type: string
+            pattern: *crontab
+          from:
+            type: string
+            format: date-time
+          to:
+            type: string
+            format: date-time

@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Vars handling in docker job -- print env -- exit 1
+
+type: docker
+
+job_id: <{ prefix.job }>/docker/env-exit-1
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ docker.registry }>/lava/amzn2023/base
+
+parameters:
+  command: /bin/sh -c 'ZZ1={{vars.zz1}} {{vars.cmd}}'
+  docker: <{ prefix.conn }>/docker/base
+  env:
+    ZZ2: '{{vars.zz2}}'
+  timeout: 360s
+  vars:
+    cmd: env | sort && exit 1
+    zz1: zz1111
+    zz2: zz2222
+
+x-lava-nocheck: joborphan

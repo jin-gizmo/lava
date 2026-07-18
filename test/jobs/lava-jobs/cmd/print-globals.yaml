@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Print globals using a runtime jinja loop
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/print-globals
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: /bin/sh -c "{% for g in globals|sort%}echo {{g}}='{{globals[g]}}'; {%endfor%}"
+
+globals:
+  global_1: v1
+  global_2: v2
+
+x-lava-nocheck: joborphan

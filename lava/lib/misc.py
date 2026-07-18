@@ -8,7 +8,7 @@ import json
 import os
 import re
 import unicodedata
-from collections.abc import Callable, Hashable, Iterable, Iterator, MutableMapping
+from collections.abc import Callable, Hashable, Iterable, Iterator, MutableMapping, Sequence
 from contextlib import contextmanager, suppress
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -350,7 +350,7 @@ def dict_strip(d: dict) -> dict:
 
 
 # ------------------------------------------------------------------------------
-def dict_set_deep(d: dict, keys: list[str] | tuple[str], v: Any) -> None:
+def dict_set_deep(d: dict, keys: Sequence[str], v: Any) -> None:
     """
     Set a value in a dict based on a sequence of keys.
 

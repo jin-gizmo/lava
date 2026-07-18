@@ -1,0 +1,29 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Dispatch job with bad Jinja syntax in parameters
+
+type: dispatch
+
+job_id: <{ prefix.job }>/dispatch/bad-jinja
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  - <{ prefix.job }>/cmd/hello-world
+
+# No globals
+globals: { }
+
+parameters:
+  parameters:
+    x: '{{ bad-jinja }}'
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Cannot render parameters"
+  marks:
+    - local

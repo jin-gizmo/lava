@@ -1,0 +1,34 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Aurora Postgres delete load psv with manifest
+
+type: db_from_s3
+
+job_id: <{ prefix.job }>/db_from_s3/psql-au/delete-pipe-manifest
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  db_conn_id: <{ prefix.conn }>/db/psql/aurora
+  s3_conn_id: <{ prefix.conn }>/aws/ssm
+
+  bucket: "{{ utils.s3bucket(realm.s3_payloads) }}"
+  key: "{{ utils.s3key(realm.s3_payloads) }}/<{ prefix.payload }>/misc.rsc/custard.psv.manifest"
+
+  schema: <{ db.common.schema }>
+  table: custard
+
+  mode: delete
+
+  args:
+    - FORMAT CSV
+    - DELIMITER '|'
+    - MANIFEST
+    - HEADER
+    - GZIP
+
+x-lava-nocheck: joborphan

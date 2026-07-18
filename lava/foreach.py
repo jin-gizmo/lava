@@ -16,8 +16,8 @@ from smart_open import open  # noqa A004
 from lava.connection import get_pysql_connection
 from lava.connection.core import make_application_name
 from lava.lib.misc import dict_check
+from . import LavaError
 from .config import LOG
-from .lavacore import LavaError
 
 
 # ------------------------------------------------------------------------------

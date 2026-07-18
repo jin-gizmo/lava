@@ -1,0 +1,20 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - MySQL check for application name (program name) in performance schema
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/mysql/appname
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/mysql-program-name.sql
+
+parameters:
+  header: true
+  escapechar: '\'
+  conn_id: <{ prefix.conn }>/db/mysql/aurora
+
+x-lava-nocheck: joborphan

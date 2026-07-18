@@ -1,7 +1,8 @@
 
 ## The Lava State API
 
-The lava state API provides for the posting and retrieval of state items.
+The [lava state API][lava.lib.state] provides for the posting, retrieval and
+removal of state items.
 
 The code to post a state item would look like this:
 

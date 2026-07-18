@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - foreach of unknown type
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/bad-type
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/action/state/globals
+
+globals:
+  from_the_parent: howdy
+
+parameters:
+  foreach:
+    type: unknown
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "No foreach handler for type unknown"
+  marks:
+    - local

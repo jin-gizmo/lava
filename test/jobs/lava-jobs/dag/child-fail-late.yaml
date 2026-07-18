@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - A simple dag job with a child failing late in the sequence
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/child-fail-late
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/exe/exit-123:
+    - <{ prefix.job }>/cmd/sleep-10
+    - <{ prefix.job }>/cmd/sleep-2
+  <{ prefix.job }>/cmd/sleep-2:
+    - <{ prefix.job }>/cmd/sleep-5
+
+parameters:
+  workers: 4
+
+x-lava-nocheck: joborphan

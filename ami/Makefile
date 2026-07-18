@@ -1,12 +1,27 @@
 # Makefile to build the lava AMI
 
 SHELL:=/bin/bash
-BASE=..
-export PATH:=$(BASE)/etc:$(PATH)
-LAVA_VERSION:=$(shell $(BASE)/lava/version.py)
-DIST:=$(BASE)/dist
+
+repo_base=..
+
+export PATH:=$(repo_base)/etc:$(PATH)
+LAVA_VERSION:=$(shell $(repo_base)/lava/version.py)
+DIST:=$(repo_base)/dist
 PARAMS=_ip _region _s3bucket _s3prefix _sg _subnet _tz _lava_version _python_version _ami_id _os _arch _instance_type
 export PACKER_LOG=1
+
+include $(repo_base)/etc/make/const.mk
+include $(repo_base)/etc/make/help.mk
+
+# ------------------------------------------------------------------------------
+# Auto-help setup
+#
+#+ What do you want to make?
+#+
+#+ ⚠️  This is *not* straightforward. Consult the lava user guide before launching
+#+ into something that you don't understand.
+#+
+#+ $(_URL)
 
 # ------------------------------------------------------------------------------
 # Formatting
@@ -19,30 +34,72 @@ Fe=[3m
 # Literal
 Fl=[4m[2m
 
-
 # ------------------------------------------------------------------------------
 # User specifiable parameters
 
-s3bucket=
-s3prefix=
-subnet=
-ip=
-sg=
-region:=$(shell aws configure get region)
-tz=
-python_version=
+_HELP_OS:=$(shell echo '{% for a in os %}`{{ a }}` {% endfor %}' | jinja -f ami-build.yaml)
+_HELP_ARCH:=$(shell echo '{% for a in arch %}`{{ a }}` {% endfor %}' | jinja -f ami-build.yaml)
+
+# --------------------
+#:vcat Required params
+
 # os tells us the builder to use. It is OS specific but not architecture specific.
+## The OS type of AMI to be built. One of $(_HELP_OS). See `ami-build.yaml`.
 os=
-# The type tells us OS and architecture and is used to derive base AMI ID.
-type=
-ami_ref=
+
+## The Python version to build from source for the AMI (e.g. `3.11.13`).
+python_version=
+
+## S3 bucket containing extra build resources such as the Oracle bundles.
+s3bucket=
+## S3 prefix containing extra build resources such as the Oracle bundles.
+s3prefix=
+
+## Subnet ID for the packer build instance.
+subnet=
+
+## Security group ID (or a comma separated list of IDs) for the packer build
+## instance.
+sg=
+
+## Timezone to set in instances created from the lava AMI.
+tz=
+
+# --------------------
+#:vcat Optional params
+
+## Name of a YAML config file (in lava deploy format) containing values for any
+## or all of the required parameters. If specified, the *env* parameter is also
+## required.
+config=
+
+## The environment identifier within a specified config file.
+env=
+
+## ID of the base AMI. Defaults to the latest AMI with the name
+## specified by the *ami_ref* parameter. Note that AWS is tricksy on
+## this and the so-called latest may not have the latest kernel version.
 ami_id=
+
+## The AWS SSM parameter name containing the ID the base AMI (e.g.
+## `al2023-ami-kernel-default-x86_64`). AWS provides a bunch of these parameters
+## to simplify finding common AMIs. The default is specified in `ami-build.yaml`.
+## See also https://docs.aws.amazon.com/linux/al2023/ug/ec2.html.
+ami_ref=
+
+## CPU architecture. One of $(_HELP_ARCH).
 arch=x86_64
+
+## IP address type for the packer build instance. Either `public` or `private`.
+ip=private
+
+## AWS region in which to build the AMI.
+region:=$(shell aws configure get region)
 
 # ------------------------------------------------------------------------------
 # Extract a value from the config file or realm info
 # Usage: $(call get_config,var-name)
-get_config=$(shell echo '+{$(1)}+' | $(BASE)/etc/jinja -d+ --file $(config))
+get_config=$(shell echo '+{$(1)}+' | $(repo_base)/etc/jinja -d+ --file $(config))
 
 # ------------------------------------------------------------------------------
 
@@ -87,10 +144,19 @@ s3base=$(call get_config,$(env)._.s3base)
 
 # This weirdness is to handle the odd S3 structure in the deploy file.
 ifneq ($(s3loc),)
-s3bucket:=$(shell $(BASE)/etc/s3loc -/ -f '{{b}}' "$(s3loc)" "$(s3base)")
-s3prefix:=$(shell $(BASE)/etc/s3loc -/ -f '{{k}}' "$(s3loc)" "$(s3base)")
+s3bucket:=$(shell $(repo_base)/etc/s3loc -/ -f '{{b}}' "$(s3loc)" "$(s3base)")
+s3prefix:=$(shell $(repo_base)/etc/s3loc -/ -f '{{k}}' "$(s3loc)" "$(s3base)")
 endif
 
+## Make the lava AMI.
+## Required parameters can be provided directly as `param=value` conventional
+## **make** parameters, or they can be provided from a config file using the
+## *config* and *env* parameters, or both. Command line parameters override
+## values read from the config file.
+##
+## Recommended usage is: make ami config=`deploy/....yaml` env=`...`
+#:req required-params=...
+#:opt optional-params=...
 ami:	_ami
 
 else
@@ -123,7 +189,7 @@ endif
 
 
 #..............................................................................
-help:
+xhelp:
 	@echo "What do you want to make?"
 	@echo
 	@echo "$(Fh)Available Targets:$(F0)"

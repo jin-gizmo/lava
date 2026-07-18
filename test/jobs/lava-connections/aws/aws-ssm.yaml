@@ -1,0 +1,12 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: AWS connection using creds from SSM.
+owner: "<{ owner }>"
+
+type: aws
+
+conn_id: <{ prefix.conn }>/aws/ssm
+enabled: true
+
+region: ap-southeast-2
+access_keys: <{ prefix.ssm }>/s3

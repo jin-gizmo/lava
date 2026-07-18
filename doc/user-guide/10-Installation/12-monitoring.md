@@ -40,8 +40,8 @@ The standard production configuration for the worker when running on the
 
 *   Set the logging level to `info`
 
-*   Generate a heartbeat every 60 seconds. This is also used to trigger
-    heartbeat
+*   Generate a [heartbeat](#heartbeats) every 60 seconds. This is also used to
+    trigger heartbeat alarms.
 
 *   Log in JSON format to the `local0` syslog facility which is directed to the
     file `/var/log/lava` on the worker machine. (The messages are also included
@@ -95,14 +95,14 @@ CloudWatch.
 
 When used with the worker startup script provided for use in production
 deployments, the lava worker emits a heartbeat message to syslog every 60
-seconds. These records propagate to the CloudWatch log group `/var/log/messages`.
-A log metric filter on this group is used as the basis of a CloudWatch Metric
-which underpins an alarm in the event of loss of heartbeat. This is all configured
-via the [worker CloudFormation stack](#building-the-cloudformation-templates).
+seconds. These records propagate to the CloudWatch log groups
+`/var/log/lava/<REALM>` and `/var/log/messages`.  A log metric filter is used as
+the basis of a CloudWatch Metric which underpins an alarm in the event of loss
+of heartbeat. This is all configured via the [worker CloudFormation
+stack](#building-the-cloudformation-templates).
 
-As of v7.1.0 (Pichincha), the heartbeat message also contains additional worker
-health information. A typical heartbeat message (although on a single line)
-appears thus:
+The heartbeat message also contains additional worker health information. A
+typical heartbeat message (although on a single line) appears thus:
 
 ```json
 {

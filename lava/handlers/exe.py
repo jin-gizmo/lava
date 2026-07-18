@@ -15,10 +15,11 @@ from typing import Any
 import boto3
 import jinja2
 
+from lava import LavaError
 from lava.config import LAVA_CODE_DIR, LOGNAME, STATUS_TIMEOUT, config
 from lava.connection import get_cli_connection
 from lava.lava import get_payload_from_s3
-from lava.lavacore import DEFER_ON_EXIT, LavaError, jinja_render_vars, job_environment
+from lava.lavacore import DEFER_ON_EXIT, jinja_render_vars, job_environment
 from lava.lib.aws import s3_split, s3_upload
 from lava.lib.datetime import duration_to_seconds
 from lava.lib.fileops import read_head_or_tail

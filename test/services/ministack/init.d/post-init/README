@@ -1,0 +1,6 @@
+These *.sh / *.py files run asynchronously wafter the ministack server starts.
+
+WARNING: Ministack insists on using /bin/sh _not_ bash for the *.sh scripts. As
+         this is a colossal pain, we have a simple /bin/sh script that runs in
+         alphabetical order any *.bash scripts it finds using whatever is in the
+         hashbang (which should be /bin/bash).

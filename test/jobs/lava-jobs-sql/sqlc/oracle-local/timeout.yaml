@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Oracle sqlc timeout
+
+type: sqlc
+
+job_id: <{ prefix.job }>/sqlc/oracle-local/timeout
+
+payload: <{ prefix.payload }>/sql.rsc/custard-count.sql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/oracle/local
+  timeout: 0.1s
+  vars:
+    table: sqlc_oracle_timeout
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  marks:
+    - local

@@ -1,0 +1,30 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Deep chain with on_success to track global propagation
+
+type: chain
+
+job_id: <{ prefix.job }>/chain/global
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+globals:
+  source: chain/global
+
+on_success:
+  - action: dispatch
+    job_id: <{ prefix.job }>/log/global
+    parameters:
+      my_parent: "{{ job.job_id }}"
+  - action: log
+    message: |
+      Job: {{ job.job_id }}
+
+      {{ job.globals }}
+
+payload:
+  - <{ prefix.job }>/cmd/randsleep
+
+x-lava-nocheck: joborphan

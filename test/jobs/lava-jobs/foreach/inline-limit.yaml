@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - Simple inline foreach exceeding hard limit
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/inline/limit
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/cmd/print-globals
+
+globals:
+  from_the_parent: howdy
+
+parameters:
+  limit: 1
+  foreach:
+    type: inline
+    values:
+      - a: A
+        b: B
+      - a: AA
+        b: BB
+
+x-lava-nocheck: joborphan

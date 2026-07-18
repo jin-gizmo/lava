@@ -29,8 +29,9 @@ platform images that can be built and then pushed to a registry in separate
 steps, multi-platform images *must* be built and pushed in a single step.
 
 The lava build process will start a local docker registry in a container as, and
-when, required as `localhost:5001`. This is managed using the **jindr** tool
-which is installed as part of the [lava repo setup](#getting-started-with-the-repo).
+when, required as `localhost:5001`. This is managed using the
+[jindr](https://github.com/jin-gizmo/jindr) tool which is installed as part of
+the [lava repo setup](#getting-started-with-the-repo).
 
 ```bash
 jindr --help

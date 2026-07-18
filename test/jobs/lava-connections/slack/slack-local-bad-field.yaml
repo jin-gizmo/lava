@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Slack webhook connection with bad field
+owner: "<{ owner }>"
+
+type: slack
+
+bad: to-the-bone
+
+conn_id: <{ prefix.conn }>/slack/local-base-bad-field
+enabled: true
+
+colour: '#ff7711'
+from: Someone
+preamble: ':volcano:'
+style: block
+webhook_url: <{ prefix.ssm }>/slack_local/webhook

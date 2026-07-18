@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Big stderr to check trimming of stderr in events table"
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/stderr-big
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: /bin/sh -c "cat /etc/protocols >&2; exit 44"
+
+x-lava-nocheck: joborphan

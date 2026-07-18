@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - Simple range foreach countdown exceeding limit
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/range/countdown/limit
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/cmd/print-globals
+
+globals:
+  from_the_parent: howdy
+
+parameters:
+  limit: 1
+  foreach:
+    type: range
+    start: 100
+    stop: 70
+    step: -10
+    name: counter
+
+x-lava-nocheck: joborphan

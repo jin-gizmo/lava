@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - SMB get with no such source file
+
+type: exe
+
+job_id: <{ prefix.job }>/smb/pysmb/exe-get-fail-no-such-source-file
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/smb-get.sh
+
+parameters:
+  connections:
+    smb: <{ prefix.conn }>/smb/<{ smb.name }>/pysmb
+
+  args:
+    - "FAIL: SMB to local -- no such source file"
+    - <{ smb.volume }>:<{ smb.dir }>/no-such-file
+    - /tmp/whatever
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  marks:
+    - local

@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Email connection using local mailpit emulator
+owner: "<{ owner }>"
+
+type: email
+subtype: smtp
+
+conn_id: <{ prefix.conn }>/email/smtp-local
+enabled: true
+
+host: <{ smtp.local.host }>
+port: <{ smtp.local.port }>
+
+tls: true
+
+user: <{ smtp.local.user }>
+password: <{ prefix.ssm }>/smtp_local/<{ smtp.local.user }>/password
+
+from: <{ email.test2 }>
+reply_to:
+  - <{ email.test1 }>
+  - <{ email.test2 }>

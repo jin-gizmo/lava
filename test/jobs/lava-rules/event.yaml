@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/event-rule.schema.yaml
+description: "Catch file drops in <{ s3.bucket.s3trigger }>/<{ s3prefix }>"
+
+rule_id: "<{ prefix.rule }>.events"
+enabled: true
+owner: "<{ owner }>"
+
+event_pattern:
+  detail:
+    bucket:
+      name:
+        - "<{ s3.bucket.s3trigger }>"
+    object:
+      key:
+        - prefix: "<{ s3.prefix.s3trigger }>/eventbus/"
+  detail-type:
+    - Object Created
+  source:
+    - aws.s3
+
+targets:
+  # Construct the ARN for the realm s3trigger lambda
+  - <{ lava.aws.arn('lambda-function', 'lava-' + realm + '-s3trigger') }>
+  # Let's log messages in CloudWatch logs
+  - <{ lava.aws.arn('log-group', '/aws/events/lava') }>

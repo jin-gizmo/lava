@@ -21,10 +21,6 @@
     "no",
     "yes"
   ],
-  "git_setup": [
-    "yes",
-    "no"
-  ],
   "config_checks": [
     "strict",
     "warning"
@@ -35,9 +31,29 @@
   "s3trigger_prefix": "app/{{cookiecutter.project_name}}",
   "rule_prefix": "lava.{{cookiecutter.realm}}.{{cookiecutter.project_name}}",
   "docker_prefix": "lava/{{cookiecutter.realm}}/{{cookiecutter.project_name}}",
+  "docker_registry": "",
   "docker_platform": [
     "linux/amd64",
     "linux/arm64",
     "host"
-  ]
+  ],
+  "__prompts__": {
+    "realm": "Lava realm (required)",
+    "description": "Project description (required)",
+    "owner": "Project owner (required)",
+    "project_name": "Project name (required)",
+    "project_dir": "Project directory (required)",
+    "pip_index_url": "Alternative PyPI server instead of pypi.org",
+    "include_lava_libs": "Include the lava Python package (jinlava)?",
+    "jupyter_support": "Include support for Jupyter notebook payloads (legacy)?",
+    "config_checks": "Configuration checks on project assets",
+    "environment": "Arbitrary environment classifier for initial config",
+    "job_prefix": "Prefix for lava job IDs",
+    "payload_prefix": "Prefix for lava payloads",
+    "s3trigger_prefix": "Prefix for s3trigger table entries",
+    "rule_prefix": "Prefix for lava Eventbridge rule IDs",
+    "docker_prefix": "Prefix for image names for lava docker payloads",
+    "docker_registry": "Target registry for docker payloads (leave empty to use AWS ECR)",
+    "docker_platform": "Target platform for lava docker payloads"
+  }
 }

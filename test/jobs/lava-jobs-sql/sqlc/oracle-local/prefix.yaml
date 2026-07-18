@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Run multiple SQL scripts under a payload prefix on Oracle.
+
+type: sqlc
+
+job_id: <{ prefix.job }>/sqlc/oracle-local/prefix
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/prefix/
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/oracle/local
+  timeout: 30s
+  vars:
+    table: sqlc_oracle_prefix
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

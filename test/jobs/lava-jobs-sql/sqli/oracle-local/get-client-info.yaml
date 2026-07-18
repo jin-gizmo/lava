@@ -1,0 +1,30 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Oracle (local) - Get client info
+
+type: sqli
+
+job_id: <{ prefix.job }>/sqli/oracle-local/get-client-info
+
+payload: |
+  SELECT
+    SYS_CONTEXT('USERENV', 'MODULE')            AS module,
+    SYS_CONTEXT('USERENV', 'ACTION')            AS action,
+    SYS_CONTEXT('USERENV', 'CLIENT_INFO')       AS client_info,
+    SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER') AS client_identifier
+  FROM dual;
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/oracle/local
+  header: true
+  delimiter: ","
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

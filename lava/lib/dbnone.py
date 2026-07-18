@@ -5,64 +5,48 @@ Typical usage would be:
 
 ```python
 try:
-    import db_module
+    import pyodbc
 except ImportError:
-    import dbnone as db_module
-    db_module.alias = 'db_module'
+    from lava.lib.dbnone import dbapi_stub
+    pyodbc = dbapi_stub('pyodbc')
 ```
-
 """
+
+import types
 
 __author__ = 'Murray Andrews'
 
-# These do nothing ... just for compatibility
-apilevel = '2.0'
-threadsafety = 1
-paramstyle = 'qmark'
-
-alias = 'Unknown DBAPI 2.0 handler'
-
 
 # ------------------------------------------------------------------------------
-# noinspection PyUnusedLocal
-def connect(*args, **kwargs):
-    """
-    Just throws an exception.
+def dbapi_stub(alias: str) -> types.ModuleType:
+    """Create a stub DB API 2.0 module to stand-in for one that's not installed."""
 
-    :param args:        Ignored.
-    :param kwargs:      Ignored.
-    """
+    m = types.ModuleType(alias)
+    # Some basic DBAPI 2 attributes ... just in case.
+    m.apilevel = '2.0'
+    m.threadsafety = 1
+    m.paramstyle = 'qmark'
+    m.alias = alias
 
-    raise NotImplementedError(f'{alias}: Not installed or unsupported')
-
-
-# ------------------------------------------------------------------------------
-class Connection:
-    """
-    A dummy connection class.
-
-    Attempting to create an instance will result in an exception.
-
-    :param args:        Ignored.
-    :param kwargs:      Ignored.
-    """
-
-    def __init__(self, *args, **kwargs):
-        """Create a dummy connection."""
+    # noinspection PyUnusedLocal
+    def connect(*args, **kwargs):
+        """Stub the module connect function."""
         raise NotImplementedError(f'{alias}: Not installed or unsupported')
 
+    class Connection:
+        """Stub the Connection class."""
 
-# ------------------------------------------------------------------------------
-class Cursor:
-    """
-    A dummy Cursor class.
+        def __init__(self, *args, **kwargs):
+            raise NotImplementedError(f'{alias}: Not installed or unsupported')
 
-    Attempting to create an instance will result in an exception.
+    class Cursor:
+        """Stub the Cursor class (probably redundant, but harmless)."""
 
-    :param args:        Ignored.
-    :param kwargs:      Ignored.
-    """
+        def __init__(self, *args, **kwargs):
+            raise NotImplementedError(f'{alias}: Not installed or unsupported')
 
-    def __init__(self, *args, **kwargs):
-        """Not implemented."""
-        raise NotImplementedError(f'{alias}: Not installed or unsupported')
+    m.connect = connect
+    m.Connection = Connection
+    m.Cursor = Cursor
+
+    return m

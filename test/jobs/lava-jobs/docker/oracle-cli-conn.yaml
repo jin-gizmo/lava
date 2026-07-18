@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Oracle query using CLI in container
+
+type: docker
+
+job_id: <{ prefix.job }>/docker/oracle-cli-conn
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ docker.registry }>/lava/amzn2023/full
+
+parameters:
+  args:
+    - -c
+    - ls -laR $LAVA_TMP;
+      cat $LAVA_CONN_ORACLE; echo 'select * from frog;' | $LAVA_CONN_ORACLE
+  command: /bin/sh
+  connections:
+    oracle: <{ prefix.conn }>/db/oracle/base
+  docker: <{ prefix.conn }>/docker/base
+  timeout: 360s
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,24 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Multiple SQL statements in one file for Oracle
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/oracle-local/multi-sql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/onecol-multi.sql
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/oracle/local
+  vars:
+    table: sql_oracle_multi_sql
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

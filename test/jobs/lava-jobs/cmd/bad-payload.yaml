@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Bad payload - missing quote
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/bad-payload
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: "sh -c 'ZZ1={{job.realm}} env | sort"
+
+parameters:
+  env:
+    ZZ2: '{{vars.zz2}}'
+  vars:
+    zz2: zzzzz2
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  error_pattern: 'Bad payload: No closing quotation'
+  marks:
+    - local

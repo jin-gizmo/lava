@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Unknown child job
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/unknown-child
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  no-such-job: null
+
+parameters:
+  workers: 2
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "no-such-job: No such job"
+  marks:
+    - local

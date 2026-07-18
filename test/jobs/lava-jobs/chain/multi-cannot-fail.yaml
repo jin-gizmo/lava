@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - No jobs allowed to fail but 2 of 3 does fail
+
+type: chain
+
+job_id: <{ prefix.job }>/chain/multi-cannot-fail
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  - <{ prefix.job }>/cmd/hello-world
+  - <{ prefix.job }>/exe/exit-123
+  - <{ prefix.job }>/cmd/hello-world
+
+# No globals
+globals: {}
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Failed with exit status 123"
+  marks:
+    - local

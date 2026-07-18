@@ -24,7 +24,6 @@ Lava supports the following registry options:
 |type|String|Yes|`docker`.|
 |user|String|No|User name for authenticating to the registry. Required for private docker repositories. Ignored for ECR registries.|
 
-
 ### Accessing External Registries
 
 Lava prefers to obtain its docker images from the local AWS ECR. It's safer,
@@ -37,7 +36,7 @@ secure code at run-time, particularly for a production environment.
     place the built payloads for docker jobs in ECR. A trivial Dockerfile can
     copy an external image as part of the build process.
 
-If you must do this damn fool thing, lava permits it. There are some considerations:
+If you must use external registries, lava permits it. There are some considerations:
 
 1.  **Private registries** (i.e. requiring authentication to access) will
     require a connection specification as described above, including the 

@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - S3 to SMB put
+
+type: exe
+
+job_id: <{ prefix.job }>/smb/pysmb/exe-put-ok-s3
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/smb-put.sh
+
+parameters:
+  connections:
+    smb: <{ prefix.conn }>/smb/<{ smb.name }>/pysmb
+
+  args:
+    - "OK: S3 to SMB"
+    - "{{ realm.s3_payloads }}/<{ prefix.payload }>/misc.rsc/hello-world.txt"
+    - <{ smb.volume }>:<{ smb.dir }>/hello-world.txt
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

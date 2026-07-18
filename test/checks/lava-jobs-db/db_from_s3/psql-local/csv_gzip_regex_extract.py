@@ -1,0 +1,70 @@
+"""Assertions for lava-jobs-db/db_from_s3/psql-local/csv-gzip-regex-extract."""
+
+from __future__ import annotations
+
+import gzip
+from typing import Any
+
+from lava import LavaError
+from lava.connection import get_pysql_connection
+from test.conftest import S3path
+from test.integration.conftest import HandlerChecker
+
+
+class Checker(HandlerChecker):
+    """Custom checker with table isolation for regex-extract truncate job."""
+
+    def __init__(self, *args, **kwargs) -> None:
+        """Init checker state."""
+        super().__init__(*args, **kwargs)
+
+        self.conn: Any = None
+        self.cursor: Any = None
+        self.conn_id = self.job_spec['parameters']['db_conn_id']
+        self.schema = self.job_spec['parameters']['schema']
+        self.table = self.job_spec['parameters']['table']
+        self.source_table = 'custard'
+        self.test_table = 'tst_' + self.run_id.replace('-', '_')
+
+    def setup(self) -> None:
+        """Clone source table and patch job table to an isolated target."""
+
+        self.conn = get_pysql_connection(self.conn_id, self.realm, autocommit=True)
+        self.cursor = self.conn.cursor()
+        self.cursor.execute(f'SET SEARCH_PATH TO "{self.schema}"')
+        self.cursor.execute(
+            f'CREATE TABLE {self.test_table} AS SELECT * FROM "{self.source_table}"'
+        )
+        self.job_spec['parameters']['table'] = self.test_table
+
+    def teardown(self) -> None:
+        """Restore original table expression and drop isolated table."""
+
+        self.job_spec['parameters']['table'] = self.table
+        if self.conn:
+            cursor = self.conn.cursor()
+            cursor.execute(f'DROP TABLE IF EXISTS {self.test_table}')
+            self.conn.close()
+
+    def check(
+        self,
+        job_result: dict[str, Any] | None,
+        job_events: dict[tuple[str, str], list[dict[str, Any]]],
+        job_error: LavaError | None,
+    ) -> None:
+        """Validate regex-extract truncate load inserted expected row count."""
+
+        assert job_error is None
+        assert job_result is not None
+        assert job_result['exit_status'] == 0
+        assert job_events[self.job_id, self.run_id][-1]['status'] == 'complete'
+
+        data_rows = len(
+            gzip.decompress(S3path(f's3://{job_result["bucket"]}/{job_result["key"]}').read())
+            .decode('utf-8')
+            .splitlines()
+        )
+
+        self.cursor.execute(f'SELECT COUNT(*) FROM {self.test_table}')
+        new_row_count = self.cursor.fetchone()[0]
+        assert new_row_count == data_rows, 'new_row_count != data_rows'

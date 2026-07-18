@@ -16,7 +16,7 @@ in Slack itself when the webhook is created.
 |preamble|String|No|Default preamble at the start of Slack messages. Useful values include things such as `<!here>` and `<!channel>` which will cause Slack to insert `@here` and `@channel` alert tags respectively. If not specified, no preamble is used.|
 |style|String|No|Display style for Slack messages. Options are `block` (default), `attachment` and `plain`. The first two use the corresponding block or attachment message construction mechanism provided by Slack to make messages more presentable.|
 |type|String|Yes|`slack`.|
-|webhook_url|String|Yes|The [webhook URL](https://api.slack.com/messaging/webhooks) provided by Slack for sending messages.|
+|webhook_url|String|Yes|The [webhook URL](https://api.slack.com/messaging/webhooks) provided by Slack for sending messages. If the value starts with `https://`, it is treated as a raw webhook URL to be used directly, otherwise it is treated as the name of an AWS SSM parameter containing the webhook URL.|
 
 ### Using the Slack Connector
 

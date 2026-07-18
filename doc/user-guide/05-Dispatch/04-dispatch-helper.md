@@ -16,10 +16,11 @@ The dispatch helper can accept dispatch requests via the following mechanisms:
 
 *   direct invocation.
 
-The standard CloudFormation template will setup an SNS topic,
-`lava-<REALM>-dispatch` and subscribe the dispatch helper lambda function to it.
-Other SNS topics or SQS queues can be created and subscribed manually as
-required.
+!!! note
+    The standard lava [CloudFormation template](#lava-realmcfnjson) will setup
+    an SNS topic --> SQS queue pair (both called `lava-<REALM>-dispatch`) and
+    subscribe the dispatch helper lambda function to the queue. Other SNS topics
+    or SQS queues can be created and subscribed manually as required.
 
 Two request formats are accepted:
 

@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Wrong worker (used as a child job)
+
+type: log
+
+job_id: <{ prefix.job }>/log/wrong-worker
+
+worker: wrong
+owner: <{ owner }>
+enabled: true
+
+payload: --
+
+x-lava-nocheck: joborphan

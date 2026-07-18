@@ -3,12 +3,14 @@
 
 # ex: set ft=sh:
 
+# chardet 6+ currently causes a spurious warning from requests.
+chardet<6
 boto3
 botocore
 cachetools
 colorama
 cookiecutter
-cx_Oracle
+oracledb
 docker
 jinja2
 jsonschema

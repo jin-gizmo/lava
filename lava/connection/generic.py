@@ -40,6 +40,7 @@ from typing import Any
 
 import boto3
 
+from lava import LavaError
 from lava.common import get_lava_param
 from lava.lib.misc import decimal_to_scalar, dict_check
 from .core import (
@@ -47,7 +48,6 @@ from .core import (
     CONNECTION_REQUIRED_FIELDS,
     IGNORE_FIELDS,
     LOG,
-    LavaError,
     cli_connector,
     get_connection_spec,
 )

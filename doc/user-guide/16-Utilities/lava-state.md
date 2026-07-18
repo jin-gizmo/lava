@@ -9,16 +9,11 @@ The lava state utility provides a CLI to the
     ```bare
     usage: lava-state [-h] [--profile PROFILE] [-r REALM] [-v] [--no-colour]
                       [-l LEVEL] [--log LOG] [--tag TAG]
-                      {put,get} ...
+                      {put,get,rm} ...
 
-    Manipulate lava state entries.
+    Manipulate lava state items.
 
-    positional arguments:
-      {put,get}
-        put                 Add / replace a state entry.
-        get                 Get a state entry.
-
-    optional arguments:
+    options:
       -h, --help            show this help message and exit
       --profile PROFILE     As for AWS CLI.
       -r REALM, --realm REALM
@@ -39,11 +34,17 @@ The lava state utility provides a CLI to the
                             @local0).
       --tag TAG             Tag log entries with the specified value. The default
                             is lava-state.
+
+    subcommands:
+      {put,get,rm}
+        put                 Add / replace a state item.
+        get                 Get a state item.
+        rm                  Remove a state item.
     ```
 
 ### Creating a Lava State Item
 
-State items are created with the `put` sub-command.
+State items are created with the `put` subcommand.
 
 !!! info
     Do not create state items with a `state_id` starting with `lava`.
@@ -83,7 +84,7 @@ State items are created with the `put` sub-command.
 
 ### Retrieving a Lava State Item
 
-State items are retrieved with the `get` sub-command.
+State items are retrieved with the `get` subcommand.
 
 ??? "Usage: lava-state get"
 
@@ -103,3 +104,21 @@ State items are retrieved with the `get` sub-command.
                             empty string. By default, attempting to get a non-
                             existent state item is an error.
     ```
+
+### Removing a Lava State Item
+
+State items are removed with the `rm` subcommand.
+
+??? "Usage: lava-state rm"
+
+    ```bare
+    usage: lava-state rm [-h] state_id [state_id ...]
+
+    positional arguments:
+      state_id    State ID to remove. Non-existent state IDs do not cause an error.
+
+    options:
+      -h, --help  show this help message and exit
+    ```
+
+

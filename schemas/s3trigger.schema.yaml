@@ -1,0 +1,82 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: "{{ id }}"
+version: "{{ version }}"
+documentation: "{{ documentation }}"
+
+title: Lava s3trigger specification
+
+type: object
+
+properties:
+  bucket:
+    description: S3 bucket name.
+    $ref: '#/$defs/common/bucket'
+  trigger_id:
+    description: Trigger ID.
+    type: string
+    minLength: 1
+  delay:
+    description: Dispatch delay.
+    $ref: '#/$defs/common/duration'
+  description:
+    description: A short description of the trigger.
+    type: string
+    minLength: 1
+  enabled:
+    description: Whether or not the trigger is enabled. Defaults to false.
+    type: boolean
+    default: false
+  globals:
+    description: >-
+      A map of named values that are are included in the dispatch request.
+      Global names cannot start with "lava".
+    type: object
+    propertyNames:
+      not:
+        pattern: "^[lL][aA][vV][aA]"
+  jinja:
+    description: Enable Jinja rendering of the parameters and globals.
+    type: boolean
+    default: true
+  job_id:
+    description: Job(s) to dispatch.
+    anyOf:
+      - type: string
+        minLength: 1
+      - type: array
+        items:
+          type: string
+          minLength: 1
+  owner:
+    description: Identifies the owner of the trigger.
+    type: string
+    minLength: 1
+  parameters:
+    description: A map of parameters for the job that will be included in the dispatch.
+    type: object
+  prefix:
+    description: Object prefix (without trailing /) or * for bucket root.
+    type: string
+    minLength: 1
+    not:
+      pattern: "/$"
+
+patternProperties:
+  ^[xX]-:
+    description: X-* fields are ignored by lava.
+  ^if_:
+    description: Trigger condtions.
+  ^if_not_:
+    description: Trigger condtions.
+  '^\$schema$':
+    type: string
+
+required:
+  - trigger_id
+  - bucket
+  - prefix
+  - job_id
+  - description
+  - owner
+
+additionalProperties: false

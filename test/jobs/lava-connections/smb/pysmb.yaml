@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: SMB connection
+owner: "<{ owner }>"
+
+type: smb
+
+conn_id: <{ prefix.conn }>/smb/<{ smb.name }>/pysmb
+enabled: true
+
+host: <{ smb.host }>
+remote_name: <{ smb.remote_name }>
+is_direct_tcp: true
+# port: <{ smb.port }>
+
+user: <{ smb.user }>
+password: <{ prefix.ssm }>/smb/<{ smb.name }>/password

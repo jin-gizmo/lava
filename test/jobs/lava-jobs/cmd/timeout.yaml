@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Sleep and job timout + CW metrics
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/timeout
+
+cw_metrics: true
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: bash -c "echo Sleeping {{vars.sleep}}; sleep {{vars.sleep}}; echo Done"
+
+parameters:
+  timeout: 1
+  vars:
+    sleep: '20'
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  error_pattern: 'Timed out after .* seconds'
+  marks:
+    - local

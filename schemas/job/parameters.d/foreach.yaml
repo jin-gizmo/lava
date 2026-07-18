@@ -1,0 +1,29 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava foreach job parameters specification
+
+type: object
+
+properties:
+  foreach:
+    description: A dictionary specifying how foreach values are generated
+    type: object
+    oneOf:
+      # {% for f in defs.job['parameters.d']['foreach.d'] %}
+      - $ref: '#/$defs/job/parameters.d/foreach.d/{{ f }}'
+      # {% endfor %}
+  can_fail:
+    description: Indicates if individual iterations are permitted to fail
+    type: boolean
+  limit:
+    description: Maximum allowed number of foreach values
+    type: integer
+    minimum: 1
+  jinja:
+    description: Enable Jinja rendering of the payload.
+    type: boolean
+
+required:
+  - foreach
+
+additionalProperties: false

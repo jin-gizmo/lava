@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Exit with status 123 and retry
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/exit-123-retry
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/exit.sh  {{vars.status}}
+
+iteration_delay: 1s
+iteration_limit: 3
+
+parameters:
+  vars:
+    status: 123
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: 'Failed with exit status 123'
+  marks:
+    - local

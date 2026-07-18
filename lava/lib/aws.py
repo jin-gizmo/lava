@@ -518,9 +518,7 @@ def s3_object_exists(bucket: str, key: str, aws_session: boto3.Session = None) -
     :param bucket:      Bucket name.
     :param key:         Object key.
     :param aws_session: A boto3 Session. If None, a default is created.
-    :return:            True if the object exists. False if the bucket exists but
-                        the object does not. An exception is raised if the bucket
-                        does not exist.
+    :return:            True if the object exists, False otherwise.
     :raise ClientError: If the bucket does not exist or permissions prevent
                         access.
     """
@@ -528,7 +526,7 @@ def s3_object_exists(bucket: str, key: str, aws_session: boto3.Session = None) -
     try:
         (aws_session or boto3.Session()).client('s3').head_object(Bucket=bucket, Key=key)
     except ClientError as e:
-        if e.response['Error']['Code'] == '404':
+        if e.response['ResponseMetadata']['HTTPStatusCode'] == 404:
             return False
         raise
     return True

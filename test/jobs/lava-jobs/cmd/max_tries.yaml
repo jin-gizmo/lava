@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: >-
+  FAIL - Sleep 60 to test max_tries -- requires queue reconfig.
+  Fail after too many retries.
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/max_tries
+
+max_tries: 1
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: sleep 60
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Local to SMB bad target dir
+
+type: exe
+
+job_id: <{ prefix.job }>/smb/smbprotocol/exe-put-fail-bad-target-dir
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/smb-put.sh
+
+parameters:
+  connections:
+    smb: <{ prefix.conn }>/smb/<{ smb.name }>/smbprotocol
+
+  args:
+    - "FAIL: Local to SMB bad target dir"
+    - /etc/hosts
+    - <{ smb.volume }>:this-is-a-bad-dir/hosts
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  marks:
+    - local

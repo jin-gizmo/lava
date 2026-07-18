@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Send text and HTML emails using email CLI connector + one with an attachment
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/email
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/exe-email.sh <{ email.test2 }>
+
+parameters:
+  connections:
+    email: <{ prefix.conn }>/email/ses
+  env:
+    ATTACH: '{{ realm.s3_payloads }}/<{ prefix.payload }>/misc.raw/lava-icon-512-transparent.png'
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Use an sftp connector to get remote /etc/hosts
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/test-sftp
+
+payload: <{ prefix.payload }>/test-sftp.sh ec2-user@canis2
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  connections:
+    sftp: <{ prefix.conn }>/sftp
+
+x-lava-nocheck: joborphan

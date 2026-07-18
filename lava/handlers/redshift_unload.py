@@ -15,10 +15,11 @@ from typing import Any
 import boto3
 import jinja2
 
+from lava import LavaError
 from lava.config import LOGNAME
 from lava.connection import get_aws_connection, get_pysql_connection
 from lava.connection.core import make_application_name
-from lava.lavacore import LavaError, jinja_render_vars
+from lava.lavacore import jinja_render_vars
 from lava.lib.aws import s3_check_bucket_security
 from lava.lib.datetime import now_tz
 from lava.lib.db import redshift_authorization, redshift_get_column_info2

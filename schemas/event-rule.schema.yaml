@@ -1,0 +1,70 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: "{{ id }}"
+version: "{{ version }}"
+documentation: "{{ documentation }}"
+
+title: Lava job framework EventBridge rule specification
+
+type: object
+
+properties:
+  description:
+    description: A short description of the rule.
+    type: string
+    minLength: 1
+  enabled:
+    description: Whether or not the rule is enabled. Defaults to false.
+    type: boolean
+    default: false
+  event_bus_name:
+    description: Name of the event bus.
+    type: string
+    default: 'default'
+  event_pattern:
+    description: >-
+      The pattern used to select which events trigger the rule.
+      See https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html
+    type: object
+  owner:
+    description: Name or email address of the rule owner
+    type: string
+    minLength: 1
+  role_arn:
+    description: The ARN of the IAM role associated with the rule.
+    type: string
+    minLength: 1
+  rule_id:
+    description: The rule name. This must be of the form lava.<REALM>.<NAME>.
+    type: string
+    pattern: ^lava\.[^.]+\..+$
+  schedule_expression:
+    description: A cron style schedule or repetition frequency for the rule to fire.
+    type: string
+    minLength: 1
+  tags:
+    description: Key/value pairs that will be added as tags to the rule.
+    type: object
+  targets:
+    description: >-
+      A list of targets for the rule.
+      If omitted or empty, the rule may fire but nothing will happen.
+    type: array
+    items:
+      oneOf:
+        - description: ARN of a target resource
+          $ref: '#/$defs/common/arn'
+        - description: EventBridge PutTargets specification (AWS API shape, PascalCase keys)
+          type: object
+
+patternProperties:
+  ^[xX]-:
+    description: X-* fields are ignored by lava.
+  '^\$schema$':
+    type: string
+
+required:
+  - description
+  - owner
+  - rule_id
+
+additionalProperties: false

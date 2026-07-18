@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Container sleeps for a loooong time to check kill on exit
+
+type: docker
+
+job_id: <{ prefix.job }>/docker/big-sleep
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ docker.registry }>/lava/amzn2023/base
+
+parameters:
+  command: >-
+    /bin/sh -c
+    'echo going to sleep for {{ vars.sleep }} - check container dies on exit; sleep {{ vars.sleep }}'
+  docker: <{ prefix.conn }>/docker/base
+  vars:
+    sleep: 123456
+
+x-lava-nocheck: joborphan

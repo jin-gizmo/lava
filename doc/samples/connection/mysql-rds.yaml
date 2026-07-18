@@ -1,0 +1,63 @@
+#- MySQL connector specifics
+#-
+#- This is the list of vars to prompt for when building
+#= host: Host name
+#= database: Database (schema) name
+#= user: User name
+#= password: SSM parameter containing password (excluding realm prefix)
+#-
+
+type: mysql-rds
+
+## #############################################################################
+## Connector type specific fields
+
+## -----------------------------------------------------------------------------
+## Conditional fields - Required but may come from Secrets Manager
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The name of the database (schema) within the database server.
+##
+database: "{{ database }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The database host DNS name or IP address.
+##
+host: "{{ host }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The name of an encrypted SSM parameter containing the password.
+## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+##
+password: "/lava/<{ realm }>/{{ password }}"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Port number.
+##
+port: 3306
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## User name.
+##
+user: "{{ user }}"
+
+## -----------------------------------------------------------------------------
+## Optional fields
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## Name of a secret in AWS Secrets Manager
+# secret_id: /lava/<{ realm }>/secret-name
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The subtype specifies the driver to use.
+# subtype: pymysql
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## The location of a file containing a host certificate for the database server.
+## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+# ssl_ca_file: "???"
+
+## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+# ssl_mode: null

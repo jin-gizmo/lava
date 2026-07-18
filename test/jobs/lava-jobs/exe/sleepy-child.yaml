@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - A sleepy child with no timeout -- will need to be killed
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/sleepy-child
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sleepy-child.sh 12345
+
+x-lava-nocheck: joborphan

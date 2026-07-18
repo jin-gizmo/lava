@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Payload is a string instead of a list
+
+type: chain
+
+job_id: <{ prefix.job }>/chain/string-payload
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: "<{ prefix.job }>/cmd/hello-world"
+
+# No globals
+globals: { }
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

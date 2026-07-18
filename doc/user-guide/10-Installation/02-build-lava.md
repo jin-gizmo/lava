@@ -67,7 +67,7 @@ make oracle
 make preview
 
 # Make the bits that don't need a builder docker image
-make cfn jinlava tools
+make cfn jinlava schemas tools
 
 # Make a couple of builder docker images. This will take quite a while.
 # The process does a full Python install from source for ARM and x86.
@@ -239,6 +239,11 @@ localhost:5001/build/lava/amzn2023-py3.11:latest
     The builder images incorporate a Python installation built from source (for
     two different platforms) to ensure consistency. This can take a reasonable
     amount of time. Be patient.
+
+!!! tip
+    The Python build process runs 4 jobs in parallel to speed up the build
+    process. This number can be adjusted by adding the `jobs=<N>` argument to
+    the `make builder` command. More jobs will use more memory.
 
 To see which builders are available in the local docker registry:
 
@@ -461,6 +466,21 @@ import lava
 
 print(lava.__version__)
 ```
+
+### Building the Lava JSON Schemas
+
+The lava JSON schemas can be built like so:
+
+```bash
+make schemas
+```
+
+The results are placed in `dist/schemas`.
+
+!!! note
+    It is not essential to build the schemas separately. They will be built
+    automatically when [building the lava documentation](#building-the-lava-documentation)
+    as they are hosted in the same site as user guide.
 
 ### Building the Lava Job Framework
 

@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Random sleep and generate CW metrics
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/randsleep
+
+cw_metrics: true
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: bash -c "x=$((1 + RANDOM % 10)); echo Sleeping $x; sleep $x; echo Done"
+
+x-lava-nocheck: joborphan

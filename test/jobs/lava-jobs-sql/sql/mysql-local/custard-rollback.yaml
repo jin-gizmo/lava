@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Bad query syntax on MySQL will cause rollback
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/mysql-local/custard-rollback
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/custard-rollback.sql
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/mysql/local
+  transaction: true
+  vars:
+    table: sql_mysql_custard_rollback
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: 'You have an error in your SQL syntax'
+  marks:
+    - local

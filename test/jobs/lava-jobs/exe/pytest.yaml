@@ -1,0 +1,20 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Run a Python program that imports lava libs
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/pyimport
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/pytest.py
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

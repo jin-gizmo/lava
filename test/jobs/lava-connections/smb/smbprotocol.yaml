@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: SMB connection over smbprotocol
+owner: "<{ owner }>"
+
+type: smb
+subtype: smbprotocol
+
+conn_id: <{ prefix.conn }>/smb/<{ smb.name }>/smbprotocol
+enabled: true
+
+host: <{ smb.host }>
+remote_name: <{ smb.remote_name }>
+is_direct_tcp: true
+# port: <{ smb.port }>
+
+user: <{ smb.user }>
+password: <{ prefix.ssm }>/smb/<{ smb.name }>/password

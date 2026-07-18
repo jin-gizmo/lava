@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Essentially same as psql_aurora but we pretend its vanilla Postgres
+owner: "<{ owner }>"
+
+type: postgres
+
+conn_id: <{ prefix.conn }>/db/psql/base
+enabled: true
+
+database:  <{ db.psql_aurora.database }>
+host: <{ db.psql_aurora.host }>
+port: <{ db.psql_aurora.port }>
+ssl_mode: verify-full
+
+user: <{ db.psql_aurora.user }>
+password:  <{ prefix.ssm }>/psql_aurora/<{ db.psql_aurora.user }>/password

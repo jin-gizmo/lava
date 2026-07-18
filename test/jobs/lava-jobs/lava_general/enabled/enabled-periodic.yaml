@@ -1,0 +1,31 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+# <% set sid='test/enabled/periodic' %>
+description: OK - Job dynamically enabled (or disabled) periodically based on recent history
+
+type: log
+
+job_id: <{ prefix.job }>/enabled/periodic
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+
+enabled: >-
+  {% set ts = utils.parsedate.parse(state['<{sid}>']) %}
+  {{ ustart-ts > utils.timedelta(minutes=2) }}
+
+payload: ignored
+
+state:
+  '<{sid}>': '2000-01-01T00:00:00Z'
+
+on_success:
+  - action: state
+    state_id: <{sid}>
+    value: "{{ ustart.isoformat() }}"
+
+event_log: |
+  State <{sid}> set to {{ ustart.isoformat() }}
+  Time since last run: {% set ts = utils.parsedate.parse(state['<{sid}>']) %}{{ ustart-ts }}
+
+x-lava-nocheck: joborphan

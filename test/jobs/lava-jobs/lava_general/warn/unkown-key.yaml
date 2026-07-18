@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Warn - Unknown top-level key
+
+bad-key: Unkown key here
+
+type: cmd
+
+job_id: <{ prefix.job }>/warn/unknown-key
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: bash -c "echo Bad to the bone"
+
+x-lava-nocheck: joborphan

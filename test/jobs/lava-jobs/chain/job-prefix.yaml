@@ -1,0 +1,29 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Chain job using job_prefix
+
+type: chain
+
+job_id: <{ prefix.job }>/chain/job_prefix
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+globals:
+  source: chain/chain/global
+  uniq_chain_chain_global: '44'
+  uniq_chain_global: master
+
+payload:
+  - cmd/hello-world
+
+parameters:
+  job_prefix: <{ prefix.job }>/
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

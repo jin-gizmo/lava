@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - MySQL check for application name (program name) in performance schema
+
+type: sqlv
+
+job_id: <{ prefix.job }>/sqlv/mysql-local/appname
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/mysql-program-name.sql
+
+parameters:
+  header: true
+  conn_id: <{ prefix.conn }>/db/mysql/local
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

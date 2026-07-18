@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - dependency cycle
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/cycle
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/log/plain: <{ prefix.job }>/cmd/hello-world
+  <{ prefix.job }>/cmd/hello-world: <{ prefix.job }>/log/plain
+
+parameters:
+  workers: 2
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Jobs are in a cycle"
+  marks:
+    - local

@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: >-
+  Redshift Serverless connector using the AWS Redshift driver with no password
+  (uses Redshift Serverless GetCredentials API).
+  Note no username.
+owner: "<{ owner }>"
+
+type: redshift-serverless
+subtype: redshift
+
+conn_id: <{ prefix.conn }>/db/redshift/svl-awsdriver-iam
+enabled: true
+
+host: <{ db.redshift_svl.host }>
+port: <{ db.redshift_svl.port }>
+ssl: true
+database: <{ db.redshift_svl.database }>

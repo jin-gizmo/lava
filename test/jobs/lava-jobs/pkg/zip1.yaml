@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Run a simple pkg job and create an (unused) git connector
+
+type: pkg
+
+job_id: "<{ prefix.job }>/pkg/zip1"
+
+worker: "<{ worker.main }>"
+enabled: true
+owner: "<{ owner }>"
+
+payload: "<{ prefix.payload }>/lava_info.zip"
+
+parameters:
+  args:
+    - '{{realm.realm}}'
+    - payload area={{realm.s3_payloads}}
+  connections:
+    git: "<{ prefix.conn }>/git"
+  command: lava_info.sh
+
+x-lava-nocheck: joborphan

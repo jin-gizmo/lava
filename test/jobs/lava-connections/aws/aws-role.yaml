@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: AWS connection using assume role
+owner: "<{ owner }>"
+
+type: aws
+
+conn_id: <{ prefix.conn }>/aws/role
+enabled: true
+
+region: ap-southeast-2
+
+role_arn: "<{ lava.aws.arn('iam-role', 'lava-' + realm + '-worker-' + worker.main) }>"
+duration: 30m
+
+external_id: "/lava/<{ realm }>/lava-<{ realm }>-worker-<{ worker.main }>/external-id"
+
+tags:
+  lava_realm: "<{ realm }>"

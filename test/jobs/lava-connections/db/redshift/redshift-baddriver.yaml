@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Redshift connector with an unknown sub-type (should error out on use)
+owner: "<{ owner }>"
+
+type: redshift
+subtype: bad_driver
+
+conn_id: <{ prefix.conn }>/db/redshift/bad_driver
+enabled: true
+
+host: <{ db.redshift.host }>
+port: <{ db.redshift.port }>
+ssl: true
+database: <{ db.redshift.database }>
+
+user: <{ db.redshift.user }>
+password:  <{ prefix.ssm }>/redshift/<{ db.redshift.user }>/password

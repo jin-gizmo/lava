@@ -1,0 +1,20 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Create a local file in the container -- custom image
+
+type: docker
+
+job_id: <{ prefix.job }>/docker/custom-hello
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ docker.registry or lava.aws.ecr_uri }>/<{ prefix.docker_repo }>/simple
+
+parameters:
+  command: /lava/hello.sh
+  docker: <{ prefix.conn }>/docker/base
+  timeout: 30s
+
+x-lava-nocheck: joborphan

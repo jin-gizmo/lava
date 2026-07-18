@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test on_success action sending message to Slack
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/slack
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo This job has an action to send to Slack
+
+on_success:
+  - action: slack
+    colour: '#8822ff'
+    from: Ex Machina@{{realm.realm}}
+    message: |
+      *Run ID*: {{ job.run_id }}
+      *Started*: {{ globals.lava.master_start }}
+      *Result*: :thumbsup:
+    slack_conn: <{ prefix.conn }>/slack/base
+    style: block
+    subject: 'Job: {{job.job_id}}'
+
+x-lava-nocheck: joborphan

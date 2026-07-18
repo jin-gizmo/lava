@@ -1,4 +1,4 @@
-personal_ws-1.1 en 479 
+personal_ws-1.1 en 499 
 ACLs
 AMIs
 APIs
@@ -16,6 +16,7 @@ CLIs
 CPUs
 CRLF
 CSV
+CVE
 CentOS
 CloudFormation
 CloudWatch
@@ -24,6 +25,7 @@ CodePrefix
 Cumbre
 DAGs
 DBAPI
+DBAs
 DDL
 DEDUP
 DFS
@@ -67,6 +69,7 @@ Hoa
 Homebrew
 Hu
 IAM
+IDEs
 IMDS
 INSERTs
 IPv
@@ -75,6 +78,7 @@ JSON
 JSONL
 JSONPath
 JUMPSTART
+JetBrains
 Jin
 Jindabyne
 JobFailed
@@ -90,13 +94,16 @@ LOGLEVEL
 LTS
 Ledesma
 Liang
+Loa
 LogLevel
 Lolitha
 Lookups
 MINS
+MSGID
 Mak
 Makefile
 Marlor
+Mauna
 MaxRss
 Mebibytes
 MiB
@@ -104,6 +111,7 @@ MinUpDays
 ModuleNotFoundError
 Myatt
 NAMESPACE
+NLS
 NTLMv
 Negra
 NetBIOS
@@ -113,6 +121,7 @@ OIDS
 ObjectCreated
 OpenSSL
 PARAM
+PEM
 PGPASS
 PITR
 PNG
@@ -161,6 +170,7 @@ SQS
 SSM
 STS
 SVG
+SYM
 Scalable
 SecurityUpdate
 SemanticVersion
@@ -168,6 +178,7 @@ Serverless
 Siok
 Sonatype
 StopWorkerDaemons
+TCPS
 TDS
 TLS
 TMP
@@ -270,6 +281,7 @@ encodable
 env
 escapechar
 euid
+eventbridge
 exe
 executables
 fileshares
@@ -289,6 +301,7 @@ hostname
 html
 https
 iam
+init
 io
 iops
 ip
@@ -335,8 +348,11 @@ natively
 nav
 nn
 nnX
+noopener
+noreferrer
 ntlm
 numerics
+oracledb
 os
 outpath
 pandoc
@@ -411,6 +427,7 @@ stdout
 str
 strptime
 subclasses
+subcommand
 subcomponents
 subdirectories
 subdirectory
@@ -434,6 +451,8 @@ tmpExpiryDays
 tmpVolumeSize
 tmpfs
 toc
+tod
+tojson
 tokei
 trigmeta
 ttl
@@ -450,6 +469,7 @@ utc
 utils
 uuid
 vCPUs
+vanishingly
 venv
 virtualenv
 visibilityTimeout

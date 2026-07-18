@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Local postgres database.
+owner: "<{ owner }>"
+
+type: postgres
+# subtype: pygresql
+
+conn_id: <{ prefix.conn }>/db/psql/local-legacy-ssl
+enabled: true
+
+database:  <{ db.psql_local.database }>
+host: <{ db.psql_local.host }>
+port: <{ db.psql_local.port }>
+
+ssl: true
+
+user: <{ db.psql_local.user }>
+password:  <{ prefix.ssm }>/psql_local/<{ db.psql_local.user }>/password

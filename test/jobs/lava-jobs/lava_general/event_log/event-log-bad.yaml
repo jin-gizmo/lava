@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: >-
+  Fail - Event log field with a bad event_log element.
+  The job will still run but the event_log will be an error.
+
+type: cmd
+
+job_id: <{ prefix.job }>/event-log/bad
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+event_log: "Bad jinja {{ wotcha"
+
+payload: echo hello
+
+parameters:
+  args:
+    - world
+
+x-lava-nocheck: joborphan

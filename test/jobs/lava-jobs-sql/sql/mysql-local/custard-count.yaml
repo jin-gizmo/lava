@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - MySQL custard count
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/mysql-local/custard-count
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/custard-count.sql
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/mysql/local
+  transaction: true
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

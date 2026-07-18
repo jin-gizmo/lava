@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Local Oracle connection with TLS/SSL (TCPS)
+owner: "<{ owner }>"
+
+type: oracle
+
+conn_id: <{ prefix.conn }>/db/oracle/local-ssl
+enabled: true
+
+host: <{ db.oracle_local.host }>
+port: <{ db.oracle_local_ssl.port }>
+service_name: <{ db.oracle_local.service_name }>
+
+user: <{ db.oracle_local.user }>
+password:  <{ prefix.ssm }>/oracle_local/<{ db.oracle_local.user }>/password
+
+ssl_mode: require
+ssl_ca_file:  <{ db.oracle_local_ssl.ca_cert }>

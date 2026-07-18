@@ -16,8 +16,9 @@ The fix is:
 unset PYTHON_INSTALL_LAYOUT
 python3 -m pip install psutil --upgrade
 ```
-Note that this problem can also affect other modules including `jinja2` and
-`cx_Oracle`. The fix is the same in each case.
+
+Note that this problem can also affect other modules, including `jinja2`. The
+fix is the same in each case.
 
 ### The Lava Docker Images
 

@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Run a simple pkg job with some injected environment
+
+type: pkg
+
+job_id: <{ prefix.job }>/pkg/zip2
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/lava_info.zip
+
+parameters:
+  args:
+    - payload-area={{realm.s3_payloads}}
+  command: lava_info.sh realm={{realm.realm}}
+  env:
+    ZZ1: '{{job.run_id}}'
+
+x-lava-nocheck: joborphan

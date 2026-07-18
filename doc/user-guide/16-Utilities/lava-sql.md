@@ -93,14 +93,14 @@ AWS S3.
     Do not have more than one `SELECT` query in the batch unless you are
     deliberately trying to create a mess.
 
-### CSV
+### CSV Format { data-toc-label="CSV" }
 
 Note that the default delimiter for `csv` format is the pipe symbol `|`, not a
 comma. The original rationale for this was for consistency with the Redshift
 `COPY` and `UNLOAD` commands. All I can say is that it seemed to make sense at
 the time.
 
-### HTML Format
+### HTML Format { data-toc-label="HTML" }
 
 The output data is encoded as an HTML table with a class of `lava-sql`. Only
 the table HTML is produced to allow the output to be incorporated into a larger
@@ -108,11 +108,11 @@ HTML document. (i.e. no `HTML`, `BODY` tags etc.).
 
 Values will be escaped as needed to ensure HTML correctness.
 
-### JSONL Format
+### JSONL Format { data-toc-label="JSONL" }
 
 Each row of output data is encoded as a single line JSON formatted object.
 
-### Parquet Format
+### Parquet Format { data-toc-label="Parquet" }
 
 Parquet compression will generally benefit from a larger batch size. The default
 of 1024 is reasonable for many purposes but increasing it will often give a

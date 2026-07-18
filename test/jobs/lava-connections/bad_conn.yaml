@@ -1,0 +1,9 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Bad connection with missing fields
+owner: "<{ owner }>"
+
+# type is mandatory
+# type: generic
+
+conn_id: <{ prefix.conn }>/bad_conn

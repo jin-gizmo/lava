@@ -9,7 +9,8 @@ from typing import Any
 
 import boto3
 
-from lava.lavacore import IGNORE_FIELDS, LavaError
+from lava.exceptions import LavaError
+from lava.lavacore import IGNORE_FIELDS
 from lava.lib.misc import dict_check
 from lava.lib.smb import PySMBConnection, SMBProtocolConnection
 from .core import (

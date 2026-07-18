@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+# <% set sleep=jinja.templates[0].split('-')[-1] | replace('.yaml', '')  %>
+
+description: OK - sleep <{ sleep }>
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/sleep-<{ sleep }>
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: bash -c "echo Sleeping <{ sleep }>; sleep <{ sleep }>; echo Done sleep <{ sleep }>"
+
+x-lava-nocheck: joborphan

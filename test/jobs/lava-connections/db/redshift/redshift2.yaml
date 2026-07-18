@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Same as redshift but different db to simulate 2 clusters
+owner: "<{ owner }>"
+
+type: redshift
+
+conn_id: <{ prefix.conn }>/db/redshift/db2
+enabled: true
+
+host: <{ db.redshift.host }>
+port: <{ db.redshift.port }>
+ssl: true
+database: <{ db.redshift2.database }>
+
+user: <{ db.redshift.user }>
+password:  <{ prefix.ssm }>/redshift/<{ db.redshift.user }>/password

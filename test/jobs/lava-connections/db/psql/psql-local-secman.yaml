@@ -1,0 +1,12 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Local postgres database using secrets manager
+owner: "<{ owner }>"
+
+type: postgres
+
+conn_id: <{ prefix.conn }>/db/psql/local-secman
+enabled: true
+secret_id: /lava/<{ lava.realm.realm }>/psql-local
+
+ssl_mode: require

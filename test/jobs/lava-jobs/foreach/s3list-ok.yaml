@@ -1,0 +1,31 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - s3list foreach to show global propagation.
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/s3list/ok
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/action/state/globals
+
+globals:
+  from_the_parent: howdy
+  publisher: null
+
+parameters:
+  limit: 25
+  foreach:
+    type: s3list
+    bucket: '{{ utils.s3bucket(realm.s3_payloads) }}'
+    prefix: '{{ utils.s3key(realm.s3_payloads) }}/<{ prefix.payload }>/foreach.raw/'
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

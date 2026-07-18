@@ -14,6 +14,8 @@ from typing import Any
 
 import requests
 
+from lava.exceptions import LavaError
+
 __author__ = 'Murray Andrews'
 
 DEFAULT_COLOUR = '#bbbbbb'
@@ -62,7 +64,7 @@ class Slack:
         """Create a Slack handler instance."""
 
         if not conn_spec.get('enabled'):
-            raise Exception(f'Connection "{conn_spec["conn_id"]}" is not enabled')
+            raise LavaError(f'Connection "{conn_spec["conn_id"]}" is not enabled')
 
         if conn_spec.get('type') != 'slack':
             raise ValueError(f'Connection "{conn_spec["conn_id"]}" is not a slack connection')
@@ -76,7 +78,7 @@ class Slack:
         self.logger = logger if logger else logging.getLogger()
 
         if self.style not in self.STYLES:
-            raise ValueError(f'Connection "{conn_spec["conn_id"]}": Bad style {style}')
+            raise ValueError(f'Connection "{conn_spec["conn_id"]}": Bad style {self.style}')
 
     # --------------------------------------------------------------------------
     def send(
@@ -206,6 +208,6 @@ class Slack:
             timeout=REQUESTS_TIMEOUT,
         )
         if not response.ok:
-            raise Exception(f'Slack response {response.status_code} - {response.text}')
+            raise LavaError(f'Slack response {response.status_code} - {response.text}')
 
         self.logger.debug(f'Slack message sent to {self.conn_spec["webhook_url"]}')

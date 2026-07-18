@@ -2,8 +2,8 @@
 
 from os import environ
 
+from .exceptions import LavaError as LavaError
 from .lavacore import (
-    LavaError as LavaError,
     dispatch as dispatch,
     get_job_spec as get_job_spec,
     get_realm_info as get_realm_info,

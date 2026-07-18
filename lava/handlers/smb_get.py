@@ -11,8 +11,9 @@ from typing import Any
 import boto3
 import jinja2
 
+from lava import LavaError
 from lava.config import LOGNAME, STATUS_TIMEOUT, config
-from lava.lavacore import DEFER_ON_EXIT, LavaError, jinja_render_vars
+from lava.lavacore import DEFER_ON_EXIT, jinja_render_vars
 from lava.lib.aws import s3_split, s3_upload
 from lava.lib.datetime import duration_to_seconds
 from lava.lib.fileops import read_head_or_tail
@@ -162,8 +163,8 @@ def run(
 
     failed = False
     fail_reason = None
-    return_info = {'exit_status': 0, 'output': []}
-    job_result = {'exit_status': 0}
+    return_info: dict[str, Any] = {'exit_status': 0, 'output': []}
+    job_result: dict[str, Any] = {'exit_status': 0}
 
     try:
         with open(stdout_file, 'w') as stdout, open(stderr_file, 'w') as stderr:

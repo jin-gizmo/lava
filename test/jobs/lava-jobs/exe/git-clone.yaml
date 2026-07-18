@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Use a git connector to clone a repo
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/test-git
+
+payload: <{ prefix.payload }>/test-git.sh <{ git_test_repo }>
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  connections:
+    git: <{ prefix.conn }>/git
+
+x-lava-nocheck: joborphan

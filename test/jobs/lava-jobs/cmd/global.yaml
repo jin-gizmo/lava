@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - simple global injection
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/global
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo hello {{globals.who}}
+
+globals:
+  who: world
+
+x-lava-nocheck: joborphan

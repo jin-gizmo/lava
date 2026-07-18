@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Child job on wrong worker
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/wrong-worker
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/log/wrong-worker: null
+
+parameters:
+  workers: 2
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Worker mismatch: Expected core but got wrong"
+  marks:
+    - local

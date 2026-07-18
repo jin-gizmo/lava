@@ -1,0 +1,183 @@
+# This file contains parameters to be made available for Jinja rendering of
+# the deployable components.
+#
+# They are referenced in the lava deployment artefacts using a variation on
+# usual Jinja syntax:
+#
+#
+#   <{...}> instead of {{...}}
+#   <#...#> instead of {#...#}
+#   <%...%> instead of {% %}
+#
+#
+# For example <{ realm }> would insert the lava realm name and <{ prefix.job }>
+# would insert the job_id prefix for the project.
+
+# ------------------------------------------------------------------------------
+# WARNING: Keys in this section MUST be present or the framework will break.
+#          DO NOT delete any of them.
+
+# Target lava realm
+realm: "test"
+
+# Prefixes for ID fields in DynamoDB
+prefix:
+  job: "test"
+  payload: "test"
+  s3trigger: "test"
+  docker_repo: "lava/dev/test"
+  rule: lava.dev.test
+
+  # Non-standard extras
+  conn: "test"
+  # Realm is in here ...
+  ssm: "/lava/dev"
+
+docker:
+  # Base image for docker jobs
+  base_img: ghcr.io/jin-gizmo/lava/amzn2023/full
+
+  # This is the registry to which payload images for docker jobs are pushed
+  registry: 258928625002.dkr.ecr.ap-southeast-2.amazonaws.com
+  platform: host
+
+  ghcr:
+    # For GHCR. the user name itself is irrelevant except, maybe, as a local
+    # identifier. GHCR derives the user identity from the access token.
+    user: lava-test
+
+# ------------------------------------------------------------------------------
+# Keys in this section are suggested for use in lava DynamoDB record specs such
+# as job specs. The framework doesn't depend on these though.
+
+owner: "Murray"
+
+worker:
+  main: "core"
+
+dispatcher:
+  main: "--"
+  none: "--"
+
+schedule:
+  main: "--"
+
+# ------------------------------------------------------------------------------
+# Put whatever variables you want to be available when Jinja renders the lava
+# deployment artefacts.
+#
+email:
+  test1: murray@canistwo.com
+  test2: murray@canis2.com
+
+db:
+  common:
+    schema: lava
+
+  oracle:
+    name: ora01
+    host: ora01.cfxsihhrogvk.ap-southeast-2.rds.amazonaws.com
+    port: 1521
+    database: LAVA
+    user: master
+  oracle_local:
+    host: lava-test-oracle
+    port: 1521
+    service_name: FREEPDB1
+    user: lava
+  # Unspecified params use oracle_local ones
+  oracle_local_ssl:
+    port: 2484
+    ca_cert: test/services/oracle/oracle/oracle-server-cert.pem
+  redshift:
+    name: rsdev01
+    host: rsdev01.cvlnqxd58vbf.ap-southeast-2.redshift.amazonaws.com
+    port: 5439
+    database: db1
+    user: lava
+  # Same cluster as 1 but different DB to simulate 2 clusters. Assume same user info
+  redshift2:
+    database: db2
+  redshift_svl:
+    name: rsv01
+    host: rsv01.258928625002.ap-southeast-2.redshift-serverless.amazonaws.com
+    port: 5439
+    database: db1
+    user: lava
+    # For assume role tests of the connector
+    access_role: arn:aws:iam::258928625002:role/lava-dev-worker-core
+    external_id: /lava/dev/redshift-serverless/lava-dev-worker-core/external-id
+  mysql_aurora:
+    name: audev01
+    host: audev01-cluster.cluster-cfxsihhrogvk.ap-southeast-2.rds.amazonaws.com
+    port: 3306
+    database: lava
+    user: lava
+  mysql_local:
+    # This must be mapped to localhost to use on the host as well as in docker network
+    host: lava-test-mysql
+    port: 3306
+    database: lava
+    user: lava
+  psql_aurora:
+    name: pgdev01
+    host: pgdev01.cluster-cfxsihhrogvk.ap-southeast-2.rds.amazonaws.com
+    port: 5432
+    database: db1
+    user: lava
+  psql_local:
+    # This must be mapped to localhost to use on the host as well as in docker network
+    host: lava-test-postgres
+    port: 5432
+    database: lava
+    user: lava
+  mssql:
+    name: msdev01
+    host: msdev01.cfxsihhrogvk.ap-southeast-2.rds.amazonaws.com
+    port: 1433
+    database: canis2
+    user: admin
+  mssql_local:
+    # This must be mapped to localhost to use on the host as well as in docker network
+    host: lava-test-mssql
+    port: 1433
+    database: lava
+    user: lava
+
+slack:
+  webhook_url: (removed)
+
+smb:
+  label: local
+  name: lava-test-smb
+  host: lava-test-smb
+  volume: lavatest
+  # Empty string is root
+  dir: ""
+  remote_name: whatever
+  user: lava
+  port: 445
+
+# For Redshift unload jobs
+rsu:
+  insecure: true
+
+s3:
+  bucket:
+    realm: &realm_bucket lava.canis2.com
+    # For s3trigger tests
+    s3trigger: events.canis2.com
+    unload: *realm_bucket
+  prefix:
+    s3trigger: triggers
+
+realm_info:
+  s3_payloads: s3://lava.canis2.com/payloads
+  s3_temp: s3://lava.canis2.com/tmp
+
+sqs:
+  normal: lava-dev-test
+  fifo: lava-dev-test.fifo
+
+# For cloning tests
+git_test_repo: git@bitbucket.org:murrayandrews/s3it.git

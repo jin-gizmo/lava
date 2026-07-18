@@ -1,0 +1,20 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Microsoft SQL Server connection (RDS)
+owner: "<{ owner }>"
+
+type: mssql
+
+conn_id: <{ prefix.conn }>/db/mssql/base
+enabled: true
+
+host: <{ db.mssql.host }>
+port: <{ db.mssql.port }>
+timeout: 10
+
+database: <{ db.mssql.database }>
+
+user: <{ db.mssql.user }>
+password:  <{ prefix.ssm }>/mssql/<{ db.mssql.user }>/password
+
+driver: FreeTds

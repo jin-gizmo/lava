@@ -1,0 +1,60 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test on_success action setting multiple state entries with rendering
+
+type: cmd
+
+job_id: <{ prefix.job }>/general/state/action-secure
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo This job has an action to create state items with rendering
+
+globals:
+  hello: world
+
+on_success:
+  - action: state
+    state_id: test/string
+    type: secure
+    value: "Hello {{ globals.hello }}"
+
+  - action: state
+    state_id: test/string/ttl
+    type: secure
+    ttl: 1d
+    value: "Hello {{ globals.hello }} with TTL of 1d"
+
+  # Try a different KMS key
+  - action: state
+    state_id: test/dict/json
+    type: secure
+    kms_key: alias/lava-<{realm}>-user
+    value:
+      hello: "{{ globals.hello }}"
+      now: "{{ job.ts_start.isoformat() }}"
+
+  - action: state
+    state_id: test/dict/raw
+    type: secure
+    value:
+      hello: "{{ globals.hello }}"
+      now: "{{ job.ts_start.isoformat() }}"
+
+  - action: state
+    state_id: test/list/json
+    type: secure
+    value:
+      - "Hello {{ globals.hello }}"
+      - "Now {{ job.ts_start.isoformat() }}"
+
+  - action: state
+    state_id: test/list/raw
+    type: secure
+    value:
+      - "Hello {{ globals.hello }}"
+      - "Now {{ job.ts_start.isoformat() }}"
+
+x-lava-nocheck: joborphan

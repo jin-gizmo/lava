@@ -1,0 +1,31 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - query foreach to show global propagation.
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/query/ok
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/action/state/globals
+
+globals:
+  from_the_parent: howdy
+  publisher: null
+
+parameters:
+  foreach:
+    type: query
+    conn_id: <{ prefix.conn }>/db/sqlite3/test
+    query: |
+      SELECT * FROM custard ORDER BY id LIMIT 3
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

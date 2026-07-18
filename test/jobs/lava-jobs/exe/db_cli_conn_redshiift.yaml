@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Use a Redshift CLI connector (CLI) to check application name
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/db-cli-conn/redshift
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/db-cli-conn-redshift.sh
+
+parameters:
+  connections:
+    db: <{ prefix.conn }>/db/redshift/base
+
+x-lava-nocheck: joborphan

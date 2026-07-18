@@ -11,10 +11,11 @@ import boto3
 import jinja2
 import sqlparse
 
+from lava import LavaError
 from lava.config import LOGNAME, config
 from lava.connection import get_pysql_connection
 from lava.connection.core import make_application_name
-from lava.lavacore import LavaError, jinja_render_vars
+from lava.lavacore import jinja_render_vars
 from lava.lib.aws import s3_split, s3_upload
 from lava.lib.db import begin_transaction
 from lava.lib.misc import dict_check, str2bool

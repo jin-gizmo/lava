@@ -1,0 +1,13 @@
+Name: '/lava/<{ realm }>/psql-local'
+Description: Connection info and credentials for local docker based Postgres
+
+KmsKeyId: 'alias/lava-<{ realm }>-sys'
+
+SecretString: >-
+  {
+    "username": "<{ db.psql_local.user }>",
+    "password": "<{ environ.DB_LAVA_PASSWORD }>",
+    "host": "<{ db.psql_local.host }>",
+    "port": "<{ db.psql_local.port }>",
+    "dbname": "<{ db.psql_local.database }>"
+  }

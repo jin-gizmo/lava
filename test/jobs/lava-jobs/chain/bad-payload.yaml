@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Chain job with bad payload
+
+type: chain
+
+job_id: <{ prefix.job }>/chain/bad-payload
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  this: should be a list not a map
+
+# No globals
+globals: { }
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad payload: must be string or list"
+  marks:
+    - local

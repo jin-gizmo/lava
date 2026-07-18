@@ -1,0 +1,30 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Aurora MySQL delete load
+
+type: db_from_s3
+
+job_id: <{ prefix.job }>/db_from_s3/mysql-au/delete-nocols
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  db_conn_id: <{ prefix.conn }>/db/mysql/aurora
+
+  bucket: "{{ utils.s3bucket(realm.s3_payloads) }}"
+  key: "{{ utils.s3key(realm.s3_payloads) }}/<{ prefix.payload }>/data.raw/custard100.csv"
+
+  schema: <{ db.common.schema }>
+  table: vcustard
+
+  args:
+    - DELIMITER ','
+    - HEADER 1
+    - TERMINATOR '\n'
+  mode: delete
+
+x-lava-nocheck: joborphan

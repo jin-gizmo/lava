@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - All jobs allowed to fail and they all do fail
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/multi-can-fail-3
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/exe/exit-123:
+    - <{ prefix.job }>/cmd/fail-retry
+
+parameters:
+  can_fail: "*"
+  workers: 4
+
+x-lava-nocheck: joborphan

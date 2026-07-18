@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Dependent job allowed to fail
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/multi-can-fail-1
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/exe/exit-123:
+    - <{ prefix.job }>/cmd/sleep-2
+  <{ prefix.job }>/cmd/sleep-2:
+    - <{ prefix.job }>/cmd/sleep-1
+
+parameters:
+  can_fail: '*/exit-123'
+  workers: 4
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

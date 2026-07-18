@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Dispatch job with bad parameters
+
+type: dispatch
+
+job_id: <{ prefix.job }>/dispatch/bad-params
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  - <{ prefix.job }>/cmd/hello-world
+
+# No globals
+globals: {}
+
+parameters:
+  bad-param: true
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad job parameters: Unexpected keys: bad-param"
+  marks:
+    - local

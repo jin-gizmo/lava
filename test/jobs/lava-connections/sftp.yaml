@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: sFTP (SSH) connection.
+owner: "<{ owner }>"
+
+type: sftp
+
+conn_id: <{ prefix.conn }>/sftp
+enabled: true
+
+ssh_key: <{ prefix.ssm }>/canis2/ssh-key
+
+ssh_options:
+  - BatchMode=yes
+  - Compression=yes

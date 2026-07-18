@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Sleep 30 and generate CW metrics
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/sleep30
+
+cw_metrics: true
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: bash -c "x=30; echo Sleeping $x; sleep $x; echo Done"
+
+x-lava-nocheck: joborphan

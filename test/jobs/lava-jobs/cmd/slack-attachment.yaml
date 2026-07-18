@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+# <% set mode='attachment' %>
+
+description: OK - Slack via CLI (<{mode}> mode)
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/slack-<{mode}>
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  bash -c 'echo "{{job.description}}" | lava-slack
+  --bar-colour black
+  --from lava-test
+  --subject "Test run {{job.job_id}}@{{job.run_id}}"
+  --style <{mode}>
+  --conn-id "<{ prefix.conn }>/slack/base"
+  --realm {{realm.realm}}
+  '
+
+x-lava-nocheck: joborphan

@@ -11,10 +11,10 @@ from typing import Any
 import boto3
 
 from lava.config import config
+from lava.exceptions import LavaError
 from lava.lib.aws import s3_download, s3_split, s3_upload
 from .core import (
     LOG,
-    LavaError,
     cli_connector,
     db_credentials_getter,
     expand_sql_conn_spec,
@@ -41,7 +41,7 @@ then
     sleep 1
 fi
 
-sqlite3 -bail -batch "$@" "$db_file" || exit
+sqlite3 -init /dev/null -bail -batch "$@" "$db_file" || exit
 
 if [ "$s3_file" != "" ]
 then

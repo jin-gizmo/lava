@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Slack webhook connection
+owner: "<{ owner }>"
+
+type: slack
+
+conn_id: <{ prefix.conn }>/slack/base
+enabled: true
+
+colour: '#ff7711'
+from: Someone
+preamble: ':volcano:'
+style: attachment
+webhook_url: <{ slack.webhook_url }>

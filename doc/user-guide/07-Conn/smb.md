@@ -100,7 +100,7 @@ If the SMB connector key in the job's `connectors` map is `fserver`, usage is:
 ```bare
 usage: $LAVA_CONN_FSERVER [-J] [-l LEVEL] {put,get} ...
 
-sub-commands:
+subcommands:
   {put,get}
     put                 Copy a file to an SMB file share.
     get                 Copy a file from an SMB file share.
@@ -117,7 +117,7 @@ logging arguments:
 ```
 
 
-Usage for the `get` sub-command:
+Usage for the `get` subcommand:
 
 ```bare
 usage: $LAVA_CONN_FSERVER get [options] SMB-path file
@@ -133,7 +133,7 @@ optional arguments:
                         AWS KMS key to use for uploading data to S3.
 ```
 
-Usage for the `put` sub-command:
+Usage for the `put` subcommand:
 
 ```bare
 usage: $LAVA_CONN_FSERVER put [options] file SMB-path

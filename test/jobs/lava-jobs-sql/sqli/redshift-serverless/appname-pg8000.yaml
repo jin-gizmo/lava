@@ -1,0 +1,29 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Redshift check for application name in stl_connection_log (pg8000)
+
+type: sqli
+
+job_id: <{ prefix.job }>/sqli/redshift-svl/appname/pg8000
+
+payload: >-
+  SELECT rtrim(user_name)         as user,
+         substring(event, 1, 20) as event,
+         record_time,
+         rtrim(remote_host)       as host,
+         rtrim(auth_method)       as auth,
+         rtrim(ssl_version)       as ssl,
+         rtrim(application_name) as app_name
+  FROM sys_connection_log
+  WHERE user_name like '%lava%'
+  ORDER BY record_time desc
+  LIMIT 5;
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/redshift/svl
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Job dynamically enabled with a simple Jinja calculation
+
+type: log
+
+job_id: <{ prefix.job }>/enabled/jinja1
+
+worker: <{ worker.main }>
+enabled: '{{ 1+1 == 2 }}'
+owner: <{ owner }>
+
+payload: ignored
+
+x-lava-nocheck: joborphan

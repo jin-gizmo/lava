@@ -44,7 +44,7 @@ requiring significant computation. Jobs are dispatched to whichever fleet is
 specified in the job configuration.
 
 Workers can be AWS EC2 nodes but do not have to be. Any Linux node with Python
-3.9+ installed can be a worker.
+3.11+ installed can be a worker.
 
 EC2 based worker fleets can be set to auto scale if required.
 

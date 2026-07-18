@@ -31,14 +31,20 @@ from threading import Thread
 from typing import Any, Callable, NoReturn
 
 import boto3
-import dateutil.parser
 import docker
 import psutil
 
 from lava.config import LOGLEVEL, LOGNAME, __config__, config, config_load
 from lava.event import EventRecorder
 from lava.lava import run_job
-from lava.lavacore import DEFER_ON_EXIT, LavaError, ThreadMonitor, dispatch, get_job_spec
+from lava.lavacore import (
+    DEFER_ON_EXIT,
+    LavaError,
+    ThreadMonitor,
+    augment_job_spec,
+    dispatch,
+    get_job_spec,
+)
 from lava.lib.aws import ec2_instance_id
 from lava.lib.daemon import daemonify
 from lava.lib.datetime import duration_to_seconds, now_tz
@@ -854,12 +860,6 @@ class JobRunner(Thread):
             self.job_done()
             raise LavaError(f'Malformed dispatch message: {e}')
 
-        try:
-            job_dispatch['ts_dispatch'] = dateutil.parser.parse(job_dispatch['ts_dispatch'])
-        except ValueError as e:
-            self.job_done()
-            raise LavaError(f'Bad timestamp in dispatch message: {e}')
-
         job_id = job_dispatch['job_id']
         run_id = job_dispatch['run_id']
 
@@ -905,30 +905,11 @@ class JobRunner(Thread):
             self.job_done()
             raise LavaError(f'Job {job_id} ({run_id}): max_tries exceeded')
 
-        # ----------------------------------------
-        # Augment job spec and return it.
-        job_spec['parameters'].update(job_dispatch.get('parameters', {}))
-        job_spec['run_id'] = run_id
-        job_spec['ts_dispatch'] = job_dispatch['ts_dispatch']
-        job_spec['realm'] = self.realm
-        job_spec['globals'].update(job_dispatch.get('globals', {}))
-
-        # Convert lava's private global timestamps back into datetime. These
-        # could have been populated by an upstream dispatch job.
-
-        if 'lava' in job_spec['globals']:
-            lava_globals = job_spec['globals']['lava']
-            for ts in (
-                'master_start',
-                'master_ustart',
-                'parent_start',
-                'parent_ustart',
-            ):
-                if ts in lava_globals:
-                    try:
-                        lava_globals[ts] = dateutil.parser.isoparse(lava_globals[ts])
-                    except ValueError:
-                        raise LavaError(f'{ts}: Bad timestamp: {lava_globals[ts]}')
+        try:
+            job_spec = augment_job_spec(job_spec, job_dispatch, self.realm)
+        except LavaError:
+            self.job_done()
+            raise
 
         return job_spec
 
