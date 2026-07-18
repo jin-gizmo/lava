@@ -1,0 +1,30 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - SQLite3 custard select 10 rows with a unix dialect
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/sqlite3-local/custard-select-dialect-unix
+
+payload: <{ prefix.payload }>/sql.rsc/custard-select-noschema.sql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/sqlite3/test
+
+  dialect: unix
+  quoting: nonnumeric
+  delimiter: ","
+
+  transaction: true
+  vars:
+    limit: 10
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

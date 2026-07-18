@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/s3trigger.schema.yaml
+
+description: Bucket level wildcard trigger
+owner: "<{ owner }>"
+
+trigger_id: &trigger_id <{ prefix.s3trigger }>/star
+
+enabled: true
+
+bucket: <{ s3.bucket.s3trigger }>
+prefix: '*'
+
+job_id: <{ prefix.job }>/log/plain
+
+parameters:
+  bucket: '{{bucket}}'
+  event_type: '{{info.event_type}}'
+  event_time: '{{info.event_time}}'
+  key: '{{key}}'
+  source_ip: '{{info.source_ip}}'
+  trigger_id: *trigger_id
+  info: '{{info}}'
+  event: '{{event}}'

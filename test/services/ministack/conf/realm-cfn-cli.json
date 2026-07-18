@@ -1,0 +1,109 @@
+{
+    "Capabilities": [
+        "CAPABILITY_IAM",
+        "CAPABILITY_NAMED_IAM"
+    ],
+    "DisableRollback": false,
+    "EnableTerminationProtection": false,
+    "OnFailure": "ROLLBACK",
+    "Parameters": [
+        {
+            "ParameterKey": "createRealmsTable",
+            "ParameterValue": "Yes"
+        },
+        {
+            "ParameterKey": "lambdaMemory",
+            "ParameterValue": "180"
+        },
+        {
+            "ParameterKey": "kmsKeyAdmin",
+            "ParameterValue": "root"
+        },
+        {
+            "ParameterKey": "workerStopMinutes",
+            "ParameterValue": "5"
+        },
+        {
+            "ParameterKey": "writeCapacityStateTable",
+            "ParameterValue": "1"
+        },
+        {
+            "ParameterKey": "logBucketName",
+            "ParameterValue": "log"
+        },
+        {
+            "ParameterKey": "readCapacityDataTables",
+            "ParameterValue": "2"
+        },
+        {
+            "ParameterKey": "readCapacityStateTable",
+            "ParameterValue": "3"
+        },
+        {
+            "ParameterKey": "lavaGroupTag",
+            "ParameterValue": "test"
+        },
+        {
+            "ParameterKey": "tmpExpiryDays",
+            "ParameterValue": "3"
+        },
+        {
+            "ParameterKey": "lambdaTimeout",
+            "ParameterValue": "60"
+        },
+        {
+            "ParameterKey": "lavaBucketName",
+            "ParameterValue": "lava"
+        },
+        {
+            "ParameterKey": "writeCapacityEventTable",
+            "ParameterValue": "2"
+        },
+        {
+            "ParameterKey": "lambdaArchitecture",
+            "ParameterValue": "arm64"
+        },
+        {
+            "ParameterKey": "writeCapacityDataTables",
+            "ParameterValue": "1"
+        },
+        {
+            "ParameterKey": "lambdaMetricsSchedule",
+            "ParameterValue": "DISABLED"
+        },
+        {
+            "ParameterKey": "s3CodePrefix",
+            "ParameterValue": "lava"
+        },
+        {
+            "ParameterKey": "lambdaRuntime",
+            "ParameterValue": "python3.11"
+        },
+        {
+            "ParameterKey": "realm",
+            "ParameterValue": "test"
+        },
+        {
+            "ParameterKey": "s3CodeBucket",
+            "ParameterValue": "code"
+        },
+        {
+            "ParameterKey": "readCapacityEventTable",
+            "ParameterValue": "1"
+        },
+        {
+            "ParameterKey": "autoscalingHeartbeatMinutes",
+            "ParameterValue": "5"
+        },
+        {
+            "ParameterKey": "lambdaVersion",
+            "ParameterValue": "${LAVA_VERSION}"
+        }
+    ],
+    "RetainExceptOnCreate": true,
+    "RollbackConfiguration": {
+        "RollbackTriggers": []
+    },
+    "Tags": [],
+    "TemplateURL": "http://s3.amazonaws.com/cfn/lava-realm.cfn.json"
+}

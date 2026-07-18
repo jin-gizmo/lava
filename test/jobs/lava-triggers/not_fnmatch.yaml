@@ -1,0 +1,24 @@
+# Test for fnmatch
+$schema: http://127.0.0.1:8000/schemas/latest/s3trigger.schema.yaml
+
+description: "Test filename matching"
+owner: "<{ owner }>"
+
+trigger_id: &trigger_id <{ prefix.s3trigger }>/not_fnmatch
+
+enabled: true
+
+bucket: '<{ s3.bucket.s3trigger }>'
+prefix: '*'
+
+if_not_fnmatch: '*frog*'
+
+job_id: <{ prefix.job }>/log/plain
+
+parameters:
+  bk: '{{bucket}}'
+  eventName: '{{event.eventName}}'
+  eventTime: '{{event.eventTime}}'
+  key: '{{key}}'
+  sourceIP: '{{event.requestParameters.sourceIPAddress}}'
+  trigger_id: *trigger_id

@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Inject some environment vars from the host environment into a docker container
+# run.
+#
+# Usage: docker-run-env regex ... -- <docker run args>
+#
+# e.g. docker-run-env '^AWS' -- docker run -it --rm ubuntu env
+
+TMP=$(mktemp -d)
+trap '/bin/rm -rf "$TMP"' 0
+
+touch "$TMP/env"
+
+while [ "$1" != "" -a "$1" != "--" ]
+do
+	env | grep "$1" >> "$TMP/env"
+	shift
+done
+
+[ "$1" != "--" ] && echo "$0: Expected \"--\" followed by docker run args" && exit 1
+shift
+[ $# -eq 0 ] && echo "$0: Expected docker run args" && exit 1
+
+docker run --env-file "$TMP/env" "$@"

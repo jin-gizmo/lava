@@ -1,0 +1,12 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Aurora MySQL with AWS security manager auth
+owner: "<{ owner }>"
+
+type: mysql-aurora
+
+conn_id: <{ prefix.conn }>/db/mysql/aurora-sm
+enabled: true
+secret_id: /lava/<{ lava.realm.realm }>/<{ db.mysql_aurora.name }>/secman
+
+ssl: true

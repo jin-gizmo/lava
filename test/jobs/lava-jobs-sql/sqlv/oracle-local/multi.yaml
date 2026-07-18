@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Oracle SQL*Plus job with multiple queries in same file
+
+type: sqlv
+
+job_id: <{ prefix.job }>/sqlv/oracle-local/multi
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/onecol-multi.sql
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/oracle/local
+  timeout: 30s
+  vars:
+    table: sqlv_oracle_multi
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

@@ -1,0 +1,33 @@
+{
+    "cookiecutter": {
+        "_checkout": null,
+        "_copy_without_render": [
+            "lava-*",
+            "misc",
+            "bin",
+            "templates",
+            "*.tpl"
+        ],
+        "_output_dir": "/private/tmp/lava-framework.6442/proj",
+        "_repo_dir": "/var/folders/34/yp3fcjdj1455gjg9_fbygm9h0000gn/T/tmpng72zo9q/cookiecutter",
+        "_template": "../lava-job-framework-8.3.0rc3.zip",
+        "_version": "-- auto injected --",
+        "config_checks": "strict",
+        "description": "Lava test jobs",
+        "docker_platform": "host",
+        "docker_prefix": "lava/dev/test",
+        "docker_registry": "",
+        "environment": "dev",
+        "include_lava_libs": "no",
+        "job_prefix": "test",
+        "jupyter_support": "no",
+        "owner": "Murray",
+        "payload_prefix": "test",
+        "pip_index_url": "",
+        "project_dir": "jobs",
+        "project_name": "jobs",
+        "realm": "dev",
+        "rule_prefix": "lava.dev.jobs",
+        "s3trigger_prefix": "test"
+    }
+}

@@ -1,0 +1,16 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: A network location / endpoint
+
+description: A network location is a host name + port number.
+
+type: object
+properties:
+  host:
+    description: The database host DNS name or IP address.
+    type: string
+    minLength: 1
+
+  port:
+    description: The database port number.
+    $ref: '#/$defs/common/posint'

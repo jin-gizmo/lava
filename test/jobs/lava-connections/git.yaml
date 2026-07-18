@@ -1,0 +1,16 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: GIT (SSH) connection
+owner: "<{ owner }>"
+
+type: git
+
+conn_id: <{ prefix.conn }>/git
+enabled: true
+
+ssh_key: <{ prefix.ssm }>/git/ssh-key
+
+ssh_options:
+  - StrictHostKeyChecking=no
+  - BatchMode=yes
+  - Compression=yes

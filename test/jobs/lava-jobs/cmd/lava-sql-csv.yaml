@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Extract a CSV to a file using lava-sql
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/lava-sql-csv
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  /bin/sh -c
+  "
+  echo 'SELECT * FROM CUSTARD LIMIT 10' |
+  lava-sql
+  --format csv
+  --header
+  --conn-id '<{ prefix.conn }>/db/sqlite3/test'
+  -o '{{ realm.s3_temp }}/{{ job.job_id }}/output.csv'
+  -
+  "
+
+event_log: Output file is {{ realm.s3_temp }}/{{ job.job_id }}/output.csv
+
+x-lava-nocheck: joborphan

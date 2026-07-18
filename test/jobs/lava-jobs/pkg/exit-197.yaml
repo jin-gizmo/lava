@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - pkg job dies with non-zero status
+
+type: pkg
+
+job_id: <{ prefix.job }>/pkg/exit-197
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/exit.zip
+
+parameters:
+  command: exit.sh {{vars.status}}
+  vars:
+    status: 197
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: 'Failed with exit status 197'
+  marks:
+    - local

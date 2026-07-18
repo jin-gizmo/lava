@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Try to dispatch unknown job
+
+type: dispatch
+
+job_id: <{ prefix.job }>/dispatch/no-such-job
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+# Try the string variant of payload
+payload: no-such-job
+
+# No globals
+globals: {}
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "no-such-job: No such job"
+  marks:
+    - local

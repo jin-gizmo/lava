@@ -24,7 +24,7 @@ def run(
     tmpdir: str,
     s3tmp: str,
     dev_mode: bool = False,
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> dict[str, Any]:
     """
     Log the job specification at level ``INFO``.

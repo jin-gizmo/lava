@@ -1,0 +1,19 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Additional generic test infrastructure components",
+  "Resources": {
+    "s3PublicBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "public",
+        "AccessControl": "PublicRead",
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": false,
+          "BlockPublicPolicy": false,
+          "IgnorePublicAcls": false,
+          "RestrictPublicBuckets": false
+        }
+      }
+    }
+  }
+}

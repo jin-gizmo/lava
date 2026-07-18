@@ -61,7 +61,7 @@ setup(
     url=REPO_URL,
     scripts=find_scripts('bin'),
     license='BSD-3-Clause',
-    author='Murray Andrews, Chris Donoghue, Alex Bool',
+    author='Murray Andrews, Chris Donoghue, Alex Boul',
     description='AWS based distributed scheduler and job runner',
     long_description=long_description,
     long_description_content_type='text/markdown',

@@ -153,10 +153,17 @@ driver for more details.
 |-|-|
 |MSSQL|[pyodbc](https://pypi.org/project/pyodbc/)|
 |MySQL|[PyMySQL](https://pymysql.readthedocs.io/en/latest/)|
-|Oracle|[cx\_Oracle](https://oracle.github.io/python-cx_Oracle/)|
+|Oracle|[python-oracledb](https://oracle.github.io/python-oracledb/)|
 |Postgres|[pg8000](https://github.com/tlocke/pg8000)|
 |Redshift|[pg8000](https://github.com/tlocke/pg8000)|
 |SQLite3|[sqlite3](https://docs.python.org/3/library/sqlite3.html)|
+
+!!! note
+    Prior to v8.3.0 (Mauna Loa), the now obsolete cx_Oracle driver was used for
+    Oracle. This has now changed to the
+    [python-oracledb](https://oracle.github.io/python-oracledb/) driver. Oracle
+    *claims* it is backward compatible. See the [Oracle
+    connector](#connector-type-oracle) for more information.
 
 Python code either must be sophisticated enough to adapt to the DBAPI 2.0
 variations at run-time or must have specific knowledge of which driver is being

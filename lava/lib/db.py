@@ -370,14 +370,12 @@ class Database:
         t = f'{schema}.{table}'
 
         if t not in self._columns:
-            self.cursor.execute(
-                f"""
+            self.cursor.execute(f"""
                 SELECT column_name
                 FROM information_schema.columns
                 WHERE table_schema = '{schema}'
                   AND table_name = '{table}'
-                """  # noqa: S608
-            )
+                """)  # noqa: S608
             self._columns[t] = [row[0].lower() for row in self.cursor.fetchall()]
 
         return self._columns[t]
@@ -1265,15 +1263,13 @@ class Redshift(Database):
         t = f'{schema}.{table}'
 
         if t not in self._columns:
-            self.cursor.execute(
-                f"""
+            self.cursor.execute(f"""
                 SELECT column_name FROM svv_columns
                 WHERE table_catalog=CURRENT_DATABASE()
                   AND table_schema = '{schema}'
                   AND table_name = '{table}'
                   ORDER BY ordinal_position
-                """  # noqa: S608
-            )
+                """)  # noqa: S608
             self._columns[t] = [row[0].lower() for row in self.cursor.fetchall()]
 
         return self._columns[t]
@@ -1646,6 +1642,8 @@ class Sqlite3(Database):
 class Oracle(Database):
     """Model an Oracle database."""
 
+    NLS_RE = re.compile(r"^(?P<name>NLS_\w+)\s*=\s*'[^']*'\s*$", re.IGNORECASE)
+
     COPY_PARAMS = {
         'DELIMITER',
         'DOUBLEQUOTE',
@@ -1768,6 +1766,38 @@ class Oracle(Database):
         return self._columns[table]
 
     # --------------------------------------------------------------------------
+    @classmethod
+    def groom_copy_args(cls, copy_args: list[str]) -> tuple[dict[str, str], dict[str, str]]:
+        """
+        Split the copy args into non-NLS args and NLS args.
+
+        Some validation is also done on the args.
+
+        :param copy_args: List of copy args for a copy_from_s3() operation.
+        :return:        A tuple (dict of non-NLS args, NLS args). Each component
+                        is a dictionary keyed on the argument name and the value
+                        is the full string from the original args list.
+
+        :raises ValueError: If any of the args are invalid.
+        """
+
+        non_nls_args = {}
+        nls_args = {}
+
+        for p in copy_args:
+            if p.lower().startswith('nls_'):
+                if not (m := cls.NLS_RE.match(p)):
+                    raise ValueError(f'Invalid NLS COPY argument: {p}')
+                nls_args[m.group('name')] = p
+                continue
+            non_nls_args[p.split()[0].upper()] = p
+
+        bad_args = set(non_nls_args) - cls.COPY_PARAMS
+        if bad_args:
+            raise ValueError(f'Invalid COPY arguments: {", ".join(bad_args)}')
+        return non_nls_args, nls_args
+
+    # --------------------------------------------------------------------------
     def copy_from_s3(
         self,
         schema: str,
@@ -1805,28 +1835,11 @@ class Oracle(Database):
         :return:                A list of strings indicating steps taken.
         """
 
-        copy_args_dict = {p.split()[0].upper(): p for p in copy_args} if copy_args else {}
-        bad_args = set(copy_args_dict) - self.COPY_PARAMS
-        if bad_args:
-            raise ValueError(f'Invalid COPY arguments: {", ".join(bad_args)}')
         events = []
+        copy_args_dict, nls_args_dict = self.groom_copy_args(copy_args)
 
         # ----------------------------------------
-        # Prepare the INSERT statement.
-
-        if not load_columns:
-            load_columns = self.columns(schema, table)
-        column_count = len(load_columns)
-
-        insert_sql = 'INSERT INTO {target}({col_list}) VALUES ({placeholders})'.format(
-            target=self.object_name(schema, table),
-            col_list=','.join(self.object_name(c.split(' ', 1)[0]) for c in load_columns),
-            placeholders=','.join(f':v{n}' for n in range(1, column_count + 1)),
-        )
-        self.logger.debug('SQL: %s', insert_sql)
-
-        # ----------------------------------------
-        # Fake manifest handling
+        # Fake manifest handling by doing it ourselves. DB itself can't do.
 
         if 'MANIFEST' in copy_args_dict:
             self.logger.debug(f'Reading manifest s3://{bucket}/{key}')
@@ -1866,6 +1879,32 @@ class Oracle(Database):
                 raise ValueError(f'Bad quoting style: {m.group(1)}')
 
         self.logger.debug('CSV format params: %s', csv_format)
+
+        # ----------------------------------------
+        # Apply the NLS_* session parameters
+        if nls_args_dict:
+            for v in nls_args_dict.values():
+                sql = f'ALTER SESSION SET {v}'
+                self.logger.debug(sql)
+                try:
+                    self.cursor.execute(sql)
+                except Exception as e:
+                    raise Exception(f'{v}: {e}') from e
+                self.logger.debug('OK: %s', sql)
+
+        # ----------------------------------------
+        # Prepare the INSERT statement.
+
+        if not load_columns:
+            load_columns = self.columns(schema, table)
+        column_count = len(load_columns)
+
+        insert_sql = 'INSERT INTO {target}({col_list}) VALUES ({placeholders})'.format(
+            target=self.object_name(schema, table),
+            col_list=','.join(self.object_name(c.split(' ', 1)[0]) for c in load_columns),
+            placeholders=','.join(f':v{n}' for n in range(1, column_count + 1)),
+        )
+        self.logger.debug('SQL: %s', insert_sql)
 
         # ----------------------------------------
         # Load our list of objects.
@@ -2309,7 +2348,7 @@ def begin_transaction(conn, cursor=None) -> None:
     """
 
     try:
-        # Plan A. Works for cx_Oracle and pymysql
+        # Plan A. Works for cx_Oracle (and oracledb hopefully) and pymysql
         # Won't work for pg8000 or SQLite3 but plan C should.
         conn.begin()
     except AttributeError:

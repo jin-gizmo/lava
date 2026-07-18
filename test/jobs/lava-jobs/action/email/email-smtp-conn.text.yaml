@@ -1,0 +1,30 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Action to send plaintext email using an SMTP email connector
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/email/smtp-conn-text
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo This job uses an action to send a plaintext email using an SMTP email connector
+
+parameters:
+  args:
+    - <{ prefix.conn }>/email/ses
+    - email connector
+
+on_success:
+  - action: email
+    email_conn: <{ prefix.conn }>/email/smtp-local
+    to: <{ email.test1 }>
+    subject: "{{ job.description }}"
+    message: |
+      Job ID: {{ job.job_id }}
+      Run ID: {{ job.run_id }}
+      Start:  {{ ustart }}
+
+x-lava-nocheck: joborphan

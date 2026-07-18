@@ -1,0 +1,14 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: SQLite3 connector -- mostly for testing.
+owner: "<{ owner }>"
+
+type: sqlite3
+
+conn_id: <{ prefix.conn }>/db/sqlite3/test
+enabled: true
+
+host: <{ realm_info.s3_payloads }>/<{ prefix.payload }>/data.raw/test.sqlite3
+port: 0
+
+user: not used

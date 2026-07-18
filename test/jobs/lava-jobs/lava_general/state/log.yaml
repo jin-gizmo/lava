@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Log job -- should see filled in state items
+
+x-readme: Make sure general/state/action has run first
+
+type: log
+
+job_id: <{ prefix.job }>/general/state/log
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+payload: --
+
+state:
+  test/string: should-not-see-this
+  no-such-item: should-see-this
+  test/dict/json: this-should-be-replaced-with-an-object
+
+x-lava-nocheck: joborphan

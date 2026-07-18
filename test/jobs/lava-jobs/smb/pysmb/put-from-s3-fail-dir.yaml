@@ -1,0 +1,30 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - smb_put - target is dir
+
+type: smb_put
+
+job_id: <{ prefix.job }>/smb/pysmb/put-from-s3-fail-dir
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  conn_id: <{ prefix.conn }>/smb/<{ smb.name }>/pysmb
+
+  # Source file
+  file: "{{ realm.s3_payloads }}/<{ prefix.payload }>/data.raw/custard100.csv"
+
+  # Target
+  share_name: <{ smb.volume }>
+  path: "<{ smb.dir }>"
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  error_pattern: "Failed with exit status 1"
+  marks:
+    - local

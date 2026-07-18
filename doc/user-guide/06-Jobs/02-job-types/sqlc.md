@@ -15,8 +15,10 @@ specific capabilities of the native CLI are critical. In most cases, one of the
 [sql](#job-type-sql), [sqli](#job-type-sqli) or [sqlv](#job-type-sqlv) job types
 will be more appropriate.
 
-!!! tip
-    For help selecting the appropriate SQL job type, See
+!!! Warning
+    The **sqlc** job type should be a last resort when the other SQL job types
+    cannot do what you need. This is exceptionally rare. For help selecting the
+    appropriate SQL job type, See
     [Choosing an SQL Job Type](#choosing-an-sql-job-type).
 
 

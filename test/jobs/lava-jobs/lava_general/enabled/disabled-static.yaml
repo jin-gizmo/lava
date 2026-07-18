@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Job statically disabled.
+
+type: log
+
+job_id: <{ prefix.job }>/disabled/static
+
+worker: <{ worker.main }>
+enabled: false
+owner: <{ owner }>
+
+payload: ignored
+
+x-lava-nocheck: joborphan

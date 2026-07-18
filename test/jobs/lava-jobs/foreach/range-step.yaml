@@ -1,0 +1,32 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - range foreach with steps
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/range/step
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/action/state/globals
+
+globals:
+  from_the_parent: howdy
+  publisher: null
+
+parameters:
+  foreach:
+    type: range
+    name: counter
+    start: 10
+    stop: 40
+    step: 10
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

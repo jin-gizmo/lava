@@ -24,7 +24,7 @@ directly to obtain either a DBAPI 2.0 connection object or an SQLAlchemy engine
 object. Refer to [Developing Lava Jobs](#developing-lava-jobs)
 for more information.
 
-### Database Authentication Using AWS SSM Parameter Store { data-toc-label="Authentication Using SSM Parameters" }
+### Database Authentication Using AWS SSM Parameter Store { data-toc-label="Auth Using SSM Parameters" }
 
 The database connectors typically require a number of connection and
 authentication parameters to be specified, such as:
@@ -42,7 +42,7 @@ The standard lava worker IAM policies will provide read access to SSM parameters
 with names of the form `/lava/<REALM>/*`. These must be encrypted with the realm
 KMS key `lava-<REALM>-sys`.
 
-### Database Authentication Using AWS Secrets Manager { data-toc-label="Authentication Using Secrets Manager" }
+### Database Authentication Using AWS Secrets Manager { data-toc-label="Auth Using Secrets Manager" }
 
 The lava database connectors support the AWS Secrets Manager as an alternative
 source for some of the connection specification parameters where they are not
@@ -71,7 +71,7 @@ The standard lava worker IAM policies will provide read access to secrets with
 names of the form `/lava/<REALM>/*`. These must be encrypted with the realm KMS
 key `lava-<REALM>-sys`.
 
-### Database Authentication Using IAM Credential Generation { data-toc-label="Authentication Using IAM" }
+### Database Authentication Using IAM Credential Generation { data-toc-label="Auth Using IAM" }
 
 Some AWS database types provide an IAM based mechanism for obtaining temporary
 database credentials. Lava supports this mechanism for some connectors. The
@@ -80,7 +80,52 @@ any AWS Secrets Manager components) does not contain a password.
 
 Refer to individual connector details for more information.
 
-### Database Client Application Identification { data-toc-label="Client Application Identification" }
+### SSL/TLS for Database Connectors { data-toc-label="SSL/TLS" }
+
+!!! note
+    SSL / TLS support for database connectors has been significantly improved
+    across most of the database connectors in v8.3 (Mauna Loa).
+
+Some database connectors support the use of SSL/TLS for connection encryption
+and, optionally, host authentication. SSL/TLS based client authentication is not
+supported.
+
+Implementation details may vary by database and driver type. Unless otherwise
+indicated in the sections on individual connectors, those that do support
+SSL/TLS use the following attributes in the connection specification.
+
+*   `ssl_mode`: If set, enable SSL/TLS. If not set, SSL/TLS is not explicitly
+    enabled by lava. It is up to the underlying driver, which may, or may not,
+    use SSL/TLS by default. You should assume the worst.
+
+    The value of `ssl_mode` must be one of the following.
+
+    |Value|Description|
+    |-|-|
+    |require|SSL/TLS will be enabled. Neither the host certificate nor the hostname will be verified. This was the mode supported on SSL enabled connections prior to v8.3 (Mauna Loa).|
+    |verify-ca|SSL/TLS will be enabled. The host certificate will be validated but the hostname will not be.|
+    |verify-full|SSL/TLS will be enabled. The host certificate and hostname will be validated.|
+
+
+*   `ssl_ca_file`: The location of a file containing a host certificate in PEM
+    format for the database server. This can be a local file or a URI. Any of
+    the schemes supported by [smart_open](https://pypi.org/project/smart-open/)
+    can be used (e.g. s3://, http://, https:// etc).
+
+    This would generally only be needed for privately issued, or self-signed,
+    certificates.
+
+*   `ssl`: (Deprecated) This is a boolean value indicating whether SSL/TLS
+    should be enabled. It was not consistently available across database
+    connector types. It is the equivalent of `ssl_mode=require` and should no
+    longer be used. It has been retained (for now) for backward compatibility.
+
+*   `ca_cert`: (Deprecated) This is an alias for `ssl_ca_file`. It, too, was not
+    consistently available across database connector types and should no longer
+    be used. Use `ssl_ca_file` instead.
+
+
+### Database Client Application Identification { data-toc-label="Client Identification" }
 
 Some database types support a mechanism for the client to identify itself when
 connecting, in addition to the user authentication. This information may then be
@@ -115,16 +160,16 @@ modifying jobs or additional configuration.
 Lava's support for a client identification mechanism is summarised in the
 following table:
 
-|       Job Type        | MS SQL | MySQL | Oracle | Postgres | Redshift | SQLite |
-|-----------------------|--------|-------|--------|----------|----------|--------|
-| [sql](#job-type-sql)  | Yes    | Yes   |        | Yes      | Yes      |        |
-| [sqli](#job-type-sqli)| Yes    | Yes   |        | Yes      | Yes      |        |
-| [sqlc](#job-type-sqlc)|        |       |        | Yes      | Yes      |        |
-| [sqlv](#job-type-sqlv)| Yes    | Yes   |        | Yes      | Yes      |        |
-| [db_from_s3](#job-type-db_from_s3)| Yes    | Yes   |        | Yes      | Yes      |        |
-| [redshift_unload](#job-type-redshift_unload)|        |       |        |          | Yes      |        |
-| lava-sql CLI    | (1)    | (1)   |        | (1)      | (1)      |        |
-| Lava API        | (2)    | (2)   |        | (2)      | (2)      |        |
+|       Job / Connection Type       | [MS SQL](#client-application-identification-for-sql-server-ms-sql) | [MySQL](#client-application-identification-for-mysql) | [Oracle](#client-application-identification-for-oracle) | [Postgres](#client-application-identification-for-postgres) | [Redshift](#client-application-identification-for-redshift) |
+|-----------------------|--------|-------|--------|----------|----------|
+| [sql](#job-type-sql)  | Yes    | Yes   | Yes | Yes      | Yes      |
+| [sqli](#job-type-sqli)| Yes    | Yes   | Yes | Yes      | Yes      |
+| [sqlc](#job-type-sqlc)|        |       |        | Yes      | Yes      |
+| [sqlv](#job-type-sqlv)| Yes    | Yes   | Yes | Yes      | Yes      |
+| [db_from_s3](#job-type-db_from_s3)| Yes    | Yes   | Yes | Yes      | Yes      |
+| [redshift_unload](#job-type-redshift_unload)|        |       |        |          | Yes      |
+| [lava-sql CLI](#lava-sql-utility) | (1)    | (1)   | (1) | (1)      | (1)      |
+| [Lava API](#connection-handling-for-python-based-jobs) | (2)    | (2)   | (2) | (2)      | (2)      |
 
 Notes:
 
@@ -224,3 +269,41 @@ SELECT hostname, program_name, loginame, cmd
 FROM sys.sysprocesses
 WHERE loginame != 'rdsa';
 ```
+
+#### Client Application Identification for Oracle
+
+!!! note
+    New in v8.3 (Mauna Loa).
+
+Oracle provides the
+[DBMS_APPLICATION_INFO](https://docs.oracle.com/en/database/oracle/oracle-database/26/arpls/DBMS_APPLICATION_INFO.html)
+and
+[DBMS_SESSION](https://docs.oracle.com/en/database/oracle/oracle-database/26/arpls/DBMS_SESSION.html)
+packages to assist with client identification and tracing. These include the
+following parameters:
+
+| Parameter         | Description                                                  | Lava Usage                                                   |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ACTION            | The current action within the module (max 32 bytes).         | Not used.                                                    |
+| CLIENT_INFO       | An arbitrary string identifying the client (max 64 bytes).   | Set to the lava version and [python-oracledb](https://oracle.github.io/python-oracledb/) version. |
+| CLIENT_IDENTIFIER | Case-sensitive application-specific identifier for the current database session (max 64 bytes). | Set to the lava provided client identifier.                  |
+| MODULE            | The module/application name (max 48 bytes).                  | Set to `lava`.                                               |
+
+!!! note
+    The descriptions above are indicative. These parameters are primarily for
+    user interpretation and naming is a bit arbitrary.
+
+DBAs can use these parameter values to query activity tables / views such as
+`V$SESSION`.
+
+Within a session, the current settings for these parameters can be obtained thus:
+
+```sql
+SELECT
+    SYS_CONTEXT('USERENV', 'MODULE')            AS module,
+    SYS_CONTEXT('USERENV', 'ACTION')            AS action,
+    SYS_CONTEXT('USERENV', 'CLIENT_INFO')       AS client_info,
+    SYS_CONTEXT('USERENV', 'CLIENT_IDENTIFIER') AS client_identifier
+FROM dual;
+```
+

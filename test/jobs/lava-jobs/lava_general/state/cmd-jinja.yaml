@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test jinja rendering of state.
+
+type: cmd
+
+job_id: <{ prefix.job }>/state/cmd/jinja
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo
+
+state:
+  test/string: null
+  test/dict/json: {}
+
+parameters:
+  args:
+    - "Unknown state is '{{ state.unknown }}'"
+    - "test/string='{{ state['test/string'] }}'"
+    - "test/dict/json.hello='{{ state['test/dict/json'].hello }}'"
+
+x-lava-nocheck: joborphan

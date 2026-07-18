@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Basic Redshift Serverless connection
+owner: "<{ owner }>"
+
+type: redshift-serverless
+
+conn_id: <{ prefix.conn }>/db/redshift/svl
+enabled: true
+
+host: <{ db.redshift_svl.host }>
+port: <{ db.redshift_svl.port }>
+ssl: true
+ssl_mode: verify-full
+database: <{ db.redshift_svl.database }>
+
+user: <{ db.redshift.user }>
+password:  <{ prefix.ssm }>/redshift/<{ db.redshift_svl.user }>/password

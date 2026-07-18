@@ -1,0 +1,39 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Local Postgres append load (with cols)
+
+type: db_from_s3
+
+job_id: <{ prefix.job }>/db_from_s3/psql-local/append-cols
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  db_conn_id: <{ prefix.conn }>/db/psql/local
+
+  bucket: "{{ utils.s3bucket(realm.s3_payloads) }}"
+  key: "{{ utils.s3key(realm.s3_payloads) }}/<{ prefix.payload }>/data.raw/custard100.csv"
+
+  schema: <{ db.common.schema }>
+  table: custard
+
+  mode: append
+
+  args:
+    - FORMAT CSV
+    - DELIMITER ','
+    - HEADER
+
+  # <% from '_common/columns.jinja' import columns_custard %>
+  columns: <{ columns_custard }>
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

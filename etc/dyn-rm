@@ -1,0 +1,211 @@
+#!/usr/bin/env python3
+
+"""
+Delete items in a DynamoDB table whose partition key matches a glob-style pattern.
+
+Only string-typed partition keys are supported.
+"""
+
+from __future__ import annotations
+
+import argparse
+import fnmatch
+import re
+import sys
+from collections.abc import Iterable, Iterator
+from pathlib import Path
+from typing import Any
+
+import boto3
+from botocore.client import BaseClient
+
+PROG = Path(sys.argv[0]).stem
+
+DELETE_BATCH_SIZE = 25  # This is DynamoDBs limit
+# How many matched keys to show as a sample in the summary output.
+PREVIEW_SIZE = 20
+
+
+# ------------------------------------------------------------------------------
+def chunked(items: Iterable[Any], size: int) -> Iterator[list[Any]]:
+    """
+    Group an iterator into lists of at most `size` items.
+
+    The whole iterator; the final group may be shorter than `size`.
+    """
+
+    chunk = []
+    for item in items:
+        chunk.append(item)
+        if len(chunk) == size:
+            yield chunk
+            chunk = []
+
+    if chunk:
+        yield chunk
+
+
+# ------------------------------------------------------------------------------
+def get_key_schema(client: Any, table_name: str) -> tuple[str, str | None]:
+    """Get (partition_key_name, sort_key_name_or_None) for a table."""
+
+    desc = client.describe_table(TableName=table_name)['Table']
+    hash_key = None
+    range_key = None
+    for key in desc['KeySchema']:
+        if key['KeyType'] == 'HASH':
+            hash_key = key['AttributeName']
+        elif key['KeyType'] == 'RANGE':
+            range_key = key['AttributeName']
+        else:
+            raise RuntimeError(f'Unknown DynamoDB key type: {key["KeyType"]}')
+    if hash_key is None:
+        raise RuntimeError(f'Could not determine partition key for table {table_name!r}')
+    hash_key: str
+    return hash_key, range_key
+
+
+# ------------------------------------------------------------------------------
+def iter_matching_keys(
+    dyn_client: BaseClient,
+    table_name: str,
+    hash_key: str,
+    range_key: str | None,
+    patterns: list[str],
+    ignore_case: bool,
+) -> Iterator[dict[str, dict[str, str]]]:
+    """
+    Yield key dicts for items whose partition key matches the glob pattern.
+
+    Yielded items are in weird DynamoDB format.
+    """
+
+    projection = hash_key if range_key is None else f'{hash_key}, {range_key}'
+    matchers = [
+        re.compile(fnmatch.translate(p), re.IGNORECASE if ignore_case else re.NOFLAG)
+        for p in patterns
+    ]
+
+    paginator = dyn_client.get_paginator('scan')
+    for page in paginator.paginate(TableName=table_name, ProjectionExpression=projection):
+        for item in page.get('Items', []):
+            hk_attr = item.get(hash_key, {})
+            hk_value = hk_attr.get('S')
+            if hk_value is None:
+                # Partition key isn't a string type; can't glob it.
+                continue
+            if any(m.match(hk_value) for m in matchers):
+                key = {hash_key: item[hash_key]}
+                if range_key is not None:
+                    key[range_key] = item[range_key]
+                yield key
+
+
+# ------------------------------------------------------------------------------
+def delete_keys(
+    dyn_client: BaseClient,
+    table_name: str,
+    keys: Iterable[dict[str, dict[str, str]]],
+    dry_run: bool,
+) -> tuple[int, list[dict[str, dict[str, str]]]]:
+    """
+    Batch delete the given keys.
+
+    Only one batch is held in memory at a time.
+
+    :return:    The total count deleted (or that would be deleted, in dry-run mode)
+                along with a small preview sample for display purposes.
+    """
+
+    deleted = 0
+    preview = []
+
+    for batch in chunked(keys, DELETE_BATCH_SIZE):
+        if len(preview) < PREVIEW_SIZE:
+            preview.extend(batch[: PREVIEW_SIZE - len(preview)])
+        if not dry_run:
+            request_items = {table_name: [{'DeleteRequest': {'Key': k}} for k in batch]}
+            while request_items:
+                resp = dyn_client.batch_write_item(RequestItems=request_items)
+                request_items = resp.get('UnprocessedItems') or {}
+        deleted += len(batch)
+    return deleted, preview
+
+
+# ------------------------------------------------------------------------------
+def format_key(key: dict[str, dict[str, str]]) -> str:
+    """Render a DynamoDB-format key dict as a human-readable string."""
+
+    parts = []
+    for attr, val in key.items():
+        value = next(iter(val.values()))
+        parts.append(f'{attr}={value!r}')
+    return ', '.join(parts)
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """Process command line arguments."""
+
+    assert __doc__  # noqa S101
+    parser = argparse.ArgumentParser(prog=PROG, description=__doc__.split('\n\n')[0])
+
+    parser.add_argument('-t', '--table', required=True, help='DynamoDB table name.')
+    parser.add_argument(
+        '-i',
+        '--ignore-case',
+        action='store_true',
+        help='Ignore case in key matching.',
+    )
+    parser.add_argument(
+        '-d',
+        '--dry-run',
+        action='store_true',
+        help='Show what would be deleted without deleting anything.',
+    )
+
+    parser.add_argument(
+        dest='pattern',
+        nargs='+',
+        metavar='KEY-GLOB',
+        help='Glob pattern to match against the partition key.',
+    )
+    return parser.parse_args()
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """Showtime."""
+
+    args = process_cli_args()
+    dyn_client = boto3.Session().client('dynamodb')
+
+    hash_key, range_key = get_key_schema(dyn_client, args.table)
+
+    print(f'Scanning {args.table!r} (key {hash_key!r}) ... ', end='')
+
+    matches = iter_matching_keys(
+        dyn_client, args.table, hash_key, range_key, args.pattern, args.ignore_case
+    )
+    deleted, preview = delete_keys(dyn_client, args.table, matches, dry_run=args.dry_run)
+
+    if deleted == 0:
+        print('No matching items found.')
+        return 0
+
+    action = 'Would delete' if args.dry_run else 'Deleted'
+    print(f'{action} {deleted} item(s):')
+    for key in preview:
+        print(f'  {format_key(key)}')
+    if deleted > len(preview):
+        print(f'  ... and {deleted - len(preview)} more')
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)

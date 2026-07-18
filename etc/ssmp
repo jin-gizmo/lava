@@ -1,0 +1,853 @@
+#!/usr/bin/env python3
+"""Manage AWS SSM parameters."""
+
+from __future__ import annotations
+
+import sys
+from abc import ABC, abstractmethod
+from argparse import ArgumentParser, Namespace
+from collections.abc import Callable, Iterator
+from functools import partial
+from os import environ, isatty
+from pathlib import Path
+from string import Template
+from typing import Any, ClassVar
+
+import boto3
+import yaml
+from botocore.exceptions import ClientError, ParamValidationError
+from colorama import Fore, Style, init
+from dotenv import dotenv_values, find_dotenv  # noqa
+from yaml import Dumper
+
+PROG = Path(sys.argv[0]).stem
+
+__version__ = '1.0.0'
+__author__ = 'Murray Andrews'
+
+# Initialise colorama
+init()
+
+# Highlight styles
+H1 = Fore.GREEN + Style.BRIGHT
+H2 = Fore.WHITE
+ERR = Fore.RED + Style.BRIGHT
+INFO = Fore.BLUE + Style.BRIGHT
+RESET = Style.RESET_ALL
+OK = Fore.GREEN + Style.BRIGHT
+
+
+# ------------------------------------------------------------------------------
+def get(k: str, d: dict[str, Any]) -> Any:
+    """Return the value of a given key from a dictionary."""
+    return d[k]
+
+
+def get_if_not_equal(k: str, d: dict[str, Any], value: Any) -> Any:
+    """Return the value of a given key from a dictionary unless it matches the given value."""
+    return d[k] if d[k] != value else None
+
+
+# ------------------------------------------------------------------------------
+def get_if_not_empty(k: str, d: dict[str, Any]) -> Any:
+    """Return the value of a given key from a dictionary or None if its empty."""
+    return d[k] or None
+
+
+# ------------------------------------------------------------------------------
+def plural(s: str, n: int) -> str:
+    """Pluralise a string."""
+    if n == 1:
+        return s
+    return f'{s}s'
+
+
+# ------------------------------------------------------------------------------
+def ask_yn(prompt: str, default: bool = False) -> bool:
+    """Ask a yes/no question and return True for yes and False for no."""
+
+    answer = input(prompt).strip().lower()
+    if not answer:
+        return default
+    return answer.startswith('y')
+
+
+# ------------------------------------------------------------------------------
+def chunk_list(ll: list, max_len: int) -> Iterator[list]:
+    """Split a list into chunks with a maximum specified length."""
+
+    for i in range(0, len(ll), max_len):
+        yield ll[i : i + max_len]
+
+
+# ------------------------------------------------------------------------------
+def transform_dict(d: dict[str, Any], transform: dict[str, Callable | None]) -> dict[str, Any]:
+    """
+    Transform a dictionary by applying a transform dict to drop or mutate values.
+
+    :param d:           The dictionary to be transformed.
+    :param transform:   A dict mapping keys to transformation functions. A missing
+                        key or a None transformation function means discard the entry.
+                        The transformation function must
+
+    """
+
+    result = {}
+    for k, fn in transform.items():
+        # Iterate over the transform dict to preserve ordering on output
+        if k in d and fn and (v := fn(k, d)) is not None:
+            result[k] = v
+    return result
+
+
+# ------------------------------------------------------------------------------
+def ssm_param_exists(name: str, ssm_client=None) -> bool:
+    """Check if an SSM parameter exists."""
+
+    if not ssm_client:
+        ssm_client = boto3.client('ssm')
+    try:
+        _ = ssm_client.get_parameter(Name=name)
+        return True
+    except ssm_client.exceptions.ParameterNotFound:
+        return False
+
+
+# ------------------------------------------------------------------------------
+def ssm_describe_parameters_by_path(
+    path: str, recursive: bool = False, ssm_client=None
+) -> dict[str, Any]:
+    """
+    Describe SSM parameters by path.
+
+    :param path:        Path to the SSM parameter. Must start with "/".
+    :param recursive:   Recurse into the parameter hierarchy.
+    :param ssm_client:  A boto3 SSM client.
+
+    :return:    A dictionary mapping SSM parameter names to a dict containing
+                parameter information.
+    """
+
+    if not path.startswith('/'):
+        raise ValueError('Path must start with "/"')
+
+    if not ssm_client:
+        ssm_client = boto3.client('ssm')
+
+    paginator = ssm_client.get_paginator('describe_parameters')
+    return {
+        param['Name']: param
+        for page in paginator.paginate(
+            ParameterFilters=[
+                {
+                    'Key': 'Path',
+                    'Option': 'Recursive' if recursive else 'OneLevel',
+                    'Values': [path],
+                },
+            ]
+        )
+        for param in page['Parameters']
+    }
+
+
+# ------------------------------------------------------------------------------
+def ssm_describe_parameters_by_name(names: list[str], ssm_client=None) -> dict[str, Any]:
+    """
+    Describe SSM parameters by name.
+
+    :param names:       A list of SSM parameter names.
+    :param ssm_client:  A boto3 SSM client.
+
+    :return:    A dictionary mapping SSM parameter names to a dict containing
+                parameter information. If the parameter is not found, the value
+                will be None.
+    """
+
+    if not ssm_client:
+        ssm_client = boto3.client('ssm')
+
+    params = dict.fromkeys(names, None)
+    paginator = ssm_client.get_paginator('describe_parameters')
+    for page in paginator.paginate(ParameterFilters=[{'Key': 'Name', 'Values': names}]):
+        for param in page['Parameters']:
+            params[param['Name']] = param
+    return params
+
+
+# ------------------------------------------------------------------------------
+class YamlIndentDumper(Dumper):
+    """Correct indentation for yaml.dump."""
+
+    def increase_indent(self, flow=False, indentless=False):
+        """Correct indentation for yaml.dump."""
+        return super().increase_indent(flow, False)
+
+
+# ------------------------------------------------------------------------------
+class CliCommand(ABC):
+    """ClI command handler."""
+
+    commands: ClassVar[dict[str, type[CliCommand]]] = {}
+    name = None  # Set by @register decorator for subclasses.
+    help_ = None  # Set by @register from first line of docstring.
+    epilog_ = None  # Set by @register from rest of docstring.
+
+    # --------------------------------------------------------------------------
+    @classmethod
+    def register(cls, name: str) -> Callable:
+        """Register a CLI command handler class."""
+
+        def decorate(cmd: type[CliCommand]):
+            """Register the command handler class."""
+            cmd.name = name
+            try:
+                docstring = cmd.__doc__.strip().splitlines()
+            except (AttributeError, IndexError):
+                raise Exception(f'Class {cmd.__name__} must have a docstring')
+            if not docstring[0]:
+                raise Exception(f'Class {cmd.__name__} must have a non-empty docstring')
+
+            cmd.help_ = docstring[0]
+            if len(docstring) > 1:
+                cmd.epilog_ = '\n'.join(docstring[1:])
+
+            cls.commands[name] = cmd
+            return cmd
+
+        return decorate
+
+    # --------------------------------------------------------------------------
+    def __init__(self, subparser):
+        """Initialize the command handler."""
+
+        self.argp = subparser.add_parser(
+            self.name, help=self.help_, description=self.help_, epilog=self.epilog_
+        )
+        self.argp.set_defaults(handler=self)
+
+    # --------------------------------------------------------------------------
+    def add_arguments(self):  # noqa B027
+        """Add arguments to the command handler."""
+        pass
+
+    # --------------------------------------------------------------------------
+    @staticmethod  # noqa B027
+    def check_arguments(args: Namespace):
+        """
+        Validate arguments.
+
+        :param args:        The namespace containing the arguments.
+        :raise ValueError:  If the arguments are invalid.
+        """
+
+        pass
+
+    # --------------------------------------------------------------------------
+    @staticmethod
+    @abstractmethod
+    def execute(args: Namespace) -> int:
+        """Execute the CLI command with the specified arguments."""
+        raise NotImplementedError('execute')
+
+
+# ------------------------------------------------------------------------------
+@CliCommand.register('ls')
+class CmdList(CliCommand):
+    """List SSM parameters."""
+
+    # Transformation spec for long long list
+    long_long_list_fields = {
+        'ARN': get,
+        'Type': get,
+        'KeyId': get,
+        'LastModifiedDate': get,
+        'LastModifiedUser': get,
+    }
+
+    # ---------------------------------------------------------------------------
+    def add_arguments(self):
+        """Add arguments to the command handler."""
+
+        self.argp.add_argument(
+            '-l',
+            dest='long',
+            action='count',
+            default=0,
+            help='List parameters in long format. Can be repeated to get more information.',
+        )
+
+        self.argp.add_argument(
+            '-r',
+            '--recursive',
+            action='store_true',
+            help=(
+                'Recurse into the parameter hierarchy. If not specified, only'
+                ' parameters at the level of the specified path will be returned.'
+            ),
+        )
+
+        self.argp.add_argument(
+            'path',
+            nargs='*',
+            default=['/'],
+            help='The hierarchy for the parameter(s). Must start with "/". Default is "/".',
+        )
+
+    # ---------------------------------------------------------------------------
+    @staticmethod
+    def check_arguments(args: Namespace):
+        """Validate arguments."""
+
+        for p in args.path:
+            if not p.startswith('/'):
+                raise ValueError(f'{p}: Path must start with "/"')
+
+    # ---------------------------------------------------------------------------
+    def execute(self, args: Namespace) -> int:
+        """List SSM parameters."""
+
+        ssm = boto3.Session().client('ssm')
+        parameters = {}
+        for p in args.path:
+            parameters |= ssm_describe_parameters_by_path(
+                p, recursive=args.recursive, ssm_client=ssm
+            )
+        for name in sorted(parameters):
+            if not args.long:
+                print(name)
+                continue
+
+            print(f'{H1}{name}{RESET}: {parameters[name].get("Description", "")}')
+            if args.long > 1:
+                p = transform_dict(parameters[name], self.long_long_list_fields)
+                for k, v in p.items():
+                    print(f'    {H2}{k}{RESET}: {v}')
+        return 0
+
+
+# ------------------------------------------------------------------------------
+@CliCommand.register('dump')
+class CmdDump(CliCommand):
+    """
+    Dump SSM parameters.
+
+    The output of "dump" is intended as input to "load". Note that "$" characters
+    in values will be escaped as "$$".
+    """
+
+    # Transformation specs to select / mutate params for output.
+    # See transform_dict() for details.
+    # Note that SSM parameters can have Tags but neither DescribeParameters nor
+    # GetParameter* will return them and it's not worth the trouble to fetch
+    # them parameter by parameter.
+    dump_fields = {
+        'Name': get,
+        'Description': get_if_not_empty,
+        'Value': lambda k, d: (
+            None if d['Type'] == 'SecureString' else d.get(k, '').replace('$', '$$')
+        ),
+        'Type': partial(get_if_not_equal, value='String'),
+        'KeyId': get,
+        'AllowedPattern': get_if_not_empty,
+        'Tier': partial(get_if_not_equal, value='Standard'),
+        'Policies': lambda k, d: d.get(k) or None,  # This one is a list - often empty
+        'DataType': partial(get_if_not_equal, value='text'),
+    }
+
+    # Only need the bare minimum in the companion file.
+    dump_secure_fields = {
+        'Name': get,
+        'Value': lambda k, d: d.get(k, '').replace('$', '$$'),
+    }
+
+    # ---------------------------------------------------------------------------
+    def add_arguments(self):
+        """Add arguments to the command handler."""
+
+        self.argp.add_argument(
+            '-o',
+            '--output',
+            metavar='FILE.yaml',
+            action='store',
+            required=True,
+            help=(
+                'The name of an output YAML file for the parameters. SecureString'
+                ' parameters will not have a value in this file. A companion YAML'
+                ' file will contain the SecureString parameter values. If the output'
+                ' file is named "params.yaml", the companion file will be named'
+                ' "params.secure.yaml". Your .gitignore should contain "*.secure.yaml".'
+                ' If the ouptut file name does not end with ".yaml", this will be added.'
+            ),
+        )
+
+        self.argp.add_argument(
+            '-r',
+            '--recursive',
+            action='store_true',
+            help=(
+                'Recurse into the parameter hierarchy. If not specified, only'
+                ' parameters at the level of the specified path will be returned.'
+            ),
+        )
+
+        self.argp.add_argument(
+            'path',
+            nargs='*',
+            default=['/'],
+            help='The hierarchy for the parameter(s). Must start with "/". Default is "/".',
+        )
+
+    # ---------------------------------------------------------------------------
+    @staticmethod
+    def check_arguments(args: Namespace) -> None:
+        """Validate arguments."""
+
+        for p in args.path:
+            if not p.startswith('/'):
+                raise ValueError(f'{p}: Path must start with "/"')
+
+    # ---------------------------------------------------------------------------
+    def execute(self, args: Namespace) -> int:
+        """Dump SSM parameters."""
+
+        # Can't use safe_dump here because we want to override the dumper.
+        dumper = partial(yaml.dump, default_flow_style=False, Dumper=YamlIndentDumper)
+
+        ssm = boto3.Session().client('ssm')
+
+        # ------------------------------
+        # We need the value of each parameter and the KMS key ID for SecureString
+        # parameters so we need to merge the results from DescribeParameters and
+        # GetParametersByPath.
+        parameters = {}
+        descriptions = {}
+        for p in args.path:
+            paginator = ssm.get_paginator('get_parameters_by_path')
+
+            parameters |= {
+                param['Name']: param
+                for page in paginator.paginate(
+                    Path=p, Recursive=args.recursive, WithDecryption=True
+                )
+                for param in page['Parameters']
+            }
+
+            descriptions |= ssm_describe_parameters_by_path(
+                p, recursive=args.recursive, ssm_client=ssm
+            )
+
+        # Merge descriptions into the values.
+        for k, v in parameters.items():
+            try:
+                v |= descriptions[k]
+            except KeyError:
+                raise Exception(f'Parameter {k} has a value but no description')
+
+        # ------------------------------
+        # Transform parameters into desired content and output
+        # noinspection PyUnboundLocalVariable
+        xform_params = [
+            (v := transform_dict(param, self.dump_fields))
+            for param in sorted(parameters.values(), key=lambda d: d['Name'])
+            if v is not None
+        ]
+        if not args.output.endswith('.yaml'):
+            args.output += '.yaml'
+        with open(args.output, 'w') as fp:
+            dumper({'Parameters': xform_params}, fp, sort_keys=False)
+        n = len(xform_params)
+        print(f'{n} {plural("parameter", n)} written to {args.output}')
+
+        # ------------------------------
+        # Find SecureStrings for the companion file.
+        # noinspection PyUnboundLocalVariable
+        secure_params = [
+            (v := transform_dict(param, self.dump_secure_fields))
+            for param in sorted(parameters.values(), key=lambda d: d['Name'])
+            if param['Type'] == 'SecureString' and v is not None
+        ]
+        if secure_params:
+            secure_path = Path(args.output).with_suffix('.secure.yaml')
+            with open(secure_path, 'w') as fp:
+                dumper({'SecureParameters': secure_params}, fp, sort_keys=False)
+            n = len(secure_params)
+            print(f'{n} secure parameter {plural("value", n)} written to {secure_path}')
+
+        return 0
+
+
+# ------------------------------------------------------------------------------
+@CliCommand.register('load')
+class CmdLoad(CliCommand):
+    """Load SSM parameters from a YAML file in the format produced by the "dump" command."""
+
+    # List of SSM parameter attributes that are rendered with dotenv data
+    render_attrs = ('Name', 'Value', 'Description', 'KeyId')
+
+    # ---------------------------------------------------------------------------
+    def add_arguments(self):
+        """Add arguments for load."""
+
+        self.argp.add_argument(
+            '-e',
+            '--env-file',
+            metavar='FILE.env',
+            action='store',
+            help=(
+                'The name of a dotenv formatted file containing variables to be'
+                ' substituted into the values using $VAR / ${VAR} substitution.'
+                ' If not specified, the file ".env" will be searched for, starting'
+                ' with the current directory and working up to the root directory.'
+                ' Environment variables are also used in the substitution process'
+                ' and take precedence.'
+            ),
+        )
+
+        self.argp.add_argument(
+            '-f',
+            '--force',
+            action='store_true',
+            help='Update existing SSM parameters. By default, existing parameters are skipped.',
+        )
+
+        self.argp.add_argument(
+            '-i',
+            '--input',
+            metavar='FILE.yaml',
+            action='store',
+            help=(
+                'The name of an input YAML file for the parameters. SecureString'
+                ' parameters must not have a value in this file. A companion YAML'
+                ' file should contain the SecureString parameter values. If the input'
+                ' file is named "params.yaml", the companion file will be named'
+                ' "params.secure.yaml". Your .gitignore should contain "*.secure.yaml".'
+                ' If the input file name does not end with ".yaml", this will be added.'
+            ),
+        )
+
+        self.argp.add_argument(
+            '-p',
+            '--path',
+            action='store',
+            help=(
+                'Load the parameters under the specified path, which must start'
+                ' with "/". If not specified, the parameter names in the input'
+                ' file are used as is.'
+            ),
+        )
+
+    # ------------------------------------------------------------------------------
+    @staticmethod
+    def check_arguments(args: Namespace):
+        """Check the arguments."""
+
+        if args.path:
+            if not args.path.startswith('/'):
+                raise ValueError('path must start with "/"')
+            # Make args.path safe for '{args.path}/name' appends
+            args.path = args.path.strip('/')
+            if args.path:
+                args.path = f'/{args.path}'
+
+    # ---------------------------------------------------------------------------
+    def execute(self, args: Namespace) -> int:
+        """Load SSM parameters."""
+
+        if not args.input.endswith('.yaml'):
+            args.input += '.yaml'
+        input_path = Path(args.input)
+        params = self.read_param_file(input_path)
+
+        have_secure_params = any(p.get('Type') == 'SecureString' for p in params.values())
+        if have_secure_params:
+            secure_path = Path(args.input).with_suffix('.secure.yaml')
+            if not secure_path.exists():
+                raise Exception(f'SecureString companion file {secure_path} does not exist')
+            secure_params = self.read_secure_params_file(secure_path)
+        else:
+            secure_params = {}
+
+        if not args.env_file:
+            args.env_file = find_dotenv(usecwd=True)
+        env_vars = {**dotenv_values(args.env_file), **environ}
+
+        n_loaded = 0
+        n_errors = 0
+        n_skipped = 0
+        ssm = boto3.Session().client('ssm')
+        for name, param in params.items():
+            if param.get('Type') == 'SecureString':
+                try:
+                    param['Value'] = secure_params[name]['Value']
+                except KeyError:
+                    print(f'{H1}{name}{RESET}: Cannot find value for SecureString parameter')
+                    n_errors += 1
+                    continue
+
+            # Render any embedded parameters in the value
+            subst_errors = True
+            for attr in self.render_attrs:
+                if not param.get(attr):
+                    continue
+                try:
+                    param[attr] = Template(param[attr]).substitute(env_vars)
+                except KeyError as e:
+                    print(f'{H1}{name}{RESET}: {attr}: Cannot find value for {e} to substitute')
+                    n_errors += 1
+                    break
+            else:
+                subst_errors = False
+            if subst_errors:
+                continue
+
+            if args.path is not None:
+                param['Name'] = f'{args.path}/{param["Name"].strip("/")}'
+
+            # Substitution / path addition could have changed the name.
+            name = param['Name']
+
+            if args.force or not ssm_param_exists(name, ssm_client=ssm):
+                try:
+                    ssm.put_parameter(**param, Overwrite=True)
+                    print(f'{H1}{name}{RESET}: Loaded')
+                    n_loaded += 1
+                except (ParamValidationError, ClientError) as e:
+                    print(f'{H1}{name}{RESET}: Failed - {e}')
+                    n_errors += 1
+            else:
+                print(f'{H1}{name}{RESET}: Already exists')
+                n_skipped += 1
+
+        print()
+        print(f'{n_loaded} SSM {plural("parameter", n_loaded)} loaded')
+        print(f'{n_skipped} SSM {plural("parameter", n_skipped)} skipped')
+        print(f'{n_errors} SSM {plural("error", n_errors)}')
+        return 1 if n_errors else 0
+
+    # ---------------------------------------------------------------------------
+    @staticmethod
+    def read_param_file(params_file: Path) -> dict[str, dict[str, Any]]:
+        """Read the SSM parameters file."""
+        with open(params_file) as fp:
+            param_list = yaml.safe_load(fp).get('Parameters', [])
+
+        # Do some validation and check if we have any SecureString params?
+        params = {}
+        for param in param_list:
+            try:
+                name = param['Name']
+            except KeyError:
+                raise Exception(f'{params_file}: "Name" key is required for all parameters')
+
+            params[name] = param
+            if param.get('Type') == 'SecureString' and 'Value' in param:
+                raise Exception(
+                    f'{params_file}: SecureString parameter {name} must not contain "Value"'
+                )
+        return params
+
+    # ---------------------------------------------------------------------------
+    @staticmethod
+    def read_secure_params_file(secure_params_file: Path) -> dict[str, dict[str, Any]]:
+        """Read the SSM secure parameters file."""
+        with open(secure_params_file) as fp:
+            secure_params_list = yaml.safe_load(fp)['SecureParameters']
+
+        secure_params = {}
+        for param in secure_params_list:
+            try:
+                name = param['Name']
+            except KeyError:
+                raise Exception(f'{secure_params_file}: "Name" key is required for all parameters')
+            if 'Value' not in param:
+                raise Exception(f'{secure_params_file}: "Value" key is required for all parameters')
+            secure_params[name] = param
+        return secure_params
+
+
+# ------------------------------------------------------------------------------
+@CliCommand.register('rm')
+class CmdRm(CliCommand):
+    """Remove SSM parameters."""
+
+    MAX_RM = 5  # Force must be used if more than this number of params would be removed.
+    DELETE_BATCH = 20  # Delete in batches
+
+    # --------------------------------------------------------------------------
+    def add_arguments(self):
+        """Add arguments to the command handler."""
+
+        i_or_f = self.argp.add_mutually_exclusive_group()
+        i_or_f.add_argument(
+            '-d',
+            '--dryrun',
+            action='store_true',
+            help='Do a dry run. No parameters will be removed.',
+        )
+
+        i_or_f.add_argument(
+            '-f',
+            '--force',
+            action='store_true',
+            help=(
+                'Force removal of parameters. Force is required to remove more'
+                f' than {self.MAX_RM} than parameters when not in'
+                ' interactive (-i) mode.'
+            ),
+        )
+
+        i_or_f.add_argument(
+            '-i',
+            '--interactive',
+            action='store_true',
+            help=(
+                'Request confirmation before attempting to remove each parameter.'
+                ' Stdin must be connected to a tty.'
+            ),
+        )
+
+        self.argp.add_argument(
+            '-r',
+            '--recursive',
+            action='store_true',
+            help=(
+                'Recurse into the parameter hierarchy. If specified, all target names'
+                ' must be parameter paths beginning with "/".'
+            ),
+        )
+
+        self.argp.add_argument(
+            'name',
+            nargs='+',
+            help=(
+                'SSM parameter to remove. If -r / --recursive is specified,'
+                ' this will be treated as a path and must begin with "/".'
+            ),
+        )
+
+    # ---------------------------------------------------------------------------
+    @staticmethod
+    def check_arguments(args: Namespace):
+        """Validate arguments."""
+
+        if args.interactive and not isatty(sys.stdin.fileno()):
+            raise RuntimeError('Stdin must be a tty for interactive mode')
+
+        if args.recursive:
+            for p in args.name:
+                if not p.startswith('/'):
+                    raise ValueError(
+                        f'{p}: Name must be a path starting with "/" in recursive mode'
+                    )
+
+    # ---------------------------------------------------------------------------
+    def execute(self, args: Namespace) -> int:
+        """Remove SSM parameters."""
+
+        ssm = boto3.Session().client('ssm')
+        parameters = {}
+        if args.recursive:
+            for p in args.name:
+                parameters |= ssm_describe_parameters_by_path(
+                    p, recursive=args.recursive, ssm_client=ssm
+                )
+        else:
+            parameters = ssm_describe_parameters_by_name(args.name, ssm_client=ssm)
+
+        if len(parameters) > self.MAX_RM and not any((args.dryrun, args.force, args.interactive)):
+            raise RuntimeError(
+                'One of dry run (-d), force (-f) or interactive (-i) mode is'
+                f' required to remove more than {self.MAX_RM} parameters'
+            )
+
+        to_delete = []
+        invalid = []
+        for name in sorted(parameters):
+            if not parameters[name]:
+                invalid.append(name)
+                continue
+            if args.dryrun or not args.interactive or ask_yn(f'Delete {name}? '):
+                to_delete.append(name)
+
+        if args.dryrun:
+            deleted = to_delete
+            fmt, action_msg = INFO, 'Will delete'
+        else:
+            fmt, action_msg = OK, 'Deleted'
+            deleted = []
+            for chunk in chunk_list(to_delete, self.DELETE_BATCH):
+                result = ssm.delete_parameters(Names=chunk)
+                deleted.extend(result['DeletedParameters'])
+                invalid.extend(result['InvalidParameters'])
+
+        for name in sorted(deleted):
+            print(f'{fmt}{name}{RESET}: {action_msg}')
+        for name in sorted(invalid):
+            print(f'{ERR}{name}{RESET}: Invalid')
+
+        n_deleted = len(deleted)
+        n_invalid = len(invalid)
+        print()
+        print(
+            f'{n_deleted} {plural("parameter", n_deleted)}'
+            f'{" would be" if args.dryrun else ""} deleted'
+        )
+        if n_invalid:
+            print(f'{n_invalid} {plural("parameter", n_invalid)} invalid')
+
+        if args.dryrun and len(parameters) > self.MAX_RM:
+            print('Note: Force (-f) or interactive (-i) mode would be required')
+
+        return 0
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> Namespace:
+    """Process the command line arguments."""
+
+    argp = ArgumentParser(prog=PROG, description=__doc__)
+
+    argp.add_argument(
+        '-v',
+        '--version',
+        action='version',
+        version=__version__,
+        help='Show version and exit.',
+    )
+
+    # Add the sub-commonads
+    subp = argp.add_subparsers(required=True, title='commands')
+    for cmd in sorted(CliCommand.commands.values(), key=lambda c: c.name):
+        cmd(subp).add_arguments()
+
+    args = argp.parse_args()
+
+    try:
+        args.handler.check_arguments(args)
+    except ValueError as e:
+        argp.error(str(e))
+
+    return args
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """Show time."""
+    try:
+        args = process_cli_args()
+        return args.handler.execute(args)
+    except Exception as ex:
+        # Uncomment for debugging
+        # raise  # noqa: ERA001
+        print(ex, file=sys.stderr)
+        return 1
+    except KeyboardInterrupt:  # pragma: no cover
+        print('Interrupt', file=sys.stderr)
+        return 2
+
+
+# ------------------------------------------------------------------------------
+# This only gets used during dev/test. Once deployed as a package, main() gets
+# imported and run directly.
+if __name__ == '__main__':  # pragma: no cover
+    exit(main())

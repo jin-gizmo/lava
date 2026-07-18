@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Valid but too short run delay
+
+type: cmd
+
+job_id: <{ prefix.job }>/run_delay/short
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo hello
+
+max_run_delay: 0.001s
+
+parameters:
+  args:
+    - world
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Aurora Postgres multiple statements in string payload
+
+type: sqli
+
+job_id: <{ prefix.job }>/sqli/psql-au/multi-list
+
+# Some elements end in ; some don't.
+payload:
+  - SELECT count(*) FROM <{db.common.schema}>.onecol;
+  - INSERT INTO <{ db.common.schema }>.onecol VALUES ('{{job.run_id}}')
+  - SELECT count(*) FROM <{db.common.schema}>.onecol;
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/psql/aurora
+  transaction: true
+
+x-lava-nocheck: joborphan

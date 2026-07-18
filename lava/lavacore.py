@@ -10,6 +10,7 @@ import threading
 from collections.abc import Iterable
 from datetime import date, datetime, time, timedelta, timezone
 from fnmatch import fnmatchcase
+from functools import partial
 from threading import Lock
 from typing import Any
 from uuid import uuid4
@@ -18,6 +19,7 @@ import boto3
 import dateutil.parser
 import jinja2
 
+from lava.exceptions import LavaError
 from lava.lib.aws import dynamo_unmarshall_item, s3_split, sqs_send_msg
 from lava.lib.datetime import DT_MAX, DT_MIN, now_tz, parse_dt
 from lava.lib.misc import dict_check, json_default
@@ -67,9 +69,63 @@ JINJA_UTILS = {
     'uuid': uuid4,
     'path': os.path,
     're': re,
+    # This is handles stuff like datetimes whereas Jinja's tojson filter doesn't.
+    'tojson': partial(json.dumps, default=json_default),
 }
 
 DEFER_ON_EXIT = 'atexit'
+
+
+# ------------------------------------------------------------------------------
+def augment_job_spec(
+    job_spec: dict[str, Any],
+    job_dispatch: dict[str, Any],
+    realm: str,
+) -> dict[str, Any]:
+    """
+    Augment the job spec with dispatch data needed to run the job.
+
+    :param job_spec:      The original job spec from DynamoDB.
+    :param job_dispatch:  The parsed SQS dispatch message.
+    :param realm:         The realm name to stamp onto the job spec.
+
+    :return:              The augmented job spec.
+
+    :raise LavaError:     If a timestamp in the dispatch message is invalid.
+    """
+
+    run_id = job_dispatch['run_id']
+
+    # Parse dispatch timestamp
+    try:
+        ts_dispatch = dateutil.parser.parse(job_dispatch['ts_dispatch'])
+    except ValueError as e:
+        raise LavaError(f'Bad timestamp in dispatch message: {e}')
+
+    # Overlay dispatch fields onto the job spec
+    job_spec['realm'] = realm
+    job_spec['run_id'] = run_id
+    job_spec['ts_dispatch'] = ts_dispatch
+    job_spec['parameters'].update(job_dispatch.get('parameters', {}))
+    job_spec['globals'].update(job_dispatch.get('globals', {}))
+
+    # Convert lava's private global timestamps back into datetime.
+    # These could have been populated by an upstream dispatch job.
+    if 'lava' in job_spec['globals']:
+        lava_globals = job_spec['globals']['lava']
+        for ts in (
+            'master_start',
+            'master_ustart',
+            'parent_start',
+            'parent_ustart',
+        ):
+            if ts in lava_globals:
+                try:
+                    lava_globals[ts] = dateutil.parser.isoparse(lava_globals[ts])
+                except ValueError:
+                    raise LavaError(f'{ts}: Bad timestamp: {lava_globals[ts]}')
+
+    return job_spec
 
 
 # ------------------------------------------------------------------------------
@@ -164,7 +220,7 @@ def get_realm_info(realm: str, realm_table) -> dict[str, Any]:
     """
 
     try:
-        realm_info = realm_table.get_item(Key={'realm': realm})['Item']  # type:dict
+        realm_info = realm_table.get_item(Key={'realm': realm})['Item']  # type: dict
     except KeyError:
         raise LavaError('No such realm')
 
@@ -191,7 +247,7 @@ def get_job_spec(job_id: str, jobs_table) -> dict[str, Any]:
     """
 
     try:
-        job_spec = jobs_table.get_item(Key={'job_id': job_id})['Item']  # type:dict
+        job_spec = jobs_table.get_item(Key={'job_id': job_id})['Item']  # type: dict
     except KeyError:
         raise LavaError('No such job')
 
@@ -270,26 +326,6 @@ def get_job_spec(job_id: str, jobs_table) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------------------
-class LavaError(Exception):
-    """
-    Lava specific exception.
-
-    :param data:    Any JSON serialisable object.
-    """
-
-    def __init__(self, *args, data: Any = None, **kwargs):
-        """Create a LavaError."""
-
-        # noinspection PyArgumentList
-        super().__init__(*args, **kwargs)
-        self.data = data
-
-
-# For backward compatibility ... for now
-LavaException = LavaError
-
-
-# ------------------------------------------------------------------------------
 def jinja_render_vars(
     job_spec: dict[str, Any], realm_info: dict[str, Any], **kwargs
 ) -> dict[str, Any]:
@@ -319,7 +355,7 @@ def job_environment(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     base: dict[str, str],
-    render_vars: dict[str, Any] = None,
+    render_vars: dict[str, Any] | None = None,
     **kwargs,
 ) -> dict[str, str]:
     """
@@ -499,6 +535,56 @@ def dispatch(
 
     """
 
+    dispatch_msg = make_dispatch_msg(
+        realm=realm,
+        job_id=job_id,
+        worker=worker,
+        params=params,
+        aws_session=aws_session,
+        globals_=globals_,
+    )
+
+    # ----------------------------------------
+    # Send it
+    if not queue_name:
+        queue_name = f'lava-{realm}-{dispatch_msg["worker"]}'
+    LOG.debug(f'Dispatching {job_id} to queue {queue_name}')
+    LOG.debug(f'Message body for {job_id} is {dispatch_msg}')
+    try:
+        sqs_send_msg(json.dumps(dispatch_msg, default=json_default), queue_name, int(delay))
+    except Exception as e:
+        raise LavaError(f'Cannot dispatch {job_id}@{realm} - {e}')
+
+    return dispatch_msg['run_id']
+
+
+# ------------------------------------------------------------------------------
+def make_dispatch_msg(
+    realm: str,
+    job_id: str,
+    worker: str = None,
+    params: dict[str, Any] = None,
+    aws_session: boto3.Session = None,
+    globals_: dict[str, Any] = None,
+) -> dict[str, Any]:
+    """
+    Send a dispatch message for the specified realm / job.
+
+    :param realm:           The realm name.
+    :param job_id:          The ID of the job to dispatch.
+    :param worker:          The target worker name. If not specified, look up
+                            the worker name in the job table.
+    :param params:          An optional dictionary of parameters to include in
+                            the dispatch.
+    :param aws_session:     A boto3 Session object. If not specified, a default is
+                            created.
+    :param globals_:        An optional dictionary of global attributes to
+                            include in the dispatch.
+
+    :return:                The run ID.
+
+    """
+
     if not aws_session:
         aws_session = boto3.Session()
 
@@ -535,18 +621,7 @@ def dispatch(
             raise LavaError('globals must be a dict')
         dispatch_msg['globals'] = globals_
 
-    # ----------------------------------------
-    # Send it
-    if not queue_name:
-        queue_name = f'lava-{realm}-{worker}'
-    LOG.debug(f'Dispatching {job_id} to queue {queue_name}')
-    LOG.debug(f'Message body for {job_id} is {dispatch_msg}')
-    try:
-        sqs_send_msg(json.dumps(dispatch_msg, default=json_default), queue_name, int(delay))
-    except Exception as e:
-        raise LavaError(f'Cannot dispatch {job_id}@{realm} - {e}')
-
-    return dispatch_msg['run_id']
+    return dispatch_msg
 
 
 # ------------------------------------------------------------------------------

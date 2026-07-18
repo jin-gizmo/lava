@@ -1,0 +1,35 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test on_success action recording the globals in a state item.
+
+type: log
+
+job_id: <{ prefix.job }>/action/state/globals
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+on_success:
+  - action: state
+    state_id: >-
+      test:{{ job.job_id }}:{{ job.run_id }}{% if globals.lava.foreach_index is defined %}:{{ globals.lava.foreach_index }}{% endif %}
+    publisher: >-
+      {% if globals.publisher %}{{ globals.publisher }}{% else %}{{ job.job_id }}:{{ job.run_id }}{% endif %}
+    type: raw
+    value:
+      # This double tojson is a bit of chicanery required because of the various layers of JSON
+      # encoding within the state handler. Trust me, it works. The state value will be a JSON
+      # encoded string containing the lava globals. We use our own tojson first because it
+      # handles datetimes whereas Jinja's doesn't.
+      globals: >-
+        {{ (utils.tojson(globals)) | tojson | trim('"') }}
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

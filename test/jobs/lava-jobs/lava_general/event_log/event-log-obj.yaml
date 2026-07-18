@@ -1,0 +1,30 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Event log field with an object to log
+
+type: cmd
+
+job_id: <{ prefix.job }>/event-log/object
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+event_log:
+  info: Here we are just logging the globals we have in the job
+  globals_as_individual_items:
+    g1: "{{ globals.g1 }}"
+    g2: "{{ globals.g2 }}"
+  globals_as_an_object: "{{ globals }}"
+
+payload: echo hello
+
+globals:
+  g1: global_value_1
+  g2: global_value 2
+
+parameters:
+  args:
+    - world
+
+x-lava-nocheck: joborphan

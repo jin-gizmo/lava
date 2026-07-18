@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - test the AWS CLI connector using credentials in SSM
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/aws-cli-conn-ssm
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/aws-cli-conn.sh
+
+parameters:
+  connections:
+    aws: <{ prefix.conn }>/aws/ssm
+
+x-lava-nocheck: joborphan

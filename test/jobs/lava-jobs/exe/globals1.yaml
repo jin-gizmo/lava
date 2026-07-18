@@ -1,0 +1,32 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - print args and environment
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/globals1
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/print-args-env.sh
+
+globals:
+  g1: global1
+
+parameters:
+  args:
+    - realm={{realm.realm}}
+    - payload-area={{realm.s3_payloads}}
+    - me={{ job.job_id }}
+    - master={{globals.lava.master_job_id}}
+    - parent={{globals.lava.parent_job_id}}
+  env:
+    GLOBAL1: 'global1={{globals.g1}}'
+    ZZ1: zz1
+    ZZ2: 'flugelhorn={{vars.h}}'
+  vars:
+    h: flugelhorn
+
+x-lava-nocheck: joborphan

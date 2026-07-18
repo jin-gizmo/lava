@@ -23,7 +23,8 @@ conventional Postgres databases (e.g. the `COPY` and `UNLOAD` commands).
 |port|Number|Yes*|The database port number.|
 |preserve\_case|Boolean|No|If `true`, don't fold database object names to lower case when quoting them for use in [db_from_s3](#job-type-db_from_s3) jobs. The default is `false` (i.e. case folding is enabled).|
 |secret_id|String|No|Obtain missing fields from AWS Secrets Manager. [More information](#database-authentication-using-aws-secrets-manager).|
-|ssl|Boolean|No|Set to `true` to enable SSL. Default is `false`.|
+|ssl_ca_file|String|No|For Redshift, this parameter is not useful particularly  for the `pg8000` subtype and ignored for the `redshift` subtype as Redshift clusters always have AWS issued certificates.|
+|ssl_mode|String|No|Enable SSL/TLS. Must be one of `require`, `verify-ca`, `verify-full`. If not specified, SSL/TLS may or may not be enabled (depending on driver defaults). See also [SSL/TLS for Database Connectors](#ssltls-for-database-connectors).|
 |subtype|String|No|Specifies the underlying DBAPI 2.0 driver. See [Redshift Connector Subtypes](#redshift-connector-subtypes) below.|
 |type|String|Yes|`redshift`.|
 |user|String|Yes*|Database user name.|
@@ -49,6 +50,11 @@ database drivers.
     As of version 8.1 (Kīlauea), the Redshift connector no longer supports
     PyGreSQL. This is not a lava change. PyGreSQL just doesn't work with
     Redshift any more.
+
+!!! info
+    The AWS Redshift connector (`redshift` subtype) does not support the
+    `ssl_ca_file` connection parameter as Redshift instances always have AWS
+    managed certificates. The parameter is ignored by lava.
 
 #### Creating Temporary IAM User Credentials for Redshift
 

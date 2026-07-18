@@ -12,6 +12,7 @@ Use one of the following to access these:
 from __future__ import annotations
 
 import os
+import shlex
 from functools import lru_cache
 from stat import S_IRUSR, S_IWUSR, S_IXUSR
 from subprocess import run
@@ -22,12 +23,14 @@ from typing import Any
 import boto3
 import pymysql
 
-from lava.lavacore import LavaError
+from lava.exceptions import LavaError
+from lava.lib.fileops import materialise_file
+from lava.lib.ssl import build_ssl_context, resolve_ssl_mode
 from .core import LOG, cli_connector, expand_sql_conn_spec, pysql_connector
 
 __author__ = 'Murray Andrews'
 
-MYSQL_SSL_CHECK_HOSTNAME = False  # False required with Python 2 and new RDS certs.
+MYSQL_CLI = 'mysql'
 
 
 # ------------------------------------------------------------------------------
@@ -52,21 +55,23 @@ def py_connect_mysql(
 
     """
 
+    if not conn_spec.get('database'):
+        raise LavaError('database must be specified for MySQL')
+
+    ssl_mode = resolve_ssl_mode(**conn_spec)
+    ssl_ca_file = conn_spec.get('ssl_ca_file') or conn_spec.get('ca_cert')
+
     db_connect_params = {
         'user': conn_spec['user'],
         'password': conn_spec['password'],
         'host': conn_spec['host'],
         'port': conn_spec['port'],
         'database': conn_spec['database'],
-        'ssl': conn_spec.get('ssl', False),
         'program_name': application_name or None,
     }
 
-    if conn_spec.get('ssl', False):
-        db_connect_params['ssl'] = {
-            'ca': conn_spec.get('ca_cert'),
-            'check_hostname': MYSQL_SSL_CHECK_HOSTNAME,
-        }
+    if ssl_mode:
+        db_connect_params['ssl'] = build_ssl_context(ssl_mode, ssl_ca_file)
 
     return pymysql.connect(**db_connect_params, autocommit=autocommit)
 
@@ -81,6 +86,14 @@ _MYSQL_MYSQL = 2
 _mysql_version_check_lock = Lock()
 
 
+# Map from lava mode names to MySQL community edition modes.
+_MYSQL_CLI_SSL_MODE_MAP = {
+    'require': 'REQUIRED',
+    'verify-ca': 'VERIFY_CA',
+    'verify-full': 'VERIFY_IDENTITY',
+}
+
+
 @lru_cache(maxsize=1)
 def _mysql_flavour() -> int:
     """
@@ -90,8 +103,9 @@ def _mysql_flavour() -> int:
     """
 
     with _mysql_version_check_lock:
+        cmd = [*shlex.split(MYSQL_CLI), '--version']
         try:
-            result = run(['mysql', '--version'], capture_output=True, encoding='utf-8', check=True)
+            result = run(cmd, capture_output=True, encoding='utf-8', check=True)
         except Exception as e:
             LOG.warning(f'No mysql CLI: {e}', extra={'event_type': 'connection'})
             return _MYSQL_NONE
@@ -100,8 +114,95 @@ def _mysql_flavour() -> int:
             LOG.debug('mysql is MariaDB variant')
             return _MYSQL_MARIADB
 
-        LOG.debug('mysql is MySQL variant')
+        LOG.debug('mysql is MySQL (Oracle) variant')
         return _MYSQL_MYSQL
+
+
+# ------------------------------------------------------------------------------
+def _mysql_cli_params(
+    conn_spec: dict[str, Any], ssl_mode: str | None, ssl_ca_file: str | None, conf_file: str
+) -> list[str]:
+    """
+    Build MySQL (Oracle Community Edition) CLI parameter list.
+
+    :param conn_spec:   Pre-expanded connection specification.
+    :param ssl_mode:    Normalised SSL mode string, or None.
+    :param ssl_ca_file: Local path to CA cert file, or None.
+    :param conf_file:   Path to the .mysql.conf file.
+    :return:            List of CLI arguments.
+    """
+    params = [
+        f'--defaults-file={shlex.quote(conf_file)}',
+        '--batch',
+        '--connect-timeout=10',
+    ]
+    for k in ('host', 'port', 'database'):
+        params.append(f'--{k}={shlex.quote(str(conn_spec[k]))}')
+
+    if ssl_mode:
+        params.append(f'--ssl-mode={_MYSQL_CLI_SSL_MODE_MAP[ssl_mode]}')
+        if ssl_ca_file:
+            params.append(f'--ssl-ca={shlex.quote(ssl_ca_file)}')
+
+    if 'X-Amz-Credential=' in conn_spec['password']:
+        LOG.debug('AWS IAM auth')
+        if not ssl_mode:
+            raise LavaError('SSL is required with IAM database authentication')
+        params.append('--enable-cleartext-plugin')
+
+    return params
+
+
+def _mariadb_cli_params(
+    conn_spec: dict[str, Any], ssl_mode: str | None, ssl_ca_file: str | None, conf_file: str
+) -> list[str]:
+    """
+    Build MariaDB CLI parameter list.
+
+    ... warning
+        The MariaDB `mysql` CLI cannot properly handle the `verify-ca` mode. If
+        no certificate is provided, it will effectively drop back to `require`
+        mode. To force a valid certificate to be provided (either explicitly via
+        a certificate file or implicitly via a publicly signed host
+        certificate), `verify-full` mode is required. This will also enforce
+        host name matching, which may not be what is desired.
+
+    :param conn_spec:   Pre-expanded connection specification.
+    :param ssl_mode:    Normalised SSL mode string, or None.
+    :param ssl_ca_file: Local path to CA cert file, or None.
+    :param conf_file:   Path to the .mysql.conf file.
+    :return:            List of CLI arguments.
+    """
+    params = [
+        f'--defaults-file={shlex.quote(conf_file)}',
+        '--batch',
+        '--connect-timeout=10',
+    ]
+    for k in ('host', 'port', 'database'):
+        params.append(f'--{k}={shlex.quote(str(conn_spec[k]))}')
+
+    if ssl_mode:
+        if ssl_ca_file:
+            # --ssl is implied by --ssl-ca
+            params.append(f'--ssl-ca={shlex.quote(ssl_ca_file)}')
+        else:
+            params.append('--ssl')
+        if ssl_mode == 'verify-full':
+            params.append('--ssl-verify-server-cert')
+
+    if 'X-Amz-Credential=' in conn_spec['password']:
+        LOG.debug('AWS IAM auth')
+        if not ssl_mode:
+            raise LavaError('SSL is required with IAM database authentication')
+        # --enable-cleartext-plugin not needed for MariaDB client
+
+    return params
+
+
+_cli_params_builder = {
+    _MYSQL_MYSQL: _mysql_cli_params,
+    _MYSQL_MARIADB: _mariadb_cli_params,
+}
 
 
 # ------------------------------------------------------------------------------
@@ -130,10 +231,18 @@ def cli_connect_mysql(
         expand_sql_conn_spec(conn_spec, aws_session=aws_session)
     except Exception as e:
         raise LavaError(f'Connection {conn_spec.get("conn_id")}: {e}')
+    if not conn_spec.get('database'):
+        raise LavaError('database must be specified for MySQL')
+
+    conn_dir = mkdtemp(dir=workdir, prefix='conn.')
+
+    ssl_mode = resolve_ssl_mode(**conn_spec)
+    ssl_ca_file = conn_spec.get('ssl_ca_file') or conn_spec.get('ca_cert')
+    if ssl_ca_file:
+        ssl_ca_file = materialise_file(ssl_ca_file, dir=conn_dir, suffix='.pem')
 
     # ----------------------------------------
     # Construct .mysql.conf file to automate authentication
-    conn_dir = mkdtemp(dir=workdir, prefix='conn.')
     conf_file = os.path.join(conn_dir, '.mysql.conf')
     with open(conf_file, 'w') as fp:
         print('[client]\nuser={user}\npassword={password}'.format(**conn_spec), file=fp)
@@ -141,40 +250,12 @@ def cli_connect_mysql(
     LOG.debug(f'Created {conf_file}')
 
     # ----------------------------------------
-    # Create a little shell script that implements the connection.
-    mysql_arg_list = [
-        '--defaults-file="{conf_file}"',
-        '--batch',
-        '--host="{host}"',
-        '--port={port}',
-        '--connect-timeout=10',
-    ]
-    if 'database' in conn_spec:
-        mysql_arg_list.append('--database="{database}"')
+    # Build flavour-specific parameter list and construct the script
+    mysql_arg_list = _cli_params_builder[mysql_flavour](conn_spec, ssl_mode, ssl_ca_file, conf_file)
 
-    if conn_spec.get('ssl', False):
-        if mysql_flavour == _MYSQL_MYSQL:
-            mysql_arg_list.append('--ssl-mode=required')
-        elif mysql_flavour == _MYSQL_MARIADB:
-            mysql_arg_list.append('--ssl')
-        else:
-            raise Exception('Internal error - unknown mysql version')
+    conn_script = f'#!/bin/bash\n\n{MYSQL_CLI} {" ".join(mysql_arg_list)} "$@"'
 
-    if 'ca_cert' in conn_spec:
-        mysql_arg_list.append('--ssl-ca={ca_cert}')
-    if 'X-Amz-Credential=' in conn_spec['password']:
-        LOG.debug('AWS IAM auth')
-        if not conn_spec.get('ssl', False):
-            raise LavaError('SSL is required with IAM database authentication')
-        if mysql_flavour == _MYSQL_MYSQL:
-            # MariaDB client doesn't need this.
-            mysql_arg_list.append('--enable-cleartext-plugin')
-
-    conn_script = '#!/bin/bash\n\nmysql {args} "$@"'.format(
-        args=' '.join(mysql_arg_list).format(conf_file=conf_file, **conn_spec)
-    )
-
-    LOG.debug(f'MYSQL script is {conn_script}')
+    LOG.debug(f'MYSQL script is:\n{conn_script}')
 
     conn_cmd_file = os.path.join(conn_dir, 'mysql')
     with open(conn_cmd_file, 'w') as fp:

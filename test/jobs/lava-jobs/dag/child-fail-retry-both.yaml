@@ -1,0 +1,31 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - dag job with a child failing with retry at dag and child level
+
+type: dag
+
+iteration_limit: 2
+iteration_delay: 1s
+
+job_id: <{ prefix.job }>/dag/child-fail-retry-both
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/cmd/sleep-1: <{ prefix.job }>/exe/exit-123-retry
+  <{ prefix.job }>/cmd/hello-world:
+    - <{ prefix.job }>/exe/exit-123-retry
+    - <{ prefix.job }>/log/plain
+
+parameters:
+  workers: 4
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Job test/exe/exit-123-retry: Failed with exit status 123"
+  marks:
+    - local

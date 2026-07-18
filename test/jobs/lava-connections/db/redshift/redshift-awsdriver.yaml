@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Redshift connector using the AWS Redshift driver
+owner: "<{ owner }>"
+
+type: redshift
+subtype: redshift
+
+conn_id: <{ prefix.conn }>/db/redshift/awsdriver
+enabled: true
+
+host: <{ db.redshift.host }>
+port: <{ db.redshift.port }>
+ssl: true
+database: <{ db.redshift.database }>
+
+user: <{ db.redshift.user }>
+password:  <{ prefix.ssm }>/redshift/<{ db.redshift.user }>/password

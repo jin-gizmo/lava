@@ -2,10 +2,7 @@
 # Lava Installation and Operation { x-nav="Installation & Operation" }
 
 !!! info
-    Lava requires Python 3.9+. The minimum recommended version is 3.11.
-
-!!! warning
-    Support for Python 3.9 ends with lava v8.2 (Kīlauea).
+    The minimum recommended version is 3.11.
 
 There are two distinct paths for deploying lava, depending on whether the goal
 is to:

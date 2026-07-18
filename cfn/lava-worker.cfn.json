@@ -11,12 +11,6 @@
     }
   },
   "Parameters": {
-    "Version": {
-      "Type": "String",
-      "Description": "Lava version (read only).",
-      "Default": "STOP - Wrong template. Use the built version from dist/cfn not src from cfn/",
-      "AllowedPattern": "^?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
-    },
     "realm": {
       "Description": "Name of the realm",
       "Type": "String",
@@ -25,7 +19,8 @@
     "worker": {
       "Description": "Name of the worker",
       "Type": "String",
-      "AllowedPattern": "[a-z]([-a-z0-9_]){2,10}"
+      "AllowedPattern": "^(?!dispatch$)(?!lava)[a-z]([-a-z0-9_]){2,15}$",
+      "ConstraintDescription": "Must be 3-16 chars, start with a-z, contain only [a-z0-9-_], not equal \"dispatch\" and not start with \"lava\"."
     },
     "messageRetentionPeriod": {
       "Description": "Message retention period on the worker queue (seconds). Default 1 day.",
@@ -223,7 +218,7 @@
   "Outputs": {
     "Version": {
       "Description": "Lava version",
-      "Value": { "Ref": "Version" },
+      "Value": "If you see this, the unbuilt version of the template has been used!!",
       "Export": { "Name": { "Fn::Sub": "lava:${realm}:${worker}:version" } }
     }
   },

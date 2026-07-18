@@ -1,0 +1,14 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Docker Github Container Registry (ghcr) connection (private)
+owner: "<{ owner }>"
+
+type: docker
+
+conn_id: <{ prefix.conn }>/docker/ghcr
+enabled: true
+
+registry: ghcr.io
+
+user: <{ docker.ghcr.user }>
+password: /lava/dev/ghcr/password

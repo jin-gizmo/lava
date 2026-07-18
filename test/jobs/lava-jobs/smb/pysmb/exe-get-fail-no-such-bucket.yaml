@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - SMB get to non-existent S3 bucket
+
+type: exe
+
+job_id: <{ prefix.job }>/smb/pysmb/exe-get-fail-no-such-bucket
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/smb-get.sh
+
+parameters:
+  connections:
+    smb: <{ prefix.conn }>/smb/<{ smb.name }>/pysmb
+
+  args:
+    - "FAIL: SMB to non-existent S3 bucket"
+    - <{ smb.volume }>:<{ smb.dir }>/hosts
+    - s3://pretty-sure-no-such-bucket/hosts
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  marks:
+    - local

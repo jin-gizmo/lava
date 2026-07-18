@@ -5,11 +5,15 @@
 pip
 build
 packaging
+jsonschema
 
-mkdocs>=1.1.2
+# aaargh.
+# TODO: Replace mkdocs 2 (Non-sensical) with Zensical
+mkdocs<2
 mkdocs-material
 mkdocs-material-extensions
 mkdocstrings[python]
+pymdown-extensions>=10.21
 
 black>=20.8b1
 flake8>=3.8.4
@@ -29,8 +33,11 @@ ruff
 pytest
 pytest-xdist
 pytest-cov
+pytest-dotenv
 moto
 
 cfdoc
 jindr
 tqdm
+jinreq
+python-dotenv

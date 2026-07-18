@@ -1,0 +1,121 @@
+$schema: https://github.com/jin-gizmo/req/releases/latest/download/req.schema.yaml
+
+name: req
+description: >
+  Pre-requisites for working with the lava repo (excluding pip installed stuff).
+
+require:
+  - name: python3.11+
+    description: Python 3.11+
+    check: >
+      req_has_command python3
+      &&
+      req_version_gte "$(python3 --version | req_extract_version)" 3.11
+
+  - name: aspell
+    description: Open source spell checker (http://aspell.net)
+    check: req_has_command aspell
+    install: |
+      case "$REQ_FAMILY"
+      in
+        darwin)
+                echo "Try ..."
+                echo "    brew install aspell"
+                ;;
+        debian)
+                echo "Try ..."
+                echo "    sudo apt update"
+                echo "    sudo apt install aspell aspell-en"
+                ;;
+        fedora)
+                echo "Try ..."
+                echo "    sudo dnf install aspell aspell-en"
+                ;;
+        arch)
+                echo "Try ..."
+                echo "    sudo pacman -S aspell aspell-en"
+                ;;
+        *)
+                echo "Try searching your distro package manager index for \"aspell\""
+                ;;
+      esac
+      # Don't recheck after install
+      exit 126
+
+#  - name: gh
+#    description: GitHub CLI
+#    check: req_has_command gh
+#    install: |
+#      case "$REQ_OS"
+#      in
+#        darwin)
+#                echo "Try ..."
+#                echo "    brew install gh"
+#                ;;
+#        linux)
+#                echo "See https://github.com/cli/cli?tab=readme-ov-file#linux--unix"
+#                exit 126
+#                ;;
+#        *)
+#                echo "Don't know how to install gh on ${REQ_OS}. You're on your own, sorry."
+#                exit 1
+#                ;;
+#      esac
+
+  - name: docker
+    description: Docker CLI
+    check: req_has_command docker
+    install: |
+      echo "See https://www.docker.com/get-started/"
+      exit 126
+
+  - name: jq
+    description: Command-line JSON processor
+    check: req_has_command jq
+
+  - name: aws-cli-v2
+    description: AWS CLI v2
+    check: req_has_command aws && req_version_eq 2 "$(aws --version | req_extract_version)"
+    install: |
+      echo "See instructions at https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
+      exit 126
+
+  - name: packer
+    description: Used to buid the lava AMI
+    check: req_has_command packer
+    install: |
+      echo "See https://developer.hashicorp.com/packer"
+      exit 126
+
+  - name: tokei
+    description: Used to count lines of code
+    optional: true
+    check: req_has_command tokei
+    install: |
+      case "$REQ_OS"
+      in
+        darwin)
+                echo "Try ..."
+                echo "    brew install tokei"
+                ;;
+        *)
+                echo "See https://github.com/xampprocky/tokei#installation"
+                ;;
+      esac
+      exit 126
+
+  - name: shellcheck
+    description: Used as part of pre-commit checks
+    check: req_has_command shellcheck
+    install: |
+      case "$REQ_OS"
+      in
+        darwin)
+                echo "Try ..."
+                echo "    brew install shellcheck"
+                ;;
+        *)
+                echo "See https://github.com/koalaman/shellcheck"
+                ;;
+      esac
+      exit 126

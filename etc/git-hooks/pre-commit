@@ -88,7 +88,7 @@ then
 	# Look for shell scripts ... including those not ending in .py
 	ALL_SHELL=$(
 		find . -type f -perm +u=x ! -path './venv*/*' \
-			! -path './.??*/*' ! -path './doc/*' ! -path './untracked/*' \
+			! -path './.??*/*' ! -path './untracked/*' \
 			! -path './dist/*' ! -path './*egg-info*' \
 			! -path './test/*' \
 			-print0 | xargs -0 file | grep -i 'shell script' | cut -d: -f1

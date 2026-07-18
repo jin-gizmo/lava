@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Illegal (reserved) global
+
+job_id: <{ prefix.job }>/cmd/global/illegal
+
+type: cmd
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo hello {{globals.who}}
+
+globals:
+  Lavatron: no way
+  who: world
+
+x-lava-nocheck: joborphan

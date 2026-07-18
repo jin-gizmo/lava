@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Dispatch with bad delay
+
+type: dispatch
+
+job_id: <{ prefix.job }>/dispatch/bad-delay
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  - <{ prefix.job }>/cmd/hello-world
+
+# No globals
+globals: {}
+
+parameters:
+  delay: -1  # Bad
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad delay"
+  marks:
+    - local

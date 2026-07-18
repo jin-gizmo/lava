@@ -236,6 +236,25 @@ class.
 
 ```
 
+#### tojson
+
+This is (essentially) the standard Python
+[json.dumps](https://docs.python.org/3/library/json.html#basic-usage) function.
+It is provided with a `default` argument that can handle types that the Jinja
+[tojson](https://jinja.palletsprojects.com/en/stable/templates/#jinja-filters.tojson)
+filter cannot (such as `datetime` objects).
+
+!!! note
+    The lava version is a function, *not* a filter.
+
+```jinja
+{# Convert the globals map to a JSON string #}
+{{ utils.tojson(globals) }}
+
+# Other arguments to json.dumps can be used too
+{{ utils.tojson(globals, indent=2, sort_keys=true) }}
+```
+
 #### uuid
 
 Generate a random UUID.

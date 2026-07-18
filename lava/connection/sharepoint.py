@@ -11,7 +11,8 @@ import boto3
 
 from lava.common import get_lava_param
 from lava.config import config
-from lava.lavacore import IGNORE_FIELDS, LavaError
+from lava.exceptions import LavaError
+from lava.lavacore import IGNORE_FIELDS
 from lava.lib.misc import dict_check, str2bool
 from lava.lib.sharepoint import Sharepoint
 from .core import CONNECTION_REQUIRED_FIELDS, LOG, cli_connector, get_connection_spec

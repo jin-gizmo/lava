@@ -1,0 +1,54 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: "{{ id }}"
+version: "{{ version }}"
+documentation: "{{ documentation }}"
+
+title: Lava connection specification
+
+type: object
+
+properties:
+  conn_id:
+    description: Connection ID.
+    type: string
+    minLength: 1
+  description:
+    description: A short description of the connection.
+    type: string
+    minLength: 1
+  enabled:
+    description: Whether or not the connection is enabled. Defaults to false.
+    type: boolean
+    default: false
+  owner:
+    description: Identifies the owner of the connection.
+    type: string
+    minLength: 1
+  type:
+    description: Connection type.
+    type: string
+    enum:
+      # {% for conn in defs.connection if not conn.endswith('.d') %}
+      - "{{ conn }}"
+      # {% endfor %}
+
+patternProperties:
+  ^[xX]-:
+    description: X-* fields are ignored by lava.
+  '^\$schema$':
+    type: string
+
+required:
+  - conn_id
+  - type
+  - description
+  - owner
+
+# Mix-in for the connection parameters for each type
+allOf:
+  # {% for conn in defs.connection if not conn.endswith('.d') %}
+  - if: { properties: { type: { const: "{{ conn }}" } } }
+    then: { $ref: '#/$defs/connection/{{ conn }}' }
+  # {% endfor %}
+
+unevaluatedProperties: false

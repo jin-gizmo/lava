@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# Get git commit / change info. Produces a string like so if the repo is
+# pristine: 
+# 	"commit-id (clean)"
+# ... and like so if its not:
+# 	"commit-id (5 staged, 6 unstaged, 7 untracked)".
+# ------------------------------------------------------------------------------
+
+
+shopt -s extglob
+
+commit_id=$(git rev-parse --short HEAD)
+
+# Trim leading / trailing whitespace
+function trim() {
+    local s="$1"
+    s="${s##+([[:space:]])}"
+    s="${s%%+([[:space:]])}"
+    echo "$s"
+}
+
+n_staged=$(trim "$(git diff --cached --name-only | wc -l)")
+n_unstaged=$(trim "$(git diff --name-only | wc -l)")
+n_untracked=$(trim "$(git -C "$(git rev-parse --show-toplevel)" ls-files --others --exclude-standard | wc -l)")
+
+status=()
+[ "$n_staged" -gt 0 ] && status+=("$n_staged staged")
+[ "$n_unstaged" -gt 0 ] && status+=("$n_unstaged unstaged")
+[ "$n_untracked" -gt 0 ] && status+=("$n_untracked untracked")
+
+if [ ${#status[@]} -eq 0 ]
+then
+	  echo "$commit_id (clean)"
+else
+	  echo "$commit_id (${status[*]})"
+fi
+

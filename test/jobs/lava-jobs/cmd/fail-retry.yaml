@@ -1,0 +1,41 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - with retries
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/fail-retry
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  bash -c "
+  echo Iteration is {{ globals.lava.iteration }};
+  echo Iteration ENV var is ${ITERATION};
+  exit 33
+  "
+
+iteration_limit: 3
+# iteration_delay: 3s
+
+parameters:
+  jinja: true
+  env:
+    ITERATION: "{{ globals.lava.iteration }}"
+
+on_fail:
+  - action: log
+    message: "ACTION: failed after {{ globals.lava.iteration }} attempts"
+
+on_retry:
+  - action: log
+    message: "ACTION: Attempt {{ globals.lava.iteration }} failed -- will retry"
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  error_pattern: '^Failed with exit status \d+$'
+  marks:
+    - local

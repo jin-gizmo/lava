@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - s3list foreach with a string glob
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/s3list/globstr
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/cmd/print-globals
+
+globals:
+  from_the_parent: howdy
+
+parameters:
+  limit: 10
+  foreach:
+    type: s3list
+    bucket: '{{ utils.s3bucket(realm.s3_payloads) }}'
+    prefix: '{{ utils.s3key(realm.s3_payloads) }}/<{ prefix.payload }>/data.raw/'
+    glob: '*.sqlite3'
+
+x-lava-nocheck: joborphan

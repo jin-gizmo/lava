@@ -27,12 +27,16 @@ import sys
 from functools import total_ordering
 from pathlib import Path
 
-from packaging.version import Version as Pep440Version
+try:
+    from packaging.version import Version as Pep440Version
+except (ModuleNotFoundError, ImportError):
+    Pep440Version = None
 
 __author__ = 'Murray Andrews'
 
 
 PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+Version = Pep440Version
 
 
 # ------------------------------------------------------------------------------
@@ -40,6 +44,8 @@ PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
 class SemanticVersion:
     """
     Model semantic versions.
+
+    No longer used in this package. It remains for backward compatibility.
 
     :param semver: See https://semver.org
     """
@@ -103,13 +109,12 @@ class SemanticVersion:
         )
 
 
-Version = Pep440Version
-
 _v = json.loads((Path(__file__).parent / 'VERSION.json').read_text(encoding='utf-8'))
-__VERSION__ = Version(_v['__version_num__'])
-__version_num__ = str(__VERSION__)
+__version_num__ = _v['__version_num__']
 __version_name__ = _v['__version_name__']
 __version__ = f'{__version_num__} ({__version_name__})'
+
+__VERSION__ = Version(_v['__version_num__']) if Version else None
 
 
 # ------------------------------------------------------------------------------
@@ -148,7 +153,11 @@ def process_cli_args() -> argparse.Namespace:
         help='Exit with zero status if the lava version is equal to the specified version.',
     )
 
-    return argp.parse_args()
+    args = argp.parse_args()
+    if not Version and any((args.ge, args.eq)):
+        argp.error('The "packaging" package must be installed for version comparison operations.')
+
+    return args
 
 
 # ------------------------------------------------------------------------------

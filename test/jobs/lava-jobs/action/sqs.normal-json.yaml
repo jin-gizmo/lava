@@ -1,0 +1,24 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Action to send an object (JSON) to a normal SQS queue
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/sqs/normal-json
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  echo This job has an action to send an object to a normal SQS queue.
+  Check queue <{ sqs.normal }>.
+
+on_success:
+  - action: sqs
+    message:
+      Job: '{{ job.job_id }}'
+      Run ID: '{{ job.run_id }}'
+    queue: <{ sqs.normal }>
+
+x-lava-nocheck: joborphan

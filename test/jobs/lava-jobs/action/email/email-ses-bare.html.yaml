@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Action to send HTML email using a bare metal SES
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/email/ses-bare-html
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo This job uses an action to send an HTML email using bare metal SES
+
+on_success:
+  - action: email
+    to: <{ email.test1 }>
+    subject: HTML test - SES bare metal
+    message: <HTML><h1>It worked</h1><b>Really</b></HTML>
+
+x-lava-nocheck: joborphan

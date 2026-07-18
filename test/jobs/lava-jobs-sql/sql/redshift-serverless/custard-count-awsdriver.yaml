@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Redshift serverless custard count (awsdriver)
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/redshift-svl/custard-count/awsdriver
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/custard-count.sql
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/redshift/svl-awsdriver
+  transaction: true
+
+x-lava-nocheck: joborphan

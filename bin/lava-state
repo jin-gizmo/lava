@@ -3,9 +3,9 @@
 """Command line utility to manipulate lava state items."""
 
 import argparse
-import logging
 import os
 import sys
+from pathlib import Path
 
 from jinja2 import Template
 
@@ -17,8 +17,7 @@ from lava.version import __version__
 
 __author__ = 'Murray Andrews'
 
-PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-LOG = logging.getLogger(LOGNAME)
+PROG = Path(sys.argv[0]).stem
 LOGLEVEL = 'info'
 
 
@@ -87,7 +86,7 @@ def process_cli_args() -> argparse.Namespace:
     # ----------------------------------------
     # Sub parsers
 
-    subp = argp.add_subparsers(dest='command', required=True)
+    subp = argp.add_subparsers(dest='command', title='subcommands', required=True)
 
     # . . . . . . . . . . . . . . . . . . . .
     # "put" command
@@ -183,10 +182,20 @@ def process_cli_args() -> argparse.Namespace:
     )
 
     # . . . . . . . . . . . . . . . . . . . .
-    args = argp.parse_args()
+    # "rm" command
+    c_rm = subp.add_parser('rm', help='Remove a state item.')
+    c_rm.set_defaults(func=cmd_rm)
 
-    if args.state_id.lower().startswith('lava'):
-        c_put.error(f'Bad state_id: {args.state_id}: Values beginning with "lava" are reserved')
+    c_rm.add_argument(
+        'state_id',
+        action='store',
+        nargs='+',
+        default=[],
+        help='State ID to remove. Non-existent state IDs do not cause an error.',
+    )
+
+    # . . . . . . . . . . . . . . . . . . . .
+    args = argp.parse_args()
 
     if not args.realm:
         try:
@@ -228,6 +237,11 @@ def cmd_put(args: argparse.Namespace) -> None:
 
     """
 
+    if args.state_id.lower().startswith('lava'):
+        raise ValueError(
+            f'Bad state_id: {args.state_id}: Values beginning with "lava" are reserved'
+        )
+
     value = args.value or args.param
     state = LavaStateItem.new(
         state_id=args.state_id,
@@ -248,6 +262,9 @@ def cmd_get(args: argparse.Namespace) -> None:
 
     The namespace argument may contain the following:
 
+    - realm:
+        Lava realm
+
     - state_id
         State ID. Required.
 
@@ -263,6 +280,29 @@ def cmd_get(args: argparse.Namespace) -> None:
         value = ''
 
     print(Template(args.template).render(s=value, state=value))
+
+
+# ---------------------------------------------------------------------------------------
+def cmd_rm(args: argparse.Namespace) -> None:
+    """
+    Remove a state item.
+
+    This is an unconditional deletion and missing items are not considered to be an error.
+
+    The namespace argument must contain the following:
+
+    - realm:
+        Lava realm
+
+    - state_id
+        A list of State IDs. Required.
+
+    :param args:        The argparse arguments namespace.
+    :return:
+    """
+
+    for sid in args.state_id:
+        LavaStateItem.rm(state_id=sid, realm=args.realm)
 
 
 # ---------------------------------------------------------------------------------------

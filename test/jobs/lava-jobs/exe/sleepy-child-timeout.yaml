@@ -1,0 +1,24 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - timeout with a sleepy child that should also exit.
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/sleepy-child-timeout
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sleepy-child.sh 12345
+
+parameters:
+  timeout: 1
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: 'Timed out after .* seconds'
+  marks:
+    - local

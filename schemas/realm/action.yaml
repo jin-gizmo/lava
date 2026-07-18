@@ -1,0 +1,8 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava action specification
+
+oneOf:
+  # {% for a in defs.realm['action.d'] %}
+  - $ref: '#/$defs/realm/action.d/{{ a }}'
+  # {% endfor %}

@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Max run delay of 5 seconds -- leave it in queue to test handling
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/max-run-delay
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+max_run_delay: 5s
+
+payload: bash -c "echo Hello World!!"
+
+x-lava-nocheck: joborphan

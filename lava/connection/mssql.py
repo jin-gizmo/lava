@@ -26,7 +26,9 @@ try:
     # noinspection PyPackageRequirements
     import pyodbc
 except ImportError:
-    import lava.lib.dbnone as pyodbc
+    from lava.lib.dbnone import dbapi_stub
+
+    pyodbc = dbapi_stub('pyodbc')
 
 from .core import LOG, cli_connector, pysql_connector
 

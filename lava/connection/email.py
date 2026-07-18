@@ -9,8 +9,9 @@ from typing import Any
 
 import boto3
 
+from lava import LavaError
 from lava.config import config
-from lava.lavacore import IGNORE_FIELDS, LavaError
+from lava.lavacore import IGNORE_FIELDS
 from lava.lib.email import Emailer
 from lava.lib.misc import dict_check, listify
 from .core import (

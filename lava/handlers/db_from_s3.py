@@ -19,10 +19,11 @@ from typing import Any
 import boto3
 import jinja2
 
+from lava import LavaError
 from lava.config import LOGNAME
 from lava.connection import get_aws_connection, get_connection_spec
 from lava.connection.core import make_application_name
-from lava.lavacore import LavaError, jinja_render_vars
+from lava.lavacore import jinja_render_vars
 from lava.lib.aws import s3_object_exists
 from lava.lib.db import Database
 from lava.lib.misc import dict_check, size_to_bytes, splitext2, str2bool

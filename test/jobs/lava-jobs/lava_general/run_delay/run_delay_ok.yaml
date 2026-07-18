@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Valid and long run delay
+
+type: cmd
+
+job_id: <{ prefix.job }>/run_delay/ok
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo hello
+
+max_run_delay: 7d
+
+parameters:
+  args:
+    - world
+
+x-lava-nocheck: joborphan

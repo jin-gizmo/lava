@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+x-description: Warn - Missing description key
+
+type: cmd
+
+job_id: <{ prefix.job }>/warn/no-description
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: bash -c "echo Bad to the bone"
+
+x-lava-nocheck: joborphan

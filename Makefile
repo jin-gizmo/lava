@@ -4,7 +4,22 @@ SHELL:=/bin/bash
 
 repo_base=.
 
-include $(repo_base)/etc/Makefile
+include $(repo_base)/etc/make/common.mk
+include $(repo_base)/etc/make/builder.mk
+include $(repo_base)/etc/make/help.mk
+
+# ------------------------------------------------------------------------------
+# Auto-help setup
+#
+#+ Welcome to **$(APP)** (v$(LAVA_VERSION)). What do you want to make?
+
+#- For more information, consult the lava user guide $(_URL)
+#-
+#- Help brought to you by **MakeHelp** - https://github.com/jin-gizmo/makehelp.
+
+HELP_CATEGORY=Getting started
+
+# ------------------------------------------------------------------------------
 
 APP=lava
 
@@ -12,21 +27,27 @@ APP=lava
 PYTEST_WORKERS=auto
 # PYTEST_WORKERS=2
 
-# This is the name of an index server for twine uploads in ~/.pypirc
+## The name of an index server for twine uploads in `~/.pypirc`.
 pypi=pypi
 
-LAVA_VERSION=$(shell python3 lava/version.py)
+export LAVA_VERSION:=$(shell python3 lava/version.py)
 
 # ------------------------------------------------------------------------------
-#  Generic from here on
 
-override OS=$(shell $(etc)/os-type.sh)
+override OS:=$(shell $(etc)/os-type.sh)
 override PY_VER=$(shell python3 -c 'from sys import version_info as v; print(f"{v.major}.{v.minor}")')
 override ARCH=$(shell arch)
 override RUNTIME:=$(OS)-py$(PY_VER)
-runtime=$(RUNTIME)
 
-# This won't be called if platform is set on command line
+## Some targets need *runtime* to be specified to indicate the target O/S type
+## and Python version (`$(runtime)` on this machine).  Building for a foreign
+## runtime is done in a docker container. See `etc/builders` for Dockerfiles.
+
+runtime:=$(RUNTIME)
+
+
+## Some docker related targets need *platform* to be specified using standard
+## docker nomenclature. e.g. `linux/arm64` (ARM), `linux/amd64` (x86).
 platform:=$(shell $(etc)/docker-platform.sh)
 
 PKG_OS_DIR=$(dist)/pkg/$(OS)
@@ -59,84 +80,9 @@ else
 TESTS=no
 endif
 
-.PHONY: help deploy backup doc clean list pkg jinlava lambda all ami init upgrade spell test cfn oracle
+.PHONY: help deploy doc clean pkg jinlava lambda init upgrade spell test cfn oracle schemas
 
 # ------------------------------------------------------------------------------
-help:
-	@echo
-	@$e What do you want to make?  Available targets are:
-	@echo
-	@$e "$RGetting started$_"
-	@$e "   help:      Print this help text."
-	@$e "   init:      Initialise the project (create venv etc.) Non-destructive."
-	@$e "   oracle:    Download / update the Oracle client binaries."
-	@echo
-	@$e "$RBuild related targets:$_"
-	@$e "   builder$C^+$_: Build a multi-platform docker image that can build the lava worker"
-	@$e "              install package for the specified runtime on foreign platforms."
-	@$e "              ARM (linux/arm64) and x86 (linux/amd64) are supported."
-	@$e "   cfn:       Make the CloudFormation templates and documentation."
-	@$e "   lambda:    Make the lambda function code bundles."
-	@$e "   jinlava:   Create a source distribution of the lava libraries suitable for"
-	@$e "              installation using pip."
-	@$e "   pkg$C^+$_:     Make the lava worker install package."
-	@$e "   registry:  Start a local docker registry to hold multi-plaftorm images for"
-	@$e "              building foreign platform builds. The registry is managed by the"
-	@$e "              \"jindr\" utility. Try \"jindr --help\" for more information."
-	@echo
-	@$e "$RInstallation related targets:$_"
-	@$e "   deploy:    Deploy modified files to S3. The env=<ENVIRONMENT>"
-	@$e "              argument is mandatory. It specifies a target environment"
-	@$e "              configuration in config.yaml. The optional config=<FILE>"
-	@$e "              argument can specify a different config file."
-	@$e "   pypi:      Upload the jinlava pkg to the \"$(pypi)\" PyPI server via twine."
-	@$e "              The \"$(pypi)\" server must be defined in ~/.pypirc. Add pypi=..."
-	@$e "              to specify a different index server entry in ~/.pypirc."
-	@echo
-	@$e "$RUser guide / documentation targets$_"
-	@$e "   doc:       Make the user guide into consolidated markdown."
-	@$e "   preview:   Build and preview the mkdocs version of the user guide."
-	@$e "   publish:   Publish the user guide to GitHub pages (must be on master branch)."
-	@$e "   spell:     Spell check the user guide (requires aspell)."
-	@echo
-	@$e "$RMiscellaneous targets:$_"
-	@$e "   upgrade:   Upgrade the virtualenv with latest packages."
-	@$e "   clean:     Remove the generated packages and documents."
-	@$e "   freeze:    Make frozen requirements.txt files based on versions currently"
-	@$e "              installed in the venv."
-	@$e "   tools:     Build the dev tools."
-	@$e "   black:     Format the code using black."
-	@$e "   check:     Run some code checks (flake8 etc)."
-	@$e "   count:     Do line counts on source code (needs tokei)."
-	@echo
-ifeq ($(TESTS),yes)
-	@$e "$RTesting targets$_"
-	@$e "   coverage:  Run the unit tests and produce a coverage report."
-	@$e "   test:      Run the unit tests."
-	@$e "   start/up:  Start the docker containers providing test resources."
-	@$e "   stop/down: Stop the docker containers providing test resources."
-	@echo
-endif
-	@echo
-	@$e "Targets with $C^$_ accept an optional $iruntime=<RUNTIME>$_ argument where $i<RUNTIME>$_"
-	@$e "specifies the target O/S type and Python version. On the current machine, this"
-	@$e "value defaults to \"$(RUNTIME)\". Building for a foreign runtime is done in a"
-	@$e "docker container. See etc/builders for Dockerfiles. Builders are available for"
-	@$e "the following runtimes:"
-	@( \
-		for b in $(wildcard etc/builders/*.Dockerfile) ; \
-		do \
-			$e "    - $$(basename $${b%.Dockerfile})" ; \
-		done ; \
-	)
-	@echo
-	@$e "Targets with a $C+$_ accept an optional $iplatform=<PLATFORM>$_ argument. This specifies"
-	@$e "the target platform architecture in docker terminology (e.g. linux/amd64 or"
-	@$e "linux/arm64)."
-	@echo
-
-# ------------------------------------------------------------------------------
-
 
 FORCE:
 
@@ -164,49 +110,89 @@ FORCE:
 		z=0 ; \
 	)
 
-
-ifndef env
-deploy:
-	$(error You must specify env=... argument!)
-else
-deploy:
-	$(etc)/deploy.sh -e $(env) -f $(config)
-endif
-
 # ------------------------------------------------------------------------------
-# Check virtual environment is not active
-_no_venv:
-	@if [ "$$VIRTUAL_ENV" != "" ] ; \
-	then \
-		$e "$RDeactivate your virtualenv for this operation$_" ; \
-		exit 1 ; \
-	fi
+#:cat Getting started
 
-# Setup the virtual environment
-_venv:	_no_venv
-	@if [ ! -d venv ] ; \
-	then \
-		echo Creating virtualenv ; \
-		python3 -m venv venv ; \
-	fi
+## Initialise the project (create venv etc.). This is non-destructive and can be
+## rerun as needed.
+init:	_venv req _git
+
+_git:	.git
+	git config core.hooksPath etc/git-hooks
+
+## Download / update the Oracle client binaries.
+oracle:	_venv_is_on
+	@mkdir -p external-packages/oracle
+	@PATH=etc:$$PATH etc/oracle-pkg-sync.sh external-packages/oracle
+
+## Check software prequisites.
+req:	_venv
+	@echo "🔵 Checking prerequisites"
 	@( \
-		echo Activating venv ; \
 		source venv/bin/activate ; \
-		if [ "$(os)" = "amzn2018" -a "$$PYTHON_INSTALL_LAYOUT" = "amzn" ] ; \
-		then \
-			echo "Aargh - Amazon Linux 1 - pip is broken - unsetting PYTHON_INSTALL_LAYOUT" ; \
-			export PYTHON_INSTALL_LAYOUT= ; \
-		fi ; \
-		echo Installing requirements ; \
-		python3 -m pip install 'pip>=20.3' --upgrade ; \
-		python3 -m pip install -r requirements-build.txt --upgrade ; \
-		python3 -m pip install -r requirements.txt --upgrade ; \
-		python3 -m pip install -r requirements-extra.txt --upgrade ; \
+		req install --optional req.yaml ; \
 	)
 
 # ------------------------------------------------------------------------------
+#:cat Build targets
 
-init:	_venv
+## Build the lava worker install package. If the target *runtime* does not match
+## the current one (`$(runtime)`), the build will be done in a docker container
+## based on a *builder* image.
+#:opt runtime platform
+pkg:	freeze _pkg
+
+## Build the CloudFormation templates and documentation.
+cfn:	_venv_is_on
+	$(MAKE) -C cfn $(MAKECMDGOALS) dist=$(abspath $(dist))
+
+## Build the lambda function code bundles.
+lambda: _venv_is_on
+	$(MAKE) -C lambda $(MAKECMDGOALS) dist=$(abspath $(dist))
+
+## Create a source distribution of the lava Python package for installation
+## using **pip**.
+jinlava: $(LIB_PKG)
+
+
+## Build the JSON schema files.
+schemas: _venv_is_on \
+	$(patsubst schemas/%.schema.yaml,dist/schemas/%.schema.yaml,$(wildcard schemas/*.schema.yaml)) \
+	$(patsubst schemas/%.schema.yaml,dist/schemas/%.schema.json,$(wildcard schemas/*.schema.yaml))
+
+
+.SECONDEXPANSION:
+
+$(dist)/schemas/%.schema.yaml: schemas/%.schema.yaml \
+		$(shell find schemas/common -name '*.yaml') \
+		$$(shell find schemas/$$* -name '*.yaml')
+	@echo Buiding $@
+	@mkdir -p $(dist)/schemas
+	@( \
+		set -e ; \
+		components=(-d schemas/common) ; \
+		[ -d "schemas/$*" ] && \
+			components+=(-d "schemas/$*") ; \
+		etc/schema-build \
+			"$${components[@]}" \
+			-p "id=$(LAVA_DOCO_URL)/schemas/latest/$*.schema.yaml" \
+			-p "documentation=$(LAVA_DOCO_URL)" \
+			-p "version=v$(LAVA_VERSION)" \
+			"$<" \
+			> "$@" ; \
+	)
+
+$(dist)/schemas/%.schema.json: $(dist)/schemas/%.schema.yaml
+	etc/schema2json < $< > $@
+
+## Build the lava job framework.
+tools:
+	$(MAKE) -C dev-tools $(MAKECMDGOALS) dist=$(abspath $(dist))
+
+
+$(LIB_PKG): _venv_is_on $(SOURCE_FILES)
+	@mkdir -p $(dist)/jinlava
+	@python3 setup.py sdist --dist-dir $(dist)/jinlava 
 
 _pkg:	$(PKG)
 
@@ -215,7 +201,7 @@ _pkg:	$(PKG)
 # Note that we set PIP_INDEX_URL env var in the build to mimic pip behavour on
 # the current host.
 
-$(PKG):	$(SOURCE_FILES)
+$(PKG):	_venv_is_on $(SOURCE_FILES)
 	@if [ "$(RUNTIME)" != "$(runtime)" -a ! -f /.dockerenv ] ; \
 	then \
 		[ ! -f "$(etc)/builders/$(runtime).Dockerfile" ] && \
@@ -234,6 +220,7 @@ $(PKG):	$(SOURCE_FILES)
 		docker run --rm -t --user $(shell id -u):$(shell id -g) -w /lava/build \
 			-v$$(pwd):/lava/build -v ~/.aws:/lava/.aws \
 			-e PIP_INDEX_URL \
+			-e VIRTUAL_ENV=anything \
 			--platform "$(platform)" \
 			"$$builder" \
 			make _pkg _freeze=no ; \
@@ -245,92 +232,140 @@ $(PKG):	$(SOURCE_FILES)
 		$e "$bCreated $@$_" ; \
 	fi
 
-
 # ------------------------------------------------------------------------------
-ifndef VIRTUAL_ENV
-all pkg freeze ami lambda jinlava doc tools black check upgrade cfn oracle:
-	$(error You need to activate the virtual environment)
+#:cat Installation targets
+
+## Deploy modified files to S3. The *env* argument specifies a target
+## environment configuration in `$(config)`. The optional *config* argument
+## can specify a different config file.
+#:req env
+#:opt config
+
+ifndef env
+deploy:
+	$(error You must specify env=... argument!)
 else
+deploy:
+	$(etc)/deploy.sh -e $(env) -f $(config)
+endif
 
-pkg:	freeze _pkg
-
-
-upgrade:
-	python3 -m pip install -r requirements-build.txt --upgrade
-	python3 -m pip install -r requirements.in --upgrade
-	python3 -m pip install -r requirements-extra.in --upgrade
-	
-freeze:	$(REQ_FILES)
-
-
-cfn:
-	$(MAKE) -C cfn $(MAKECMDGOALS) dist=$(abspath $(dist))
-
-lambda:
-	$(MAKE) -C lambda $(MAKECMDGOALS) dist=$(abspath $(dist))
-
-jinlava: $(LIB_PKG)
-
-$(LIB_PKG): $(SOURCE_FILES)
-	@mkdir -p $(dist)/jinlava
-	@python3 setup.py sdist --dist-dir $(dist)/jinlava 
-
+## Upload the jinlava package to the `$(pypi)` PyPI server via twine. The
+## `$(pypi)` server must be defined in `~/.pypirc`. Use the *pypi* argument to
+## specify a different index server entry in `~/.pypirc`.
+#:opt pypi
 pypi:	~/.pypirc jinlava
 	twine upload -r "$(pypi)" "dist/jinlava/jinlava-$(LAVA_VERSION).tar.gz"
 
 
 # ------------------------------------------------------------------------------
-# Documentation related targets
-#
-doc spell preview publish:
+#:cat Documentation targets
+
+## Build the user guide into consolidated markdown.
+doc:	_venv_is_on
+	$(MAKE) -C doc $(MAKECMDGOALS) dist=$(abspath $(dist))
+
+## Spell check the user guide (requires **aspell**).
+spell:
+	$(MAKE) -C doc $(MAKECMDGOALS) dist=$(abspath $(dist))
+
+## Build and preview the mkdocs version of the user guide.
+preview: _venv_is_on
+	$(MAKE) -C doc $(MAKECMDGOALS) dist=$(abspath $(dist))
+
+## Publish the user guide to GitHub pages (must be on *master* branch).
+publish: _venv_is_on
 	$(MAKE) -C doc $(MAKECMDGOALS) dist=$(abspath $(dist))
 
 # ------------------------------------------------------------------------------
-tools:
-	$(MAKE) -C dev-tools $(MAKECMDGOALS) dist=$(abspath $(dist))
+#:cat Miscellaneous targets
 
-black:
+## Format the Python code using **black**.
+black:	_venv_is_on
 	black .
 	black $(HIDDEN_PYTHON)
 
-check:
+## Run the pre-commit code checks (**ruff**, **flake8** etc).
+check:	_venv_is_on
 	$(etc)/git-hooks/pre-commit
 
-
-oracle:
-	@mkdir -p external-packages/oracle
-	@PATH=etc:$$PATH etc/oracle-pkg-sync.sh external-packages/oracle
-	
-endif
-
+## Remove the generated packages and documents.
 clean:
 	$(RM) $(PKG) $(LIB_PKG)
 	$(MAKE) -C doc $(MAKECMDGOALS) dist=$(abspath $(dist))
 	$(MAKE) -C cfn $(MAKECMDGOALS) dist=$(abspath $(dist))
 	$(MAKE) -C lambda $(MAKECMDGOALS) dist=$(abspath $(dist))
 
+## Count lines of source code (needs **tokei**).
 count:
 	tokei .
 
+## Upgrade the virtual environment with the latest Python packages.
+upgrade: _venv_is_on
+	python3 -m pip install -r requirements-build.txt --upgrade
+	python3 -m pip install -r requirements.in --upgrade
+	python3 -m pip install -r requirements-extra.in --upgrade
+	
+## Build frozen `requirements-*.txt` files based on versions currently
+## installed in the venv.
+freeze:	_venv_is_on $(REQ_FILES)
+
+## Update the TOC in `README.md`.
+toc:
+	@set -e ; \
+	tmp=$$(mktemp) ; \
+	z=1 ; \
+	trap '/bin/rm -f $$tmp; exit $$z' 0 ; \
+	etc/tocmark README.md > $$tmp || exit ; \
+	if cmp -s README.md $$tmp ; \
+	then \
+		echo "README.md already up to date" ; \
+	else \
+		cp README.md README.md.bak ; \
+		mv $$tmp README.md ; \
+		echo "README.md TOC updated" ; \
+	fi ; \
+	z=0
+
+
 
 # ------------------------------------------------------------------------------
-#  Test targets
-
-# Need to make sure we can access AWS or a lot of the tests will fail.
-_aws:
-	@aws sts get-caller-identity > /dev/null
+#:cat Test targets
 
 ifeq ($(TESTS),yes)
-coverage: _aws
-	@mkdir -p dist/test
-	pytest --cov=. --cov-report html:dist/test/htmlcov -n "$(PYTEST_WORKERS)"
+## Run the unit tests and produce a coverage report.
+coverage:
 
-test:	_aws
-	pytest -v -s -n "$(PYTEST_WORKERS)"
+## Run the unit tests.
+test:
 
-start stop up down:
-	$(MAKE) -C test $(MAKECMDGOALS)
+## Load the test job suite into the ministack container
+load:
+
+## Start the docker containers providing test resources.
+start:
+
+## Check that the local docker based test infrastructure is ready to use (also
+## included in the *test* and *coverage* targets).
+ready:
+
+## Stop the docker containers providing test resources.
+stop:
+
+## Update source images for test containers.
+# Ministack, in particular, updates frequently (almost daily).
+refresh:
+
+start ready stop up down load test coverage refresh: _delegate
+	@:
+
+# This delegate nonsense is required to prevent stuff running twice when
+# multiple targets are specified on the command line (e.g. make up load).
+.PHONY: _delegate
+
+_delegate:
+	@$(MAKE) -C test $(MAKECMDGOALS)
+
 else
-coverage test start stop up down:
+start ready stop up down load test coverage refresh:
 	@echo "Test targets are not enabled in this clone"
 endif

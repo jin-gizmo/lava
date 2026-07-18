@@ -1,0 +1,32 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: SSL configuration options for database connections
+
+description: SSL configuration options for database connections.
+
+type: object
+
+properties:
+  ssl_mode:
+    description: SSL/TLS verification mode
+    type: string
+    enum:
+      - require
+      - verify-ca
+      - verify-full
+  ssl_ca_file:
+    description: File name or URI for server certificate.
+    type: string
+    minLength: 1
+
+  # Deprecated attributes
+  ssl:
+    description: (Deprecated) Enable SSL/TLS. Use ssl_mode=require.
+    type: boolean
+    default: false
+    deprecated: true
+  ca_cert:
+    description: (Deprecated) File name or URI for server certificate. Use ssl_ca_file.
+    type: string
+    minLength: 1
+    deprecated: true

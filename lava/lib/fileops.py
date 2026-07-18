@@ -8,10 +8,15 @@ import math
 import os
 import re
 import shlex
+import stat
 import subprocess
 import unicodedata
 from collections.abc import Iterator
 from fnmatch import fnmatch
+from shutil import copyfileobj
+from tempfile import mkstemp
+
+import smart_open
 
 from .decorators import deprecated
 
@@ -272,3 +277,34 @@ def sanitise_filename(value: str) -> str:
     value = re.sub(r'[-\s]+', '-', value)
 
     return value.strip('.-')
+
+
+# ------------------------------------------------------------------------------
+def materialise_file(
+    uri: str, suffix: str = '', dir: str = None, mode: int = stat.S_IRUSR, **kwargs  # noqa A002
+) -> str:
+    """
+    Copy a file from a URI to a temporary local file and returns its path.
+
+    It is up to the client to remove the file when done.
+
+    Useful when a library requires a filesystem path but the source may be
+    a URI supported by smart_open (e.g. s3://, http://).
+
+    :param uri:     Path or URI to read from via smart_open.
+    :param suffix:  Optional suffix for the temp file name (e.g. '.pem').
+    :param dir:     Optional directory to copy the file into. If not specified,
+                    a default directory is used.
+    :param mode:    File permissions. Defaults to owner read-only (0o400).
+    :param kwargs:  Additional keyword arguments to pass to smart_open.open()
+    :return:        Path to the temporary file.
+    """
+
+    fd, path = mkstemp(suffix=suffix, dir=dir)
+    os.close(fd)
+    os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
+    with open(path, 'wb') as dst, smart_open.open(uri, 'rb', **kwargs) as src:
+        # noinspection PyTypeChecker
+        copyfileobj(src, dst)
+    os.chmod(path, mode)
+    return path

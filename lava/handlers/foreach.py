@@ -18,10 +18,11 @@ from typing import Any
 import boto3
 from dateutil.tz import UTC
 
+from lava import LavaError
 from lava.config import LOG, config
 from lava.foreach import Foreach
 from lava.lava import run_job
-from lava.lavacore import LavaError, get_job_spec, jinja_render_vars
+from lava.lavacore import get_job_spec, jinja_render_vars
 from lava.lib.misc import dict_check
 
 __author__ = 'Murray Andrews'

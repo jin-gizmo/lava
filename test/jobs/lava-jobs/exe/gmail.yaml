@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - send email via gmail with CLI connector
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/gmail
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/exe-email.sh
+
+parameters:
+  args:
+    - <{ email.test2 }>
+  connections:
+    email: <{ prefix.conn }>/email/gmail
+
+x-lava-nocheck: joborphan

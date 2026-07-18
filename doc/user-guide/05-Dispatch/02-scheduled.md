@@ -173,8 +173,13 @@ A *lava scheduling object* is a map with the following fields:
 |Field|Type|Required|Description|
 |-|-|-|-------------------------------------------------------------|
 |crontab|String|Yes|A conventional crontab timing specification.|
-|from|String|No|An ISO 8601 datetime string specifying when the schedule object becomes active. Default is midnight, 01/01/0001|
-|to|String|No|An ISO 8601 datetime string specifying when the schedule object ceases to active. Default is midnight, 31/12/9999|
+|from|String|No|An ISO 8601 datetime string specifying when the schedule object becomes active. Default is midnight, 01/01/0001 (UTC).|
+|to|String|No|An ISO 8601 datetime string specifying when the schedule object ceases to active. Default is midnight, 31/12/9999 (UTC).|
+
+!!! note
+    The whole ISO 8601 vs RFC 3339 debacle raises its head at this point. Just
+    stick to the familiar core subset of both with which most people are
+    familiar and all will be well.
 
 The `from` and `to` fields allow specific schedules to be active only within
 defined time periods. If `from` is less than `to`, the schedule is active only
@@ -185,9 +190,14 @@ only outside those two times.
 
 [from-to]:img/schedule-from-to.png
 
-The `from` and `to` fields are each timezone aware. If no timezone is specified, the
-local timezone of the worker running the
-[lavasched](#job-type-lavasched) job is assumed.
+The `from` and `to` fields are each timezone aware.
+
+!!! info
+    As of v8.3 (Mauna Loa), use of values without a timezone indicator is
+    deprecated and will fail schema validation by [lava-schema](#lava-schema-utility).
+    The lava worker will still accept values without a timezone
+    and assume the local timezone of the worker running the
+    [lavasched](#job-type-lavasched) job.
 
 #### Examples
 
@@ -235,17 +245,15 @@ after that. Note that in this example, UTC is specified in the date entries.
 ```
 
 This one will run the job daily at midday, except during February 2019 when it
-is not active. Note that `from` is greater than `to` in this case and the lack
-of timezone means the local timezone of the worker running the
-[lavasched](#job-type-lavasched) job will be used.
+is not active. Note that `from` is greater than `to` in this case.
 
 ```json
 {
   ...
   "schedule": {
     "crontab": "0 12 * * *",
-    "from": "2019-03-01T00:00:00",
-    "to:": "2019-02-01T00:00:00"
+    "from": "2019-03-01T00:00:00+11:00",
+    "to:": "2019-02-01T00:00:00+11:00"
   },
   ...
 }

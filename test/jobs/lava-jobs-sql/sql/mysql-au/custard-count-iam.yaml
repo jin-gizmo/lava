@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Aurora MySQL custard count with IAM auth
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/mysql-au/custard-count-iam
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/custard-count.sql
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/mysql/aurora-iam
+  transaction: true
+
+x-lava-nocheck: joborphan

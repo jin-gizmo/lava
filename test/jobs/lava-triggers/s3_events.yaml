@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/s3trigger.schema.yaml
+
+description: Catch an S3 event
+owner: "<{ owner }>"
+
+trigger_id: &trigger_id <{ prefix.s3trigger }>/s3event
+
+enabled: true
+
+bucket: <{ s3.bucket.s3trigger }>
+prefix: <{ s3.prefix.s3trigger }>
+
+job_id: <{ prefix.job }>/log/plain
+
+globals:
+  bucket: 'Global bucket: {{bucket}}'
+
+parameters:
+  bucket: '{{bucket}}'
+  event_type: '{{info.event_type}}'
+  event_time: '{{info.event_time}}'
+  key: '{{key}}'
+  source_ip: '{{info.source_ip}}'
+  trigger_id: *trigger_id
+  info: '{{info}}'
+  event: '{{event}}'

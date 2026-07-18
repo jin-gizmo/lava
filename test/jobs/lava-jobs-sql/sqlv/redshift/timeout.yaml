@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Redshift sqlv timeout
+
+type: sqlv
+
+job_id: <{ prefix.job }>/sqlv/redshift/timeout
+
+payload: <{ prefix.payload }>/sql.rsc/custard-count.sql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/redshift/base
+  timeout: 0.1s
+
+x-lava-nocheck: joborphan

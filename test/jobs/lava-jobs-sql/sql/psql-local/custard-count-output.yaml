@@ -1,0 +1,24 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Aurora Postgres custard count with specified output area
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/psql-local/custard-count-output
+
+payload: <{ prefix.payload }>/sql.rsc/custard-count.sql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/psql/local
+  transaction: true
+  output: my_output_area
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

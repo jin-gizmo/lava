@@ -1,0 +1,41 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Redshift unload multi starting at good table
+
+type: redshift_unload
+
+job_id: <{ prefix.job }>/rsu.multi-start-good
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/redshift/base
+  s3_conn_id: <{ prefix.conn }>/aws/ssm
+
+  start: custard
+  stop_on_fail: false
+
+  schema: <{ db.common.schema }>
+  relation:
+    - no_such_table
+    - custard
+
+  bucket: "<{ s3.bucket.unload }>"
+  prefix: "{{ utils.s3key(realm.s3_temp) }}/test/rsu/{{schema}}/{{relation}}.csv.gz."
+
+  args:
+    - CSV
+    - ALLOWOVERWRITE
+    - PARALLEL OFF
+    - HEADER
+    - GZIP
+
+  dateformat: YYYY-MM-DD
+
+  insecure: <{ rsu.insecure }>
+
+x-lava-nocheck: joborphan

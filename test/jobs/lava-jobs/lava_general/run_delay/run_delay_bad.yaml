@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - Invalid run delay
+
+type: cmd
+
+job_id: <{ prefix.job }>/run_delay/bad
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo hello
+
+max_run_delay: frog
+
+parameters:
+  args:
+    - world
+
+x-lava-nocheck: joborphan

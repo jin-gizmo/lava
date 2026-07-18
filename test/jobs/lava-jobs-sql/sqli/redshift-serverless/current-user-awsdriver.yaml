@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Redshift get current user (awsdriver)
+
+type: sqli
+
+job_id: <{ prefix.job }>/sqli/redshift-svl/current-user/awsdriver
+
+payload: >-
+  SELECT CURRENT_USER;
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/redshift/svl-awsdriver
+
+x-lava-nocheck: joborphan

@@ -9,9 +9,10 @@ from typing import Any
 import boto3
 import jinja2
 
+from lava import LavaError
 from lava.config import LOGNAME
 from lava.connection import get_sharepoint_connection
-from lava.lavacore import LavaError, jinja_render_vars
+from lava.lavacore import jinja_render_vars
 from lava.lib.aws import s3_download, s3_split
 from lava.lib.misc import dict_check
 

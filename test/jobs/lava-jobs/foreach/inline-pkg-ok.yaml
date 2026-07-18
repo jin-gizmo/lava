@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Inline foreach running a pkg
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/inline/pkg
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/pkg/global1
+
+globals:
+  from_the_parent: howdy
+
+parameters:
+  foreach:
+    type: inline
+    values:
+      - g1: Loop index=0
+      - g1: Loop index=2
+
+x-lava-nocheck: joborphan

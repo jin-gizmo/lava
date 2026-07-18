@@ -1,7 +1,7 @@
 
 ## Getting Started
 
-Ensure you have GNU **make** and Python 3.9+ installed. Make will be
+Ensure you have GNU **make** and Python 3.11+ installed. Make will be
 preinstalled on many Linux systems, or will be available in the distro package
 repos. For macOS, install the Xcode developer tools.
 

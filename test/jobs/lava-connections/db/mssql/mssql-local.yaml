@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Local SQL Server database.
+owner: "<{ owner }>"
+
+type: mssql
+
+conn_id: <{ prefix.conn }>/db/mssql/local
+enabled: true
+
+database:  <{ db.mssql_local.database }>
+host: <{ db.mssql_local.host }>
+port: <{ db.mssql_local.port }>
+
+user: <{ db.mssql_local.user }>
+password:  <{ prefix.ssm }>/mssql_local/<{ db.mssql_local.user }>/password
+
+driver: FreeTDS

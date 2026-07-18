@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Aurora sqlite3 custard count
+
+type: sqlc
+
+job_id: <{ prefix.job }>/sqlc/sqlite3-local/custard-count
+
+payload: <{ prefix.payload }>/sql.rsc/custard-count-noschema.sql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/sqlite3/test
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

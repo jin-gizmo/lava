@@ -30,6 +30,12 @@ _LAVA_EVENT_TTL = None
 
 
 # ------------------------------------------------------------------------------
+def put_event(mesg: dict[str, Any]) -> None:
+    """Put an event into the event queue."""
+    _EVENT_QUEUE.put(mesg)
+
+
+# ------------------------------------------------------------------------------
 def log_event(job_spec: dict[str, Any], status: str, info: Any = None) -> datetime:
     """
     Send an event record to the event logger thread.
@@ -65,8 +71,7 @@ def log_event(job_spec: dict[str, Any], status: str, info: Any = None) -> dateti
     if _LAVA_EVENT_TTL:
         mesg['ttl'] = int(now.timestamp() + _LAVA_EVENT_TTL)
 
-    _EVENT_QUEUE.put(mesg)
-
+    put_event(mesg)
     return now
 
 

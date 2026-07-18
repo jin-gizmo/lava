@@ -8,6 +8,7 @@ only object shared across realms.
 |-|-|-|-------------------------------------------------------------|
 |config|Map|No|An optional map of configuration values that will be applied to all workers in the realm. Refer to [Lava Worker Configuration](#lava-worker-configuration) for more information.|
 |on_fail|List[Map]|No|The default [on_fail actions](#job-actions) for jobs in the realm.|
+|on_retry|List[Map]|No|The default [on_retry actions](#job-actions) for jobs in the realm.|
 |on_success|List[Map]|No|The default [on_success actions](#job-actions) for jobs in the realm.|
 |realm|String|Yes|A unique identifier for the realm. Keep it simple.|
 |s3_key|String|Yes|A KMS key identifier used when objects are written to S3 by a worker. Typically, either a key ARN or `alias/<KEY-NAME>`.|

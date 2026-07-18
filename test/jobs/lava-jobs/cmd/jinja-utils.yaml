@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test jinja utility functions
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/jinja-utils
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo
+
+parameters:
+  args:
+    - Today is {{ start.strftime('%A') }}.
+    - Yesterday was {{ (start - utils.timedelta(days=1)).strftime('%A') }}.
+    - My lava bucket is {{ utils.s3bucket(realm.s3_temp) }}.
+    - Extract first part of bucket name using re={{ utils.re.search('s3://([^.]*)',
+      realm.s3_temp).group(1) }}.
+    - Basename of lava tmp path is {{ utils.path.basename(realm.s3_temp) }}.
+    - Easter this year is on {{ utils.dateutil.easter.easter(job.ts_start.year) }}.
+
+x-lava-nocheck: joborphan

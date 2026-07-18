@@ -5,11 +5,20 @@ APP=lava
 
 repo_base=..
 
-include $(repo_base)/etc/Makefile
+include $(repo_base)/etc/make/registry.mk
+include $(repo_base)/etc/make/help.mk
 
 # ------------------------------------------------------------------------------
-#  Generic from here on
+# Auto-help setup
+#+ What do you want to make?
 
+#- For more information, consult the lava user guide $(_URL)
+
+HELP_CATEGORY=Miscellaneous targets
+
+#:cat Build targets
+
+# ------------------------------------------------------------------------------
 LAMBDAS=dispatch s3trigger stop metrics
 LAVA_VERSION=$(shell python3 ../lava/version.py)
 
@@ -24,12 +33,12 @@ PIP_INDEX_URL=$(shell ../etc/pip-index-url)
 runtime=amzn2023-py3.13
 platform=linux/arm64
 
-.PHONY: help clean pkg builder
+.PHONY: help clean pkg
 .PRECIOUS: $(REQ_FILES)
 
 
 # ------------------------------------------------------------------------------
-help:
+xhelp:
 	@echo
 	@echo What do you want to make?  Available targets are:
 	@echo
@@ -70,13 +79,11 @@ $(pkg_dir)/%-$(LAVA_VERSION).zip: %/requirements.txt $(wildcard %/*.py) $(wildca
 	mkdir -p $(pkg_dir)
 	./pkg.sh -d $(pkg_dir) $(shell basename $@ | sed s/-.*//) || $(RM) $@
 
-all:	pkg
-
-lambda:	pkg
-
 _pkg:	$(PKGS)
 
-pkg:	$(REQ_FILES)
+## Build the lambda function code bundles.
+#:opt platform runtime
+lambda:	registry $(REQ_FILES)
 	@( \
 		echo "[32mContainer based build for $(runtime)[0m" ; \
 		builder="localhost:$(REGISTRY_LOCAL_PORT)/build/lava/$(runtime)" ; \

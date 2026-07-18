@@ -1,0 +1,3 @@
+These *.sh / *.py files run synchronously before the ministack server starts.
+
+WARNING: Ministack insists on using /bin/sh _not_ bash for the *.sh scripts.

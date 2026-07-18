@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Job dynamically enabled (enabled = 'TRUE')
+
+type: log
+
+job_id: <{ prefix.job }>/enabled/simple
+
+worker: <{ worker.main }>
+enabled: 'TRUE'
+owner: <{ owner }>
+
+payload: ignored
+
+x-lava-nocheck: joborphan

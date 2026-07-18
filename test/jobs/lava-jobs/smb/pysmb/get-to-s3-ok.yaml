@@ -1,0 +1,29 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - smb_get to S3
+
+type: smb_get
+
+job_id: <{ prefix.job }>/smb/pysmb/get-to-s3-ok
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  conn_id: <{ prefix.conn }>/smb/<{ smb.name }>/pysmb
+
+  # Source file
+  share_name: <{ smb.volume }>
+  path: <{ smb.dir }>/{{ job.run_id }}/{{ utils.path.basename(job.parameters.file) }}
+
+  # Target
+  file: "{{ realm.s3_temp }}/test/smb/{{ job.run_id }}/custard100.csv"
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

@@ -1,0 +1,30 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - smb-put - S3 to SMB
+
+type: smb_put
+
+job_id: <{ prefix.job }>/smb/pysmb/put-from-s3-ok
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  conn_id: <{ prefix.conn }>/smb/<{ smb.name }>/pysmb
+  create_dirs: true
+
+  # Source file
+  file: "{{ realm.s3_payloads }}/<{ prefix.payload }>/data.raw/custard100.csv"
+
+  # Target
+  share_name: <{ smb.volume }>
+  path: <{ smb.dir }>/{{ job.run_id }}/{{ utils.path.basename(job.parameters.file) }}
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

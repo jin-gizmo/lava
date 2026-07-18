@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - Chain job with unknown child
+
+type: chain
+
+job_id: <{ prefix.job }>/chain/unknown-child
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  - unknown-child
+
+# No globals
+globals: { }
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "unknown-child: No such job"
+  marks:
+    - local

@@ -17,14 +17,15 @@ from typing import Any
 from uuid import uuid4
 
 import boto3
-import docker
-import docker.errors
+import docker  # noqa
+import docker.errors  # noqa
 import jinja2
 import requests.exceptions
 
+from lava import LavaError
 from lava.config import LOGNAME, STATUS_TIMEOUT, config
 from lava.connection import get_cli_connection, get_docker_connection
-from lava.lavacore import DEFER_ON_EXIT, LavaError, jinja_render_vars, job_environment
+from lava.lavacore import DEFER_ON_EXIT, jinja_render_vars, job_environment
 from lava.lib.aws import s3_split, s3_upload
 from lava.lib.datetime import duration_to_seconds
 from lava.lib.misc import Defer, Task, dict_check
@@ -156,16 +157,7 @@ def run(
     except ValueError as e:
         raise LavaError(f'Bad job parameters: {e}')
 
-    if ':' in job_spec['payload']:
-        try:
-            image_repo, image_tag = job_spec['payload'].strip().split(':')
-        except ValueError:
-            raise LavaError(
-                f'Bad payload: {job_spec["payload"]}: Must be in the form repository[:tag]'
-            )
-    else:
-        image_repo = job_spec['payload'].strip()
-        image_tag = 'latest'
+    image_repo = job_spec['payload'].strip()
 
     timeout = duration_to_seconds(parameters.get('timeout', config('DOCKER_TIMEOUT')))
 
@@ -273,16 +265,15 @@ def run(
         raise LavaError(f'Cannot get docker client: {e}')
 
     cntnr = None
-    return_info = {'exit_status': 0}
+    return_info: dict[str, Any] = {'exit_status': 0}
     short_id = None
 
     try:
         # ------------------------------------
         # Pull the docker image
         try:
-            LOG.debug('Pulling image %s:%s', image_repo, image_tag)
-            # noinspection PyUnresolvedReferences
-            image = dclient.images.pull(repository=image_repo, tag=image_tag)
+            LOG.debug('Pulling image %s', image_repo)
+            image = dclient.images.pull(image_repo)
             LOG.debug('Got image %s', image.tags)
         except docker.errors.APIError as e:
             # Hacksville -- Sometimes docker login works but the pull fails.
@@ -291,7 +282,7 @@ def run(
                 try:
                     LOG.warning(
                         f'Docker login ok but pull image failed: Error {e.status_code}:'
-                        f' {image_repo}:{image_tag} - will try to login again',
+                        f' {image_repo} - will try to login again',
                         extra={
                             'event_type': 'job',
                             'job_id': job_spec['job_id'],
@@ -301,8 +292,7 @@ def run(
                     dclient = get_docker_connection(
                         docker_conn_id, realm=job_spec['realm'], aws_session=aws_session
                     )
-                    # noinspection PyUnresolvedReferences
-                    image = dclient.images.pull(repository=image_repo, tag=image_tag)
+                    image = dclient.images.pull(image_repo)
                     LOG.debug('Got image %s on second attempt', image.tags)
                 except Exception as e:
                     raise LavaError(f'Cannot pull docker image {image_repo}: {e}')
@@ -316,7 +306,6 @@ def run(
         # Create a container from the image.
 
         try:
-            # noinspection PyUnresolvedReferences
             cntnr = dclient.containers.run(
                 image=image,
                 name=f'lava-{uuid4()}',

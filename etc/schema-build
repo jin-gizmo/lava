@@ -1,0 +1,233 @@
+#!/usr/bin/env python3
+
+"""Build consolidated JSON schema files from components."""
+
+from __future__ import annotations
+
+import sys
+from argparse import Action, ArgumentError, ArgumentParser, Namespace
+from collections.abc import Iterator, Sequence
+from contextlib import suppress
+from glob import iglob
+from pathlib import Path
+from typing import Any
+
+import jsonschema
+import yaml
+from jinja2 import Environment
+
+PROG = Path(sys.argv[0]).stem
+
+
+# ------------------------------------------------------------------------------
+# Fix pyyaml list indenting.
+class CustomDumper(yaml.Dumper):
+    """Increase list indentation."""
+
+    def increase_indent(self, flow=False, indentless=False):
+        """Increase list indentation."""
+        return super().increase_indent(flow, False)
+
+
+CustomDumper.add_representer(
+    type(None), lambda dumper, value: dumper.represent_scalar('tag:yaml.org,2002:null', '')
+)
+
+
+# ------------------------------------------------------------------------------
+class StoreNameValuePair(Action):
+    """
+    Used with argparse to store values from options of the form ``--option name=value``.
+
+    The destination (self.dest) will be created as a dict {name: value}. This
+    allows multiple name-value pairs to be set for the same option.
+    """
+
+    # --------------------------------------------------------------------------
+    # noinspection PyUnresolvedReferences
+    def __call__(self, parser, namespace, values, option_string=None):
+        """Handle name=value option."""
+
+        if not hasattr(namespace, self.dest) or not getattr(namespace, self.dest):
+            setattr(namespace, self.dest, {})
+        argdict = getattr(namespace, self.dest)
+
+        if not isinstance(values, list):
+            values = [values]
+        for val in values:
+            try:
+                n, v = val.split('=', 1)
+            except ValueError as e:
+                raise ArgumentError(self, str(e))
+            argdict[n] = v
+
+
+# ------------------------------------------------------------------------------
+def dict_set_deep(d: dict, keys: Sequence[str], v: Any) -> None:
+    """
+    Set a value in a dict based on a sequence of keys.
+
+    Subdicts are created on the way as required.
+
+    :param d:           The dictionary.
+    :param keys:        A list or tuple of strings.
+    :param v:           The value to set.
+
+    :raise ValueError:  If one of the elements along the path is not a dict.
+
+    """
+
+    for k in keys[:-1]:
+        # noinspection PyUnresolvedReferences
+        d = d.setdefault(k, {})
+        if not isinstance(d, dict):
+            raise ValueError('Key sequence does not lead to a dict')
+
+    if not isinstance(d, dict):
+        raise ValueError('Key sequence does not lead to a dict')
+
+    d[keys[-1]] = v
+
+
+# ------------------------------------------------------------------------------
+def rglob(pattern: str, root_dir: Path) -> Iterator[Path]:
+    """
+    Recursively glob a directory, following symlinks.
+
+    This is needed because Path().rglob() won't follow symlinks prior to py3.13.
+
+    Note that this uses glob.iglob() which will happily return dangling links.
+
+    :param pattern: Pattern to glob. This must be in the form glob.iglob() uses.
+    :param root_dir: Root directory for the search.
+    :return:        An iterator over the matching paths.
+    """
+
+    for p in iglob(pattern, root_dir=root_dir, recursive=True):
+        yield root_dir / Path(p)
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> Namespace:
+    """Process command line arguments."""
+
+    argp = ArgumentParser(
+        prog=PROG, description='Build consolidated JSON schema files from components'
+    )
+
+    argp.add_argument(
+        '-d',
+        '--dir',
+        action='append',
+        default=[],
+        help=(
+            'Directory containing components. These are added into $defs and also'
+            ' made available to the Jinja renderer. Can be specified multiple times.'
+        ),
+    )
+
+    argp.add_argument(
+        '-p',
+        '--param',
+        metavar='NAME=VALUE',
+        action=StoreNameValuePair,
+        default={},
+        help='Additional Jinja rendering variables. Can be specified multiple times.',
+    )
+
+    argp.add_argument(
+        'schema_file',
+        metavar='schema.yaml',
+        action='store',
+        help='YAML schema file.',
+    )
+
+    return argp.parse_args()
+
+
+# ------------------------------------------------------------------------------
+def load_defs(dirname: str, jinja_env: Environment = None, **render_vars) -> dict[str, Any]:
+    """
+    Build a dictionary of YAML schema definitions from fragment files.
+
+    The naming process maps file names to keys like so:
+    -   `dirname/file.yaml` -> file
+    -   `dirname/subdir1/subdir2/file.yaml` -> subdir1/subdir2/file
+
+    :param dirname: Directory containing fragment schema files (*.yaml). This is
+                    scanned recursively.
+    :param jinja_env:   A Jinja environment to use for rendering.
+    :return: Dictionary of YAML schema definitions.
+    """
+
+    defs = {}
+    dirpath = Path(dirname)
+    if not dirpath.is_dir():
+        raise Exception(f'{dirname}: No such directory')
+
+    for path in sorted(rglob('**/*.yaml', dirpath), key=lambda f: f.stem):
+        key = path.relative_to(dirname).with_suffix('').parts
+        try:
+            text = path.read_text()
+            if jinja_env:
+                text = jinja_env.from_string(text).render(**render_vars)
+            data = yaml.safe_load(text)
+        except Exception as e:
+            raise Exception(f'{path}: {e}') from e
+        # We delete any $schema in the sub-components -- just noise.
+        with suppress(KeyError):
+            del data['$schema']
+        try:
+            dict_set_deep(defs, key, data)
+        except Exception as e:
+            raise Exception(f'{path}: {e}') from e
+
+    return defs
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """Show time."""
+
+    args = process_cli_args()
+    # We really do want autoescape off here. All content is local and safe. ish.
+    jenv = Environment(autoescape=False)  # noqa S701
+
+    # Load the source for the schema.
+    schema_raw_text = Path(args.schema_file).read_text()
+    # Load all of our components and build them into a "defs" object.
+    # In the first load we don't do any rendering of component content.
+    defs = {Path(dirname).name: load_defs(dirname) for dirname in args.dir}
+
+    # We now have a defs structure that is not final but is good enough for
+    # rendering the main schema and components. This allows components to
+    # contain Jinja that references other components.
+
+    schema_text_rendered = jenv.from_string(schema_raw_text).render(defs=defs, **args.param)
+    defs = {
+        Path(dirname).name: load_defs(dirname, jenv, defs=defs, **args.param)
+        for dirname in args.dir
+    }
+    schema = yaml.safe_load(schema_text_rendered)
+    schema.setdefault('$defs', {})
+    schema['$defs'] |= defs
+
+    # Now we should have a valid schema at this point -- let's check.
+    try:
+        jsonschema.validators.validator_for(schema).check_schema(schema)
+    except jsonschema.SchemaError as e:
+        raise Exception(f'Bad schema: {"/".join(str(p) for p in e.path)}: {e.message}') from e
+
+    yaml.dump(schema, sys.stdout, Dumper=CustomDumper, sort_keys=False, default_flow_style=False)
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)

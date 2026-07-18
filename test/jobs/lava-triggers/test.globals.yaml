@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/s3trigger.schema.yaml
+
+description: Pass globals to a job
+owner: "<{ owner }>"
+
+trigger_id: &trigger_id <{ prefix.s3trigger }>/globals
+
+enabled: true
+
+bucket: <{ s3.bucket.s3trigger }>
+prefix: '*'
+
+if_fnmatch: '*global*'
+
+job_id: <{ prefix.job }>/log/plain
+
+globals:
+  g1: This is global1
+  g2: 'Global bucket: {{bucket}}'
+
+parameters:
+  bk: '{{bucket}}'
+  eventName: '{{event.eventName}}'
+  eventTime: '{{event.eventTime}}'
+  key: '{{key}}'
+  sourceIP: '{{event.requestParameters.sourceIPAddress}}'
+  trigger_id: *trigger_id

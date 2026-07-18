@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Event log field with a simple string.
+
+type: cmd
+
+job_id: <{ prefix.job }>/event-log/string
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+event_log: Just a simple string with global g1={{ globals.g1 }}
+
+payload: echo hello
+
+globals:
+  g1: global_value_1
+  g2: global_value 2
+
+parameters:
+  args:
+    - world
+
+x-lava-nocheck: joborphan

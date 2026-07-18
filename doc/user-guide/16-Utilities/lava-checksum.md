@@ -55,7 +55,7 @@ the following [lava DynamoDB tables](#dynamodb-tables).
       --version             show program's version number and exit
     ```
 
-To get help on a sub-command, use `-h` / `--help` on the sub-command. e.g.
+To get help on a subcommand, use `-h` / `--help` on the subcommand. e.g.
 
 ```bare
 lava-checksum check --help
@@ -75,12 +75,12 @@ Key points to note:
     manage backward compatibility.
 
 Arguments for the **lava-checksum** utility shown above must be placed before
-the sub-command. Arguments specific to sub-command must be placed after the
-sub-command.
+the subcommand. Arguments specific to subcommand must be placed after the
+subcommand.
 
 Note:
 
-*   The `add` sub-command will only add missing checksums and `update` will only
+*   The `add` subcommand will only add missing checksums and `update` will only
     update existing checksums.
 
 *   If any table entries are modified, a ZIP file will be left in the current

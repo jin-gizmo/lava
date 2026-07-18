@@ -1,0 +1,35 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - SQLite3 multiple payloads with nested prefix
+
+type: sqlv
+
+job_id: <{ prefix.job }>/sqlv/sqlite3/multi-payload/nested-pfx
+
+payload:
+  - <{ prefix.payload }>/sql.rsc/custard-count-noschema.sql
+  # This next line should cause a fail
+  - <{ prefix.payload }>/
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/sqlite3/test
+
+  quoting: nonnumeric
+  delimiter: ","
+
+  transaction: true
+  level: debug
+  vars:
+    limit: 10
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: 'Failed with exit status 1'
+  marks:
+    - local

@@ -7,7 +7,7 @@ from functools import partial
 import boto3
 import sqlalchemy
 
-from lava.lavacore import LavaError
+from lava import LavaError
 from .core import LOG, _get_pysql_connection, get_sql_conn_spec, make_application_name
 
 

@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - pkg job handling globals
+
+type: pkg
+
+job_id: <{ prefix.job }>/pkg/global1
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/lava_info.zip
+
+globals:
+  g1: This is global 1
+
+parameters:
+  command: lava_info.sh
+  args:
+    - 'realm={{realm.realm}}'
+    - payload area={{realm.s3_payloads}}
+    - gl={{globals.g1}}
+
+x-lava-nocheck: joborphan

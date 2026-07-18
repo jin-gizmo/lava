@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Oracle connection
+owner: "<{ owner }>"
+
+type: oracle
+
+conn_id: <{ prefix.conn }>/db/oracle/base
+enabled: true
+
+host: <{ db.oracle.host }>
+port: <{ db.oracle.port }>
+database: <{ db.oracle.database }>
+
+user: <{ db.oracle.user }>
+password:  <{ prefix.ssm }>/oracle/<{ db.oracle.user }>/password
+
+ssl_mode: verify-full

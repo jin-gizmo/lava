@@ -1,0 +1,40 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Redshift switch load with jinja rendering of table
+
+type: db_from_s3
+
+job_id: <{ prefix.job }>/db_from_s3/redshift/switch-jinja-table-1
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+
+  vars:
+    csv: custard100.csv.gz
+    table: custard
+
+  db_conn_id:  <{ prefix.conn }>/db/redshift/base
+  s3_conn_id: <{ prefix.conn }>/aws/ssm
+
+  bucket: "{{ utils.s3bucket(realm.s3_payloads) }}"
+  key: "{{ utils.s3key(realm.s3_payloads) }}/<{ prefix.payload }>/data.raw/{{ vars.csv }}"
+
+  schema: <{ db.common.schema }>
+  table: '{{ vars.table }}'
+
+  mode: switch
+
+  args:
+    - CSV
+    - IGNOREHEADER 1
+    - GZIP
+
+  # <% from '_common/columns.jinja' import columns_custard %>
+  columns: <{ columns_custard }>
+
+x-lava-nocheck: joborphan

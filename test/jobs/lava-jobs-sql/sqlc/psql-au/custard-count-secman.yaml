@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Aurora Postgres custard count with AWWS Sec Manager auth
+
+type: sqlc
+
+job_id: <{ prefix.job }>/sqlc/psql-au/custard-count-secman
+
+payload: <{ prefix.payload }>/sql.rsc/custard-count.sql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/psql/aurora-sm
+
+x-lava-nocheck: joborphan

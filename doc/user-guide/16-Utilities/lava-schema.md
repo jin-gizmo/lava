@@ -4,46 +4,64 @@
 The **lava-schema** utility performs deep schema validation for lava DynamoDB
 specification objects.
 
-??? "Usage"
+!!! note
+    Minor changes have occurred in v8.3.0 (Mauna Loa) to use [hosted JSON schema
+    specifications](#lava-json-schemas) rather than embedded definitions.
+    **Lava-schema** is now bundled in the [lava job
+    framework](#the-lava-job-framework) to perform pre-installation schema
+    validation.
 
+??? "Usage"
     ```bare
-    usage: lava-schema.py [-h] [-d] [-r REALM] [-s DIRNAME]
-                          [-t {job,s3trigger,connection}] [-v]
-                          [SPEC ...]
+    usage: lava-schema [-h] [-d] [-r REALM] [-s SCHEMA_BASE]
+                       [-t {job,s3trigger,connection,realm,event-rule}] [-v]
+                       [SPEC ...]
 
     Deep schema validation for lava DynamoDB specification objects.
 
     positional arguments:
-      SPEC                  If specified, specifications are read directly from
-                            DynamoDB and any SPEC arguments are treated as GLOB style
-                            patterns that the ID of the specifications must match. If
-                            the -d / --dynamodb option is not specified, JSON formatted
-                            lava object specifications are read from the named files.
+      SPEC                  If the -d / --dynamodb option is specified,
+                            specifications are read directly from DynamoDB and any
+                            SPEC arguments are treated as GLOB style patterns that
+                            the ID of the specifications must match. If the -d /
+                            --dynamodb option is not specified, JSON or YAML
+                            formatted lava object specifications are read from the
+                            named files. Note that any $schema entries in the
+                            source are ignored in favour of the schemas indicated
+                            by -s / --schema-base.
 
-    optional arguments:
+    options:
       -h, --help            show this help message and exit
-      -d, --dynamodb        Read lava specifications from DynamoDB instead of the local
-                            file system. The lava realm must be specified, either via
-                            the -r / --realm option or the LAVA_REALM environment
-                            variable.
+      -d, --dynamodb        Read lava specifications from DynamoDB instead of the
+                            local file system. The lava realm must be specified,
+                            either via the -r / --realm option or the LAVA_REALM
+                            environment variable. Note that not all schema types
+                            have an associated DynamoDB table.
       -r REALM, --realm REALM
-                            Lava realm name. If not specified, the environment variable
-                            LAVA_REALM will be used. If --d / --dynamodb is specified,
-                            a value must be specified by one of these mechanisms.
-      -s DIRNAME, --schema-dir DIRNAME
-                            Directory containing lava schema specifications. Default is
-                            /usr/local/lib/lava/lava/lib/schema.
-      -t {job,s3trigger,connection}, --type {job,s3trigger,connection}
-                            Use the schema appropriate to the specified lava object
-                            type. Options are job, s3trigger, connection. The default
-                            is job.
+                            Lava realm name. If not specified, the environment
+                            variable LAVA_REALM will be used. If --d / --dynamodb
+                            is specified, a value must be specified by one of
+                            these mechanisms for realm specific tables.
+      -s SCHEMA_BASE, --schema-base SCHEMA_BASE
+                            Path to schema base directory. This can be a local
+                            directory or a URL. If not specified, the value of the
+                            LAVA_SCHEMA_BASE environment variable is used with a
+                            default of https://jin-
+                            gizmo.github.io/lava/schemas/latest.
+      -t {job,s3trigger,connection,realm,event-rule},
+      --type {job,s3trigger,connection,realm,event-rule}
+                            Use the schema appropriate to the specified lava
+                            object type. The default is job.
       -v, --verbose         Print results for all specifications. By default, only
                             validation failures are printed.
+
+    Exits with status 1 if any item fails validation and 0 otherwise.
     ```
 
 **Lava-schema** can read specifications directly from DynamoDB or from the local
-file system. The latter is useful to check the install components produced in
-the `dist` directory by a [lava job framework](#the-lava-job-framework) project.
+file system in either YAML or JSON format. The latter is useful to check the
+install components produced in the `dist` directory by a [lava job
+framework](#the-lava-job-framework) project.
 
 Whereas [lava-check](#lava-check-utility) is focused on basic configuration
 management hygiene, **lava-schema** is focused on strict compliance with
@@ -56,15 +74,7 @@ point.)
 As of v7.1.0 (Pichincha), deep schema validation only manifests in the
 **lava-schema** utility. The lava worker doesn't use this. Instead, it uses
 its traditional process of checking just enough to validate that it
-can try to run the job.
-
-This will change in a future release and the worker will also perform deep
-schema validation of the fully resolved [augmented job
-specification](#the-augmented-job-specification) and the other [DynamoDB object
-types](#dynamodb-tables) at run-time. Malformed jobs that could run under the
-current validation process will be rejected outright.
-
-!!! note "I'm from the Government and I'm here to help you."
+can try to run the job. (This may change in a future release.)
 
 Commonly observed configuration errors that the lava worker will tolerate but
 **lava-schema** will not include:
@@ -89,7 +99,7 @@ Commonly observed configuration errors that the lava worker will tolerate but
 
 *   **Incorrect parameter types**    
     For example, the `args` parameter of the [exe](#job-type-exe) job type
-    expects a list of *strings* (although numbers are OK also). Booleans
+    expects a list of *strings* (although numbers are tolerated also). Booleans
     are not. In a YAML job specification file in a
     [lava job framework](#the-lava-job-framework) project, it is easy to mix up
     an argument value of `true` (boolean) with `"true"` (string). The first one

@@ -1,0 +1,17 @@
+description: OK - Redshift custard count
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/redshift/custard-count/awsdriver_nopass
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/custard-count.sql
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/redshift/awsdriver-nopass
+  transaction: true
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,42 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - Local Postgres fails to load from non-existent bucket
+
+type: db_from_s3
+
+job_id: <{ prefix.job }>/db_from_s3/psql-local/missing-bucket-fail
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  db_conn_id: <{ prefix.conn }>/db/psql/local
+  jinja: false
+  skip_missing: false
+
+  bucket: "no-such-bucket"
+  key: "does-not-matter"
+
+  schema: <{ db.common.schema }>
+  table: custard
+
+  mode: append
+
+  args:
+    - FORMAT CSV
+    - DELIMITER ','
+    - HEADER
+
+  # <% from '_common/columns.jinja' import columns_custard %>
+  columns: <{ columns_custard }>
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: 'Copy failed: Download failed: s3://.* Not Found'
+  marks:
+    - local

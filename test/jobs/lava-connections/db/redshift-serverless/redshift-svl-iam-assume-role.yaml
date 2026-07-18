@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: >-
+  Redshift Serverless connector using IAM and assumed role to get credentials.
+  Note no username.
+owner: "<{ owner }>"
+
+type: redshift-serverless
+
+conn_id: <{ prefix.conn }>/db/redshift/svl-iam-assume-role
+enabled: true
+
+host: <{ db.redshift_svl.host }>
+port: <{ db.redshift_svl.port }>
+ssl: true
+database: <{ db.redshift_svl.database }>
+
+role_arn: <{ db.redshift_svl.access_role }>
+external_id:  <{ db.redshift_svl.external_id }>

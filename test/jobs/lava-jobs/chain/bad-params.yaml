@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Chain job with bad parameters
+
+type: chain
+
+job_id: <{ prefix.job }>/chain/bad-params
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  - <{ prefix.job }>/cmd/hello-world
+
+parameters:
+  bad: to the bad
+
+# No globals
+globals: { }
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad job parameters: Unexpected keys: bad"
+  marks:
+    - local

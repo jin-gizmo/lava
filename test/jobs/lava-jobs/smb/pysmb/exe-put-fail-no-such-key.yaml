@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Non-existent S3 key to SMB put
+
+type: exe
+
+job_id: <{ prefix.job }>/smb/pysmb/exe-put-fail-no-such-key
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/smb-put.sh
+
+parameters:
+  connections:
+    smb: <{ prefix.conn }>/smb/<{ smb.name }>/pysmb
+
+  args:
+    - "FAIL: Non-existent S3 key to SMB"
+    - "{{ realm.s3_payloads }}/<{ prefix.payload }>/misc.rsc/no-such-key"
+    - <{ smb.volume }>:<{ smb.dir }>/whatever
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  marks:
+    - local

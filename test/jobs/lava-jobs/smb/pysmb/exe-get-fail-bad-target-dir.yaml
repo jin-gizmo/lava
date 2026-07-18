@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - SMB get to local bad target dir
+
+type: exe
+
+job_id: <{ prefix.job }>/smb/pysmb/exe-get-fail-bad-target-dir
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/smb-get.sh
+
+parameters:
+  connections:
+    smb: <{ prefix.conn }>/smb/<{ smb.name }>/pysmb
+
+  args:
+    - "FAIL: SMB to local bad target dir"
+    - <{ smb.volume }>:<{ smb.dir }>/hosts
+    - /does-not-exist/hosts
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  marks:
+    - local

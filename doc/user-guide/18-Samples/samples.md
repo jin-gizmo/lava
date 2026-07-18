@@ -1,12 +1,1837 @@
-*   [Job samples](#job-samples)
+
+
+
+
 *   [Connection samples](#connection-samples)
-*   [Rule samples](#rule-samples)
-*   [S3trigger samples](#s3trigger-samples)
+*   [Event Rule samples](#event-rule-samples)
+*   [Job samples](#job-samples)
+*   [S3Trigger samples](#s3trigger-samples)
+
+## Connection Samples
+??? "aws"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: aws
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields
+    # One of `access_keys` or `role_arn` must be specified. If `role_arn` is used,
+    # `external_id` can also be provided.
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the access keys.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    access_keys: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The ARN of a role to assume. The example shows how to construct an ARN in the
+    ## same account. Otherwise, a full IAM role ARN is required. Cross account roles
+    ## can be used.
+    # role_arn: "<{ lava.aws.arn('iam-role', 'some-role') }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of an SSM parameter containing a unique identifier that may be required
+    ## when assuming a (typically cross-account) role.
+    # external_id: "/lava/<{ realm }>/???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The duration of the role session.
+    # duration: 1h
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## IAM managed policies to use as managed session policies.
+    # policy_arns:
+    #   - policy_arn1
+    #   - policy_arn2
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## An IAM policy to use as an inline session policy. This should be expressed as
+    ## a full policy object. Lava will manage conversion to JSON
+    # policy:
+    #  Version: '2012-10-17'
+    #  Statement:
+    #    - Sid: Stmt1
+    #      Effect: Allow
+    #      Action: 's3:ListAllMyBuckets'
+    #      Resource: '*'
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## A dictionary of tags to apply to the assumed role session.
+    # tags:
+    #  a: tagA
+    #  b: tagB
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The AWS region name. If not specified, the current region is assumed.
+    ##
+    # region: "ap-southeast-2"
+    ```
+
+??? "docker"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: docker
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Email address for registry login
+    ##
+    # email: "John.Bigbooté@eigth.dimension.com"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name for authenticating to the registry. Required for private docker
+    ## repositories. Ignored for ECR registries.
+    # user: "..."
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of the SSM parameter containing the password for authenticating to the
+    ## registry. Required for private docker repositories. Ignored for ECR
+    ## registries. For a given realm, the SSM parameter name must be of the form
+    ## /lava/<REALM>/... and the value must be a secure string encrypted using the
+    ## lava-<REALM>-sys KMS key
+    ##
+    # password: "/lava/<{ realm }>/..."
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Either the URL for a standard registry or ecr[:account-id]. In the latter
+    ## case, lava will connect to the AWS ECR registry in the specified AWS account
+    ## or the current account if no account-id is specified. If no registry is
+    ## specified, the default public docker registry is used
+    ##
+    # registry: "aws"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## URL for the docker server. If not specified, then the normal docker
+    ## environment variables are used. Generally, this means using the local docker
+    ## daemon accessed via the UNIX socket.
+    ##
+    # server: "..."
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Timeout on docker API calls in seconds
+    ##
+    # timeout: 10
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Use TLS when connecting to the docker server. Default True.
+    ##
+    # tls: true
+    ```
+
+??? "email"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: ses
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The email handler subtype. Default is ses.
+    # subtype: ses
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The email address that is sending the email. If not specified, a value must
+    ## specified at the realm level.
+    ##
+    # from: "y2@colossal.cave"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Reply-to address(es). Can be string or list of strings.
+    ##
+    # reply_to: "bedquilt@colossal.cave"
+    
+    ## -----------------------------------------------------------------------------
+    ## ses subtype specific fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The AWS region name for SES. If not specified, us-east-1 is used.
+    ##
+    # region: "us-east-1"
+    ```
+
+??? "generic"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: generic
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    attributes:
+      attr1: Sample value
+      attr2:
+        type: ssm
+        parameter: ssm-parameter-name
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    ```
+
+??? "git"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: git
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the SSH private key.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    ssh_key: "/lava/<{ realm }>/???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    ```
+
+??? "mariadb-rds"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: mysql
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database (schema) within the database server.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 3306
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pymysql
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    ```
+
+??? "mariadb"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: mysql
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database (schema) within the database server.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 3306
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pymysql
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    ```
+
+??? "mysql-aurora"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: mysql-aurora
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database (schema) within the database server.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 3306
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pymysql
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    ```
+
+??? "mysql-rds"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: mysql-rds
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database (schema) within the database server.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 3306
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pymysql
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    ```
+
+??? "mysql"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: mysql
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database (schema) within the database server.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 3306
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pymysql
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    ```
+
+??? "oracle-rds"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: oracle
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 1521
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Oracle version for compatibility in the form x.y[.z].
+    ##
+    # edition: "x.y.z"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: oracledb
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The Oracle database service name. Generally, exactly one of service_name or
+    ## sid must be specified.
+    ##
+    # service_name: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The Oracle System Identifier of the database. Generally, exactly one of
+    ## service_name or sid must be specified.
+    ##
+    # sid: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, no SSL/TLS.
+    # ssl_mode: null
+    ```
+
+??? "oracle"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: oracle
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 1521
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Oracle version for compatibility in the form x.y[.z].
+    ##
+    # edition: "x.y.z"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: oracledb
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The Oracle database service name. Generally, exactly one of service_name or
+    ## sid must be specified.
+    ##
+    # service_name: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The Oracle System Identifier of the database. Generally, exactly one of
+    ## service_name or sid must be specified.
+    ##
+    # sid: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, no SSL/TLS.
+    # ssl_mode: null
+    ```
+
+??? "postgres-aurora"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: postgres-aurora
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database (schema) within the database server.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 5432
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pg8000
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    ```
+
+??? "postgres-rds"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: postgres-rds
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database (schema) within the database server.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 5432
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pg8000
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    ```
+
+??? "postgres"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: postgres
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database (schema) within the database server.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 5432
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pg8000
+    ```
+
+??? "psql"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: postgres
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database (schema) within the database server.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 5432
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pg8000
+    ```
+
+??? "redshift-serverless"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: redshift-serverless
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database within the Redshift Serverless namespace.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The Redshift serverless workgroup endpoint address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ## If not provided, IAM authentication to Redshift Serverless is attempted.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 5439
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name. This is required except when using secrets managaer or IAM based
+    ## authentication.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of an SSM parameter containing an external ID to use when assuming the
+    ## IAM role specified by role_arn.
+    ##
+    # external_id: ...
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The password duration when generating temporary IAM user credientials.
+    ##
+    # password_duration: "15m"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## don't fold database object names to lower case when quoting for db_from_s3 jobs
+    ##
+    # preserve_case: False
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## ARN of IAM role to be assumed when generating temporary IAM user credentials.
+    ##
+    # role_arn: ...
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pg8000
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of the workgroup associated with the database. Used when generating
+    ## temporary IAM user credentials. Defaults to the first component of the host.
+    ##
+    # workgroup: ...
+    ```
+
+??? "redshift"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: redshift
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Conditional fields - Required but may come from Secrets Manager
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of the database within the database server.
+    ##
+    database: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the password.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ## If not provided, IAM authentication to Redshift is attempted.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Port number.
+    ##
+    port: 5439
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The Redshift cluster identifier. Default is first part of host name.
+    ##
+    # cluster_id: my_cluster
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Name of a secret in AWS Secrets Manager
+    # secret_id: /lava/<{ realm }>/secret-name
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The password duration when generating temporary IAM user credientials.
+    ##
+    # password_duration: "15m"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## don't fold database object names to lower case when quoting for db_from_s3 jobs
+    ##
+    # preserve_case: False
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The location of a file containing a host certificate for the database server.
+    ## Can be a local file or URI (eg. 's3://...', 'http://...', 'https://...' etc).
+    # ssl_ca_file: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## To enable SSL/TLS set to one of 'require', 'verify-ca' or 'verify-full'. If
+    ## not set, SSL/TLS may or may not be enabled (depends on driver defaults).
+    # ssl_mode: null
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The subtype specifies the driver to use.
+    # subtype: pg8000
+    ```
+
+??? "scp"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: scp
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the SSH private key.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    ssh_key: "/lava/<{ realm }>/???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    ```
+
+??? "ses"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    ## -----------------------------------------------------------------------------
+    ## This is a legacy connector. Use email instead.
+    ## -----------------------------------------------------------------------------
+    
+    type: ses
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The email address that is sending the email. If not specified, a value must
+    ## specified at the realm level.
+    ##
+    # from: "y2@colossal.cave"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Reply-to address(es). Can be string or list of strings.
+    ##
+    # reply_to: "bedquilt@colossal.cave"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The email address that bounces and complaints will be forwarded to when
+    ## feedback forwarding is enabled
+    ##
+    # return_path: "plugh@colossal.cave"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The AWS region name for SES. If not specified, us-east-1 is used.
+    ##
+    # region: "us-east-1"
+    ```
+
+??? "sftp"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: sftp
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the SSH private key.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    ssh_key: "/lava/<{ realm }>/???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    ```
+
+??? "sharepoint"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: sharepoint
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The Application ID that the SharePoint registration portal assigned your app.
+    ## This resembles a UUID.
+    ##
+    client_id: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## SSM parameter containing the client secret.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    client_secret: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The organisation’s SharePoint base URL. e.g. acme.sharepoint.com.
+    ##
+    org_base_url: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## SSM parameter containing password for authenticating to SharePoint.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## SharePoint site name.
+    ##
+    site_name: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Azure AD registered domain ID.
+    tenant: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name for authenticating to SharePoint.
+    ##
+    # user: "???"
+    ```
+
+??? "slack"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: slack
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Webhook URL provided by Slack for sending messages, or the name of an SSM
+    ## parameter containing the webhook URL.
+    ##
+    webhook_url: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Default colour for the sidebar for Slack messages sent using attachment style.
+    ##
+    # colour: "#bbbbbb"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## An arbitrary source identifier for display in Slack messages.
+    ##
+    # from: "lava@<REALM>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Default preamble at the start of Slack messages.
+    ##
+    # preamble:  ""
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Display style for Slack messages: block, attachment and plain.
+    ##
+    # style: block
+    ```
+
+??? "smb"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: smb
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The database host DNS name or IP address.
+    ##
+    host: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## NetBIOS machine name of the remote server.
+    ##
+    remote_name: "???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## SSM parameter containing password for authenticating to the SMB server.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    password: "/lava/<{ realm }>/???"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## User name for authenticating to the SMB server.
+    ##
+    user: "???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The connection subtype. Choose between 'pysmb' and 'smbprotocol'. smbprotocol
+    ## supports encryption and access via DFS. Defaults to 'pysmb'.
+    ##
+    # subtype: "smbprotocol"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The network domain. Defaults to an empty string.
+    ##
+    ## In the 'smbprotocol' job subtype, domain can refer to a DFS domain.
+    ## Connecting via DFS is not supported in the 'pysmb' job subtype.
+    ##
+    # domain: ""
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## A custom port to use. Defaults to 445 if is_direct_tcp is True else 139.
+    ##
+    # port: 445
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## If false, request and transfer files without encryption. If true use encryption.
+    ##
+    ## Default is True when using the 'smbprotocol' job subtype.
+    ## The 'pysmb' job subtype doesn't support encryption.
+    ##
+    # encrypt: false
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## If false, use NetBIOS over TCP/IP. If true use SMB over TCP/IP. Default false.
+    ##
+    # is_direct_tcp: false
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Local NetBIOS machine name that will identify the origin of connections. If
+    ## not specified, defaults to the first 15 characters of lava-<REALM>
+    ##
+    # my_name: "<{ ('lava-' + realm)[:15] }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Indicates whether pysmb should be NTLMv1 or NTLMv2 authentication algorithm
+    ## for authentication. Default is true.
+    ##
+    # use_ntlm_v2: true
+    ```
+
+??? "ssh"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    conn_id: "???"
+    enabled: true
+    
+    description: "..."
+    owner: "<{ owner }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
+    ##
+    # X-whatever: "Some value"
+    
+    type: ssh
+    
+    ## #############################################################################
+    ## Connector type specific fields
+    
+    ## -----------------------------------------------------------------------------
+    ## Mandatory fields
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The name of an encrypted SSM parameter containing the SSH private key.
+    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
+    ##
+    ssh_key: "/lava/<{ realm }>/???"
+    
+    ## -----------------------------------------------------------------------------
+    ## Optional fields
+    ```
+
+## Event Rule Samples
+??? "eventbridge-rule"
+
+    ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/event-rule.schema.yaml
+    
+    ## #############################################################################
+    ## Mandatory fields
+    ##
+    rule_id: "lava.<{realm}>.???"
+    enabled: true
+    owner: "<{ owner }>"
+    description: "Rule description"
+    
+    ## #############################################################################
+    ## Optional fields
+    ##
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Event bus name. This should almost always be left out to use the default bus.
+    ##
+    # event_bus_name: default
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Event pattern. This will almost always be required. The example shown is an
+    ## S3 object creation event.
+    ##
+    # event_pattern:
+    #   detail:
+    #     bucket:
+    #       name:
+    #         - my-bucket
+    #     object:
+    #       key:
+    #         - prefix: a/prefix/in/the/bucket/
+    #   detail-type:
+    #     - Object Created
+    #   source:
+    #     - aws.s3
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Schedule expression (cron or rate based). Usually only one of event_pattern
+    ## and schedule_expression are required.
+    ##
+    # schedule_expression: "rate(1 day)"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## The ARN of the IAM role associated with the rule. Not needed for basic use
+    ## cases such as s3trigger and logging events to CloudWatch.
+    ##
+    # role_arn: "<{ lava.aws.arn('iam-role', 'my-role-name') }>"
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Event targets. This is required if you want the rule to do anything. The
+    ## example shown is for using s3trigger to dispatch a job on an S3 event.
+    ##
+    # targets:
+    #   # Construct the ARN for the realm s3trigger lambda
+    #   - <{ lava.aws.arn('lambda-function', 'lava-' + realm + '-s3trigger') }>
+    #   # Let's log messages in CloudWatch logs
+    #   - <{ lava.aws.arn('log-group', '/aws/events/lava') }>
+    
+    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ## Tags for the rule.
+    ##
+    # tags:
+    #   key1: val1
+    #   key2: val2
+    ```
 
 ## Job Samples
 ??? "chain"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -104,7 +1929,7 @@
     ## #############################################################################
     ## Job parameters
     
-    parameters:
+    # parameters:
       ## ---------------------------------------------------------------------------
       ## Mandatory params
     
@@ -128,6 +1953,8 @@
 ??? "cmd"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -223,7 +2050,7 @@
     ## #############################################################################
     ## Job parameters
     
-    parameters:
+    ## parameters:
       ## ---------------------------------------------------------------------------
       ## Mandatory params
     
@@ -269,6 +2096,8 @@
 ??? "dag"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -369,7 +2198,7 @@
     ## #############################################################################
     ## Job parameters
     
-    parameters:
+    # parameters:
       ## ---------------------------------------------------------------------------
       ## Mandatory params
     
@@ -393,6 +2222,8 @@
 ??? "db_from_s3"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -495,7 +2326,7 @@
       key: "???"
       schema: "???"
       table: "???"
-      mode: "???"
+      mode: "append"  # abort, append, drop etc...
     
       ## ---------------------------------------------------------------------------
       ## Optional params
@@ -528,6 +2359,8 @@
 ??? "dispatch"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -625,7 +2458,7 @@
     ## #############################################################################
     ## Job parameters
     
-    parameters:
+    # parameters:
       ## ---------------------------------------------------------------------------
       ## Mandatory params
     
@@ -659,6 +2492,8 @@
 ??? "docker"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -753,7 +2588,7 @@
     ## #############################################################################
     ## Job parameters
     
-    parameters:
+    # parameters:
       ## ---------------------------------------------------------------------------
       ## Mandatory params
     
@@ -851,6 +2686,8 @@
 
     ```yaml
     
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
+    
     ## #############################################################################
     ## Mandatory fields
     
@@ -944,7 +2781,7 @@
     ## #############################################################################
     ## Job parameters
     
-    parameters:
+    # parameters:
       ## ---------------------------------------------------------------------------
       ## Mandatory params
     
@@ -997,6 +2834,8 @@
 ??? "foreach"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -1095,9 +2934,11 @@
       ## Mandatory params
     
       foreach:
-        type: "iterator type"  # e.g. inline, csv etc.
-        param1: ...  # These are type dependent
-        param2: ...
+        # Iterator type: the example shows the "inline" type.
+        type: inline  # e.g. inline, csv etc.
+        values:
+          - { k1: v1, k2: v2}
+          - { k1: v3, k2: v4}
     
       ## ---------------------------------------------------------------------------
       ## Optional params
@@ -1120,6 +2961,8 @@
 ??? "log"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -1211,9 +3054,9 @@
     payload: "--"
     
     ## #############################################################################
-    ## Job parameters
+    ## Job parameters are ignored
     
-    parameters:
+    # parameters:
       ## ---------------------------------------------------------------------------
       ## Mandatory params
     
@@ -1224,6 +3067,8 @@
 ??? "pkg"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -1379,6 +3224,8 @@
 
     ```yaml
     
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
+    
     ## #############################################################################
     ## Mandatory fields
     
@@ -1490,15 +3337,18 @@
         - "arg2"
     
       ## ---------------------------------------------------------------------------
-      ## Optional params
+      ## Conditional params
     
       ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-      ## S3 connectivity -- either s3_conn_id or s3_iam_role
+      ## S3 connectivity -- one of s3_conn_id or s3_iam_role is required
       ##
       ## The connection ID for AWS S3.
-      # s3_conn_id: "???"
+      s3_conn_id: "???"
       ## The IAM role name used to allow access to the source data in S3.
       # s3_iam_role: "???"
+    
+      ## ---------------------------------------------------------------------------
+      ## Optional params
     
       ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       ## Disable bucket security checks. Default is false.
@@ -1534,6 +3384,8 @@
 ??? "sharepoint_get_doc"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -1688,6 +3540,8 @@
 ??? "sharepoint_get_list"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -1872,6 +3726,8 @@
 
     ```yaml
     
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
+    
     ## #############################################################################
     ## Mandatory fields
     
@@ -2032,6 +3888,8 @@
 
     ```yaml
     
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
+    
     ## #############################################################################
     ## Mandatory fields
     
@@ -2190,6 +4048,8 @@
 ??? "sharepoint_put_list"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -2375,6 +4235,8 @@
 
     ```yaml
     
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
+    
     ## #############################################################################
     ## Mandatory fields
     
@@ -2491,7 +4353,7 @@
       ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       ## The name of the file share.
       ##
-      share: "???"
+      share_name: "???"
     
       ## ---------------------------------------------------------------------------
       ## Optional params
@@ -2526,6 +4388,8 @@
 ??? "smb_put"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -2644,7 +4508,7 @@
       ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       ## The name of the file share.
       ##
-      share: "???"
+      share_name: "???"
     
       ## ---------------------------------------------------------------------------
       ## Optional params
@@ -2680,6 +4544,8 @@
 ??? "sql"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -2859,6 +4725,8 @@
 
     ```yaml
     
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
+    
     ## #############################################################################
     ## Mandatory fields
     
@@ -2999,6 +4867,8 @@
 ??? "sqli"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -3177,6 +5047,8 @@
 ??? "sqlv"
 
     ```yaml
+    
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/job.schema.yaml
     
     ## #############################################################################
     ## Mandatory fields
@@ -3364,1655 +5236,20 @@
       #   var2: "value2"
     ```
 
-## Connection Samples
-??? "aws"
+## S3Trigger Samples
+??? "s3trigger"
 
     ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
     
-    description: "..."
-    owner: "<{ owner }>"
+    $schema: https://jin-gizmo.github.io/lava/schemas/latest/s3trigger.schema.yaml
     
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: aws
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    # One of `access_keys` or `role_arn` must be specified.
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the access keys.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    access_keys: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The ARN of a role to assume. The example shows how to construct an ARN in the
-    ## same account. Otherwise, a full IAM role ARN is required. Cross account roles
-    ## can be used.
-    role_arn: "<{ lava.aws.arn('iam-role', 'some-role') }>"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of an SSM parameter containing a unique identifier that may be required
-    ## when assuming a (typically cross-account) role.
-    external_id: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The duration of the role session.
-    # duration: 1h
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## IAM managed policies to use as managed session policies.
-    # policy_arns:
-    #   - policy_arn1
-    #   - policy_arn2
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## An IAM policy to use as an inline session policy. This should be expressed as
-    ## a full policy object. Lava will manage conversion to JSON
-    # policy:
-    #  Version: '2012-10-17'
-    #  Statement:
-    #    - Sid: Stmt1
-    #      Effect: Allow
-    #      Action: 's3:ListAllMyBuckets'
-    #      Resource: '*'
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## A dictionary of tags to apply to the assumed role session.
-    # tags:
-    #  a: tagA
-    #  b: tagB
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The AWS region name. If not specified, the current region is assumed.
-    ##
-    # region: "ap-southeast-2"
-    ```
-
-??? "docker"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: docker
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Email address for registry login
-    ##
-    # email: "John.Bigbooté@eigth.dimension.com"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name for authenticating to the registry. Required for private docker
-    ## repositories. Ignored for ECR registries.
-    # user: "..."
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of the SSM parameter containing the password for authenticating to the
-    ## registry. Required for private docker repositories. Ignored for ECR
-    ## registries. For a given realm, the SSM parameter name must be of the form
-    ## /lava/<REALM>/... and the value must be a secure string encrypted using the
-    ## lava-<REALM>-sys KMS key
-    ##
-    # password: "/lava/<{ realm }>/..."
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Either the URL for a standard registry or ecr[:account-id]. In the latter
-    ## case, lava will connect to the AWS ECR registry in the specified AWS account
-    ## or the current account if no account-id is specified. If no registry is
-    ## specified, the default public docker registry is used
-    ##
-    # registry: "aws"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## URL for the docker server. If not specified, then the normal docker
-    ## environment variables are used. Generally, this means using the local docker
-    ## daemon accessed via the UNIX socket.
-    ##
-    # server: "..."
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Timeout on docker API calls in seconds
-    ##
-    # timeout: 10
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Use TLS when connecting to the docker server. Default True.
-    ##
-    # tls: true
-    ```
-
-??? "email"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: ses
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The email handler subtype. Default is ses.
-    # subtype: ses
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The email address that is sending the email. If not specified, a value must
-    ## specified at the realm level.
-    ##
-    # from: "y2@colossal.cave"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Reply-to address(es). Can be string or list of strings.
-    ##
-    # reply_to: "bedquilt@colossal.cave"
-    
-    ## -----------------------------------------------------------------------------
-    ## ses subtype specific fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The AWS region name for SES. If not specified, us-east-1 is used.
-    ##
-    # region: "us-east-1"
-    ```
-
-??? "generic"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: generic
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    attributes:
-      attr1: Sample value
-      attr2:
-        type: ssm
-        parameter: ssm-parameter-name
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    ```
-
-??? "git"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: git
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the SSH private key.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    ssh_key: "/lava/<{ realm }>/???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    ```
-
-??? "mariadb-rds"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: mysql
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database (schema) within the database server.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pymysql
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of a file containing the CA certificate for the database server.
-    ## Ignored unless ssl is true.
-    ##
-    # ca_cert: "/usr/local/lib/rds/rds-ca-2019-root.pem"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false
-    ##
-    # ssl: false
-    ```
-
-??? "mariadb"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: mysql
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database (schema) within the database server.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pymysql
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of a file containing the CA certificate for the database server.
-    ## Ignored unless ssl is true.
-    ##
-    # ca_cert: "/usr/local/lib/rds/rds-ca-2019-root.pem"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false
-    ##
-    # ssl: false
-    ```
-
-??? "mysql-aurora"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: mysql
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database (schema) within the database server.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pymysql
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of a file containing the CA certificate for the database server.
-    ## Ignored unless ssl is true.
-    ##
-    # ca_cert: "/usr/local/lib/rds/rds-ca-2019-root.pem"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false
-    ##
-    # ssl: false
-    ```
-
-??? "mysql-rds"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: mysql
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database (schema) within the database server.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pymysql
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of a file containing the CA certificate for the database server.
-    ## Ignored unless ssl is true.
-    ##
-    # ca_cert: "/usr/local/lib/rds/rds-ca-2019-root.pem"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false
-    ##
-    # ssl: false
-    ```
-
-??? "mysql"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: mysql
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database (schema) within the database server.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pymysql
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of a file containing the CA certificate for the database server.
-    ## Ignored unless ssl is true.
-    ##
-    # ca_cert: "/usr/local/lib/rds/rds-ca-2019-root.pem"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false
-    ##
-    # ssl: false
-    ```
-
-??? "oracle-rds"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: oracle
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Oracle version for compatibility in the form x.y[.z].
-    ##
-    # edition: "x.y.z"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: cx_oracle
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The Oracle database service name. Generally exactly one of service_name or
-    ## sid must be specified.
-    ##
-    # service_name: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The Oracle System Identifier of the database. Generally exactly one of
-    ## service_name or sid must be specified.
-    ##
-    # sid: "???"
-    ```
-
-??? "oracle"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: oracle
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Oracle version for compatibility in the form x.y[.z].
-    ##
-    # edition: "x.y.z"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: cx_oracle
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The Oracle database service name. Generally exactly one of service_name or
-    ## sid must be specified.
-    ##
-    # service_name: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The Oracle System Identifier of the database. Generally exactly one of
-    ## service_name or sid must be specified.
-    ##
-    # sid: "???"
-    ```
-
-??? "postgres-aurora"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: postgres
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database (schema) within the database server.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pg8000
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false
-    ##
-    # ssl: false
-    ```
-
-??? "postgres-rds"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: postgres
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database (schema) within the database server.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pg8000
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false
-    ##
-    # ssl: false
-    ```
-
-??? "postgres"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: postgres
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database (schema) within the database server.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pg8000
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false
-    ##
-    # ssl: false
-    ```
-
-??? "psql"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: postgres
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database (schema) within the database server.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pg8000
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false
-    ##
-    # ssl: false
-    ```
-
-??? "redshift-serverless"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: redshift-serverless
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database within the Redshift Serverless namespace.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The Redshift serverless workgroup endpoint address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ## If not provided, IAM authentication to Redshift Serverless is attempted.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name. This is required except when using secrets managaer or IAM based
-    ## authentication.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of an SSM parameter containing an external ID to use when assuming the
-    ## IAM role specified by role_arn.
-    ##
-    # external_id: ...
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The password duration when generating temporary IAM user credientials.
-    ##
-    # password_duration: "15m"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## don't fold database object names to lower case when quoting for db_from_s3 jobs
-    ##
-    # preserve_case: False
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## ARN of IAM role to be assumed when generating temporary IAM user credentials.
-    ##
-    # role_arn: ...
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false.
-    ##
-    # ssl: false
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pg8000
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of the workgroup associated with the database. Used when generating
-    ## temporary IAM user credentials. Defaults to the first component of the host.
-    ##
-    # workgroup: ...
-    ```
-
-??? "redshift"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: redshift
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Conditional fields - Required but may come from Secrets Manager
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of the database within the database server.
-    ##
-    database: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the password.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ## If not provided, IAM authentication to Redshift is attempted.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Port number.
-    ##
-    port: ???
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The Redshift cluster identifier. Default is first part of host name.
-    ##
-    # cluster_id: my_cluster
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Name of a secret in AWS Secrets Manager
-    # secret_id: /lava/<{ realm }>/secret-name
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The password duration when generating temporary IAM user credientials.
-    ##
-    # password_duration: "15m"
-    
-    ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ### don't fold database object names to lower case when quoting for db_from_s3 jobs
-    ###
-    ## preserve_case: False
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Set to true to enable SSL. Default is false
-    ##
-    # ssl: false
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The subtype specifies the driver to use.
-    # subtype: pg8000
-    ```
-
-??? "scp"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: scp
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the SSH private key.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    ssh_key: "/lava/<{ realm }>/???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    ```
-
-??? "ses"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    ## -----------------------------------------------------------------------------
-    ## This is a legacy connector. Use email instead.
-    ## -----------------------------------------------------------------------------
-    
-    type: ses
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The email address that is sending the email. If not specified, a value must
-    ## specified at the realm level.
-    ##
-    # from: "y2@colossal.cave"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Reply-to address(es). Can be string or list of strings.
-    ##
-    # reply_to: "bedquilt@colossal.cave"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The email address that bounces and complaints will be forwarded to when
-    ## feedback forwarding is enabled
-    ##
-    # return_path: "plugh@colossal.cave"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The AWS region name for SES. If not specified, us-east-1 is used.
-    ##
-    # region: "us-east-1"
-    ```
-
-??? "sftp"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: sftp
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the SSH private key.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    ssh_key: "/lava/<{ realm }>/???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    ```
-
-??? "sharepoint"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: sharepoint
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The Application ID that the SharePoint registration portal assigned your app.
-    ## This resembles a UUID.
-    ##
-    client_name: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## SSM parameter containing the client secret.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    client_secret: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The organisation’s SharePoint base URL. e.g. acme.sharepoint.com.
-    ##
-    org_base_url: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## SSM parameter containing password for authenticating to SharePoint.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## SharePoint site name.
-    ##
-    site_name: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Azure AD registered domain ID.
-    tenant: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name for authenticating to SharePoint.
-    ##
-    # user: "???"
-    ```
-
-??? "smb"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: smb
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The database host DNS name or IP address.
-    ##
-    host: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## NetBIOS machine name of the remote server.
-    ##
-    remote_name: "???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## SSM parameter containing password for authenticating to the SMB server.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    password: "/lava/<{ realm }>/???"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## User name for authenticating to the SMB server.
-    ##
-    user: "???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The connection subtype. Choose between 'pysmb' and 'smbprotocol'. smbprotocol
-    ## supports encryption and access via DFS. Defaults to 'pysmb'.
-    ##
-    # subtype: "smbprotocol"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The network domain. Defaults to an empty string.
-    ##
-    ## In the 'smbprotocol' job subtype, domain can refer to a DFS domain.
-    ## Connecting via DFS is not supported in the 'pysmb' job subtype.
-    ##
-    # domain: ""
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## A custom port to use. Defaults to 445 if is_direct_tcp is True else 139.
-    ##
-    # port: 445
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## If false, request and transfer files without encryption. If true use encryption.
-    ##
-    ## Default is True when using the 'smbprotocol' job subtype.
-    ## The 'pysmb' job subtype doesn't support encryption.
-    ##
-    # encrypt: false
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## If false, use NetBIOS over TCP/IP. If true use SMB over TCP/IP. Default false.
-    ##
-    # is_direct_tcp: false
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Local NetBIOS machine name that will identify the origin of connections. If
-    ## not specified, defaults to the first 15 characters of lava-<REALM>
-    ##
-    # my_name: "<{ ('lava-' + realm)[:15] }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Indicates whether pysmb should be NTLMv1 or NTLMv2 authentication algorithm
-    ## for authentication. Default is true.
-    ##
-    # use_ntlm_v2: true
-    ```
-
-??? "ssh"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    conn_id: "???"
-    enabled: true
-    
-    description: "..."
-    owner: "<{ owner }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## X-* / x-* vars are ignored by lava but may be useful for other purposes.
-    ##
-    # X-whatever: "Some value"
-    
-    type: ssh
-    
-    ## #############################################################################
-    ## Connector type specific fields
-    
-    ## -----------------------------------------------------------------------------
-    ## Mandatory fields
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The name of an encrypted SSM parameter containing the SSH private key.
-    ## This must be a secure string encrypted using the lava-<REALM>-sys KMS key.
-    ##
-    ssh_key: "/lava/<{ realm }>/???"
-    
-    ## -----------------------------------------------------------------------------
-    ## Optional fields
-    ```
-
-## Rule Samples
-??? "common"
-
-    ```yaml
-    ## #############################################################################
-    ## Mandatory fields
-    ##
-    rule_id: "<{ prefix.rule }>.demo"
-    enabled: true
-    owner: "<{ owner }>"
-    description: "Rule description"
-    
-    ## #############################################################################
-    ## Optional fields
-    ##
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Event bus name. This should almost always be left out to use the default bus.
-    ##
-    # event_bus_name: default
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Event pattern. This will almost always be required. The example shown is an
-    ## S3 object creation event.
-    ##
-    # event_pattern:
-    #   detail:
-    #     bucket:
-    #       name:
-    #         - my-bucket
-    #     object:
-    #       key:
-    #         - prefix: a/prefix/in/the/bucket/
-    #   detail-type:
-    #     - Object Created
-    #   source:
-    #     - aws.s3
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Schedule expression (cron or rate based). Usually only one of event_pattern
-    ## and schedule_expression are required.
-    ##
-    # schedule_expression: "rate(1 day)"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## The ARN of the IAM role associated with the rule. Not needed for basic use
-    ## cases such as s3trigger and logging events to CloudWatch.
-    ##
-    # role_arn: "<{ lava.aws.arn('iam-role', 'my-role-name') }>"
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Event targets. This is required if you want the rule to do anything. The
-    ## example shown is for using s3trigger to dispatch a job on an S3 event.
-    ##
-    # targets:
-    #   # Construct the ARN for the realm s3trigger lambda
-    #   - <{ lava.aws.arn('lambda-function', 'lava-' + realm + '-s3trigger') }>
-    #   # Let's log messages in CloudWatch logs
-    #   - <{ lava.aws.arn('log-group', '/aws/events/lava') }>
-    
-    ## - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    ## Tags for the rule.
-    ##
-    # tags:
-    #   key1: val1
-    #   key2: val2
-    ```
-
-## S3trigger Samples
-??? "common"
-
-    ```yaml
     ## #############################################################################
     ## Mandatory fields
     ##
     trigger_id: "<{ prefix.s3trigger }>/???"
     enabled: true
     job_id: "<{ prefix.job }>/???"
-    bucket: "???"
+    bucket: "my-s3-bucket"
     prefix: "???"
     
     ## #############################################################################

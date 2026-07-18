@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Job dynamically enabled - check if global 'a' is a palindrome
+
+type: log
+
+job_id: <{ prefix.job }>/enabled/global
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+
+enabled: |
+  {% set word = globals.a | lower %}
+  {{ word == word | reverse }}
+
+globals:
+  '#': Global a is a palindrome.
+  a: Tattarrattat
+
+payload: ignored
+
+x-lava-nocheck: joborphan

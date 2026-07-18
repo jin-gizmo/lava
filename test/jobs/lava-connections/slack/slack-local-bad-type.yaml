@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Slack webhook connection with bad type
+owner: "<{ owner }>"
+
+type: should-be-slack
+
+conn_id: <{ prefix.conn }>/slack/local-base-bad-type
+enabled: true
+
+colour: '#ff7711'
+from: Someone
+preamble: ':volcano:'
+style: block
+webhook_url: <{ prefix.ssm }>/slack_local/webhook

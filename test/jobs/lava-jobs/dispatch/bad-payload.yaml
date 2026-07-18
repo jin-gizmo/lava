@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Payload type error
+
+type: dispatch
+
+job_id: <{ prefix.job }>/dispatch/bad-payload
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  payload-must-be: "a list not a dict"
+
+# No globals
+globals: {}
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Payload must be .* list"
+  marks:
+    - local

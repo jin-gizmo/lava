@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - Simple range foreach limit exceeds realm value
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/range/limit/too-big
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/cmd/print-globals
+
+globals:
+  from_the_parent: howdy
+
+parameters:
+  limit: 1000
+  foreach:
+    type: range
+    stop: 3
+    name: counter
+
+x-lava-nocheck: joborphan

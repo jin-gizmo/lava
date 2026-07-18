@@ -10,7 +10,7 @@ the entries in the [DynamoDB tables](#dynamodb-tables). These include:
     checksums on table entries and
     [configuration drift detection](#configuration-drift-detection).
 
-*   **Deep Schema validation** via the [lava-schema](#lava-schema-utility)
+*   **Deep schema validation** via the [lava-schema](#lava-schema-utility)
     utility.
 
 *   **Bad practice detection** via the [lava-check](#lava-check-utility) utility.

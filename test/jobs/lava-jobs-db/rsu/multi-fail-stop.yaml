@@ -1,0 +1,38 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Redshift multiple unload - stop on fail
+
+type: redshift_unload
+
+job_id: <{ prefix.job }>/rsu/multi-fail-stop
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/redshift/base
+  s3_conn_id: <{ prefix.conn }>/aws/ssm
+
+  schema: <{ db.common.schema }>
+  relation:
+    - custard
+    - no_such_table
+
+  bucket: "<{ s3.bucket.unload }>"
+  prefix: "{{ utils.s3key(realm.s3_temp) }}/test/rsu/{{schema}}/{{relation}}.csv.gz."
+
+  args:
+    - CSV
+    - ALLOWOVERWRITE
+    - PARALLEL OFF
+    - HEADER
+    - GZIP
+
+  dateformat: YYYY-MM-DD
+
+  insecure: <{ rsu.insecure }>
+
+x-lava-nocheck: joborphan

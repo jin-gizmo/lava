@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - test the AWS Python connector using assume role
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/aws-py-conn-role
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/aws-cli-conn.py
+
+parameters:
+  connections:
+    aws: <{ prefix.conn }>/aws/role
+
+x-lava-nocheck: joborphan

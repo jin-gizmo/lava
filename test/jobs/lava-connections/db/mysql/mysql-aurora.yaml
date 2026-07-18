@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Aurora MySQL connection using password in SSM
+owner: "<{ owner }>"
+
+type: mysql-aurora
+
+conn_id: <{ prefix.conn }>/db/mysql/aurora
+enabled: true
+
+host: <{ db.mysql_aurora.host }>
+port: <{ db.mysql_aurora.port }>
+ssl: true
+database: <{ db.mysql_aurora.database }>
+
+user: <{ db.mysql_aurora.user }>
+password: <{ prefix.ssm }>/mysql_aurora/<{ db.mysql_aurora.user }>/password

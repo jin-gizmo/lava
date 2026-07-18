@@ -1,0 +1,8 @@
+{
+  "entries": [
+    {
+        "url":"<{ realm_info.s3_payloads }>/<{ prefix.payload }>/data.raw/custard100.psv.gz",
+        "meta": { "content_length": 5948 }
+    }
+  ]
+}

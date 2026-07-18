@@ -37,6 +37,10 @@ docker:
   # Platform can be of "host", "linux/arm64", "linux/amd64" or
   # "linux/amd64,linux/arm64". The base image must support the requested platform.
   platform: "{{cookiecutter.docker_platform}}"
+  # Target registry for docker payloads. Leave empty to use AWS ECR.
+  # Docker Job payloads will generally look like this:
+  # <{ docker.registry or lava.aws.ecr_uri }>/<{ prefix.docker_repo }>/...
+  registry: "{{cookiecutter.docker_registry}}"
 
 # ------------------------------------------------------------------------------
 # Keys in this section are suggested for use in lava DynamoDB record specs such

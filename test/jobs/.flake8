@@ -1,0 +1,21 @@
+# ex: ft=conf
+
+[flake8]
+max-line-length = 100
+exclude = venv,untracked,dist,.git,.idea,doc,bin,etc,lib
+max-complexity = 50
+import-order-style = pycharm
+# application-import-names = ...
+
+ignore = 
+	# Extra whitespace before : - black will add this
+	E203
+	# docstring: Imperative mood
+	D401
+	# docstring: No blank lines allowed after function docstring
+	D202
+	# W503 is not PEP8: line break before binary operator
+	W503
+	# flake8-return: don't assign value to var if use only as return value
+	R504
+

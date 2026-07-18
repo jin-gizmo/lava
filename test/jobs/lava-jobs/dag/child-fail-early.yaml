@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - A simple dag job with a child failing early in the sequence
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/child-fail-early
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/cmd/sleep-10: <{ prefix.job }>/exe/exit-123
+  <{ prefix.job }>/cmd/sleep-2:
+    - <{ prefix.job }>/exe/exit-123
+    - <{ prefix.job }>/cmd/sleep-5
+
+parameters:
+  workers: 4
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Job test/exe/exit-123: Failed with exit status 123"
+  marks:
+    - local

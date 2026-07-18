@@ -10,7 +10,8 @@ import boto3
 import docker
 
 from lava.common import get_lava_param
-from lava.lavacore import IGNORE_FIELDS, LavaError
+from lava.exceptions import LavaError
+from lava.lavacore import IGNORE_FIELDS
 from lava.lib.misc import dict_check
 from .core import CONNECTION_REQUIRED_FIELDS, LOG, get_connection_spec
 

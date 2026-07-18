@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Use an SSH connector to get remote system hostname
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/test-ssh
+
+payload: <{ prefix.payload }>/test-ssh.sh ec2-user@canis2
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  connections:
+    ssh: <{ prefix.conn }>/ssh
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Run a shell script that creates but does not cleanup tmp dir and file
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/mktmp_sh
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/mktmp.sh
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - SQLite3 custard select with header
+
+type: sqli
+
+job_id: <{ prefix.job }>/sqli/sqlite3/custard-select-header
+
+payload:
+  - "SELECT * FROM custard limit 10;"
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/sqlite3/test
+
+  header: true
+  quoting: nonnumeric
+  delimiter: ","
+
+  transaction: true
+  vars:
+    limit: 10
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - echo bull frog (arg handling test) - Docker hub
+
+type: docker
+
+job_id: <{ prefix.job }>/docker/dockerhub/echo
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: alpine
+
+parameters:
+  command: echo bull
+  args:
+    - frog
+  docker: <{ prefix.conn }>/docker/base
+  timeout: 360s
+
+x-lava-nocheck: joborphan

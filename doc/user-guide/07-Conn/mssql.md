@@ -1,5 +1,5 @@
 
-    ## Connector type: mssql
+## Connector type: mssql
 
 The **mssql** connector handles connections to Microsoft SQL Server databases.
 
@@ -50,4 +50,4 @@ configured on the lava worker:
 
 *   [pyodbc](https://pypi.org/project/pyodbc/)
 
-[Configuring unixODBC with Free TDS](http://www.unixodbc.org/doc/FreeTDS.html)
+See [Configuring unixODBC with Free TDS](http://www.unixodbc.org/doc/FreeTDS.html)

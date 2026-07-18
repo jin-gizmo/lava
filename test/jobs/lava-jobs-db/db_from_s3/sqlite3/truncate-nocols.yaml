@@ -1,0 +1,31 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - sqlite3 truncate load
+
+type: db_from_s3
+
+job_id: <{ prefix.job }>/db_from_s3/sqlite3/truncate-nocols
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  db_conn_id: <{ prefix.conn }>/db/sqlite3/test
+
+  bucket: "{{ utils.s3bucket(realm.s3_payloads) }}"
+  key: "{{ utils.s3key(realm.s3_payloads) }}/<{ prefix.payload }>/data.raw/custard100.csv"
+
+  schema: main
+  table: custard
+
+  mode: truncate
+
+  args:
+    - DELIMITER ','
+    - HEADER
+    - QUOTING 'minimal'
+
+x-lava-nocheck: joborphan

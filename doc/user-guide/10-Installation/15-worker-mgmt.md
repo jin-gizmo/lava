@@ -17,7 +17,7 @@ The key components are:
     The *minimum*, *preferred* and *maximum* instance counts are specified as
     parameters in the worker CloudFormation stack. Workers that act as schedule
     based dispatchers **must** have all values set to 1. Other workers can have
-    whatever is needed noting that the auto scaling can create that many
+    whatever is needed, noting that the auto scaler can create that many
     instances, so be reasonable. Also note that if auto scaling is enabled, the
     minimum should be 1 or the auto scaler will scale down to 0 and it will
     never scale up.

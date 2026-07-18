@@ -1,0 +1,30 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Schedule the dispatcher
+
+type: lavasched
+
+job_id: <{ prefix.job }>/lavasched/schedule
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+# schedule: '*/15 * * * *'
+# Valid but impossible schedule - 31 Feb
+schedule: '0 0 31 2 *'
+
+payload: --
+
+parameters:
+  dispatcher: localtime
+  args:
+    - --log
+    - '@local0'
+    - --tag
+    # Space in the tag is deliberate for testing quoting
+    - lava-dispatcher-dev-localtime (Melbourne)
+    - --log-json
+  env:
+    CRON_TZ: Australia/Melbourne
+
+x-lava-nocheck: joborphan

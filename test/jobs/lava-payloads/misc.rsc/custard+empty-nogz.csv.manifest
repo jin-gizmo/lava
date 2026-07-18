@@ -1,0 +1,12 @@
+{
+  "entries": [
+    {
+        "url":"<{ realm_info.s3_payloads }>/<{ prefix.payload }>/data.raw/empty.csv",
+        "meta": { "content_length": 0 }
+    },
+    {
+        "url":"<{ realm_info.s3_payloads }>/<{ prefix.payload }>/data.raw/custard100.csv",
+        "meta": { "content_length": 11762 }
+    }
+  ]
+}

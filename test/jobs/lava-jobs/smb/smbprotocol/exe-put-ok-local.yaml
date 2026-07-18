@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Local to SMB put
+
+type: exe
+
+job_id: <{ prefix.job }>/smb/smbprotocol/exe-put-ok-local
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/smb-put.sh
+
+parameters:
+  connections:
+    smb: <{ prefix.conn }>/smb/<{ smb.name }>/smbprotocol
+
+  args:
+    - "OK: Local to SMB"
+    - /etc/hosts
+    - <{ smb.volume }>:<{ smb.dir }>/hosts
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

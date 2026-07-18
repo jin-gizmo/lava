@@ -74,7 +74,7 @@ parameter itself.
 | Field | Type | Required | Description |
 |-|-|-|------------------|
 | type | String | Yes | The foreach generator type: `inline`. |
-| values | List[Map[String,*]] | Yes | A list of maps containing iteration values. |
+| values | List[Map[String,*]] | Yes | A list of maps containing iteration values. Map keys must not start with `lava` (case insensitive).|
 
 For example, given this (partial) job specification ...
 

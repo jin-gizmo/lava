@@ -1,0 +1,48 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: ?? - Sleep and fail randomly with retries
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/randfail-retry
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  bash -c "x=$((1 + RANDOM % 10));
+  y=$((RANDOM % 2));
+  echo Iteration is {{ globals.lava.iteration }};
+  echo Sleeping $x, $y;
+  sleep $x; echo Done; exit $y"
+
+iteration_limit: 5
+iteration_delay: 3s
+
+parameters:
+  jinja: true
+  env:
+    HIHO: Silver
+  timeout: 30
+  vars:
+    a: A
+    b: B
+
+globals:
+  x: X
+  y: Y
+
+on_fail:
+  - action: log
+    message: "ACTION: failed after {{ globals.lava.iteration }} attempts"
+
+on_success:
+  - action: log
+    message: "ACTION: succeeded after {{ globals.lava.iteration }} attempts"
+
+on_retry:
+  - action: log
+    message: "ACTION: Attempt {{ globals.lava.iteration }} failed -- will retry"
+
+x-lava-nocheck: joborphan

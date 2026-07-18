@@ -9,7 +9,9 @@ from typing import Any
 
 import boto3
 
-from lava.lavacore import IGNORE_FIELDS, LavaError
+from lava.exceptions import LavaError
+from lava.lavacore import IGNORE_FIELDS
+from lava.lib.aws import ssm_get_param
 from lava.lib.misc import dict_check
 from lava.lib.slack import Slack
 from .core import (
@@ -66,6 +68,14 @@ def get_slack_connection(conn_id: str, realm: str, aws_session: boto3.Session = 
 
     if not conn_spec['enabled']:
         raise LavaError(f'Connection {conn_id}: Not enabled')
+
+    if not conn_spec['webhook_url'].startswith('https://'):
+        try:
+            conn_spec['webhook_url'] = ssm_get_param(
+                conn_spec['webhook_url'], aws_session=aws_session
+            )
+        except Exception as e:
+            raise LavaError(f'Connection {conn_id}: {e}') from e
 
     return Slack(conn_spec, realm, logger=LOG)
 

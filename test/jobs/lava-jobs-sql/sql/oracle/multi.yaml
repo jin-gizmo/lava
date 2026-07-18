@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Multiple queries in the payload file
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/oracle/multi
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/onecol-multi.sql
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/oracle/base
+
+x-lava-nocheck: joborphan

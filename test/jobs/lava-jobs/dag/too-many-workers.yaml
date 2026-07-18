@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Excess workers trimmed back
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/too-many-workers
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/log/plain: null
+  <{ prefix.job }>/cmd/hello-world: <{ prefix.job }>/log/plain
+
+parameters:
+  workers: 2000000
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

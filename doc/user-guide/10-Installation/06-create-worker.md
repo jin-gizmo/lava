@@ -7,7 +7,7 @@
 Each realm can have an arbitrary number of workers of different capabilities to
 run jobs.
 
-Workers can run on Linux / macOS with Python 3.9+ installed.
+Workers can run on Linux / macOS with Python 3.11+ installed.
 
 There are different ways to run the lava worker.
 The worker can be run interactively or as a multi-threaded daemon. It is

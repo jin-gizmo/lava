@@ -19,10 +19,11 @@ from __future__ import annotations
 import json
 import logging
 import os
+from collections.abc import Callable
 from datetime import datetime
 from fnmatch import fnmatch
 from threading import RLock
-from typing import Any, Callable
+from typing import Any
 from urllib.parse import unquote_plus
 
 import boto3
@@ -119,7 +120,7 @@ def event_condition(condition_type: str) -> Callable:
 
 
 # ------------------------------------------------------------------------------
-def setup_logging(level: str, name: str = None) -> None:
+def setup_logging(level: str, name: str | None = None) -> None:
     """
     Set up logging.
 

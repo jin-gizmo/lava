@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Job dynamically enabled (or disabled) - check if state variable is odd
+
+type: log
+
+job_id: <{ prefix.job }>/enabled/state
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+
+enabled: |
+  {% set val = state['test/enabled/state'].n | int %}
+  {{ val % 2 == 1 }}
+
+state:
+ test/enabled/state: -- set at run time --
+
+payload: ignored
+
+x-lava-nocheck: joborphan
+
+x-prerequisite: lava-state --realm dev put test/enabled/state -p n=5

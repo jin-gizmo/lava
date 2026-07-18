@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Just log the job spec for testing globals (embedded and passed in)
+
+type: log
+
+job_id: <{ prefix.job }>/log/global
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+payload: --
+
+globals:
+  hello: world
+
+x-lava-nocheck: joborphan

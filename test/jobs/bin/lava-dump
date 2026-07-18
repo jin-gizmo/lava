@@ -1,0 +1,207 @@
+#!/usr/bin/env python3
+
+"""
+Fetch lava DynamoDB table entries that match a given glob pattern.
+
+The returned objects are dumped into into files. This is useful for importing
+stuff into the lava framework and also for backup.
+
+It deliberately avoids using the lava libraries so it can be included in the
+framework bundle.
+
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from collections import namedtuple
+
+import boto3
+import yaml
+
+from lava.lib.aws import dynamo_scan_table
+from lava.lib.fileops import sanitise_filename
+from lava.lib.misc import match_any, match_none
+
+__author__ = 'Murray Andrews'
+
+PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+
+TableDescriptor = namedtuple('TableDescriptor', ['title', 'key', 'name'])
+
+TABLES = (
+    TableDescriptor('jobs', 'job_id', 'lava.{realm}.jobs'),
+    TableDescriptor('connections', 'conn_id', 'lava.{realm}.connections'),
+    TableDescriptor('s3triggers', 'trigger_id', 'lava.{realm}.s3triggers'),
+    TableDescriptor('triggers', 'trigger_id', 'lava.{realm}.s3triggers'),
+    TableDescriptor('realms', 'realm', 'lava.realms'),
+)
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(
+        prog=PROG, description='Extract lava configurations from DynamoDB and dump them to files.'
+    )
+
+    argp.add_argument(
+        '-d',
+        '--dir',
+        action='store',
+        default='.',
+        help='Store files in the specified directory, which will be'
+        ' created if it doesn\'t exist.'
+        ' Defaults to the current directory.',
+    )
+
+    argp.add_argument('--profile', action='store', help='As for AWS CLI.')
+
+    argp.add_argument(
+        '-i', '--ignore-case', action='store_true', dest='i', help='Matching is case insensitive.'
+    )
+
+    argp.add_argument(
+        '-n',
+        '--not-match',
+        action='store_true',
+        dest='not_match',
+        help='Only extract items with keys thay don\'t match any of the specified glob patterns.',
+    )
+
+    argp.add_argument(
+        '-r',
+        '--realm',
+        action='store',
+        help='Lava realm name. This is required for all tables except the realms table.',
+    )
+
+    argp.add_argument('-q', '--quiet', action='store_true', help='Quiet mode.')
+
+    argp.add_argument(
+        '-t',
+        '--table',
+        action='store',
+        default='jobs',
+        help=(
+            'Extract from the specified table. This can be one of'
+            ' jobs, connections, s3triggers (or triggers) or realms.'
+            ' Any unique initial sequence is accepted. The default is "jobs".'
+        ),
+    )
+
+    argp.add_argument(
+        '-y',
+        '--yaml',
+        action='store_true',
+        help='Dump items in YAML format. The default is JSON.',
+    )
+
+    argp.add_argument(
+        'glob_pat',
+        metavar='glob-pattern',
+        nargs='*',
+        action='store',
+        help=(
+            'Only extract items with keys that match any of the specified'
+            ' glob style patterns. This test is inverted by the'
+            ' -n / --not-match option.'
+        ),
+    )
+
+    args = argp.parse_args()
+
+    # Work out which DynamoDB table is involved
+    for table in TABLES:  # type: TableDescriptor
+        # noinspection PyUnresolvedReferences
+        if table.title.startswith(args.table.lower()):
+            args.table = table
+            break
+    else:
+        argp.error(f'Unknown table: {args.table}')
+
+    if args.table.title != 'realms' and not args.realm:
+        argp.error(f'-r / --realm must be specified for the {args.table.title} table')
+
+    return args
+
+
+# ------------------------------------------------------------------------------
+def write_json(item: dict, filename: str) -> str:
+    """
+    Write an object in JSON format.
+
+    :param item:        Item to write.
+    :param filename:    Output filename. A ".json" suffix will be added.
+
+    :return:            The filename.
+    """
+
+    fname = filename + '.json'
+    with open(fname, 'w') as fp:
+        json.dump(item, fp, indent=4, sort_keys=True)
+        print(file=fp)
+
+    return fname
+
+
+# ------------------------------------------------------------------------------
+def write_yaml(item: dict, filename: str) -> str:
+    """
+    Write an object in YAML format.
+
+    :param item:        Item to write.
+    :param filename:    Output filename. A ".yaml" suffix will be added.
+
+    :return:            The filename.
+    """
+
+    fname = filename + '.yaml'
+    with open(fname, 'w') as fp:
+        yaml.safe_dump(item, fp, default_flow_style=False, indent=2)
+
+    return fname
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Do the business.
+
+    :return:    status
+    """
+
+    args = process_cli_args()
+    os.makedirs(args.dir, exist_ok=True)
+    aws_session = boto3.Session(profile_name=args.profile)
+    dumper = write_yaml if args.yaml else write_json
+    matcher = match_none if args.not_match else match_any
+
+    for item in dynamo_scan_table(args.table.name.format(realm=args.realm), aws_session):
+        key = item[args.table.key]
+
+        if not args.glob_pat or matcher(key, args.glob_pat, ignore_case=args.i):
+            filename = dumper(item, os.path.join(args.dir, sanitise_filename(key)))
+            if not args.quiet:
+                print(f'{key} --> {filename}')
+
+    return 0
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(1)

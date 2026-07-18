@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - Illegal global key
+
+type: cmd
+
+job_id: <{ prefix.job }>/bad/illegal-global
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+globals:
+  lava_x: Globals starting with lava not allowed
+
+payload: bash -c "echo Bad to the bone"
+
+x-lava-nocheck: joborphan

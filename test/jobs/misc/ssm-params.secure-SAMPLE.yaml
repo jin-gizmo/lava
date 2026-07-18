@@ -1,0 +1,53 @@
+# Sample companion file for ssm-params.yaml containing SecureString values.
+#
+# Instructions:
+#
+# 1.  Ensure your .gitignore contains "*.secure.yaml".
+# 2.  Copy this to ssm-params.secure.yaml
+# 3.  Fill in any required missing values. Note that ${VAR} / $VAR substitution
+#     from .env can be used.
+
+# While this sample file is repo safe, the real verison is NOT repo safe.
+
+SecureParameters:
+  - Name: audev01/master
+    Value: ...
+  - Name: canis2/ssh-key
+    Value: ...
+  - Name: ghcr/password
+    Value: ...
+  - Name: git/ssh-key
+    Value: ...
+  - Name: gmail/password
+    Value: ...
+  - Name: lava-dev-worker-core/external-id
+    Value: ...
+  - Name: mssql/admin/password
+    Value: ...
+  - Name: mssql_local/lava/password
+    Value: "${DB_LAVA_PASSWORD}"
+  - Name: mysql_aurora/lava/password
+    Value: ...
+  - Name: mysql_local/lava/password
+    Value: "${DB_LAVA_PASSWORD}"
+  - Name: oracle/master/password
+    Value: ...
+  - Name: oracle_local/lava/password
+    Value: "${DB_LAVA_PASSWORD}"
+  - Name: psql_aurora/lava/password
+    Value: ...
+  - Name: psql_local/lava/password
+    Value: "${DB_LAVA_PASSWORD}"
+  - Name: redshift-serverless/lava-dev-worker-core/external-id
+    Value: ...
+  - Name: redshift/lava/password
+    Value: ...
+  # For ministack, access keys can be pretty much anything
+  - Name: s3
+    Value: test,test
+  - Name: slack_local/webhook
+    Value: "${SLACK_WEBHOOK}"
+  - Name: smb/lava-test-smb/password
+    Value: "${SMB_PASSWORD}"
+  - Name: smtp_local/lava/password
+    Value: "${SMTP_PASSWORD}"

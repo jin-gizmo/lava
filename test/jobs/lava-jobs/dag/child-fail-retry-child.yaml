@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - dag job with a child failing with retry at child level
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/child-fail-retry-child
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/cmd/sleep-10: <{ prefix.job }>/exe/exit-123-retry
+  <{ prefix.job }>/cmd/sleep-2:
+    - <{ prefix.job }>/exe/exit-123-retry
+    - <{ prefix.job }>/cmd/sleep-5
+
+parameters:
+  workers: 4
+
+x-lava-nocheck: joborphan

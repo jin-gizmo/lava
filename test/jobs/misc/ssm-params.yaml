@@ -1,0 +1,87 @@
+# SSM parameters for testing -- mostly connector stuff
+
+# Note:
+#   1.  Values for SecureString parameters are not in this file.
+#   2.  This file is repo safe.
+#   3.  A path prefix will be applied as part of the loading process.
+
+_:
+  kms_sys: &kms_sys alias/lava-${LAVA_REALM}-sys
+
+Parameters:
+  - Name: audev01/master
+    Description: Aurora MySQL dev master passwrd
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: canis2/ssh-key
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: generic
+    Description: A generic string for testing generic connectors
+    Value: This generic parameter came from SSM.
+  - Name: ghcr/password
+    Description: GHCR read-only access token
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: git/ssh-key
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: gmail/password
+    Description: Gmail
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: lava-dev-worker-core/external-id
+    Description: External ID for assume role
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: mssql/admin/password
+    Description: msdev01
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: mssql_local/lava/password
+    Description: Local SQL Server DB
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: mysql_aurora/lava/password
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: mysql_local/lava/password
+    Description: Local MySQL DB
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: oracle/master/password
+    Description: Pass
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: oracle_local/lava/password
+    Description: Local Oracle DB
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: psql_aurora/lava/password
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: psql_local/lava/password
+    Description: 'Local PostgreSQL DB '
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: redshift-serverless/lava-dev-worker-core/external-id
+    Description: External ID for assume role for Redshift Serverless connector
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: redshift/lava/password
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: s3
+    Description: S3 for lava-reader
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: slack_local/webhook
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: smb/lava-test-smb/password
+    Description: Lava SMB test instance
+    Type: SecureString
+    KeyId: *kms_sys
+  - Name: smtp_local/lava/password
+    Type: SecureString
+    KeyId: *kms_sys

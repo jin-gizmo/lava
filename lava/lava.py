@@ -17,10 +17,11 @@ import boto3
 import jinja2
 from dateutil.tz import UTC
 
+from lava import LavaError
 from lava.actions import do_actions
 from lava.config import LOGNAME, config
 from lava.event import log_event
-from lava.lavacore import LavaError, jinja_render_vars
+from lava.lavacore import jinja_render_vars
 from lava.lib.aws import s3_split
 from lava.lib.datetime import duration_to_seconds, now_tz
 from lava.lib.decorators import deprecated

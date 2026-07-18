@@ -13,8 +13,9 @@ from typing import Any
 
 import boto3
 
+from lava import LavaError
 from lava.config import LOGNAME, config
-from lava.lavacore import JobSchedule, LavaError
+from lava.lavacore import JobSchedule
 from lava.lib.aws import dynamo_unmarshall_item, s3_split, s3_upload
 from lava.lib.misc import dict_check, listify
 

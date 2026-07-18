@@ -78,7 +78,10 @@ def runpg(
     deferred_kill_id = None
     deferred_actions = Defer.on_event(kill_event)
     with Popen(*popenargs, start_new_session=start_new_session, **kwargs) as process:
-        pgid = os.getpgid(process.pid)
+        try:
+            pgid = os.getpgid(process.pid)
+        except ProcessLookupError:
+            pgid = process.pid
         if kill_event:
             deferred_kill_id = deferred_actions.add(
                 Task(description=f'Kill process group {pgid}', action=killpg, args=[pgid, SIGKILL])

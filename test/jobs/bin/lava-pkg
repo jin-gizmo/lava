@@ -1,0 +1,199 @@
+#!/bin/bash
+
+# Package a directory of code into a zip file for a lava "pkg" job.
+
+PROG=$(basename "$0")
+
+# ------------------------------------------------------------------------------
+function usage {
+	echo "Usage: $PROG [-h] [options] source-dir [target]" >&2
+}
+
+function help {
+	usage
+	cat >&2 <<-!
+
+	Package up the contents of a directory into a zip file for deployment as
+	a lava pkg job.
+
+	If the directory contains a requirements.txt file, then Python modules
+	listed therein, including any dependencies, are included.
+
+	If the directory contains a requirements-nodeps.txt file, then Python
+	modules listed therein, excluding any dependencies, are included.
+
+	Options:
+
+	  -h		Print help and exit
+
+	  -c conf-file	A YAML config file. If specified, any files in the env/
+	  		directory will be jinja rendered using this file (using
+			<{ }> jinja delimiters).
+
+	  -p name=val	Add the specified parameter to the jinja rendering
+	  		process. (See -c option.)
+
+	  -T template	Use the named template when converting Jupyter notebooks
+	  		to Python.
+
+	  source-dir	The directory containing the source code.
+
+	  target	Place the generated zip file in the specified target. If
+	  		a directory is specified, then the zip file will be
+			created in that directory with a name based on the source
+			directory. Otherwise, a file name ending in .zip must be
+			specified. If no target is specified, the current directory
+			is assumed.
+
+	!
+}
+
+function info {
+	if [ -t 2 ]
+	then
+		echo "[34m$*[0m" >&2
+	else
+		echo "$PROG: INFO: $*" >&2
+	fi
+}
+
+function warning {
+	if [ -t 2 ]
+	then
+		echo "[35m$*[0m" >&2
+	else
+		echo "$PROG: WARNING: $*" >&2
+	fi
+}
+
+function error {
+	if [ -t 2 ]
+	then
+		echo "[31m$*[0m" >&2
+	else
+		echo "$PROG: ERROR: $*" >&2
+	fi
+}
+
+function abort {
+	error "ABORT: $*"
+	exit 1
+}
+
+# Convert relative path to absolute
+function abspath {
+	cd "$1" || exit 1
+	pwd
+}
+
+# ------------------------------------------------------------------------------
+# shellcheck disable=SC2048,SC2086
+args=$(getopt c:hp:T: $*)
+[ $? -ne 0 ] && usage && exit 2
+
+declare -a render_args ipynb2py_args
+
+# shellcheck disable=SC2086
+set -- $args
+while true
+do
+	case "$1"
+	in
+		-h)	help; exit 0;;
+
+		-c)	render_args+=(--file "$2"); shift 2;;
+		-p)	render_args+=(-p "$2"); shift 2;;
+
+		-T)	ipynb2py_args+=(--template "$2"); shift 2;;
+
+		--)	shift; break;;
+		*)	abort "Internal error";;
+	esac
+done
+
+[ $# -eq 0 -o $# -gt 2 ] && usage && exit 1
+
+src_dir="$1"
+dst=${2:-.}
+
+[ ! -d "$src_dir" ] && abort "$src_dir: No such directory"
+
+if [ -d "$dst" ]
+then
+	dst="$dst/$(basename "$(abspath "$src_dir")").zip"
+elif [[ $dst == *.zip ]]
+then
+	:
+else
+	abort "Target $dst is not a directory nor a zip file"
+fi
+
+# ------------------------------------------------------------------------------
+z=3
+TMP=/tmp/pkg.$$
+trap '/bin/rm -rf $TMP; exit $z' 0
+mkdir -p $TMP
+shopt -s nullglob
+
+# Copy contents to temp area -- follow symlinks
+info Copying source
+cp -RL "$src_dir"/ $TMP/src
+
+# Prepare any env/* files.
+# If there are no render args we have nothing to render into the files, so skip.
+if [ ${#render_args[@]} -ne 0 -a -d $TMP/src/env ]
+then
+	info Rendering Dockerfile and env files
+	find $TMP/src/env -type f -not -name '*.swp' | while read -r f
+	do
+		jinja --delimiter \< "${render_args[@]}" "$f" > "$f.$$" || exit 1
+		cat "$f.$$" > "$f"
+		/bin/rm -f "$f.$$"
+	done || exit 1
+fi
+
+if [ "$(os-type)" = "amzn2018" -a "$PYTHON_INSTALL_LAYOUT" = "amzn" ]
+then
+	warning "Aargh - Amazon Linux 1 - pip is broken - unsetting PYTHON_INSTALL_LAYOUT"
+	export PYTHON_INSTALL_LAYOUT=
+fi
+
+# Add any Python modules required.
+if [ -f "$src_dir"/requirements.txt ]
+then
+	info "Adding Python modules (including dependencies)"
+	python3 -m pip install --ignore-installed \
+		--target $TMP/src -r "$src_dir"/requirements.txt || exit 1
+fi
+
+if [ -f "$src_dir"/requirements-nodeps.txt ]
+then
+	info "Adding Python modules (excluding dependencies)"
+	python3 -m pip install --ignore-installed --no-deps \
+		--target $TMP/src -r "$src_dir"/requirements-nodeps.txt || exit 1
+fi
+
+# Convert any Jupyter notebooks to Python
+find $TMP/src -name '*.ipynb' -type f -print0 | xargs -0 ipynb2py "${ipynb2py_args[@]}"|| exit 1
+
+# Create the code bundle.
+info Creating code bundle
+(
+	cd $TMP/src
+	zip -9 --quiet -r -o ../pkg.zip --exclude \
+			'*.pyc' \
+			'*__pycache__/*' \
+			'*.swp' \
+			'*.ipynb' \
+			'*.zip' \
+			'*.tar.*' \
+			'*-info/*' \
+			'*.DS_Store' \
+			-- \
+			*
+) || exit 1
+
+mv $TMP/pkg.zip "$dst" || exit 1
+
+info "Created $dst"
+z=0

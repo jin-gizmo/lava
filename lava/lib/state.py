@@ -4,15 +4,16 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 import boto3
 from boto3.dynamodb.types import Binary
 from dateutil.parser import parse
 
+from lava import LavaError
 from lava.config import LOGNAME, config, config_load
-from lava.lavacore import LavaError
 from lava.lib.datetime import duration_to_seconds, now_tz
 from lava.lib.misc import dict_check, json_default
 
@@ -93,10 +94,10 @@ class LavaStateItem:
         state_id: str,
         realm: str,
         value: Any,
-        state_type: str = None,
-        publisher: str = None,
-        ttl: str | int | float = None,
-        aws_session: boto3.Session = None,
+        state_type: str | None = None,
+        publisher: str | None = None,
+        ttl: str | int | float | None = None,
+        aws_session: boto3.Session | None = None,
         **kwargs,
     ):
         """Use the factory methods `new()`/ `get()` rather than the constructor."""
@@ -141,7 +142,9 @@ class LavaStateItem:
 
     # --------------------------------------------------------------------------
     @classmethod
-    def get(cls, state_id: str, realm: str, aws_session: boto3.Session = None) -> LavaStateItemType:
+    def get(
+        cls, state_id: str, realm: str, aws_session: boto3.Session | None = None
+    ) -> LavaStateItemType:
         """
         Retrieve an existing state item from DynamoDB.
 
@@ -197,6 +200,26 @@ class LavaStateItem:
 
         LOG.debug('Retrieved state item: %s', item)
         return item
+
+    # --------------------------------------------------------------------------
+    @classmethod
+    def rm(cls, state_id: str, realm: str, aws_session: boto3.Session | None = None) -> None:
+        """
+        Remove a state item from DynamoDB.
+
+        This is an unconditional deletion and missing items are not considered
+        to be an error.
+
+        :param state_id:        State ID.
+        :param realm:           Lava realm.
+        :param aws_session:     A boto3 session. One is created if not specified.
+
+        """
+
+        if not aws_session:
+            aws_session = boto3.Session()
+        state_table = aws_session.resource('dynamodb').Table(f'lava.{realm}.state')
+        state_table.delete_item(Key={'state_id': state_id})
 
     # --------------------------------------------------------------------------
     def __str__(self):
@@ -297,7 +320,7 @@ class LavaStateSecure(LavaStateItem):
     """
 
     # --------------------------------------------------------------------------
-    def __init__(self, *args, kms_key: str = None, **kwargs):
+    def __init__(self, *args, kms_key: str | None = None, **kwargs):
         """As for super but with kms_key."""
 
         super().__init__(*args, **kwargs)

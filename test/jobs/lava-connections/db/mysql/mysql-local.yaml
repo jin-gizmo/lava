@@ -1,0 +1,17 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Local MySQL connection using password in SSM
+owner: "<{ owner }>"
+
+type: mysql
+
+conn_id: <{ prefix.conn }>/db/mysql/local
+enabled: true
+
+host: <{ db.mysql_local.host }>
+port: <{ db.mysql_local.port }>
+ssl: true
+database: <{ db.mysql_local.database }>
+
+user: <{ db.mysql_local.user }>
+password: <{ prefix.ssm }>/mysql_local/<{ db.mysql_local.user }>/password

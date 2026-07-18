@@ -1,0 +1,24 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - JSON lines (jsonl) foreach exceeding limit
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/jsonl/limit
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/cmd/print-globals
+
+globals:
+  from_the_parent: howdy
+
+parameters:
+  limit: 1
+  foreach:
+    type: jsonl
+    filename: '{{ realm.s3_payloads }}/<{ prefix.payload }>/data.raw/data2.jsonl'
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - SMB get to local
+
+type: exe
+
+job_id: <{ prefix.job }>/smb/smbprotocol/exe-get-ok-local
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/smb-get.sh
+
+parameters:
+  connections:
+    smb: <{ prefix.conn }>/smb/<{ smb.name }>/smbprotocol
+
+  args:
+    - "OK: SMB to local"
+    - <{ smb.volume }>:<{ smb.dir }>/hosts
+    - ./hosts
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

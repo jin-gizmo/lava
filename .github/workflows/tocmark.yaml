@@ -1,0 +1,31 @@
+name: Update TOC in README.md
+on:
+  push:
+    branches: [ master, main ]
+    paths: [ 'README.md' ]
+
+jobs:
+  update-toc:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: toc-update-${{ github.ref }}
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Update README TOC
+        id: toc
+        uses: jin-gizmo/tocmark@v1
+        with:
+          file: README.md
+
+      - name: Commit changes if TOC updated
+        if: steps.toc.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "docs: update README TOC [skip ci]" && git push

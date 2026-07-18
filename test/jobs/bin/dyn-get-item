@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+
+"""
+Utility to get a JSON formatted item from a DynamoDB table.
+
+This is not possible using the AWS CLI as it returns the wacky DynamoDB style
+JSON.
+
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from decimal import Decimal
+from typing import Any
+
+import boto3
+import yaml
+
+__author__ = 'Murray Andrews'
+__version__ = '1.1.1'
+
+PROG = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+
+STATUS_OK = 0
+STATUS_ERROR = 1  # Generic errors
+STATUS_ITEM_NOT_FOUND = 2
+
+
+# ------------------------------------------------------------------------------
+def json_default(obj: Any) -> Any:
+    """Serialise non-standard objects for json.dumps()."""
+
+    if isinstance(obj, Decimal):
+        return float(obj) if '.' in str(obj) else int(obj)
+
+    try:
+        return str(obj)
+    except Exception:
+        raise TypeError(f'Cannot serialize {type(obj)}')
+
+
+# ------------------------------------------------------------------------------
+class StoreNameValuePair(argparse.Action):
+    """
+    Used with argparse to store values from options of the form ``name=value``.
+
+    The destination (self.dest) will be created as a dict {name: value}. This
+    allows multiple name-value pairs to be set for the same option.
+
+    Usage is:
+
+    ::
+
+        argparser.add_argument('-x', metavar='key=value', action=StoreNameValuePair)
+
+    or
+
+    ::
+
+        argparser.add_argument('-x', metavar='key=value ...', action=StoreNameValuePair, nargs='+')
+
+    """
+
+    # --------------------------------------------------------------------------
+    # noinspection PyUnresolvedReferences
+    def __call__(self, parser, namespace, values, option_string=None):
+        """Handle name=value option."""
+
+        if not hasattr(namespace, self.dest) or not getattr(namespace, self.dest):
+            setattr(namespace, self.dest, {})
+        argdict = getattr(namespace, self.dest)
+
+        if not isinstance(values, list):
+            values = [values]
+        for val in values:
+            try:
+                n, v = val.split('=', 1)
+            except ValueError as e:
+                raise argparse.ArgumentError(self, str(e))
+            argdict[n] = v
+
+
+# ------------------------------------------------------------------------------
+def process_cli_args() -> argparse.Namespace:
+    """
+    Process the command line arguments.
+
+    :return:    The args namespace.
+    """
+
+    argp = argparse.ArgumentParser(prog=PROG, description='Get an item from a DynamoDB table.')
+
+    argp.add_argument('--profile', action='store', help='As for AWS CLI.')
+
+    argp.add_argument(
+        '-c',
+        '--container',
+        metavar='NAME',
+        action='store',
+        help=(
+            'Place the returned item inside a container object with'
+            ' the given name. The value may be a dot separated hierarchy.'
+        ),
+    )
+
+    argp.add_argument('-t', '--table', action='store', required=True, help='DynamoDB table name.')
+
+    argp.add_argument('-v', '--version', action='version', version=__version__)
+
+    argp.add_argument(
+        '-y',
+        '--yaml',
+        action='store_true',
+        help='If specified, produce the output in YAML format instead of JSON.',
+    )
+
+    argp.add_argument(
+        'keys',
+        metavar='key=value',
+        action=StoreNameValuePair,
+        nargs='+',
+        help='Key specifications in the form key=value.',
+    )
+
+    return argp.parse_args()
+
+
+# ------------------------------------------------------------------------------
+class CliError(Exception):
+    """Custom exception for CLI errors."""
+
+    def __init__(self, msg: str, status: int) -> None:
+        """Create a CliError."""
+
+        self.msg = msg
+        self.status = status
+
+
+# ------------------------------------------------------------------------------
+def main() -> int:
+    """
+    Do the business.
+
+    :return:        Status
+    """
+
+    args = process_cli_args()
+    aws_session = boto3.Session(profile_name=args.profile)
+    table = aws_session.resource('dynamodb').Table(args.table)
+
+    try:
+        item = table.get_item(Key=args.keys)['Item']
+    except KeyError:
+        raise CliError('Item not found', status=STATUS_ITEM_NOT_FOUND)
+
+    if args.container:
+        ancestors = args.container.split('.')
+        for a in reversed(ancestors):
+            item = {a: item}
+
+    if args.yaml:
+        yaml.safe_dump(item, stream=sys.stdout, default_flow_style=False, indent=2)
+    else:
+        json.dump(item, sys.stdout, indent=4, sort_keys=True, default=json_default)
+        print()
+
+    return STATUS_OK
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    # Uncomment for debugging
+    # exit(main())  # noqa: ERA001
+    try:
+        exit(main())
+    except CliError as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(ex.status)
+    except Exception as ex:
+        print(f'{PROG}: {ex}', file=sys.stderr)
+        exit(STATUS_ERROR)

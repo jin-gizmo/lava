@@ -1,0 +1,10 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+
+title: Lava log job parameters specification
+
+type: object
+
+properties: {}
+
+# The log job type deliberately ignores any parameters.
+additionalProperties: true

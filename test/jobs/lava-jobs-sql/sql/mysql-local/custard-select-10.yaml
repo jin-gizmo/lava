@@ -1,0 +1,29 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - SQL Server custard select 10 rows
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/mssql-local/custard-select-10
+
+payload: <{ prefix.payload }>/sql.rsc/custard-select-mssql.sql
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/mssql/local
+
+  quoting: nonnumeric
+  delimiter: ","
+
+  transaction: true
+  vars:
+    limit: 10
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

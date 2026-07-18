@@ -1,0 +1,14 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Locally hosted registry using jindr
+owner: "<{ owner }>"
+
+type: docker
+
+conn_id: <{ prefix.conn }>/docker/local
+enabled: true
+
+registry: localhost:5001
+
+user: "roger"
+password: /lava/test/generic

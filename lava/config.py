@@ -20,7 +20,7 @@ from lava.lib.decorators import static_vars
 # ------------------------------------------------------------------------------
 # General parameters
 
-LOGLEVEL = os.environ.get('LAVA_LOGLEVEL', 'info')
+LOGLEVEL: str = os.environ.get('LAVA_LOGLEVEL', 'info')
 LAVA_CODE_DIR = os.path.dirname(os.path.dirname(__file__))
 LOG = logging.getLogger(name=LOGNAME)
 
@@ -100,9 +100,14 @@ __config__ = {
     'EMAIL_MAX_ATTACHMENTS': 5,  # Limit number of attachments - zero disables attachments.
     'EMAIL_MAX_ATTACHMENT_SIZE': '2M',
     'EMAIL_MAX_SIZE': '5M',
+    'EMAIL_MSGID_DOMAIN': None,
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # Postgres client side copy timeout.
     'PG_COPY_TIMEOUT': '30m',
+    # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+    # Oracle specific config
+    'ORACLE_CONNECTION_MODE': 'thin',  # Or 'thick'.
+    'ORACLE_LIB_DIR': None,
     # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     # SharePoint job constants
     'SP_LIST_DELIMITER': '|',
@@ -194,7 +199,7 @@ def config(key: str, convert=None) -> Any:
     :param key:         The config item name.
     :param convert:     The value will be passed through the converter runnable
                         to process it (e.g. to cast it to a given type). If not
-                        specified no conversion is performed.
+                        specified, no conversion is performed.
 
     :return:            The config item value.
 

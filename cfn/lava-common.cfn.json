@@ -10,19 +10,10 @@
       "Author": "Murray Andrews"
     }
   },
-  "Parameters": {
-    "Version": {
-      "Type": "String",
-      "Description": "Lava version (read only).",
-      "Default": "STOP - Wrong template. Use the built version from dist/cfn not src from cfn/",
-      "AllowedPattern": "^?(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
-
-    }
-  },
   "Outputs": {
     "Version": {
       "Description": "Lava common stack version",
-      "Value": { "Ref": "Version"},
+      "Value": "If you see this, the unbuilt version of the template has been used!!",
       "Export": { "Name": "lava:version" }
     }
   },

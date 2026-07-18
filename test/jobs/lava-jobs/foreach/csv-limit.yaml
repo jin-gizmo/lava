@@ -1,0 +1,24 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - CSV foreach exceeding hard limit
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/csv/limit
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/cmd/print-globals
+
+globals:
+  from_the_parent: howdy
+
+parameters:
+  limit: 1
+  foreach:
+    type: csv
+    filename: '{{ realm.s3_payloads }}/<{ prefix.payload }>/data.raw/custard2.csv'
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Redshift Serverless check for application name in stl_connection_log (awsdriver_nopass)
+
+type: sql
+
+job_id: <{ prefix.job }>/sql/redshift-svl/appname/awsdriver-iam
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/redshift-sys-connection-log.sql
+
+parameters:
+  header: true
+  conn_id: <{ prefix.conn }>/db/redshift/svl-awsdriver-iam
+
+x-lava-nocheck: joborphan

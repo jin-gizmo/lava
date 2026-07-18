@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - MsSQL check for application name (program name)
+
+type: sqlv
+
+job_id: <{ prefix.job }>/sqlv/mssql/appname
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sql.rsc/mssql-program-name.sql
+
+parameters:
+  header: true
+  conn_id: <{ prefix.conn }>/db/mssql/base
+
+x-lava-nocheck: joborphan

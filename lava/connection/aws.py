@@ -15,7 +15,8 @@ from cachetools import TTLCache, cached
 
 from lava.common import get_lava_param
 from lava.config import config
-from lava.lavacore import IGNORE_FIELDS, LavaError
+from lava.exceptions import LavaError
+from lava.lavacore import IGNORE_FIELDS
 from lava.lib.aws import ssm_get_param
 from lava.lib.datetime import duration_to_seconds
 from lava.lib.misc import clean_str, dict_check, listify

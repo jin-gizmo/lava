@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - A simple dag job with a child timeout
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/child-timeout
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/cmd/sleep-10: null
+  <{ prefix.job }>/cmd/sleep-2:
+    - <{ prefix.job }>/cmd/sleep-5
+    - <{ prefix.job }>/cmd/timeout
+
+parameters:
+  workers: 4
+
+x-lava-nocheck: joborphan

@@ -1,0 +1,101 @@
+ID,CustardClubNo,GivenName,FamilyName,Sex,CustardBidPrice,CustardCode,FavouriteCustard,CustardJedi,City,PostCode,Email,Phone,LastCustard,CustardQuota
+0,100000000,Molly,Francis,F,58.04,eGfJkQ,lumpy,False,Musk,3461,gcpn@gm.dodgy.zz,08 7954 5075,2015-06-01,29
+1,100000013,Frances,Kelley,F,45.39,ktDVFk,runny,False,Bethanga,3691,iephtasn@xx.dodgy.zz,0458 128 965,2014-02-25,58
+2,100000026,Rebecca,Estrada,F,90.09,IIGMgZ,lumpy,True,Karingal Centre,3199,sfiuc@clmv.dodgy.zz,0491 213 327,2015-12-08,34
+3,100000039,Amy,Moses,F,93.17,USkGF,lumpy,False,Parkville,3052,pslbt@anc.dodgy.zz,0406 658 029,2014-08-11,40
+4,100000052,Logan,Zuniga,M,34.76,husU,runny,True,Merbein West,3505,btywajfr@sl.dodgy.zz,07 5552 8730,2015-06-10,54
+5,100000065,Miriam,Copeland,F,54.73,wEUwu,baked,True,Kingower,3517,dqxw@zd.dodgy.zz,03 1117 9414,2014-02-26,34
+6,100000078,Lewis,Bernard,M,94.27,zRkX,runny,True,Charlemont,3217,rhtdl@jzg.dodgy.zz,0466 700 249,2015-12-17,49
+7,100000091,Vincent,Vasquez,M,55.53,hgqyE,lumpy,False,Timboon,3268,ciown@xzzn.dodgy.zz,04 9527 7602,2014-05-30,39
+8,100000104,Felicity,Good,F,21.26,YwncU,lumpy,False,Lakes Entrance,3909,dpol@gpg.dodgy.zz,0402 697 700,2016-01-01,55
+9,100000117,Christian,Richardson,M,47.59,yiQKi,runny,False,Ascot,3551,ioqs@agt.dodgy.zz,04 4607 0975,2014-01-28,53
+10,100000130,Frederick,Guerrero,M,95.99,aBarF,baked,True,Brunswick East,3057,xejxgg@ld.dodgy.zz,0465 175 292,2015-11-09,33
+11,100000143,Martin,Poole,M,85.53,imgsA,runny,True,Greenhill,3444,hhxnwxwd@imee.dodgy.zz,06 8779 8464,2014-08-31,37
+12,100000156,Angus,Spencer,M,84.2,rxKF,runny,False,Yuulong,3237,tgnlaio@mepn.dodgy.zz,0492 519 643,2014-06-21,22
+13,100000169,Lincoln,Lynch,M,60.01,cNqsLa,baked,False,Swifts Creek,3896,iqdk@vay.dodgy.zz,07 0086 1202,2014-03-06,44
+14,100000182,Julia,James,F,52.6,VHxe,runny,False,Yellingbo,3139,lnhf@vvni.dodgy.zz,03 5377 5352,2015-10-08,33
+15,100000195,Coco,Sosa,F,81.32,PlErm,baked,True,Combienbar,3889,qmri@eu.dodgy.zz,0446 309 532,2015-03-30,46
+16,100000208,Simon,Waller,M,47.35,NCuTm,baked,True,Kyabram,3620,yfvk@ojj.dodgy.zz,09 5338 8527,2016-01-18,60
+17,100000221,Arthur,Chavez,M,93.9,uMXS,lumpy,True,Mount Evelyn,3796,uvtoixu@ppu.dodgy.zz,08 0727 8534,2015-07-03,25
+18,100000234,Philip,Newman,M,53.92,GUCE,baked,True,Mollongghip,3352,qqipjfr@nnsd.dodgy.zz,01 6860 8239,2014-06-22,31
+19,100000247,Violet,Odom,F,30.77,vQww,runny,False,Hawksburn,3142,xgjlgh@ruv.dodgy.zz,06 9731 4509,2014-03-22,59
+20,100000260,Hassan,Butler,M,38.06,RzlsIy,runny,True,Noorat East,3265,sbtaex@wrr.dodgy.zz,0427 818 292,2014-01-11,37
+21,100000273,Charles,Perry,M,68.29,mUYr,baked,False,Wahring,3608,xcopvoie@lqwv.dodgy.zz,0482 449 554,2015-03-12,59
+22,100000286,Amelie,Carson,F,72.41,KKIWNp,lumpy,False,Tylden,3444,gwohqma@qbth.dodgy.zz,0469 964 956,2015-02-17,50
+23,100000299,Frank,Barajas,M,73.72,aLfu,lumpy,True,Kelvin View,3666,mxpfuff@nj.dodgy.zz,06 8163 9951,2014-03-19,29
+24,100000312,Clara,Clark,F,10.58,AIffRn,lumpy,True,Carina,3512,cigdrm@shnh.dodgy.zz,0402 585 789,2015-03-12,37
+25,100000325,Fiona,Powers,F,65.15,AKSuzN,lumpy,True,Longwood East,3666,aabsqx@ez.dodgy.zz,05 3302 9587,2014-04-07,45
+26,100000338,Lucas,Conway,M,64.91,FtToMa,runny,True,Sorrento,3943,njper@uzu.dodgy.zz,03 9379 4125,2015-06-09,34
+27,100000351,Dennis,Krueger,M,30.21,EzZUh,baked,True,Nalinga,3646,emtfz@kvwq.dodgy.zz,0418 864 108,2015-10-05,36
+28,100000364,Florence,Cisneros,F,92.88,QBapl,lumpy,False,Wooragee,3747,kfodvuel@ox.dodgy.zz,0423 224 881,2015-07-27,38
+29,100000377,Tamsin,Roberson,F,50.84,nqTy,lumpy,True,Geelong Mc,3221,cramckm@ttf.dodgy.zz,03 7491 2907,2015-06-08,37
+30,100000390,Harvey,Forbes,M,44.12,HwnNXS,lumpy,True,Yanakie,3960,dbgibyk@gcft.dodgy.zz,0453 437 783,2014-10-11,45
+31,100000403,Lincoln,Andrew,M,72.33,ptdwBm,lumpy,True,Kirkstall,3283,zqoz@qt.dodgy.zz,05 9076 8257,2015-07-03,58
+32,100000416,Bianca,Duke,F,41.22,OfyCqM,lumpy,True,Warneet,3980,zqnfb@ypy.dodgy.zz,06 7905 8603,2016-02-12,36
+33,100000429,Chloe,Garza,F,36.23,ecHNz,runny,True,Clematis,3782,babkepeg@gugb.dodgy.zz,07 5317 7267,2014-08-18,56
+34,100000442,Gabriella,Pearson,F,13.49,YoyZB,lumpy,False,Darnum,3822,ijkisj@sb.dodgy.zz,0458 538 512,2015-05-11,54
+35,100000455,Wilfred,Walton,M,35.64,PZDQc,runny,False,Melton West,3337,iwns@iq.dodgy.zz,0451 619 113,2015-01-18,54
+36,100000468,Benjamin,Ferguson,M,99.97,RwUn,runny,True,Bamganie,3333,mxljas@sw.dodgy.zz,0410 999 231,2015-09-13,54
+37,100000481,Lee,Orozco,M,27.82,vFAsEW,lumpy,False,Doreen,3754,bxgyneas@vw.dodgy.zz,0487 225 485,2016-02-19,55
+38,100000494,Tommy,Summers,M,13.56,STxIrQ,runny,False,Drouin East,3818,iycygp@pib.dodgy.zz,03 1805 4374,2015-03-25,45
+39,100000507,Lois,Morris,F,54.59,ZdYim,lumpy,False,East Melbourne,8002,nfpwx@jr.dodgy.zz,02 5571 4361,2014-06-06,45
+40,100000520,Montgomery,Beck,M,93.74,HLEd,lumpy,False,Croydon Hills,3136,vggud@tkl.dodgy.zz,0487 604 591,2016-02-20,34
+41,100000533,Jamie,Wise,M,44.29,cTEQ,baked,True,Yalca,3637,wpdehvl@nji.dodgy.zz,09 7438 2218,2014-04-18,42
+42,100000546,Patricia,Stevenson,F,56.68,hagDM,lumpy,False,Normanville,3579,mmpnzd@hhk.dodgy.zz,01 7443 2694,2014-03-25,23
+43,100000559,Kyle,Richards,M,97.71,eRVXQu,baked,True,Bellbrae,3228,thccdu@hf.dodgy.zz,0417 004 045,2014-10-20,45
+44,100000572,Francesca,Peterson,F,78.06,epirk,lumpy,True,Drummond,3461,qbvkgytc@uu.dodgy.zz,0403 400 142,2015-01-14,53
+45,100000585,Daisy,Guerra,F,42.34,TIMk,runny,True,Glenrowan,3675,qvpjxctg@tssr.dodgy.zz,09 8030 5905,2014-07-31,40
+46,100000598,Troy,Hinton,M,73.9,xsFoGy,baked,False,Myrtle Creek,3551,lymwka@oj.dodgy.zz,06 6606 8571,2015-11-21,41
+47,100000611,Otto,Hess,M,33.39,ukpkg,lumpy,False,Bentleigh,3204,gvocd@ngd.dodgy.zz,07 7616 7162,2014-01-08,26
+48,100000624,Benedict,Kirby,M,95.34,TBkui,runny,False,Old Tallangatta,3701,xjer@fl.dodgy.zz,02 9303 2049,2014-09-05,23
+49,100000637,Anthony,Ball,M,90.56,YShTG,runny,True,Nullawarre,3268,lrfbm@lrip.dodgy.zz,0472 410 318,2015-08-28,58
+50,100000650,Lee,Sullivan,M,78.56,IZhfh,baked,False,Williamstown North,3016,qdlkelvt@mbb.dodgy.zz,0449 345 449,2014-11-01,42
+51,100000663,Molly,Shaw,F,70.93,WPOm,lumpy,True,Elaine,3334,ytxusf@xio.dodgy.zz,0424 301 357,2014-08-13,45
+52,100000676,Sidney,Morse,M,64.71,Ipgv,baked,True,Crooked River,3862,cvbu@wmon.dodgy.zz,05 7978 7086,2014-10-19,50
+53,100000689,Louise,Woods,F,53.79,rGcJ,lumpy,False,Carina,3512,elkycpao@uh.dodgy.zz,0474 807 155,2014-10-19,58
+54,100000702,Margot,Moody,F,14.91,cTtOT,runny,True,Jeffcott,3480,laqojy@ink.dodgy.zz,0474 791 440,2016-01-07,45
+55,100000715,Phoebe,Macdonald,F,94.26,NNrBri,runny,False,Selwyn,3737,uoqxs@nw.dodgy.zz,0429 464 587,2015-03-09,34
+56,100000728,Omar,Fitzpatrick,M,24.41,ZHWDg,runny,False,Ravenswood,3453,kriemyco@kaz.dodgy.zz,05 0843 4728,2015-10-10,26
+57,100000741,Florence,Dickson,F,33.23,BemX,lumpy,False,Majorca,3465,iswqprov@csvz.dodgy.zz,0479 429 639,2015-04-03,52
+58,100000754,Sinead,Delacruz,F,14.76,KsBR,baked,False,Bowmans Forest,3735,nfpm@uu.dodgy.zz,07 3310 9507,2015-02-10,44
+59,100000767,Amelie,Gomez,F,26.1,Fzvh,runny,False,Katamatite,3649,grcuues@npab.dodgy.zz,07 4305 9920,2014-02-26,33
+60,100000780,Edith,Pratt,F,52.05,JqdoO,baked,False,Germania,3387,wfdao@nfsa.dodgy.zz,0468 930 414,2015-03-29,42
+61,100000793,Annabelle,Silva,F,11.24,xGwoRt,runny,False,Montrose,3765,hyjpr@jltu.dodgy.zz,02 6860 1458,2014-07-11,28
+62,100000806,Louise,Whitaker,F,16.32,RVHN,lumpy,True,Panitya,3512,ucdsc@mn.dodgy.zz,04 5056 9353,2014-12-16,44
+63,100000819,Frank,Rubio,M,36.04,bKfFWl,runny,True,Nariel Valley,3707,wilphak@eaek.dodgy.zz,03 4192 6565,2014-07-07,27
+64,100000832,Tamsin,Rowe,F,77.72,lVNkw,runny,True,Speewa,3585,lcpefkmb@lpko.dodgy.zz,0418 586 117,2015-12-06,27
+65,100000845,Elisabeth,Dudley,F,88.1,JdPg,runny,True,Allestree,3305,ixyplt@zobn.dodgy.zz,0460 213 073,2015-11-23,57
+66,100000858,Henry,Ward,M,98.03,wMHufx,runny,False,Barwon Downs,3243,mhsemnz@jdqh.dodgy.zz,07 7049 8713,2015-01-16,58
+67,100000871,Khalid,Robbins,M,67.53,zVeKQ,baked,False,Brodribb River,3888,njkfohwv@dyz.dodgy.zz,01 1062 1607,2015-10-31,26
+68,100000884,Dylan,Mcknight,M,17.95,FdlizC,lumpy,True,Tambo Crossing,3893,xurzaxwx@luj.dodgy.zz,05 2719 5423,2014-07-13,35
+69,100000897,Kyle,Beard,M,86.32,nTmD,lumpy,False,Tangambalanga,3691,unqnyi@gl.dodgy.zz,0480 757 056,2014-01-04,24
+70,100000910,Jonah,Mejia,M,29.51,aWWl,baked,False,Clifton Springs,3222,ugmwj@fps.dodgy.zz,0405 877 916,2015-12-27,33
+71,100000923,Lilian,Porter,F,44.82,qHdCf,baked,False,Porepunkah,3740,fobu@rh.dodgy.zz,0489 484 723,2015-07-22,55
+72,100000936,Joseph,Boyer,M,11.63,yjsmS,lumpy,True,Melbourne,8383,xhziple@ezsi.dodgy.zz,0410 007 848,2015-01-01,46
+73,100000949,Megan,Holland,F,78.36,noiziw,runny,True,Redbank,3477,khih@sodc.dodgy.zz,03 3144 2676,2016-01-03,30
+74,100000962,Tyler,Levy,F,65.73,PgSfOY,baked,False,Mulgrave,3170,rrnoir@tja.dodgy.zz,01 8121 4029,2015-01-27,44
+75,100000975,Bruce,Stevenson,M,81.1,nKbf,lumpy,False,Vaughan,3451,jdkkrn@ddl.dodgy.zz,04 3669 3038,2014-10-09,23
+76,100000988,Eleanor,Travis,F,40.89,GijCec,lumpy,False,Worrowing,3858,xctl@nn.dodgy.zz,03 3870 5488,2014-01-06,45
+77,100001001,Esther,Cooper,F,61.49,dKDLS,lumpy,True,Wensleydale,3241,dyserj@hyn.dodgy.zz,08 1595 1057,2015-07-18,33
+78,100001014,Monty,Spencer,M,37.88,nvXa,lumpy,True,Mitta Mitta,3701,feejfsj@ytot.dodgy.zz,05 1011 9027,2016-01-03,46
+79,100001027,Molly,Erickson,F,86.37,aaaxzj,baked,False,Alphington,3078,moto@go.dodgy.zz,0449 355 375,2014-09-29,58
+80,100001040,Benedict,Brewer,M,94.83,yDSokE,runny,False,Nathalia,3638,ufbwieq@cn.dodgy.zz,0436 274 911,2014-04-22,25
+81,100001053,Claudia,Mccullough,F,21.35,CuME,lumpy,False,Newham,3442,dkroui@zgs.dodgy.zz,0497 144 039,2016-02-04,23
+82,100001066,Josephine,Perez,F,24.69,OHVW,runny,False,Caniambo,3630,lywdce@jp.dodgy.zz,0419 158 460,2015-05-16,34
+83,100001079,Leon,Wright,M,19.47,AMyiAf,baked,False,Mentone East,3194,lywhpia@ml.dodgy.zz,0497 167 850,2015-05-08,22
+84,100001092,Angelica,Horton,F,48.15,BwXk,lumpy,False,Camberwell North,3124,ngvrcys@nxrt.dodgy.zz,0472 249 644,2015-06-09,33
+85,100001105,Luke,Cowan,M,99.74,IVSo,lumpy,False,Betley,3472,xdfkjb@gu.dodgy.zz,01 7133 4858,2014-12-10,43
+86,100001118,Naomi,Davenport,F,86.44,rGJPZ,runny,True,Yarraville West,3013,lyopye@qw.dodgy.zz,07 5038 6965,2015-11-01,33
+87,100001131,Brian,Parsons,M,73.48,Shau,lumpy,True,Brighton East,3187,vrelm@jqc.dodgy.zz,0461 582 473,2014-05-07,26
+88,100001144,Stanley,Delgado,M,23.43,cApj,baked,False,Bellbird Creek,3889,ktwns@ffzn.dodgy.zz,0430 488 048,2014-05-02,36
+89,100001157,Ahmed,Kelley,M,15.3,kebsTD,baked,False,Romsey,3434,zdnk@qz.dodgy.zz,07 5165 2455,2014-02-05,56
+90,100001170,Eleni,Rodriguez,F,99.49,DuUhPq,runny,True,Scoresby,3179,yvynrah@zd.dodgy.zz,06 2203 1968,2015-02-14,34
+91,100001183,Kerri,Rose,F,17.23,YhKqj,baked,True,Baromi,3871,chko@ioug.dodgy.zz,05 0478 8722,2015-06-18,59
+92,100001196,Ralph,Thornton,M,95.85,uApej,runny,True,Hollands Landing,3862,elopte@wnh.dodgy.zz,04 9844 6530,2014-04-04,35
+93,100001209,Mary,Jones,F,34.35,eNDr,baked,True,Mitre,3409,ixmwvpg@nnmh.dodgy.zz,09 7314 6556,2014-07-22,52
+94,100001222,Evelyn,West,F,43.63,lAowg,runny,True,Burwood East,3151,rgfr@ircc.dodgy.zz,08 0505 4904,2015-08-12,35
+95,100001235,Curtis,Sloan,M,66.54,omuTV,baked,True,She Oaks,3331,pihqjryx@kdm.dodgy.zz,09 8465 3057,2014-11-05,26
+96,100001248,Reuben,Christian,M,32.12,iIAuQH,lumpy,True,Lake Marmal,3525,tksvxrvh@yav.dodgy.zz,07 0853 2632,2016-02-10,57
+97,100001261,Douglas,Conley,M,96.93,bIscVv,lumpy,True,Graytown,3608,gedeuejx@ru.dodgy.zz,0475 384 160,2016-02-02,27
+98,100001274,Lilian,Nolan,F,64.14,QzdY,lumpy,True,Brunswick East,3057,zvbxsye@adpe.dodgy.zz,04 2519 9689,2015-07-21,22
+99,100001287,Katherine,Atkinson,F,44.19,oXMw,lumpy,True,Waurn Ponds,3216,urtrrk@psof.dodgy.zz,0472 189 064,2014-07-13,33

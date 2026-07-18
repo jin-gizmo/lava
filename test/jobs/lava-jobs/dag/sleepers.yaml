@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - A simple dag job with some sleepy children
+
+type: dag
+
+job_id: <{ prefix.job }>/dag/sleepers
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  <{ prefix.job }>/cmd/sleep-10: null
+  <{ prefix.job }>/cmd/sleep-2: <{ prefix.job }>/cmd/sleep-5
+  <{ prefix.job }>/exe/globals1: null
+
+parameters:
+  workers: 2
+
+x-lava-nocheck: joborphan

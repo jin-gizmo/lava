@@ -1,0 +1,24 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - exe timeout
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/timeout
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/sleep.sh 20
+
+parameters:
+  timeout: 1
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: 'Timed out'
+  marks:
+    - local

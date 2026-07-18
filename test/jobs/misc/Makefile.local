@@ -1,0 +1,90 @@
+#
+# ex: set ft=Makefile
+#
+# This is a sample local Makefile to perform non-standard build or installation
+# related actions for components in the misc directory.
+#
+# If required, copy this file to "Makefile.local" and customise as needed. The
+# following targets must be implementated
+#
+#	dist
+#	install
+#	pre-install
+#	uninstall
+#
+# ------------------------------------------------------------------------------
+# Useful stuff ...
+#
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+# The get_config macro is defined in ../etc/make/common.mk and may be useful:
+#
+# Usage: $(call get_config,var-name)
+# 	Extract a value from the config file or realm info file. The latter is
+# 	accessed as `lava.realm.<NAME>`
+#
+# . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+# The DIST var contains the name of the dist directory for misc for the current
+# environment.
+
+# ------------------------------------------------------------------------------
+# Best not to fiddle with this section
+
+include ../etc/make/common.mk
+
+ifndef REALM
+%:
+	$(error Run make from the parent directory - not here)
+endif
+
+export LAVA_REALM=$(REALM)
+
+# ------------------------------------------------------------------------------
+# Customise these as needed but all targets must be retained.
+
+dist:
+	@echo "⚪️ Nothing to do for local $@"
+
+pre-install:
+	@echo "⚪️ Nothing to do for local $@"
+
+install:
+	@echo "🔵 Installing SSM parameters"
+	@./ssmp load --input ssm-params.yaml --path "/lava/$(REALM)" --force
+	@echo
+	@echo "🔵 Installing Secrets Manager items"
+	@( \
+		set -a ; \
+		. ../../.env ; \
+		tmp=$$(mktemp -d) ; \
+		trap '/bin/rm -rf "$$tmp"' 0 ; \
+		set +a ; \
+		shopt -s nullglob ; \
+		set -e ; \
+		for f in secman/*.yaml ; \
+		do \
+			jinja -d'<' -f "../config/$(REALM).yaml" < "$$f" > "$$tmp/secret.yaml" ; \
+			name=$$(echo "{{Name}}" | jinja -f "$$tmp/secret.yaml") ; \
+			if [ "$$name" == "" ] ; \
+			then \
+				echo "$$f: could not determine secret name" ; \
+				exit 1 ; \
+			else \
+				true ; \
+			fi ; \
+			echo -n "[92m$$name[0m: " ; \
+			if aws secretsmanager describe-secret --secret-id "$$name" > /dev/null 2>&1 ; \
+			then \
+				aws secretsmanager delete-secret --secret-id "$$name" --force-delete-without-recovery > /dev/null 2>&1 ; \
+				action=replaced ; \
+			else \
+				action=created ; \
+			fi ; \
+			aws secretsmanager create-secret --cli-input-yaml "file://$$tmp/secret.yaml" > /dev/null  ; \
+			echo "$$action" ; \
+		done ; \
+	)
+
+
+uninstall:
+	@echo "⚪️ Nothing to do for local $@"
+

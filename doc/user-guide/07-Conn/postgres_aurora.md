@@ -4,7 +4,7 @@
 This connector support AWS RDS Aurora PostgreSQL clusters. This is almost a
 synonym for [postgres](#connector-type-postgres).
 Key differences are:
- 
+
 *   The [db_from_s3](#job-type-db_from_s3) job can take
     advantage of an AWS facility to load data directly from S3.
 
@@ -22,9 +22,10 @@ Key differences are:
 |port|Number|Yes*|The database port number.|
 |preserve\_case|Boolean|No|If `true`, don't fold database object names to lower case when quoting them for use in [db_from_s3](#job-type-db_from_s3) jobs. The default is `false` (i.e. case folding is enabled).|
 |secret_id|String|No|Obtain missing fields from AWS Secrets Manager. [More information](#database-authentication-using-aws-secrets-manager).|
-|ssl|Boolean|No|Set to `true` to enable SSL. Default is `false`|
+|ssl_ca_file|String|No|The location of a file containing a host certificate in PEM format for the database server. This can be a local file or a URI. Any of the schemes supported by [smart_open](https://pypi.org/project/smart-open/) can be used (e.g. `s3://`, `http://`, `https://` etc).|
+|ssl_mode|String|No|Enable SSL/TLS. Must be one of `require`, `verify-ca`, `verify-full`. If not specified, SSL/TLS may or may not be enabled (depending on driver defaults). See also [SSL/TLS for Database Connectors](#ssltls-for-database-connectors).|
 |subtype|String|No|Specifies the underlying DBAPI 2.0 driver. The default is `pg8000` which should be used wherever possible. The `pygresql` driver is also available.|
-|type|String|Yes|`psql` or `postgres`.|
+|type|String|Yes|`postgres-aurora`.|
 |user|String|Yes*|Database user name.|
 
 !!! info
@@ -40,7 +41,7 @@ the `psql` CLI.  Apart from the connection parameters, it is invoked with the
 following options:
 
 ```bash
-psql --no-psqlrc --quiet --set ON_ERROR_STOP=on --pset footer=off
+psql --no-psqlrc --quiet --no-password --set ON_ERROR_STOP=on --pset footer=off
 ```
 
 ### Creating Temporary IAM User Credentials for AWS RDS Aurora PostgreSQL { data-toc-label="IAM Auth for Aurora PostgreSQL" }

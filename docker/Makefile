@@ -9,6 +9,31 @@
 SHELL:=/bin/bash
 repo_base=..
 
+include $(repo_base)/etc/make/common.mk
+include $(repo_base)/etc/make/registry.mk
+include $(repo_base)/etc/make/help.mk
+
+
+# ------------------------------------------------------------------------------
+# Auto-help setup
+#
+#+ This makefile is used to build lava docker images. Images come in *base* and
+#+ *full* variants for various target operating systems. Multiplatform images
+#+ are created by default.
+
+#- For more information, consult the lava user guide $(_URL)
+
+HELP_CATEGORY=Miscellaneous targets
+
+# Force category ordering
+#:cat Build targets
+#:cat AWS ECR targets
+#:cat Docker registry targets
+#:cat Miscellaneous targets
+
+
+# ------------------------------------------------------------------------------
+
 # These are set as labels on the images and annotations on the manifest.
 IMAGE_DESCRIPTION=Lava is an AWS based distributed scheduler and job runner
 define IMAGE_ATTRS
@@ -19,30 +44,43 @@ org.opencontainers.image.licenses=BSD-3-Clause
 endef
 export IMAGE_ATTRS
 
-include $(repo_base)/etc/Makefile
-
+## Tag for built images.
 tag=latest
 
 LAVA_VERSION=$(shell python3 ../lava/version.py)
 LAVA_FULL_VERSION=$(shell python3 ../lava/version.py --all)
 
 PKG=common/base/lava-$(LAVA_VERSION).tar.bz2
-OS=$(shell cd os && find * -maxdepth 0 -type d)
+OS:=$(shell cd os && find * -maxdepth 0 -type d)
+_OS:=$(foreach x,$(OS), `$x`)
+## Base O/S type: $(_OS)
+os=
 
+## By default, multi-platform images will be built supporting x86
+## (`linux/amd64`) and ARM (`linux/arm64`). This variable can override that.
 platform=linux/amd64,linux/arm64
+COMMA=,
+ifeq (,$(findstring $(COMMA),$(platform)))
+    # Can't have index annotations in single platform build
+    ANNOTATIONS=manifest
+else
+    ANNOTATIONS=index,manifest
+endif
 
-# Add --progress=plain if you need to see full build activity.
-BUILD=docker buildx build --platform="$(platform)"
+## Docker build progress information style. Set to `plain` to see full build activity.
+progress=auto
+BUILD=docker buildx build --platform="$(platform)" --progress="$(progress)"
 BUILD_DATE=$(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
-# External registry
+## Target docker registry for published images.
 registry=ghcr.io
 ifneq ($(registry),)
 REGISTRY=$(registry:%/=%)/
 endif
 
-# Prior to the open source version (8.2), prefix was set to "dist". This made
-# (some) sense within Origin, but none at all for the o/s version.
+## Prefix for the exported image tag. Default is dist for `ecr-*` targets and
+## `$(prefix)` otherwise. The resulting image tag will be something like
+## `<registry>/<prefix>/lava/<os>/...`.
 prefix=jin-gizmo
 ecr-%: prefix=dist
 
@@ -51,70 +89,6 @@ REPO_PREFIX=$(prefix:%/=%)/
 
 
 .PHONY: help clean all base full package os pkg
-
-
-# Cyan + italic
-x=$C$i
-
-# ------------------------------------------------------------------------------
-help:
-	@echo
-	@$e "This makefile is used to build lava docker images. Many of the targets"
-	@$e "accept (or require) $ikey=value$_ arguments. The default values are shown."
-	@echo
-	@$e "Available targets are:"
-	@echo
-	@$e "$RBuild related targets:$_"
-	@$e "$x   build os=... [platform=$(platform)] [tag=$(tag)]$_"
-	@$e "                 Make the base and full images for a specified O/S type."
-	@$e "$x   build-all [platform=$(platform)] [tag=$(tag)]$_"
-	@$e "                 Make the base and full images for all available O/S types."
-	@$e "$x   base os=... [platform=$(platform)] [tag=$(tag)]$_"
-	@$e "                 Make a lava image without CLI connector executables."
-	@$e "$x   full os=... [platform=$(platform)] [tag=$(tag)]$_"
-	@$e "                 Make a lava image with CLI connector executables."
-	@$e "$x   check os=... [platform=$(platform)]$_"
-	@$e "                 Perform a fast and flimsy check on the image."
-	@$e "$x   check-all [platform=$(platform)]$_"
-	@$e "                 Perform a fast and flimsy check on all images."
-	@$e "$x   pkg$_           Make the lava code package for docker containers."
-	@$e "$x   registry$_      Start a local docker registry to hold multi-plaftorm images."
-	@$e "                 The registry is managed by the \"jindr\" utility. Try"
-	@$e "                 \"jindr --help\" for more information."
-	@echo
-	@$e "$RAWS ECR related targets:$_"
-	@$e "$x   ecr-repo os=... [prefix=dist]$_"
-	@$e "                 Create ECR 'base' and 'full' repos for the specified O/S type."
-	@$e "$x   ecr-push os=... [prefix=dist]$_"
-	@$e "                 Push the 'base' and 'full' images to the ECR repo for the"
-	@$e "                 specified O/S type."
-	@$e "$x   ecr-repo-all [prefix=dist]$_"
-	@$e "                 Create ECR repos for all images."
-	@$e "$x   ecr-all [prefix=dist]$_"
-	@$e "                 Push all images to the ECR repos."
-	@echo
-	@$e "$RDocker regisry related targets:$_"
-	@$e "$x   push os=... [registry=$(registry)] [prefix=$(prefix)]$_"
-	@$e "                 Copy the 'base' and 'full' images to the external registry"
-	@$e "                 for the specified O/S type."
-	@$e "$x   push-all [registry=$(registry)] [prefix=$(prefix)]$_"
-	@$e "                 Push all images to the external registy."
-	@echo
-	@$e "$RMiscellaneous targets:$_"
-	@$e "$x   clean$_         Remove the generated lava packages and docker junk."
-	@$e "$x   help$_          Print this help text."
-	@echo
-	@$e "$RMake value arguments:$_"
-	@$e "$x   os=...$_        Base O/S type: $(OS)"
-	@$e "$x   platform=...$_  By default, multi-platform images will be built supporting"
-	@$e "                 x86 (linux/amd64) and ARM (linux/arm64). This argument can"
-	@$e "                 override that."
-	@$e "$x   registry=...$_  Docker registry. Default is $(registry)."
-	@$e "$x   prefix=...$_    Prefix for the exported image tag. Default is dist for ecr-*"
-	@$e "                 targets and $(prefix) otherwise. The resulting image tag will"
-	@$e "                 be something like $i<registry>/<prefix>/lava/<os>/...$_"
-	@$e "$x   tag=...$_       Tag for the image. Default is latest."
-	@echo
 
 # ------------------------------------------------------------------------------
 
@@ -125,30 +99,45 @@ $(PKG): _FORCE
 
 pkg:	$(PKG)
 
+#:cat Build targets
+## Make the *base* and *full* images for all available O/S types.
+#:opt platform tag progress
 build-all:
 	@for os in $(OS) ; \
 	do \
 		$(MAKE) build os=$$os "tag=$(tag)" || exit 1 ; \
 	done
 
+#:cat AWS ECR targets
+
+## Create ECR repos for all images.
+#:opt prefix=dist
 ecr-repo-all:
 	@for os in $(OS) ; \
 	do \
 		$(MAKE) ecr-repo os=$$os || exit 1 ; \
 	done
 
+## Push all images from the local registry to the ECR repos.
+#:opt prefix=dist
 ecr-all: check-all
 	@for os in $(OS) ; \
 	do \
 		$(MAKE) ecr-push os=$$os || exit 1 ; \
 	done
 
+#:cat Docker registry targets
+## Push all images from the local registry to the external registry.
+#:opt registry prefix
 push-all: check-all
 	@for os in $(OS) ; \
 	do \
 		$(MAKE) push os=$$os || exit 1 ; \
 	done
 
+#:cat Build targets
+## Perform a fast and flimsy check on all images.
+#:opt platform
 check-all:
 	@for os in $(OS) ; \
 	do \
@@ -164,7 +153,12 @@ os:
 		exit 1 ; \
 	fi
 
-# Build base and full images for given O/S
+# ------------------------------------------------------------------------------
+#:cat Build targets
+
+## Build the *base* and *full* lava images for a specified O/S type.
+#:req os
+#:opt platform tag progress
 build:
 	@for i in base full ; \
 	do \
@@ -174,24 +168,25 @@ build:
 		$(MAKE) $$i os=$(os) "tag=$(tag)" || exit 1 ; \
 	done
 
-# Build a version without CLI connector executables
-
+## Build a lava image without CLI connector executables.
+#:req os
+#:opt platform tag progress
 base:	os Dockerfile $(PKG) registry
 	@if [ ! -f "os/$(os)/from.txt" ]; then echo "os/$(os)/from.txt: No such file"; exit 1; else :; fi
 	@echo lava version is $(LAVA_VERSION)
 	( \
 		set -e ; \
-		DESCRIPTION="Base installation of lava, without external components required to use CLI based connectors." \
-		TMP=$$(mktemp -d) ; \
+		description="Base installation of lava, without external components required to use CLI based connectors." \
+		tmp=$$(mktemp -d) ; \
 		z=3 ; \
-		trap '/bin/rm -rf $$TMP; exit $$z' 0 ; \
-		cp -RL os/$(os)/$@/* $$TMP ; \
-		cp -L $(PKG) $$TMP ; \
-		ls -lR $$TMP ; \
+		trap '/bin/rm -rf $$tmp; exit $$z' 0 ; \
+		cp -RL os/$(os)/$@/* $$tmp ; \
+		cp -L $(PKG) $$tmp ; \
+		ls -lR $$tmp ; \
 		LABELS=() ; \
 		while IFS= read -r line ; \
 		do \
-			LABELS+=("--label" "$$line" "--annotation" "index,manifest:$$line") ; \
+			LABELS+=("--label" "$$line" "--annotation" "$(ANNOTATIONS):$$line") ; \
 		done <<< "$$IMAGE_ATTRS" ; \
 		$(BUILD) --rm --push --pull --provenance=false \
 			-t localhost:$(REGISTRY_LOCAL_PORT)/lava/$(os)/$@:$(tag) \
@@ -201,29 +196,31 @@ base:	os Dockerfile $(PKG) registry
 			--build-arg "type=$@" \
 			--build-arg "os=$(os)" \
 			--label org.opencontainers.image.title="Lava $@ ($(os))" \
-			--label org.opencontainers.image.description="$$DESCRIPTION" \
-			--annotation index,manifest:org.opencontainers.image.description="$$DESCRIPTION" \
+			--label org.opencontainers.image.description="$$description" \
+			--annotation "$(ANNOTATIONS):org.opencontainers.image.description"="$$description" \
 			"$${LABELS[@]}" \
-			-f Dockerfile $$TMP ; \
+			-f Dockerfile $$tmp ; \
 		z=0 ; \
 	)
 
-# Build a version with everything, including CLI connector executables
+## Make a lava image with everything, including CLI connector executables.
+#:req os
+#:opt platform tag progress
 full:	os Dockerfile $(PKG) registry
 	@echo lava version is $(LAVA_VERSION)
 	( \
 		set -e ; \
-		DESCRIPTION="Full installation of lava, including external components required to use CLI based connectors." \
-		TMP=$$(mktemp -d) ; \
+		description="Full installation of lava, including external components required to use CLI based connectors." \
+		tmp=$$(mktemp -d) ; \
 		z=3 ; \
-		trap '/bin/rm -rf $$TMP; exit $$z' 0 ; \
-		cp -RL os/$(os)/$@/* $$TMP ; \
-		mkdir -p $$TMP/packages ; \
-		cp -RL packages $$TMP ; \
-		ls -lR $$TMP ; \
+		trap '/bin/rm -rf $$tmp; exit $$z' 0 ; \
+		cp -RL os/$(os)/$@/* $$tmp ; \
+		mkdir -p $$tmp/packages ; \
+		cp -RL packages $$tmp ; \
+		ls -lR $$tmp ; \
 		while IFS= read -r line ; \
 		do \
-			LABELS+=("--label" "$$line" "--annotation" "index,manifest:$$line") ; \
+			LABELS+=("--label" "$$line" "--annotation" "$(ANNOTATIONS):$$line") ; \
 		done <<< "$$IMAGE_ATTRS" ; \
 		$(BUILD) --rm --push --pull --provenance=false \
 			-t localhost:$(REGISTRY_LOCAL_PORT)/lava/$(os)/$@:$(tag) \
@@ -233,14 +230,20 @@ full:	os Dockerfile $(PKG) registry
 			--build-arg "type=$@" \
 			--build-arg "os=$(os)" \
 			--label org.opencontainers.image.title="Lava $@ ($(os))" \
-			--label org.opencontainers.image.description="$$DESCRIPTION" \
-			--annotation index,manifest:org.opencontainers.image.description="$$DESCRIPTION" \
+			--label org.opencontainers.image.description="$$description" \
+			--annotation "$(ANNOTATIONS):org.opencontainers.image.description"="$$description" \
 			"$${LABELS[@]}" \
-			-f Dockerfile $$TMP ; \
+			-f Dockerfile $$tmp ; \
 		z=0 ; \
 	)
 
-# Create the ECR repo for the given OS type and apply lifecycle policy
+# ------------------------------------------------------------------------------
+#:cat AWS ECR targets
+
+## Create ECR *base* and *full* repos for the specified O/S type.
+## A lifecycle policy will also be added.
+#:req os
+#:opt prefix=dist
 ecr-repo:
 	aws ecr create-repository --repository-name "$(REPO_PREFIX)lava/$(os)/base"
 	aws ecr create-repository --repository-name "$(REPO_PREFIX)lava/$(os)/full"
@@ -249,7 +252,10 @@ ecr-repo:
 	aws ecr put-lifecycle-policy --repository-name "$(REPO_PREFIX)lava/$(os)/full" \
 		--lifecycle-policy-text file://lifecycle.json
 
-# Copy the images from our local registry to ECR for the given OS type.
+## Push the *base* and *full* images from the local registry to the ECR repo for
+## the specified O/S type.
+#:req os
+#:opt prefix=dist
 ecr-push: registry
 	@( \
 		set -e ; \
@@ -270,8 +276,12 @@ ecr-push: registry
 	)
 
 
-# Copy the images from our local registry to the remote registry for the given
-# OS type. Must have logged in to the remote registry first.
+# ------------------------------------------------------------------------------
+#:cat Docker registry targets
+
+## Copy the *base* and *full* images from our local registry to the remote
+## registry for the given OS type. **Log in to the remote registry first.**
+#:opt registry prefix
 push:	registry
 	@( \
 		set -e ; \
@@ -287,7 +297,10 @@ push:	registry
 		done ; \
 	)
 
-# Run a very quick and dirty check
+#:cat Build targets
+## Perform a fast and flimsy check on the *base* and *full* images.
+#:req os
+#:opt platform
 check:
 	@IFS=',' read -r -a platforms <<< "$(platform)" ; \
 	for p in "$${platforms[@]}" ; \
@@ -306,6 +319,8 @@ base full ecr-repo ecr-push check push:
 	$(error The os parameter must be specified)
 endif
 
+## Remove the generated lava packages and docker junk.
+#:cat Miscellaneous targets
 clean:
 	$(RM) $(PKG)
 	docker system prune -f

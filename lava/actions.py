@@ -23,7 +23,8 @@ from lava.lib.aws import ses_send
 from lava.lib.datetime import duration_to_seconds
 from lava.lib.misc import dict_check, json_default
 from lava.lib.state import LavaStateItem
-from .lavacore import LOGNAME, LavaError, dispatch, jinja_render_vars
+from . import LavaError
+from .lavacore import LOGNAME, dispatch, jinja_render_vars
 
 __author__ = 'Murray Andrews'
 
@@ -76,7 +77,7 @@ def action_dispatch(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     job_result: dict[str, Any],
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> None:
     """
     Send an SQS message to dispatch another job.
@@ -169,7 +170,7 @@ def action_sqs(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     job_result: dict[str, Any],
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> None:
     """
     Send an SQS message.
@@ -258,7 +259,7 @@ def action_sns(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     job_result: dict[str, Any],
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> None:
     """
     Send an SNS message.
@@ -327,7 +328,7 @@ def action_log(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     job_result: dict[str, Any],
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> None:
     """
     Write a log message at level info.
@@ -366,7 +367,7 @@ def action_email(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     job_result: dict[str, Any],
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> None:
     """
     Send an email.
@@ -487,7 +488,7 @@ def action_slack(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     job_result: dict[str, Any],
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> None:
     """
     Send a Slack message.
@@ -570,7 +571,7 @@ def action_aws_event(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     job_result: dict[str, Any],
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> None:
     """
     Send an event to AWS EventBridge.
@@ -636,7 +637,7 @@ def action_aws_event(
     if not aws_session:
         aws_session = boto3.Session()
 
-    event_info = {
+    event_info: dict[str, Any] = {
         'Source': f'lava.{realm_info["realm"]}',
         'DetailType': 'Lava Job Action',
         'Detail': json.dumps(detail, default=json_default),
@@ -669,7 +670,7 @@ def action_state_set(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     job_result: dict[str, Any],
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> None:
     """
     Set a lava state item.
@@ -754,8 +755,8 @@ def do_actions(
     action_key: str,
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
-    job_result: dict[str, Any] = None,
-    aws_session: boto3.Session = None,
+    job_result: dict[str, Any] | None = None,
+    aws_session: boto3.Session | None = None,
 ) -> None:
     """
     Run any post job actions.

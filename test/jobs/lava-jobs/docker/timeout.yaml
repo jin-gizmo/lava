@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Container sleepy bo bo - timeout
+
+type: docker
+
+job_id: <{ prefix.job }>/docker/timeout
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ docker.registry }>/lava/amzn2023/base
+
+parameters:
+  command: /bin/sh -c 'echo going to timeout - check container dies; sleep 1000'
+  docker: <{ prefix.conn }>/docker/base
+  timeout: 2s
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  # 28 is the exit status lava uses for timeouts
+  error_pattern: 'Failed with exit status 28'
+  marks:
+    - local

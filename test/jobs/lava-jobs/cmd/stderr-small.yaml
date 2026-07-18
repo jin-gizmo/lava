@@ -1,0 +1,15 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Small stderr to check trimming of stderr in events table"
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/stderr-small
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: /bin/sh -c "cat /etc/profile >&2; exit 44"
+
+x-lava-nocheck: joborphan

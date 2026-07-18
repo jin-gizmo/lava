@@ -1,8 +1,13 @@
 # Dockerfile to build an image suitable for building the lava pkg.
 
+# Note we deliberately omit --enable-optimizations from ./configure as it takes
+# forever for no real benefit in this situation.
+
 FROM amazonlinux:2023
 
-ARG python_version=3.11.14
+ARG	\
+	python_version=3.11.14 \
+	jobs=4
 
 # This is arg, not env, because we want to use it now but don't want to bake it
 # in to the image.
@@ -20,8 +25,8 @@ RUN \
 	wget "https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz" ; \
 	tar xf "Python-${python_version}.tgz" ; \
 	cd "Python-${python_version}" ; \
-	./configure --enable-optimizations --with-readline=editline --with-platlibdir=lib64 ; \
-	make install ; \
+	./configure --with-readline=editline --with-platlibdir=lib64 ; \
+	make -j"${jobs}" install ; \
 	cd /tmp ; \
 	/bin/rm -rf python ; \
 	python3 --version ; \
