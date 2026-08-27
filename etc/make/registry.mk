@@ -18,5 +18,5 @@ etc=$(repo_base)/etc
 #:cat Miscellaneous targets
 registry:
 	jindr -r "localhost:$(REGISTRY_LOCAL_PORT)" start
-	@$e "$GWhen done, stop local docker registry using \"jindr stop\"$_" ; \
+	@$e "$BWhen done, stop local docker registry using \"jindr stop\"$_" ; \
 

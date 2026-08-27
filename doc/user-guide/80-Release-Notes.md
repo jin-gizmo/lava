@@ -132,7 +132,8 @@ a more consistent framework.
 *   No further testing has, or will, be done on Python versions prior to 3.11.
     No (known) breaking changes have been introduced but you are now on your tod.
 
-*   Python 3.14 (with GIL enabled) is supported.
+*   Python 3.14 (with GIL enabled) is supported. Python 3.14 with free threading
+    is untested.
 
 *   The process of building the docker images for foreign builds is now much
     faster. See [Building the Lava Worker Bundle for a Foreign
@@ -156,8 +157,12 @@ a more consistent framework.
 *   The following changes have been made to the [email](#connector-type-email)
     connector:
     
-    *   Reply-to addresses specified in the connection specification are now
+    *   Reply-To addresses specified in the connection specification are now
         handled correctly.
+
+    *   Fixed a bug in the CLI version of the connector where Reply-To addresses
+        specified on the command line would be appended to any addresses
+        specified in the connection specification, instead of overriding them.
 
     *   Email addresses can now be in full RFC 5322 format
          as well as bare email addresses (e.g. `J Smith <j.smith@example.com>`

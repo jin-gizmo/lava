@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Wrong type for payload
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/bad-payload-type
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  - Payload cannot be a list
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Only single string payloads are supported for exe jobs"
+  marks:
+    - local

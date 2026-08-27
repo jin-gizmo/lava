@@ -143,7 +143,7 @@ def run(
     try:
         command = shlex.split(command)
     except Exception as e:
-        raise LavaError(f'Bad payload: {e}')
+        raise LavaError(f'Bad command: {e}')
 
     args = command[1:] + [str(a) for a in parameters.get('args', [])]
 
@@ -165,6 +165,7 @@ def run(
         base=dict(os.environ),
         render_vars=render_vars if enable_jinja else None,
         LAVA_S3_TMP=s3tmp,
+        # TODO: LAVA_S3_PAYLOAD needs to be set inside the payload loop
         LAVA_S3_PAYLOAD=realm_info['s3_payloads'] + '/' + job_spec['payload'],
         # This helps Python exe's use the Lava libraries and connection manager
         PYTHONPATH=os.environ.get('PYTHONPATH', '') + ':' + LAVA_CODE_DIR,
@@ -193,7 +194,7 @@ def run(
             }
         )
 
-    return_info = {'exit_status': 0, 'output': []}
+    return_info: dict[str, Any] = {'exit_status': 0, 'output': []}
 
     # ----------------------------------------
     # Retrieve the package payload from S3 and unpack it.

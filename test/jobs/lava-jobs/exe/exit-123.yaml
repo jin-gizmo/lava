@@ -10,7 +10,7 @@ worker: <{ worker.main }>
 enabled: true
 owner: <{ owner }>
 
-payload: <{ prefix.payload }>/exit.sh  {{vars.status}}
+payload: <{ prefix.payload }>/exit.sh {{vars.status}}
 
 parameters:
   vars:

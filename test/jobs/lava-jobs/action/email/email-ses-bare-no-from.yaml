@@ -1,0 +1,31 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Action using SES with no "from" and no validated domains
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/email/ses-bare-no-from
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo This job uses an action with SES and no valid "from"
+
+on_success:
+  - action: email
+    to: <{ email.test1 }>
+    subject: "{{ job.job_id }} {{ job.run_id }}"
+    message: |
+          Description: {{ job.description }}
+          Job ID: {{ job.job_id }}
+          Run ID: {{ job.run_id }}
+          Start:  {{ ustart }}
+
+x-lava-nocheck: joborphan
+
+# Job succeeds but the action will fail
+x-lava-test:
+  result: OK
+  marks:
+    - local

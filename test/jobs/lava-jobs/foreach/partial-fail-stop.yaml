@@ -1,0 +1,32 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Should fail on the second invocation
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/partial-fail-stop
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/cmd/exit
+
+parameters:
+  foreach:
+    type: inline
+    values:
+      # Index: 0
+      - status: 0
+      # Index: 1
+      - status: 42
+      # Index: 2 ... Won't get to this one.
+      - status: 0
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Index 1: Failed with exit status 42"
+  marks:
+    - local

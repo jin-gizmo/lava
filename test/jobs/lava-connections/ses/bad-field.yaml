@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: SES connection (legacy) with an invalid field
+owner: "<{ owner }>"
+
+type: ses
+
+bad: moon rising
+
+conn_id: <{ prefix.conn }>/ses/bad-field
+enabled: true
+
+from: <{ email.test2 }>
+
+reply_to:
+  - <{ email.test1 }>
+  - <{ email.test2 }>
+
+configuration_set: lava-test

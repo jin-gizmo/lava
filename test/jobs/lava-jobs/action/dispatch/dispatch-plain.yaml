@@ -1,0 +1,32 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test on_success action to dispatch another job
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/dispatch/plain
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+globals:
+  global1: "g1"
+  global2: "g2"
+
+payload: >-
+  echo This job has an action to dispatch another job.
+
+on_success:
+  - action: dispatch
+    job_id: <{ prefix.job }>/log/plain
+    parameters:
+      param1: "p1"
+      param2: "p2"
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

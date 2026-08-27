@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Add custom stuff into event log
+
+type: log
+
+job_id: <{ prefix.job }>/log/event-log-ok
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+payload: --
+
+globals:
+  a: Alpha
+
+event_log:
+  alpha: '{{ globals.a }}'
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

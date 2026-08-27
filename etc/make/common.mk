@@ -59,3 +59,21 @@ _venv:	_venv_is_off
 # Make sure we can access AWS.
 _aws:
 	@aws sts get-caller-identity > /dev/null
+
+# ------------------------------------------------------------------------------
+# Repo hygiene stuff
+_repo_is_clean:
+	@if ! git diff-index --quiet HEAD --; \
+	then \
+		echo "🔴 Working directory not clean! Commit or stash first."; \
+		exit 1; \
+	fi
+
+_on_master:
+	@if [ "$$(git rev-parse --abbrev-ref HEAD)" != "master" ]; \
+	then \
+		echo "🔴 Not on master branch!"; \
+		exit 1; \
+	fi
+
+

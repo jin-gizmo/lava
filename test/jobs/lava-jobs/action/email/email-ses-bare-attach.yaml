@@ -1,0 +1,34 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Action using SES does not support attachments but job will succeed
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/email/ses-bare-attach
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo This job uses an action with SES and attachments
+
+on_success:
+  - action: email
+    to: <{ email.test1 }>
+    from: <{ email.test2 }>
+    subject: "{{ job.job_id }} {{ job.run_id }}"
+    message: |
+          Description: {{ job.description }}
+          Job ID: {{ job.job_id }}
+          Run ID: {{ job.run_id }}
+          Start:  {{ ustart }}
+    attachments:
+      - '{{ realm.s3_payloads }}/<{ prefix.payload }>/misc.raw/lava-icon-512-transparent.png'
+
+x-lava-nocheck: joborphan
+
+# Job succeeds but the action will fail
+x-lava-test:
+  result: OK
+  marks:
+    - local

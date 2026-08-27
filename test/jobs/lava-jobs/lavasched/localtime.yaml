@@ -1,0 +1,50 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Lavasched job
+
+type: lavasched
+
+job_id: <{ prefix.job }>/lavasched/localtime
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+payload: --
+
+parameters:
+  dispatcher: localtime
+  env:
+    MY_ENV_VAR: some-value
+  # Space in the tag is deliberate for testing quoting
+  args: [ "--tag", "A B" ]
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local
+
+  # These are the before and after crontabs. The test rig injects / uses this data
+  # at the appropriate time.
+  before: |
+    # This stuff should be left untouched
+    #### Lava Schedules Start ####
+    #### Lava Schedules End ####
+    # This should be left untouched too
+
+  after: |
+    # This stuff should be left untouched
+    #### Lava Schedules Start ####
+    LAVA_REALM=test
+    MY_ENV_VAR=some-value
+    0 0 30 2 * /usr/local/bin/lava-dispatcher --worker core --tag 'A B' test/lavasched/compound
+    1 1 30 2 * /usr/local/bin/lava-dispatcher --worker core --tag 'A B' test/lavasched/compound
+    0 0 31 2 * /usr/local/bin/lava-dispatcher --worker core --tag 'A B' test/lavasched/compound
+    0 0 31 2 * /usr/local/bin/lava-dispatcher --worker core --tag 'A B' test/lavasched/dict-active
+    0 0 31 2 * /usr/local/bin/lava-dispatcher --worker core --tag 'A B' test/lavasched/string
+    0 0 30 2 * /usr/local/bin/lava-dispatcher --worker core --tag 'A B' test/lavasched/string-list
+    0 0 31 2 * /usr/local/bin/lava-dispatcher --worker core --tag 'A B' test/lavasched/string-list
+    #### Lava Schedules End ####
+    # This should be left untouched too

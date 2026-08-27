@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Dict schedule that is active
+
+type: log
+
+job_id: <{ prefix.job }>/lavasched/dict-active
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+dispatcher: localtime
+schedule:
+  # 1 active schedule -- we use impossible dates in case of accidents
+  crontab: '0 0 31 2 *'
+  from: '2020-01-01T00:00:00Z'
+  to: '3000-12-31T23:59:00Z'
+
+payload: --
+
+x-lava-nocheck: joborphan

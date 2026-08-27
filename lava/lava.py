@@ -173,7 +173,7 @@ def run_job(
         log_event(job_spec, 'logging', info=event_info)
 
     # ----------------------------------------
-    # Check if the job is dynamically eneabled.
+    # Check if the job is dynamically enabled.
     if (
         isinstance(enabled, str)
         and (e := jinja2.Template(enabled).render(**render_vars).strip().lower()) != 'true'

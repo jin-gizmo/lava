@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Iteration limit greater than max
+
+type: log
+
+job_id: <{ prefix.job }>/log/iteration-limit-too-big
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+iteration_limit: 1000000
+
+payload: --
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  error_pattern: 'iteration_limit must be <= \d+'
+  marks:
+    - local

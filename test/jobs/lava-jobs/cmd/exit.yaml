@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Exit status specified by a global
+
+type: cmd
+
+job_id: <{ prefix.job }>/cmd/exit
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  bash -c "echo Exiting with status {{ globals.status }}; exit {{ globals.status }}"
+
+globals:
+  status: 99
+
+x-lava-nocheck: joborphan

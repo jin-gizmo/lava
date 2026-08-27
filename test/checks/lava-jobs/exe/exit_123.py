@@ -25,6 +25,6 @@ class Checker(HandlerChecker):
         assert str(job_error) == 'Failed with exit status 123'
 
         assert (
-            job_events[(self.job_id, self.run_id)][-1]['info']['error_data']['exit_status'] ==
+            job_events[self.job_id, self.run_id][-1]['info']['error_data']['exit_status'] ==
             123
         )

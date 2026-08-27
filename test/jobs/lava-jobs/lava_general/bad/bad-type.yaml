@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: Fail - Missing mandatory "type" key
+
+type: no-such-job-type
+
+job_id: <{ prefix.job }>/bad/bad-type
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: bash -c "echo Bad to the bone"
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "no-such-job-type: Unknown job type"
+  marks:
+    - local

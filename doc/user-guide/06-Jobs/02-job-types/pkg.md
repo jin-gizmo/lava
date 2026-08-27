@@ -23,9 +23,12 @@ lexicographic order.
 
 See [S3 Payloads](#s3-payloads) for more information.
 
+<!--
+*** THIS DOES NOT CURRENTLY WORK
 !!! note
     The `pkg` job type also allows the payload to be a list of S3 locations if
     the [v2 Payload Downloader](#the-v2-payload-downloader) is enabled.
+-->
 
 ### Environment
 

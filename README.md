@@ -86,9 +86,16 @@ See also the [lava GUI](https://jin-gizmo.github.io/lava-gui).
 
 ## About the Tests
 
-While we do have a significant test suite for lava, we're still working through
-the process of generalising it for the open source release, removing Origin
-specific configuration etc. Give us a little time for that.
+With the release of lava v8.3.0 (Mauna Loa), a substantial chunk of the lava
+test suite has been brought into the open source release. We still have more to
+do here in terms of bringing in more of the existing test suite into the
+automation, but the coverage is reasonably solid and improving.
+
+If it's any consolation, lava runs successfully at scale in a significant
+industrial deployment, and has done for some years.
+
+For more information, check [test/README.md](test/README.md).
 
 > [!NOTE]
-> The table of contents in this README was brought to you by [TOCmark](https://github.com/jin-gizmo/tocmark).
+> The table of contents in this README was brought to you by
+> [TOCmark](https://github.com/jin-gizmo/tocmark).

@@ -1,7 +1,5 @@
 """Test AWS lib functions."""
 
-import moto.core
-
 from lava.lib.aws import *
 from test.conftest import use_moto
 

@@ -706,17 +706,15 @@ def ses_send(
         msg['Subject'] = {'Data': subject, 'Charset': charset}
 
     if message:
-        # noinspection PyTypeChecker
         msg['Body']['Text'] = {'Data': message, 'Charset': charset}
 
     if html:
-        # noinspection PyTypeChecker
         msg['Body']['Html'] = {'Data': html, 'Charset': charset}
 
     # ----------------------------------------
     # Build sending args
 
-    ses_args = {'Source': sender, 'Destination': destination, 'Message': msg}
+    ses_args: dict[str, Any] = {'Source': sender, 'Destination': destination, 'Message': msg}
 
     # ----------------------------------------
     # Supplementary fields
@@ -754,7 +752,7 @@ def cw_put_metric(
     namespace: str,
     dimensions: OrderedDict | list[dict[str, Any]],
     value: float | int,
-    unit: str = 'None',
+    unit: str | None = 'None',
     resolution: str = 'low',
     cw_client=None,
 ) -> None:
@@ -763,7 +761,7 @@ def cw_put_metric(
 
     :param metric:      Metric name.
     :param namespace:   CloudWatch namespace. If None then this is a no-op.
-    :param dimensions:  Either an ordered dict or a a list of dictionaries with
+    :param dimensions:  Either an ordered dict or a list of dictionaries with
                         a single key/value
     :param value:       The metric value.
     :param unit:        The metric unit. If not specified the default of None

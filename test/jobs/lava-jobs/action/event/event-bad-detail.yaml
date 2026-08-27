@@ -1,0 +1,31 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test on_success event action with detail of wrong type
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/event/bad-detail
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  echo on_success event action with detail of wrong type.
+
+on_success:
+  - action: event
+    event_bus: default
+    resources:
+      - "{{ realm.realm }}"
+      - "{{ job.worker }}"
+
+    # Detail must be string or object, not list.
+    detail: ['A', 'B']
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

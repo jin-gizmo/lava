@@ -3,8 +3,7 @@
 """
 Lava version.
 
-This is used in a number of places (including docker builds) so don't forget to
-update.
+This is used in a number of places (including docker builds).
 
 This file can be run directly to print version info to stdout.
 

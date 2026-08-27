@@ -382,7 +382,7 @@ def job_environment(
     """
 
     # Start with a copy of the worker environment
-    env = base or {}
+    env: dict[str, Any] = base or {}
 
     # Render and add the job spec environment
     if render_vars:

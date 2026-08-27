@@ -103,7 +103,7 @@ def test_smbfile_cls(name: str, tc, smb_hello_file):
     'name,match',
     [
         ('lava-test-smb/pysmb', 'Unable to open remote file object'),
-        ('lava-test-smb/smbprotocol', 'The file does not exist'),
+        ('lava-test-smb/smbprotocol', 'STATUS_OBJECT_PATH_NOT_FOUND'),
     ],
 )
 def test_get_file_fail(name: str, match: str, tc, smb_hello_file):

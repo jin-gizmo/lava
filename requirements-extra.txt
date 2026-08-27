@@ -8,9 +8,9 @@
 PyGreSQL==6.2.3
 
 # Optional alternative to pg8000 for Redshift
-redshift-connector==2.1.14
+redshift-connector==2.1.15
 
 pyodbc==5.3.0
 
 # For parquet
-pyarrow==24.0.0
+pyarrow==25.0.0

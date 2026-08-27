@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Bad Jinja syntax in custom stuff for event log - not considered a job killer
+
+type: log
+
+job_id: <{ prefix.job }>/log/event-log-bad-jinja
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+payload: --
+
+event_log:
+  problem: '{{ bad-jinja '
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Job is disabled with a dynamic Jinja
+
+type: log
+
+job_id: <{ prefix.job }>/log/not-enabled-dynamic
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: '{{ globals.do_it.startswith("y") }}'
+
+payload: --
+
+globals:
+  do_it: nope
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

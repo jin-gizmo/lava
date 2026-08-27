@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: AWS local (ministack) connection using assume role
+owner: "<{ owner }>"
+
+type: aws
+
+conn_id: <{ prefix.conn }>/aws/local-role
+enabled: true
+
+region: us-east-1
+
+role_arn: "<{ lava.aws.arn('iam-role', 'assume-me') }>"
+duration: 30m
+
+external_id: "/lava/<{ realm }>/iam/assume-me/external-id"
+
+tags:
+  lava_realm: "<{ realm }>"

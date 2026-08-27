@@ -41,7 +41,7 @@ ODBC_DRIVER = 'FreeTDS'
 # ------------------------------------------------------------------------------
 @pysql_connector(dialect='mssql', subtype='pyodbc')
 def py_connect_mssql(
-    conn_spec: dict[str, Any], autocommit: bool = False, application_name: str = None
+    conn_spec: dict[str, Any], autocommit: bool = False, application_name: str | None = None
 ) -> pyodbc.Connection:
     """
     Get a connection to the specified MS SQL database.
@@ -83,7 +83,7 @@ def py_connect_mssql(
 # noinspection PyUnusedLocal
 @cli_connector('mssql')
 def cli_connect_mssql(
-    conn_spec: dict[str, Any], workdir: str, aws_session: boto3.Session = None
+    conn_spec: dict[str, Any], workdir: str, aws_session: boto3.Session | None = None
 ) -> str:
     """
     CLI command for MS SQL.
@@ -99,6 +99,9 @@ def cli_connect_mssql(
 
     """
 
+    if not aws_session:
+        aws_session = boto3.Session()
+
     conn_dir = mkdtemp(dir=workdir, prefix='conn.')
 
     conn_script = (
@@ -108,7 +111,7 @@ def cli_connect_mssql(
     )
     LOG.debug('MsSql script is \n%s', conn_script)
 
-    conn_cmd_file = os.path.join(conn_dir, 'mysql')
+    conn_cmd_file = os.path.join(conn_dir, 'mssql')
     with open(conn_cmd_file, 'w') as fp:
         print(conn_script, file=fp)
     os.chmod(conn_cmd_file, S_IRUSR | S_IWUSR | S_IXUSR)

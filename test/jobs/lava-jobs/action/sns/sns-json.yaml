@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Action to send an object (JSON) to an SNS topic
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/sns/json
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  echo This job has an action to send an object to an SNS topic
+
+on_success:
+  - action: sns
+    message:
+      Job: '{{ job.job_id }}'
+      Run ID: '{{ job.run_id }}'
+    topic: -- test rig will insert during test setup --
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

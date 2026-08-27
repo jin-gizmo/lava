@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Exercise the connection interface
+
+type: pkg
+
+job_id: <{ prefix.job }>/pkg/db-conn
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/db-conn.zip
+
+parameters:
+  command: db-conn.py
+  connections:
+    psql_local: <{ prefix.conn }>/db/psql/local
+    mysql_local: <{ prefix.conn }>/db/mysql/local
+    mssql_local: <{ prefix.conn }>/db/mssql/local
+    oracle_local: <{ prefix.conn }>/db/oracle/local
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

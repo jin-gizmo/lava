@@ -6,18 +6,20 @@ with per-job checker modules.
 
 ## Scope
 
-Unlike unit tests under `test/unit`, tests here focus on end-to-end handler 
-execution via `run_job` (`test_handler.py`), utilizing job specs augmentation logic from core Lava
-code.
+Unlike unit tests under `test/unit`, tests here focus on end-to-end handler
+execution via `run_job` (`test_handler.py`), utilizing job specs augmentation
+logic from core Lava code.
 
-Custom assertions are implemented in checker modules under `test/checks`, which are dynamically 
-discoverable based on job spec paths. This allows test cases to specify their own validation logic
-beyond simple pass/fail outcomes.
+Custom assertions are implemented in checker modules under `test/checks`, which
+are dynamically discoverable based on job spec paths. This allows test cases to
+specify their own validation logic beyond simple pass/fail outcomes.
 
 ## Test Data Model
 
 ### Test metadata
-Test metadata is defined under `x-lava-test` in job spec JSON, with the following structure:
+
+Test metadata is defined under `x-lava-test` in job spec JSON, with the
+following structure:
 
 ```yaml
 x-lava-test:
@@ -98,14 +100,15 @@ def check(
 - `context` is a placeholder object for checker-local state.
 
 ## Logging Capture
-Logs emitted during job execution are captured through monkeypatching Lava's internal logger to 
-append log records to a list. This allows checkers to perform assertions on logs as part of 
-their validation logic.
 
-The captured logs are provided to checkers via the `job_events` parameter as a dictionary of 
-lists with keys on `(job_id, run_id)` pairs, similar to how log events go into 
-the DynamoDB events table. This is especially useful for a `chain` job or a `foreach` job where 
-we have parent-child job relationships.
+Logs emittey during job execution are captured through monkeypatching Lava's
+internal logger to append log records to a list. This allows checkers to perform
+assertions on logs as part of their validation logic.
+
+The captured logs are provided to checkers via the `job_events` parameter as a
+dictionary of lists with keys on `(job_id, run_id)` pairs, similar to how log
+events go into the DynamoDB events table. This is especially useful for a
+`chain` job or a `foreach` job where we have parent-child job relationships.
 
 For example, a `job_events` structure might look like:
 
@@ -116,8 +119,6 @@ For example, a `job_events` structure might look like:
     ...
 }
 ```
-
-
 
 ## Runtime Flow
 

@@ -37,8 +37,25 @@ Some one-off configuration is required before starting the test environment.
 See [Connecting to the Local Service Containers](#connecting-to-the-local-service-containers)
 and [Credentials](#credentials) below.
 
-Once this initial configuration is done, start the test environment by running
-the following command from either the repo root directory or the `test`
+The local test environment runs versions of the lava AWS Lambda functions in
+Ministack. The Lambda code bundles must be built *before* starting the test
+environment. The tests also require the Amazon Linux 2023 based lava docker
+images. Do the following from the root of the repo:
+
+```bash
+# The Lambda code builds is done within a builder docker image.
+# This builder image needs to be made first.
+make builder runtime=amzn2023-py3.13
+
+# Now we can build the Lambda function bundles.
+make lambda
+
+# Build the Amazon 2023 based lava images.
+make --directory=docker build os=amzn2023
+```
+
+Once the initial build and configuration is done, start the test environment by
+running the following command from either the repo root directory or the `test`
 directory:
 
 ```bash
@@ -80,9 +97,9 @@ The docker compose process described above will create a suite of local services
 
 > [!IMPORTANT]
 >
-> While all the services present on `localhost` from the host, the tests and
+> While all the services present on `localhost` from the host, the tests and
 > some of the test infrastructure absolutely requires them to be addressable
-> with hostname that matches the name of the container. The `/etc/hosts` entries
+> with hostname that matches the name of the container. The `/etc/hosts` entries
 > described below are **essential**.
 
 These are available at the following endpoints.

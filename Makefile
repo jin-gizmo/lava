@@ -3,6 +3,7 @@
 SHELL:=/bin/bash
 
 repo_base=.
+REPO_URL=https://github.com/jin-gizmo/lava
 
 include $(repo_base)/etc/make/common.mk
 include $(repo_base)/etc/make/builder.mk
@@ -27,7 +28,7 @@ APP=lava
 PYTEST_WORKERS=auto
 # PYTEST_WORKERS=2
 
-## The name of an index server for twine uploads in `~/.pypirc`.
+# The name of an index server for twine uploads in `~/.pypirc`.
 pypi=pypi
 
 export LAVA_VERSION:=$(shell python3 lava/version.py)
@@ -74,6 +75,10 @@ config=deploy.yaml
 # Set to empty to not include non-standard module in the package.
 INCLUDE_MODULES=-m
 
+# WHen doing "make release" to create a GitHub release default is ...
+draft=no
+
+
 ifneq ($(wildcard test/*),)
 TESTS=yes
 else
@@ -81,6 +86,24 @@ TESTS=no
 endif
 
 .PHONY: help deploy doc clean pkg jinlava lambda init upgrade spell test cfn oracle schemas
+
+# ------------------------------------------------------------------------------
+# This is a somewhat arbitrary subset of useful stuff. If what you need is not
+# here, just build it yourself.
+#
+
+
+RELEASE_FILES=\
+	$(wildcard dist/cfn/*.cfn.json) \
+	dist/dev-tools/lava-job-framework-$(LAVA_VERSION).zip
+	# $(wildcard dist/lambda/*-$(LAVA_VERSION).zip) \
+	# dist/pkg/amzn2023/lava-$(LAVA_VERSION)-amzn2023-py3.11-aarch64.tar.bz2 \
+	# dist/pkg/amzn2023/lava-$(LAVA_VERSION)-amzn2023-py3.11-x86_64.tar.bz2
+	# dist/pkg/amzn2023/lava-$(LAVA_VERSION)-amzn2023-py3.13-aarch64.tar.bz2 \
+	# dist/pkg/amzn2023/lava-$(LAVA_VERSION)-amzn2023-py3.13-x86_64.tar.bz2 \
+	# dist/pkg/amzn2023/lava-$(LAVA_VERSION)-amzn2023-py3.14-aarch64.tar.bz2 \
+	# dist/pkg/amzn2023/lava-$(LAVA_VERSION)-amzn2023-py3.14-x86_64.tar.bz2
+
 
 # ------------------------------------------------------------------------------
 
@@ -109,6 +132,7 @@ FORCE:
 		fi ; \
 		z=0 ; \
 	)
+
 
 # ------------------------------------------------------------------------------
 #:cat Getting started
@@ -142,13 +166,13 @@ req:	_venv
 #:opt runtime platform
 pkg:	freeze _pkg
 
-## Build the CloudFormation templates and documentation.
+## Build the CloudFormation templates and associated documentation.
 cfn:	_venv_is_on
-	$(MAKE) -C cfn $(MAKECMDGOALS) dist=$(abspath $(dist))
+	$(MAKE) -C cfn cfn dist=$(abspath $(dist))
 
 ## Build the lambda function code bundles.
 lambda: _venv_is_on
-	$(MAKE) -C lambda $(MAKECMDGOALS) dist=$(abspath $(dist))
+	$(MAKE) -C lambda lambda dist=$(abspath $(dist))
 
 ## Create a source distribution of the lava Python package for installation
 ## using **pip**.
@@ -187,7 +211,7 @@ $(dist)/schemas/%.schema.json: $(dist)/schemas/%.schema.yaml
 
 ## Build the lava job framework.
 tools:
-	$(MAKE) -C dev-tools $(MAKECMDGOALS) dist=$(abspath $(dist))
+	$(MAKE) -C dev-tools tools dist=$(abspath $(dist))
 
 
 $(LIB_PKG): _venv_is_on $(SOURCE_FILES)
@@ -233,6 +257,48 @@ $(PKG):	_venv_is_on $(SOURCE_FILES)
 	fi
 
 # ------------------------------------------------------------------------------
+# Release related targets. These are really just shortcuts for commonly built
+# artefacts and will evolve over time as things such as Python version support
+# changes. We define these as targets rather than a variable listing targets
+# because some of them require parameters in the build process.
+
+RELEASE_RUNTIMES=amzn2023-py3.11 amzn2023-py3.13 amzn2023-py3.14
+RELEASE_PLATFORMS=linux/arm64 linux/amd64
+
+_release.builders:
+	for r in $(RELEASE_RUNTIMES) ; \
+	do \
+		$(MAKE) builder runtime="$$r" ; \
+	done
+
+_release.pkg:	_release.builders
+	$(MAKE) pkg
+	for r in $(RELEASE_RUNTIMES) ; \
+	do \
+		for p in $(RELEASE_PLATFORMS) ; \
+		do \
+			$(MAKE) pkg runtime="$$r" platform="$$p" ; \
+		done ; \
+	done
+
+_release.other: cfn jinlava lambda schemas tools
+
+## Build a bunch of release related targets. This is essentially a shortcut for
+## commonly built artefacts (excluding docker images).
+##
+## The *jobs* argument sets the number of parallel **make** jobs when building.
+## Reduce this if memory errors occur.
+## If `force` is set to `yes`, the builder images will be rebuilt, even if they
+## already exist. By default, the builder images are not rebuilt if they already
+## exist.
+#:opt jobs force
+
+artefacts: _release.pkg _release.other
+
+artifacts:
+	$(error Learn to spell dude ... the correct form is "artefacts" from the Latin "arte factum")
+
+# ------------------------------------------------------------------------------
 #:cat Installation targets
 
 ## Deploy modified files to S3. The *env* argument specifies a target
@@ -256,25 +322,75 @@ endif
 pypi:	~/.pypirc jinlava
 	twine upload -r "$(pypi)" "dist/jinlava/jinlava-$(LAVA_VERSION).tar.gz"
 
+retag=no
+
+## Create a GitHub release containing selected generic assets. Set *draft* to
+## either `yes` or `no`. To force updating an existing full version tag, set
+## *retag* to `yes`.
+#:opt draft retag
+
+release: _repo_is_clean _on_master
+	@( \
+		case "$(retag)" \
+		in \
+			yes | true) force=-f ;; \
+			no | false) force= ;; \
+			*)	echo "Bad value for retag: $(retag) - must be yes or no" ; exit 1 ;; \
+		esac ; \
+		git tag $$force "v$(LAVA_VERSION)" ; \
+		git push origin $$force "v$(LAVA_VERSION)" ; \
+	)
+	@$e "$GCreating GitHub release ...$_"
+	@( \
+		case "$(draft)" \
+		in \
+			yes | true) draft=true ;; \
+			no | false) draft=false ;; \
+			*)	echo "Bad value for draft: $(draft) - must be yes or no" ; exit 1 ;; \
+		esac ; \
+		if gh release view "v$(LAVA_VERSION)" > /dev/null 2>&1 ; \
+		then \
+			$e "$GUpdating existing release for tag v$(LAVA_VERSION)$_" ; \
+			gh release upload --clobber "v$(LAVA_VERSION)" $(RELEASE_FILES) ; \
+			gh release edit \
+				--draft="$$draft" \
+				--verify-tag=false \
+				--title "Version $(LAVA_VERSION)" \
+				--notes "https://jin-gizmo.github.io/lava/" \
+				"v$(LAVA_VERSION)" ; \
+		else \
+			$e "$GCreating new release for tag v$(LAVA_VERSION)$_" ; \
+			gh release create \
+				--draft="$$draft" \
+				--fail-on-no-commits \
+				--verify-tag=false \
+				--title "Version $(LAVA_VERSION)" \
+				--notes "https://jin-gizmo.github.io/lava/" \
+				"v$(LAVA_VERSION)" \
+				$(RELEASE_FILES) ; \
+		fi ; \
+	)
+	@gh release view "v$(LAVA_VERSION)"
+
 
 # ------------------------------------------------------------------------------
 #:cat Documentation targets
 
 ## Build the user guide into consolidated markdown.
 doc:	_venv_is_on
-	$(MAKE) -C doc $(MAKECMDGOALS) dist=$(abspath $(dist))
+	$(MAKE) -C doc doc dist=$(abspath $(dist))
 
 ## Spell check the user guide (requires **aspell**).
 spell:
-	$(MAKE) -C doc $(MAKECMDGOALS) dist=$(abspath $(dist))
+	$(MAKE) -C doc spell dist=$(abspath $(dist))
 
 ## Build and preview the mkdocs version of the user guide.
 preview: _venv_is_on
-	$(MAKE) -C doc $(MAKECMDGOALS) dist=$(abspath $(dist))
+	$(MAKE) -C doc preview dist=$(abspath $(dist))
 
 ## Publish the user guide to GitHub pages (must be on *master* branch).
 publish: _venv_is_on
-	$(MAKE) -C doc $(MAKECMDGOALS) dist=$(abspath $(dist))
+	$(MAKE) -C doc publish dist=$(abspath $(dist))
 
 # ------------------------------------------------------------------------------
 #:cat Miscellaneous targets
@@ -291,9 +407,9 @@ check:	_venv_is_on
 ## Remove the generated packages and documents.
 clean:
 	$(RM) $(PKG) $(LIB_PKG)
-	$(MAKE) -C doc $(MAKECMDGOALS) dist=$(abspath $(dist))
-	$(MAKE) -C cfn $(MAKECMDGOALS) dist=$(abspath $(dist))
-	$(MAKE) -C lambda $(MAKECMDGOALS) dist=$(abspath $(dist))
+	$(MAKE) -C doc clean dist=$(abspath $(dist))
+	$(MAKE) -C cfn clean dist=$(abspath $(dist))
+	$(MAKE) -C lambda clean dist=$(abspath $(dist))
 
 ## Count lines of source code (needs **tokei**).
 count:

@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Invalid connection label
+
+type: pkg
+
+job_id: <{ prefix.job }>/pkg/bad-conn-label
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/exit.zip
+
+parameters:
+  connections:
+    must-by-word-chars-only: whatever
+  command: exit.sh {{vars.status}}
+  vars:
+    status: 0
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad connection label: must-by-word-chars-only"
+  marks:
+    - local

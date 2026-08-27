@@ -1,0 +1,36 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - foreach with a bad payload
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/bad-payload
+
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+# Payload must be a string not a list
+payload:
+  - <{ prefix.job }>/cmd/print-globals
+
+globals:
+  from_the_parent: howdy
+
+parameters:
+  foreach:
+    type: inline
+    values:
+      - a: A
+        b: B
+      - a: AA
+        b: BB
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad payload: must be string"
+  marks:
+    - local

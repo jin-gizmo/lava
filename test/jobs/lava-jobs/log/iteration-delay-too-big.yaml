@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Iteration delay greater than max
+
+type: log
+
+job_id: <{ prefix.job }>/log/iteration-delay-too-big
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+iteration_delay: 300w
+
+payload: --
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  error_pattern: "iteration_delay must be <="
+  marks:
+    - local

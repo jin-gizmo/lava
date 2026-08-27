@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - max run delay exceeded
+
+type: log
+
+job_id: <{ prefix.job }>/log/max-run-delay-exceeded
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+# Negative run delay means it should have run in the past
+max_run_delay: -1h
+
+payload: --
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  error_pattern: "dispatch is more than -1h old"
+  marks:
+    - local

@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: SES connection (legacy) with an invalid from data type
+owner: "<{ owner }>"
+
+type: ses
+
+conn_id: <{ prefix.conn }>/ses/bad-from
+enabled: true
+
+# "from" must be a string
+from:
+  - <{ email.test2 }>
+
+reply_to:
+  - <{ email.test1 }>
+  - <{ email.test2 }>
+
+configuration_set: lava-test

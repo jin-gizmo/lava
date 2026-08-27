@@ -11,7 +11,7 @@ Components that use docker as part of the build process include:
 * the [lava worker installation bundle](#building-the-lava-worker-bundle-for-a-foreign-host)
 * the [lava docker images](#docker-images-for-lava)
 * the lava Lambda functions
-* lava tests for docker based resources (databases etc).
+* lava test infrastructure (databases etc.)
 
 This has all been developed using [Docker
 Desktop](https://www.docker.com/products/docker-desktop/) on macOS. Your mileage
@@ -26,7 +26,9 @@ The build process sometimes requires multi-platform docker images to provide
 both x86 and ARM support. This in turn requires a docker registry to which these
 multi-platform images can be pushed as part of the build process. Unlike single
 platform images that can be built and then pushed to a registry in separate
-steps, multi-platform images *must* be built and pushed in a single step.
+steps, multi-platform images *must* be built and pushed in a single step. [^1]
+
+[^1]: Yes, there are ways around this but they're fiddly.
 
 The lava build process will start a local docker registry in a container as, and
 when, required as `localhost:5001`. This is managed using the

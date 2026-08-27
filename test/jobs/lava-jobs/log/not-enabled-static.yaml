@@ -1,0 +1,19 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Job is disabled with a static boolean
+
+type: log
+
+job_id: <{ prefix.job }>/log/not-enabled-static
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: false
+
+payload: --
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

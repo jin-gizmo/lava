@@ -118,6 +118,7 @@ class Sqlite3Connection(sqlite3.Connection):
                 aws_session = boto3.Session()
             self._s3client = aws_session.client('s3')
 
+            os.makedirs(config('TMPDIR'), exist_ok=True)
             fd, self._local_db = mkstemp(dir=config('TMPDIR'), suffix='.sqlite3')
             os.close(fd)
             LOG.debug(f'Downloading {database} to {self._local_db}')
@@ -176,7 +177,7 @@ class Sqlite3Connection(sqlite3.Connection):
 def py_connect_sqlite3(
     conn_spec: dict[str, Any],
     autocommit: bool = False,
-    application_name: str = None,
+    application_name: str | None = None,
 ) -> Sqlite3Connection:
     """
     Get a connection to the specified SQLite3 database.
@@ -208,7 +209,7 @@ def py_connect_sqlite3(
 # ------------------------------------------------------------------------------
 @cli_connector('sqlite3')
 def cli_connect_sqlite3(
-    conn_spec: dict[str, Any], workdir: str, aws_session: boto3.Session = None
+    conn_spec: dict[str, Any], workdir: str, aws_session: boto3.Session | None = None
 ) -> str:
     """
     Generate a CLI command that will run a sqlite3 script.
@@ -226,7 +227,7 @@ def cli_connect_sqlite3(
     try:
         expand_sql_conn_spec(conn_spec, aws_session=aws_session)
     except Exception as e:
-        raise LavaError(f'Connection {conn_spec.get("conn_id")}: {e}')
+        raise LavaError(f'Connection {conn_spec.get("conn_id", "unknown")}: {e}')
 
     db_file = conn_spec['host']
 

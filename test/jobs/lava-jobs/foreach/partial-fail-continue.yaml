@@ -1,0 +1,32 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Second child will fail but parent will continue and succeed
+
+type: foreach
+
+job_id: <{ prefix.job }>/foreach/partial-fail-continue
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.job }>/cmd/exit
+
+parameters:
+  can_fail: true
+  foreach:
+    type: inline
+    values:
+      # Index: 0
+      - status: 0
+      # Index: 1
+      - status: 42
+      # Index: 2
+      - status: 0
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

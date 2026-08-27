@@ -1,0 +1,34 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Action to send to a FIFO queue
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/sqs/fifo
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo This job has an action to send to a FIFO SQS queue
+
+# We deliberately send the same message twice to validate dedup
+on_success:
+  - action: sqs
+    dedup_id: A-constant
+    group_id: '{{job.job_id}}'
+    message: '{{ job.run_id }}'
+    queue: <{ sqs.fifo }>
+
+  - action: sqs
+    dedup_id: A-constant
+    group_id: '{{job.job_id}}'
+    message: '{{ job.run_id }}'
+    queue: <{ sqs.fifo }>
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

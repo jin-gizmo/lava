@@ -7,13 +7,13 @@
 
 # chardet 6+ currently causes a spurious warning from requests.
 chardet<6
-boto3==1.43.20
-botocore==1.43.20
+boto3==1.43.51
+botocore==1.43.51
 cachetools==7.1.4
 colorama==0.4.6
 cookiecutter==2.7.1
-oracledb==4.0.1
-docker==7.1.0
+oracledb==4.0.2
+docker==7.2.0
 jinja2==3.1.6
 jsonschema==4.26.0
 pg8000==1.31.5
@@ -24,10 +24,10 @@ pysmb==1.2.14
 python-dateutil==2.9.0.post0
 pyyaml==6.0.3
 requests==2.34.2
-smbprotocol==1.16.1
-sqlalchemy==2.0.50
+smbprotocol==1.17.0
+sqlalchemy==2.0.51
 sqlparse==0.5.5
 graphlib-backport>=1.0.3; python_version < '3.9'
 tabulate==0.10.0
-smart_open[s3]==7.6.1
+smart_open[s3]==8.0.1
 packaging==26.2

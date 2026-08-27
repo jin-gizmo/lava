@@ -83,7 +83,7 @@ refresh:
 ## Run the unit tests.
 ## Do *make start* first to start up the test infrastructure.
 test:	_venv_is_on _aws ready
-	pytest -v -s -n "$(PYTEST_WORKERS)"
+	cd .. && pytest -v -s -n "$(PYTEST_WORKERS)"
 
 ## Run the unit tests and produce a coverage report.
 ## Do *make start* first to start up the test infrastructure.

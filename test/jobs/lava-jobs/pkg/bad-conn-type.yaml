@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Wrong type for connections
+
+type: pkg
+
+job_id: <{ prefix.job }>/pkg/bad-conn-type
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/exit.zip
+
+parameters:
+  connections: "Must be a dict / map here"
+  command: exit.sh {{vars.status}}
+  vars:
+    status: 0
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "connections parameter must be a map"
+  marks:
+    - local

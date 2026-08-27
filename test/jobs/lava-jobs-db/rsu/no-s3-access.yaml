@@ -1,0 +1,41 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - one of s3_iam_role and s3_conn_id is required
+
+type: redshift_unload
+
+job_id: <{ prefix.job }>/rsu/no-s3-access
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  conn_id: <{ prefix.conn }>/db/redshift/base
+
+  bucket: "<{ s3.bucket.unload }>"
+  prefix: "{{ utils.s3key(realm.s3_temp) }}/test/rsu/{{schema}}/{{relation}}.csv.gz."
+
+  schema: <{ db.common.schema }>
+  relation: custard
+
+  args:
+    - CSV
+    - ALLOWOVERWRITE
+    - PARALLEL OFF
+    - HEADER
+    - GZIP
+
+  dateformat: YYYY-MM-DD
+
+  insecure: <{ rsu.insecure }>
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "At least one of s3_iam_role and s3_conn_id is required"
+  marks:
+    - local

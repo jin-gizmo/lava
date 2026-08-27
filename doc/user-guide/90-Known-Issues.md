@@ -1,6 +1,11 @@
 
 # Known Issues
 
+#### pkg job payloads cannot be a list
+
+This is supposed to work but it currently doesn't, which doesn't appear to be
+bothering anybody.
+
 #### PG8000 type error with SQLAlchemy
 
 PG8000 had a bug in its implementation that the SQLAlchemy driver patched over.

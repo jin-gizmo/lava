@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Payload is missing in S3 (non-existent)
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/missing-payload
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+# Bad syntax
+payload: "<{ prefix.payload }>/no-such-payload.sh"
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "No payload files downloaded from S3"
+  marks:
+    - local

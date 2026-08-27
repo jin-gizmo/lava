@@ -21,3 +21,8 @@ parameters:
   command: lava_info.sh
 
 x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

@@ -187,5 +187,5 @@ sqs:
   fifo: lava-dev-test.fifo
 
 # For cloning tests
-# TODO: Replace this with something like jin-gizmo/jindr
+# TODO: Replace this with something like rockstorm
 git_test_repo: git@bitbucket.org:murrayandrews/s3it.git

@@ -1,0 +1,13 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: AWS connection without either access_keys or role_arn
+owner: "<{ owner }>"
+
+type: aws
+
+conn_id: <{ prefix.conn }>/aws/no-creds
+enabled: true
+
+region: ap-southeast-2
+
+# Must have one of access_keys or role_arn

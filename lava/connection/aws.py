@@ -47,7 +47,9 @@ ROLE_SESSION_NAME_MAX_LEN = 64  # AWS limit
 
 
 # ------------------------------------------------------------------------------
-def _get_access_keys_from_ssm(ssm_param_name, aws_session: boto3.Session = None) -> dict[str, str]:
+def _get_access_keys_from_ssm(
+    ssm_param_name, aws_session: boto3.Session | None = None
+) -> dict[str, str]:
     """
     Get static access keys from an SSM parameter.
 
@@ -147,10 +149,10 @@ def assume_role(
 
 
 # ------------------------------------------------------------------------------
-# The caching appraach here is a bit lazy in that we just cache for a relatively
+# The caching approach here is a bit lazy in that we just cache for a relatively
 # short period of time. This should be more than sufficient to take pressure off
 # IAM in the event of a flurry of jobs using the same connector. A more
-# sophisticated appraoch would be to cache static keys for a small amount of time
+# sophisticated approach would be to cache static keys for a small amount of time
 # (in case they are modified) and each session access key for a period of time
 # that is dependent on the expiry time of individual keys that still leaves a
 # reasonable TTL on the keys. Much too complicated for too little value.
@@ -165,7 +167,7 @@ def assume_role(
     key=lambda conn_spec, *_, **__: conn_spec['conn_id'],
 )
 def _get_aws_credentials(
-    conn_spec: dict[str, str], aws_session: boto3.Session = None
+    conn_spec: dict[str, str], aws_session: boto3.Session | None = None
 ) -> dict[str, str]:
     """
     Get AWS credentials using info in an aws connection spec.

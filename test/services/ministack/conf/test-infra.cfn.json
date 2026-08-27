@@ -2,16 +2,42 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Additional generic test infrastructure components",
   "Resources": {
-    "s3PublicBucket": {
-      "Type": "AWS::S3::Bucket",
+    "iamRoleAssumeMe": {
+      "Type": "AWS::IAM::Role",
       "Properties": {
-        "BucketName": "public",
-        "AccessControl": "PublicRead",
-        "PublicAccessBlockConfiguration": {
-          "BlockPublicAcls": false,
-          "BlockPublicPolicy": false,
-          "IgnorePublicAcls": false,
-          "RestrictPublicBuckets": false
+        "Description": "Test role that can be assumed",
+        "RoleName": "assume-me",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": { "Service": "ec2.amazonaws.com" },
+              "Action": [ "sts:AssumeRole", "sts:TagSession" ]
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": [
+                  { "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:root" }
+                ]
+              },
+              "Action": "sts:TagSession"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": [
+                  { "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:root" }
+                ]
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": { "StringEquals": { "sts:ExternalId": "glockenspiel" } }
+            }
+          ]
         }
       }
     }

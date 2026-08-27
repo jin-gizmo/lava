@@ -42,7 +42,10 @@ def test_state_types():
 
 
 # ------------------------------------------------------------------------------
-@pytest.mark.parametrize('state_type, value', product(STATE_TYPES, TEST_VALUES))
+@pytest.mark.parametrize(
+    'state_type, value',
+    list(product(STATE_TYPES, TEST_VALUES)),
+)
 def test_state_item(state_type: str, value: StateItemValue, session_id, tc):
     state_id = f'lava/test/{session_id}/{state_type}/{value.v_type}'
     LavaStateItem.new(

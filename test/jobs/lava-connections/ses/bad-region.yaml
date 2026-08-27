@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: SES connection (legacy) with an invalid region data type
+owner: "<{ owner }>"
+
+type: ses
+
+# Region must be a string
+region:
+  - us-west-1
+
+conn_id: <{ prefix.conn }>/ses/bad-region
+enabled: true
+
+from: <{ email.test2 }>
+
+reply_to:
+  - <{ email.test1 }>
+  - <{ email.test2 }>
+
+configuration_set: lava-test

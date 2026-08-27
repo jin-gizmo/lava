@@ -1,0 +1,21 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Max run delay
+
+type: log
+
+job_id: <{ prefix.job }>/log/max-run-delay-ok
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+max_run_delay: 5m
+
+payload: --
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

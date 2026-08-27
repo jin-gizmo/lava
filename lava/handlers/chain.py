@@ -38,14 +38,14 @@ JOB_PARAMS_OPTIONAL_FIELDS = {
 
 
 # ------------------------------------------------------------------------------
-# noinspection PyUnusedLocal
+# noinspection unused-parameter
 def run(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     tmpdir: str,
     s3tmp: str,
     dev_mode: bool = False,
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> dict[str, Any]:
     """
     Dispatch a chain of jobs.
@@ -125,15 +125,12 @@ def run(
     # Get the DynamoDB job table
 
     job_table_name = 'lava.' + job_spec['realm'] + '.jobs'
-    try:
-        job_table = aws_session.resource('dynamodb').Table(job_table_name)
-    except Exception as e:
-        raise Exception(f'Cannot get DynamoDB table {job_table_name} - {e}')
+    job_table = aws_session.resource('dynamodb').Table(job_table_name)
 
     # ----------------------------------------
     # Loop through the jobs in the chain
 
-    return_info = {'exit_status': 0, 'jobs': [], 'failed_jobs': []}
+    return_info: dict[str, Any] = {'exit_status': 0, 'jobs': [], 'failed_jobs': []}
 
     ts_start = job_spec['ts_start']
     ts_ustart = job_spec['ts_start'].astimezone(UTC)

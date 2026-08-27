@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Wrong type for payload
+
+type: pkg
+
+job_id: <{ prefix.job }>/pkg/bad-payload-type
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  bad: Payload cannot be a map
+
+parameters:
+  command: exit.sh {{vars.status}}
+  vars:
+    status: 0
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  marks:
+    - local

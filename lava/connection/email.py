@@ -13,7 +13,7 @@ from lava import LavaError
 from lava.config import config
 from lava.lavacore import IGNORE_FIELDS
 from lava.lib.email import Emailer
-from lava.lib.misc import dict_check, listify
+from lava.lib.misc import dict_check
 from .core import (
     CONNECTION_OPTIONAL_FIELDS,
     CONNECTION_REQUIRED_FIELDS,
@@ -41,7 +41,9 @@ EMAIL_CONNECTION_OPTIONAL_FIELDS = CONNECTION_OPTIONAL_FIELDS | {
 
 
 # ------------------------------------------------------------------------------
-def get_email_connection(conn_id: str, realm: str, aws_session: boto3.Session = None) -> Emailer:
+def get_email_connection(
+    conn_id: str, realm: str, aws_session: boto3.Session | None = None
+) -> Emailer:
     """
     Get a connection to an email sender.
 
@@ -98,7 +100,7 @@ def get_email_connection(conn_id: str, realm: str, aws_session: boto3.Session = 
 # ------------------------------------------------------------------------------
 @cli_connector('ses')
 def cli_connect_ses(
-    conn_spec: dict[str, Any], workdir: str, aws_session: boto3.Session = None
+    conn_spec: dict[str, Any], workdir: str, aws_session: boto3.Session | None = None
 ) -> str:
     """
     Generate a CLI command that will invoke AWS SES to send an email.
@@ -126,16 +128,20 @@ def cli_connect_ses(
             ignore=IGNORE_FIELDS,
         )
     except Exception as e:
-        raise LavaError(f'Connection {conn_spec.get("conn_id")}: {e}')
+        raise LavaError(f'Connection {conn_spec.get("conn_id", "unknown")}: {e}')
 
     if not aws_session:
         aws_session = boto3.Session()
 
     region = conn_spec.get('region', config('SES_REGION'))
+    if not region or not isinstance(region, str):
+        # noinspection string-conversion-without-dunder-method
+        raise LavaError(f'Missing or malformed "region" for SES: {region}')
 
     sender = conn_spec.get('from', config('SES_FROM'))
-    if not sender:
-        raise LavaError('No "from" for SES found')
+    if not sender or not isinstance(sender, str):
+        # noinspection string-conversion-without-dunder-method
+        raise LavaError(f'Missing or malformed "from" for SES: {sender}')
 
     return_path = conn_spec.get('return_path', '')
 
@@ -186,7 +192,7 @@ z=0
 # ------------------------------------------------------------------------------
 @cli_connector('email')
 def cli_connect_email(
-    conn_spec: dict[str, Any], workdir: str, aws_session: boto3.Session = None
+    conn_spec: dict[str, Any], workdir: str, aws_session: boto3.Session | None = None
 ) -> str:
     """
     Generate a CLI command to invoke the `lava-email` utility to send an email.
@@ -206,7 +212,7 @@ def cli_connect_email(
             ignore=IGNORE_FIELDS,
         )
     except Exception as e:
-        raise LavaError(f'Connection {conn_spec.get("conn_id")}: {e}')
+        raise LavaError(f'Connection {conn_spec.get("conn_id", "unknown")}: {e}')
 
     conn_id = conn_spec['conn_id']
     if not aws_session:
@@ -216,10 +222,6 @@ def cli_connect_email(
         f'lava-email --profile "{aws_session.profile_name}"'
         f' --conn-id "{conn_id}" --realm "$LAVA_REALM"'
     )
-    if conn_spec.get('from'):
-        cmd += f' --from "{conn_spec["from"]}"'
-    if conn_spec.get('reply_to'):
-        cmd += ''.join([f' --reply-to "{s}"' for s in listify(conn_spec['reply_to'])])
 
     # ----------------------------------------
     # Create a little shell script that implements the connection.

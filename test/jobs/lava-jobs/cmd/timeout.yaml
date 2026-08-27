@@ -20,6 +20,7 @@ parameters:
     sleep: '20'
 
 x-lava-nocheck: joborphan
+
 x-lava-test:
   result: FAIL
   error_pattern: 'Timed out after .* seconds'

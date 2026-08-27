@@ -1,0 +1,27 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test on_success event action with resources of wrong type
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/event/bad-resources
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  echo on_success event action with detail of wrong type.
+
+on_success:
+  - action: event
+    event_bus: default
+    # Resources must be a list
+    resources: "{{ realm.realm }}"
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

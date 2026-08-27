@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Add custom stuff into event log using state items
+
+type: log
+
+job_id: <{ prefix.job }>/log/event-log-state-item
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+payload: --
+
+state:
+  a: Alpha
+  b: Beta
+
+event_log:
+  # Alternate forms of reference for state items
+  alpha: '{{ job.state.a }}'
+  beta: '{{ state.b }}'
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: OK
+  marks:
+    - local

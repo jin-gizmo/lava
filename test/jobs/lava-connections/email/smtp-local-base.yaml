@@ -1,0 +1,18 @@
+$schema: http://127.0.0.1:8000/schemas/latest/connection.schema.yaml
+
+description: Email connection in structure but wrong type.
+owner: "<{ owner }>"
+
+type: x-email
+subtype: smtp
+
+conn_id: <{ prefix.conn }>/email/wrong-type
+enabled: true
+
+host: <{ smtp.local.host }>
+port: <{ smtp.local.port }>
+
+tls: true
+
+user: <{ smtp.local.user }>
+password: <{ prefix.ssm }>/smtp_local/<{ smtp.local.user }>/password

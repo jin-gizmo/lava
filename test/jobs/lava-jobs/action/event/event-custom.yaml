@@ -1,0 +1,33 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test on_success action sending custom event to EventBridge
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/event/custom
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  echo This job has an action to send to raise a custom EventBridge event.
+  See log group /aws/events/lava
+
+on_success:
+  - action: event
+    source: '{{ job.job_id }}'
+    detail_type: 'lava-event'
+    detail:
+      status: success
+      realm: "{{ realm.realm }}"
+      job_id: "{{ job.job_id }}"
+      run_id: "{{job.run_id }}"
+      result: "{{result | tojson}}"
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

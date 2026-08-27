@@ -130,3 +130,5 @@ test/services/ministack/ms-state.x/
 *.crt
 *.dylib
 *.secure.yaml
+
+test/jobs/config/dev.yaml

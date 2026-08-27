@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Compound schedule with a mix of strings / dicts - (only Feb ones are active)
+
+type: log
+
+job_id: <{ prefix.job }>/lavasched/compound
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+dispatcher: localtime
+schedule:
+  # 3 active schedules -- we use impossible dates in case of accidents
+  - '0 0 30 2 *'
+  - crontab: '1 1 30 2 *'
+  - crontab: '0 0 31 2 *'
+    from: '2020-01-01T00:00:00Z'
+    to: '3000-12-31T23:59:00Z'
+  # 31 April -- this one is inactive though so not a problem
+  - crontab: '0 0 31 4 *'
+    to: '2020-01-01T00:00:00Z'
+    from: '3000-12-31T23:59:00Z'
+
+payload: --
+
+x-lava-nocheck: joborphan

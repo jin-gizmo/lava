@@ -11,6 +11,9 @@ After cloning the repo:
 ```bash
 cd lava
 
+# See what "make" can do ... this will print help
+make
+
 # Create the virtualenv and install required Python packages.
 # This can be rerun as needed, even with an existing virtualenv.
 make init
@@ -27,9 +30,15 @@ additional tools are required:
 | [aspell](http://aspell.net)                                  | Spell checking the user guide. Install it on macOS with Homebrew. |
 | [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) | Used for deployment of lava components and various other things. |
 | [docker](https://www.docker.com)                             | Cross platform builds, testing and building the [lava docker images](#building-the-lava-docker-images). [Docker Desktop](https://www.docker.com/products/docker-desktop/) is just fine. |
+| [gh](https://cli.github.com) | The GitHub CL is used to create GitHub releases. |
 | [packer](https://developer.hashicorp.com/packer)             | Building the [lava AMI](#the-lava-ec2-ami).                  |
 | [shellcheck](https://www.shellcheck.net) | Used as part of pre-commit checks. Install it on macOS with Homebrew. |
 | [tokei](https://github.com/XAMPPRocky/tokei)                 | Required to count lines of code (optional). Install it on macOS with Homebrew. |
+
+!!! tip
+    Running `make req` will do an automated check for prerequisites using the
+    [req](https://github.com/jin-gizmo/req#req---a-software-prerequisite-checker--installer)
+    gizmo.
 
 The Oracle basic client and SQL*Plus are also required.
 See [Oracle Client Binaries](#oracle-client-binaries).
@@ -49,7 +58,7 @@ lava
 ├── cfn                     | CloudFormation templates (src only - see dist/cfn)
 ├── deploy                  | YAML config files for deploying into AWS accounts
 │   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
-├── dev-tools               | Makefile for building the lava job framework.
+├── dev-tools               | Makefile for building the lava job framework
 │   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
 ├── dist                    | Ephemeral - created by build process (ex-repo)
 │   ├── ami                 | Manifests produced by AMI builds
@@ -102,7 +111,9 @@ lava
 ├── schemas                 | Source for JSON schemas for jobs, connections etc.
 │   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
 └── test                    | Lava units tests and test jobs (gnarly)
+    ├── checks              | Custom validation logic for lava test jobs
     ├── data                | Test data (e.g. used to populate test DBs)
+    ├── integration         | Pytest handler for running / validating lava jobs
     ├── jobs                | Test jobs, connectors etc (lava job framework fmt)
     ├── services            | Data for Docker compose services used for testing
     └── unit                | Unit test source

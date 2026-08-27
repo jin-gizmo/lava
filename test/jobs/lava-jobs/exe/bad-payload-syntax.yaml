@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Bad syntax for payload
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/bad-payload-syntax
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+# Bad syntax
+payload: "<{ prefix.payload }>/exit.sh '0"
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad payload: No closing quotation"
+  marks:
+    - local

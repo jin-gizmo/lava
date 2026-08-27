@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - pkg job with zero exit status
+
+type: pkg
+
+job_id: <{ prefix.job }>/pkg/exit-0
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/exit.zip
+
+parameters:
+  command: exit.sh {{vars.status}}
+  vars:
+    status: 0
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

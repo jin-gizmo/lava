@@ -1,0 +1,31 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Action to send plaintext email using a bare metal SES
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/email/ses-bare-text
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: echo This job uses an action to send a plaintext email using bare metal SES
+
+on_success:
+  - action: email
+    to: <{ email.test1 }>
+    from: <{ email.test2 }>
+    subject: "{{ job.job_id }} {{ job.run_id }}"
+    message: |
+          Description: {{ job.description }}
+          Job ID: {{ job.job_id }}
+          Run ID: {{ job.run_id }}
+          Start:  {{ ustart }}
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

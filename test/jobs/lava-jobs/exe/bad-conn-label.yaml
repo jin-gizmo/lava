@@ -1,0 +1,25 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Bad label for connection
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/bad-conn-label
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/exit.sh 0
+
+parameters:
+  connections:
+    bad-label: Must be word chars only
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad connection label"
+  marks:
+    - local

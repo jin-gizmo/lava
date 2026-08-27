@@ -1,0 +1,22 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Bad Jinja syntax for payload
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/bad-payload-jinja
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+# Bad Jinja syntax
+payload: "<{ prefix.payload }>/exit.sh {{"
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad payload or args: unexpected 'end of template'"
+  marks:
+    - local

@@ -1,0 +1,34 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - on_success action to dispatch another job with delay out of range
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/dispatch/bad-delay
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+globals:
+  global1: "g1"
+  global2: "g2"
+
+payload: >-
+  echo This job has an action to dispatch another job.
+
+on_success:
+  - action: dispatch
+    job_id: <{ prefix.job }>/log/plain
+    # Delay is too large
+    delay: 1d
+    parameters:
+      param1: "p1"
+      param2: "p2"
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

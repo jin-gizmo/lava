@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Test on_success action with invalid action item
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/bad-action
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+globals:
+  global1: "g1"
+  global2: "g2"
+
+payload: >-
+  echo This job has an action with an invalid action item
+
+on_success:
+  - bad: action
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: OK
+  marks:
+    - local

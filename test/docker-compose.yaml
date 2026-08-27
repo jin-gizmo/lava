@@ -179,14 +179,15 @@ services:
     networks:
       - lava
 
-  slack:
-    container_name: ${COMPOSE_PROJECT_NAME}-slack
+  # Vercel emulate https://github.com/vercel-labs/emulate
+  emulate:
+    container_name: ${COMPOSE_PROJECT_NAME}-emulate
     build:
-      context: services/slack
+      context: services/emulate
       dockerfile: Dockerfile
       args:
         NPM_CONFIG_REGISTRY: ${NPM_CONFIG_REGISTRY-}
-    image: ${COMPOSE_PROJECT_NAME}-slack:latest
+    image: ${COMPOSE_PROJECT_NAME}-emulate:latest
     command:
       - --service
       - slack
@@ -197,9 +198,11 @@ services:
       # Starting port defaults to 4000 for active services and increments from there
       - "127.0.0.1:4000:4000"
     volumes:
-      - ./services/slack/emulate.config.yaml:/emulate/emulate.config.yaml:ro
+      - ./services/emulate/emulate.config.yaml:/emulate/emulate.config.yaml:ro
     networks:
-      - lava
+      lava:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME}-slack
 
   mail:
     container_name: ${COMPOSE_PROJECT_NAME}-mail

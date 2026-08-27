@@ -32,14 +32,14 @@ JOB_PARAMS_OPTIONAL_FIELDS = {'can_fail', 'limit', 'jinja'}
 
 
 # ------------------------------------------------------------------------------
-# noinspection PyUnusedLocal
+# noinspection unused-parameter
 def run(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     tmpdir: str,
     s3tmp: str,
     dev_mode: bool = False,
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> dict[str, Any]:
     """
     Dispatch the same job multiple times with a sequence of globals.
@@ -98,10 +98,7 @@ def run(
     run_id = job_spec['run_id']
 
     job_table_name = f'lava.{job_spec["realm"]}.jobs'
-    try:
-        job_table = aws_session.resource('dynamodb').Table(job_table_name)
-    except Exception as e:
-        raise LavaError(f'Cannot get DynamoDB table {job_table_name} - {e}')
+    job_table = aws_session.resource('dynamodb').Table(job_table_name)
 
     # Work out limits on how long our foreach is allowed to be
     fe_limit = int(parameters.get('limit', config('FOREACH_LIMIT', int)))
@@ -152,7 +149,7 @@ def run(
     ts_start = job_spec['ts_start']
     ts_ustart = job_spec['ts_start'].astimezone(UTC)
     can_fail = parameters.get('can_fail', False)
-    return_info = {
+    return_info: dict[str, Any] = {
         'exit_status': 0,
         'limit': fe_limit,
         'foreach_len': len(foreach_vals),

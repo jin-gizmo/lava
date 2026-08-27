@@ -433,7 +433,6 @@ def action_email(
 
     # ----------------------------------------
     # See if an email connector is specified
-
     if action_info.get('email_conn'):
         email_conn = get_email_connection(
             conn_id=action_info['email_conn'], realm=realm_info['realm'], aws_session=aws_session
@@ -454,7 +453,8 @@ def action_email(
     # No email connector -- use bare metal SES.
 
     # Look for SES region name in the action_info then the realm_info then use default.
-    region = action_info.get('region', config('SES_REGION'))
+    # noinspection bad-assignment
+    region: str = action_info.get('region', config('SES_REGION'))
 
     # Look for SES sender address in the action_info then the realm_info.
     sender = action_info.get('from', config('SES_FROM'))

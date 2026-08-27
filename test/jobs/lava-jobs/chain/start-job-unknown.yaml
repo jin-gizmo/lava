@@ -1,0 +1,26 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - Start job is unknown
+
+type: chain
+
+job_id: <{ prefix.job }>/chain/start-job-unknown
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload:
+  - <{ prefix.job }>/exe/exit-123
+  - <{ prefix.job }>/cmd/hello-world
+
+parameters:
+  start: no-such-job
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Requested start job no-such-job is not present in the chain"
+  marks:
+    - local

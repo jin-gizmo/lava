@@ -13,6 +13,7 @@ enabled: true
 payload: --
 
 x-lava-nocheck: joborphan
+
 x-lava-test:
   result: OK
   marks:

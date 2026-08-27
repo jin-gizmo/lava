@@ -33,14 +33,14 @@ JOB_PARAMS_OPTIONAL_FIELDS = {'args', 'env'}
 
 
 # ------------------------------------------------------------------------------
-# noinspection PyUnusedLocal
+# noinspection unused-parameter
 def run(
     job_spec: dict[str, Any],
     realm_info: dict[str, Any],
     tmpdir: str,
     s3tmp: str,
     dev_mode: bool = False,
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> dict[str, Any]:
     """
     Build the crontab for the dispatcher.
@@ -75,14 +75,7 @@ def run(
 
     """
 
-    return_info: dict[str, Any] = {'exit_status': 0}
-
-    try:
-        dict_check(job_spec['parameters'], required=JOB_PARAMS_REQUIRED_FIELDS)
-    except ValueError as e:
-        raise LavaError(f'Bad job parameters: {e}')
-
-    parameters = job_spec['parameters']
+    parameters = job_spec.get('parameters', {})
 
     try:
         dict_check(
@@ -163,6 +156,9 @@ def run(
 
     # ----------------------------------------
     # Check if the new crontab is different from previous
+
+    return_info: dict[str, Any] = {'exit_status': 0}
+
     if cmp(old_cron, new_cron, shallow=False):
         LOG.debug('Old and new crontabs are the same - nothing to do')
         return return_info
@@ -259,7 +255,7 @@ def put_crontab(filename: str) -> None:
 
 # ------------------------------------------------------------------------------
 def get_scheduled_jobs(
-    jobs_table_name: str, dispatcher: str, aws_session: boto3.Session = None
+    jobs_table_name: str, dispatcher: str, aws_session: boto3.Session | None = None
 ) -> Iterable[dict[str, Any]]:
     """
     Get scheduled jobs for the specified dispatcher from the jobs table.

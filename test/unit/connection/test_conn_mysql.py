@@ -24,7 +24,6 @@ from test.conftest import use_moto
 )
 def test_py_connect_mysql_ok(ssl_, ssl_mode, expected_ssl_version_re, tc, dirs):
     conf = tc.db.mysql_local
-    print(conf)
     conn_spec = {
         'conn_id': 'test/mysql-local',
         'description': 'DB connection test',
@@ -310,11 +309,11 @@ def test_cli_connect_mysql_no_passwd(tc, dirs, tmp_path, monkeypatch, set_mysql_
 @pytest.mark.parametrize(
     'cli_type, ssl_, ssl_mode, exception_msg',
     [
-        # ('oracle', None, None, None),
-        # ('oracle', None, 'require', None),
-        # ('oracle', None, 'verify-ca', 'CA certificate is required'),
-        # ('oracle', None, 'verify-full', 'CA certificate is required'),
-        # ('oracle', True, None, None),
+        ('oracle', None, None, None),
+        ('oracle', None, 'require', None),
+        ('oracle', None, 'verify-ca', 'CA certificate is required'),
+        ('oracle', None, 'verify-full', 'CA certificate is required'),
+        ('oracle', True, None, None),
         # MariaDB client is now fussy about always having a valid cert. It used
         # to be more tolerant in the SSL-optional modes
         ('mariadb', None, None, 'TLS/SSL error: self-signed certificate'),

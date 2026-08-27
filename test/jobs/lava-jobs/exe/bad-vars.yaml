@@ -1,0 +1,24 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Wrong type for vars
+
+type: exe
+
+job_id: <{ prefix.job }>/exe/bad-vars
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: <{ prefix.payload }>/exit.sh 0
+
+parameters:
+  vars: "Must be a dict / map here"
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "vars must be a map/dict"
+  marks:
+    - local

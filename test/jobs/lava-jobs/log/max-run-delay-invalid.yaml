@@ -1,0 +1,23 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Invalid max run delay
+
+type: log
+
+job_id: <{ prefix.job }>/log/max-run-delay-invalid
+
+worker: <{ worker.main }>
+owner: <{ owner }>
+enabled: true
+
+# Invalid
+max_run_delay: banana
+
+payload: --
+
+x-lava-nocheck: joborphan
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad max_run_delay: banana"
+  marks:
+    - local

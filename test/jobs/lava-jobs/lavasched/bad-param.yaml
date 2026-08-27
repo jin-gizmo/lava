@@ -1,0 +1,28 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: FAIL - Bad parameter
+
+type: lavasched
+
+job_id: <{ prefix.job }>/lavasched/bad-param
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: --
+
+parameters:
+  dispatcher: localtime
+  bad: param
+  args: ["--log", "@local0"]
+  env:
+    CRON_TZ: Australia/Melbourne
+
+x-lava-nocheck: joborphan
+
+x-lava-test:
+  result: FAIL
+  error_pattern: "Bad job parameters: Unexpected keys: bad"
+  marks:
+    - local

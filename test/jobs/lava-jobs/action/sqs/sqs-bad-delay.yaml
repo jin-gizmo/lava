@@ -1,0 +1,31 @@
+$schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
+
+description: OK - SQS action with a bad delay
+
+type: cmd
+
+job_id: <{ prefix.job }>/action/sqs/bad-delay
+
+worker: <{ worker.main }>
+enabled: true
+owner: <{ owner }>
+
+payload: >-
+  echo This job has an SQS action with a bad delay
+
+on_success:
+  - action: sqs
+    # Delay too big
+    delay: 1d
+    message:
+      Job: '{{ job.job_id }}'
+      Run ID: '{{ job.run_id }}'
+    queue: <{ sqs.normal }>
+
+x-lava-nocheck: joborphan
+
+# Job will succeed but action will fail
+x-lava-test:
+  result: OK
+  marks:
+    - local
