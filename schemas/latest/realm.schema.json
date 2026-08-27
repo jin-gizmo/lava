@@ -1,0 +1,575 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://jin-gizmo.github.io/lava/schemas/latest/realm.schema.json",
+    "version": "v8.3.0",
+    "documentation": "https://jin-gizmo.github.io/lava",
+    "title": "Lava realm specification",
+    "type": "object",
+    "properties": {
+        "realm": {
+            "description": "A unique identifier for the realm.",
+            "type": "string",
+            "minLength": 1
+        },
+        "config": {
+            "description": "Configuration values to be applied to all workers in the realm.",
+            "type": "object"
+        },
+        "s3_key": {
+            "description": "KMS key identifier used when objects are written to S3 by a worker.",
+            "type": "string",
+            "anyOf": [
+                {
+                    "$ref": "#/$defs/common/arn"
+                },
+                {
+                    "pattern": "^alias/.+"
+                }
+            ]
+        },
+        "s3_payloads": {
+            "description": "Location in S3 where payloads are stored for the realm.",
+            "type": "string",
+            "pattern": "^s3://[a-z0-9][-.a-z0-9]{1,61}[a-z0-9]/.+"
+        },
+        "s3_temp": {
+            "description": "Location in S3 where job outputs are stored for the realm.",
+            "type": "string",
+            "pattern": "^s3://[a-z0-9][-.a-z0-9]{1,61}[a-z0-9]/.+"
+        },
+        "on_fail": {
+            "description": "Job specific on_fail actions for the job",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/realm/action"
+            }
+        },
+        "on_retry": {
+            "description": "Job specific on_retry actions for the job",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/realm/action"
+            }
+        },
+        "on_success": {
+            "description": "Job specific on_success actions for the job",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/realm/action"
+            }
+        }
+    },
+    "patternProperties": {
+        "^[xX]-": {
+            "description": "X-* fields are ignored by lava."
+        },
+        "^\\$schema$": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "realm",
+        "s3_key",
+        "s3_payloads",
+        "s3_temp"
+    ],
+    "$defs": {
+        "common": {
+            "arn": {
+                "title": "arn",
+                "description": "AWS ARN",
+                "type": "string",
+                "pattern": "^arn:(aws|aws-cn|aws-us-gov):([a-zA-Z0-9-]+):([a-z0-9-]*):([0-9]{12}|):(.+)$"
+            },
+            "bucket": {
+                "title": "S3 bucket name.",
+                "description": "S3 bucket name.",
+                "type": "string",
+                "pattern": "^[a-z0-9][-.a-z0-9]{1,61}[a-z0-9]$"
+            },
+            "duration": {
+                "title": "A lava duration specification",
+                "description": "A \"duration\" is a string in the form nnX where nn is a number and X is s (seconds), m (minutes) or h (hours), d (days) or w (weeks). If X is not specified, seconds are assumed. A durations is always >= 0.",
+                "oneOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^[0-9]*(\\.[0-9]*)?[smhdw]?$"
+                    }
+                ]
+            },
+            "netloc": {
+                "title": "A network location / endpoint",
+                "description": "A network location is a host name + port number.",
+                "type": "object",
+                "properties": {
+                    "host": {
+                        "description": "The database host DNS name or IP address.",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "port": {
+                        "description": "The database port number.",
+                        "$ref": "#/$defs/common/posint"
+                    }
+                }
+            },
+            "posint": {
+                "title": "A lava positive integer specification",
+                "description": "Lava is tolerant on integer values (for now).",
+                "oneOf": [
+                    {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^[0-9]+$"
+                    }
+                ]
+            },
+            "size": {
+                "title": "A lava (data) size specification",
+                "description": "A \"size\" is a string in the form nnX where nn is a number and X is a case-sensitive unit specifier. If X is not specified, bytes are assumed. A size is always >= 0.",
+                "oneOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^[0-9]*(\\.[0-9]*)?(B|K|KB|M|MB|G|GB|T|TB|P|PB|KiB|MiB|GiB|TiB|PiB)?$"
+                    }
+                ]
+            },
+            "ssl-config": {
+                "title": "SSL configuration options for database connections",
+                "description": "SSL configuration options for database connections.",
+                "type": "object",
+                "properties": {
+                    "ssl_mode": {
+                        "description": "SSL/TLS verification mode",
+                        "type": "string",
+                        "enum": [
+                            "require",
+                            "verify-ca",
+                            "verify-full"
+                        ]
+                    },
+                    "ssl_ca_file": {
+                        "description": "File name or URI for server certificate.",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "ssl": {
+                        "description": "(Deprecated) Enable SSL/TLS. Use ssl_mode=require.",
+                        "type": "boolean",
+                        "default": false,
+                        "deprecated": true
+                    },
+                    "ca_cert": {
+                        "description": "(Deprecated) File name or URI for server certificate. Use ssl_ca_file.",
+                        "type": "string",
+                        "minLength": 1,
+                        "deprecated": true
+                    }
+                }
+            }
+        },
+        "realm": {
+            "action": {
+                "title": "Lava action specification",
+                "oneOf": [
+                    {
+                        "$ref": "#/$defs/realm/action.d/dispatch"
+                    },
+                    {
+                        "$ref": "#/$defs/realm/action.d/email"
+                    },
+                    {
+                        "$ref": "#/$defs/realm/action.d/event"
+                    },
+                    {
+                        "$ref": "#/$defs/realm/action.d/log"
+                    },
+                    {
+                        "$ref": "#/$defs/realm/action.d/slack"
+                    },
+                    {
+                        "$ref": "#/$defs/realm/action.d/sns"
+                    },
+                    {
+                        "$ref": "#/$defs/realm/action.d/sqs"
+                    },
+                    {
+                        "$ref": "#/$defs/realm/action.d/state"
+                    }
+                ]
+            },
+            "action.d": {
+                "dispatch": {
+                    "title": "Dispatch action specification",
+                    "type": "object",
+                    "properties": {
+                        "action": {
+                            "type": "string",
+                            "enum": [
+                                "dispatch",
+                                "lava"
+                            ]
+                        },
+                        "delay": {
+                            "description": "Dispatch delay.",
+                            "$ref": "#/$defs/common/duration"
+                        },
+                        "job_id": {
+                            "description": "Job to dispatch.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "parameters": {
+                            "description": "A map of parameters that will be sent with the dispatch.",
+                            "type": "object"
+                        }
+                    },
+                    "required": [
+                        "action",
+                        "job_id"
+                    ],
+                    "additionalProperties": false
+                },
+                "email": {
+                    "title": "Email action specification",
+                    "type": "object",
+                    "properties": {
+                        "action": {
+                            "type": "string",
+                            "const": "email"
+                        },
+                        "email_conn": {
+                            "description": "The name of an email connector to use for sending email.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "from": {
+                            "description": "The source email address.",
+                            "type": "string",
+                            "format": "email"
+                        },
+                        "message": {
+                            "description": "The message body.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "region": {
+                            "description": "The AWS region name for the SES service.",
+                            "type": "string",
+                            "pattern": "^[a-z]+-[a-z]+-[0-9]+$"
+                        },
+                        "subject": {
+                            "description": "The message subject.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "to": {
+                            "description": "The destination email address(es).",
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "email"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "format": "email"
+                                    }
+                                }
+                            ]
+                        },
+                        "attachments": {
+                            "description": "Names of files to add as attachments.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "required": [
+                        "action",
+                        "message",
+                        "subject",
+                        "to"
+                    ],
+                    "additionalProperties": false
+                },
+                "event": {
+                    "title": "Event action specification",
+                    "type": "object",
+                    "properties": {
+                        "action": {
+                            "type": "string",
+                            "const": "event"
+                        },
+                        "detail_type": {
+                            "description": "The event detail type.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "detail": {
+                            "description": "Event detail.",
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "event_bus": {
+                            "description": "The event bus name.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "resources": {
+                            "description": "A list of resources.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "source": {
+                            "description": "The event source.",
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "required": [
+                        "action"
+                    ],
+                    "additionalProperties": false
+                },
+                "log": {
+                    "title": "Log action specification",
+                    "type": "object",
+                    "properties": {
+                        "action": {
+                            "type": "string",
+                            "const": "log"
+                        },
+                        "message": {
+                            "description": "The message to log.",
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "required": [
+                        "action",
+                        "message"
+                    ],
+                    "additionalProperties": false
+                },
+                "slack": {
+                    "title": "Slack action specification",
+                    "type": "object",
+                    "properties": {
+                        "action": {
+                            "type": "string",
+                            "const": "slack"
+                        },
+                        "colour": {
+                            "description": "Default colour for the sidebar for messages sent using attachment style.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "from": {
+                            "description": "An arbitrary source identifier for display in the Slack message.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "message": {
+                            "description": "The message body.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "preamble": {
+                            "description": "Preamble at the start of the message.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "slack_conn": {
+                            "description": "The name of a slack connector to use.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "style": {
+                            "description": "Display style for Slack messages.",
+                            "type": "string",
+                            "enum": [
+                                "block",
+                                "attachment",
+                                "plain"
+                            ]
+                        },
+                        "subject": {
+                            "description": "The message subject.",
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "required": [
+                        "action",
+                        "message",
+                        "slack_conn"
+                    ],
+                    "additionalProperties": false
+                },
+                "sns": {
+                    "title": "SNS action specification",
+                    "type": "object",
+                    "properties": {
+                        "action": {
+                            "type": "string",
+                            "const": "sns"
+                        },
+                        "message": {
+                            "description": "The message body. This can be either a string or an object. If it is an object it will be JSON encoded before sending.",
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                {
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "subject": {
+                            "description": "The message subject.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "topic": {
+                            "description": "The topic ARN.",
+                            "type": "string",
+                            "pattern": "^arn:aws:sns:"
+                        }
+                    },
+                    "required": [
+                        "action",
+                        "message",
+                        "topic"
+                    ],
+                    "additionalProperties": false
+                },
+                "sqs": {
+                    "title": "SQS action specification",
+                    "type": "object",
+                    "properties": {
+                        "action": {
+                            "type": "string",
+                            "const": "sqs"
+                        },
+                        "dedup_id": {
+                            "description": "The token used for deduplication of sent messages. This parameter applies only to FIFO queues."
+                        },
+                        "delay": {
+                            "description": "Message sending delay as duration.",
+                            "$ref": "#/$defs/common/duration"
+                        },
+                        "group_id": {
+                            "description": "The tag that specifies that a message belongs to a specific message group. This parameter applies only to FIFO queues.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "message": {
+                            "description": "The message body. This can be either a string or an object. If it is an object it will be JSON encoded before sending.",
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1
+                                },
+                                {
+                                    "type": "object"
+                                }
+                            ]
+                        },
+                        "queue": {
+                            "description": "The name or URL of the queue (not the ARN!).",
+                            "type": "string",
+                            "minLength": 1
+                        }
+                    },
+                    "required": [
+                        "action",
+                        "message",
+                        "queue"
+                    ],
+                    "additionalProperties": false
+                },
+                "state": {
+                    "title": "SNS action specification",
+                    "type": "object",
+                    "properties": {
+                        "action": {
+                            "type": "string",
+                            "const": "state"
+                        },
+                        "kms_key": {
+                            "description": "The secure state item type supports KMS encryption of the value. This field specifies the KMS key to use, either as a KMS key ARN or a key alias in the form alias/key-id.",
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "pattern": "^alias/[^ ]*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "pattern": "^arn:aws:kms:"
+                                }
+                            ]
+                        },
+                        "publisher": {
+                            "description": "An arbitrary identifier for the entity posting the event item.",
+                            "type": "string",
+                            "minLength": 1
+                        },
+                        "state_id": {
+                            "description": "The state entry ID.",
+                            "type": "string",
+                            "minLength": 1,
+                            "not": {
+                                "pattern": "^lava"
+                            }
+                        },
+                        "ttl": {
+                            "description": "Time to live for the state item specified as a duration.",
+                            "$ref": "#/$defs/common/duration"
+                        },
+                        "type": {
+                            "description": "The state item type.",
+                            "type": "string",
+                            "enum": [
+                                "json",
+                                "raw",
+                                "secure"
+                            ]
+                        },
+                        "value": {
+                            "description": "A JSON encodable object."
+                        }
+                    },
+                    "required": [
+                        "action",
+                        "state_id",
+                        "value"
+                    ],
+                    "additionalProperties": false
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,211 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://jin-gizmo.github.io/lava/schemas/latest/s3trigger.schema.json",
+    "version": "v8.3.0",
+    "documentation": "https://jin-gizmo.github.io/lava",
+    "title": "Lava s3trigger specification",
+    "type": "object",
+    "properties": {
+        "bucket": {
+            "description": "S3 bucket name.",
+            "$ref": "#/$defs/common/bucket"
+        },
+        "trigger_id": {
+            "description": "Trigger ID.",
+            "type": "string",
+            "minLength": 1
+        },
+        "delay": {
+            "description": "Dispatch delay.",
+            "$ref": "#/$defs/common/duration"
+        },
+        "description": {
+            "description": "A short description of the trigger.",
+            "type": "string",
+            "minLength": 1
+        },
+        "enabled": {
+            "description": "Whether or not the trigger is enabled. Defaults to false.",
+            "type": "boolean",
+            "default": false
+        },
+        "globals": {
+            "description": "A map of named values that are are included in the dispatch request. Global names cannot start with \"lava\".",
+            "type": "object",
+            "propertyNames": {
+                "not": {
+                    "pattern": "^[lL][aA][vV][aA]"
+                }
+            }
+        },
+        "jinja": {
+            "description": "Enable Jinja rendering of the parameters and globals.",
+            "type": "boolean",
+            "default": true
+        },
+        "job_id": {
+            "description": "Job(s) to dispatch.",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "minLength": 1
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    }
+                }
+            ]
+        },
+        "owner": {
+            "description": "Identifies the owner of the trigger.",
+            "type": "string",
+            "minLength": 1
+        },
+        "parameters": {
+            "description": "A map of parameters for the job that will be included in the dispatch.",
+            "type": "object"
+        },
+        "prefix": {
+            "description": "Object prefix (without trailing /) or * for bucket root.",
+            "type": "string",
+            "minLength": 1,
+            "not": {
+                "pattern": "/$"
+            }
+        }
+    },
+    "patternProperties": {
+        "^[xX]-": {
+            "description": "X-* fields are ignored by lava."
+        },
+        "^if_": {
+            "description": "Trigger condtions."
+        },
+        "^if_not_": {
+            "description": "Trigger condtions."
+        },
+        "^\\$schema$": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "trigger_id",
+        "bucket",
+        "prefix",
+        "job_id",
+        "description",
+        "owner"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+        "common": {
+            "arn": {
+                "title": "arn",
+                "description": "AWS ARN",
+                "type": "string",
+                "pattern": "^arn:(aws|aws-cn|aws-us-gov):([a-zA-Z0-9-]+):([a-z0-9-]*):([0-9]{12}|):(.+)$"
+            },
+            "bucket": {
+                "title": "S3 bucket name.",
+                "description": "S3 bucket name.",
+                "type": "string",
+                "pattern": "^[a-z0-9][-.a-z0-9]{1,61}[a-z0-9]$"
+            },
+            "duration": {
+                "title": "A lava duration specification",
+                "description": "A \"duration\" is a string in the form nnX where nn is a number and X is s (seconds), m (minutes) or h (hours), d (days) or w (weeks). If X is not specified, seconds are assumed. A durations is always >= 0.",
+                "oneOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^[0-9]*(\\.[0-9]*)?[smhdw]?$"
+                    }
+                ]
+            },
+            "netloc": {
+                "title": "A network location / endpoint",
+                "description": "A network location is a host name + port number.",
+                "type": "object",
+                "properties": {
+                    "host": {
+                        "description": "The database host DNS name or IP address.",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "port": {
+                        "description": "The database port number.",
+                        "$ref": "#/$defs/common/posint"
+                    }
+                }
+            },
+            "posint": {
+                "title": "A lava positive integer specification",
+                "description": "Lava is tolerant on integer values (for now).",
+                "oneOf": [
+                    {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^[0-9]+$"
+                    }
+                ]
+            },
+            "size": {
+                "title": "A lava (data) size specification",
+                "description": "A \"size\" is a string in the form nnX where nn is a number and X is a case-sensitive unit specifier. If X is not specified, bytes are assumed. A size is always >= 0.",
+                "oneOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^[0-9]*(\\.[0-9]*)?(B|K|KB|M|MB|G|GB|T|TB|P|PB|KiB|MiB|GiB|TiB|PiB)?$"
+                    }
+                ]
+            },
+            "ssl-config": {
+                "title": "SSL configuration options for database connections",
+                "description": "SSL configuration options for database connections.",
+                "type": "object",
+                "properties": {
+                    "ssl_mode": {
+                        "description": "SSL/TLS verification mode",
+                        "type": "string",
+                        "enum": [
+                            "require",
+                            "verify-ca",
+                            "verify-full"
+                        ]
+                    },
+                    "ssl_ca_file": {
+                        "description": "File name or URI for server certificate.",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "ssl": {
+                        "description": "(Deprecated) Enable SSL/TLS. Use ssl_mode=require.",
+                        "type": "boolean",
+                        "default": false,
+                        "deprecated": true
+                    },
+                    "ca_cert": {
+                        "description": "(Deprecated) File name or URI for server certificate. Use ssl_ca_file.",
+                        "type": "string",
+                        "minLength": 1,
+                        "deprecated": true
+                    }
+                }
+            }
+        },
+        "s3trigger": {}
+    }
+}

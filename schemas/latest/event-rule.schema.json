@@ -1,0 +1,191 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://jin-gizmo.github.io/lava/schemas/latest/event-rule.schema.json",
+    "version": "v8.3.0",
+    "documentation": "https://jin-gizmo.github.io/lava",
+    "title": "Lava job framework EventBridge rule specification",
+    "type": "object",
+    "properties": {
+        "description": {
+            "description": "A short description of the rule.",
+            "type": "string",
+            "minLength": 1
+        },
+        "enabled": {
+            "description": "Whether or not the rule is enabled. Defaults to false.",
+            "type": "boolean",
+            "default": false
+        },
+        "event_bus_name": {
+            "description": "Name of the event bus.",
+            "type": "string",
+            "default": "default"
+        },
+        "event_pattern": {
+            "description": "The pattern used to select which events trigger the rule. See https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html",
+            "type": "object"
+        },
+        "owner": {
+            "description": "Name or email address of the rule owner",
+            "type": "string",
+            "minLength": 1
+        },
+        "role_arn": {
+            "description": "The ARN of the IAM role associated with the rule.",
+            "type": "string",
+            "minLength": 1
+        },
+        "rule_id": {
+            "description": "The rule name. This must be of the form lava.<REALM>.<NAME>.",
+            "type": "string",
+            "pattern": "^lava\\.[^.]+\\..+$"
+        },
+        "schedule_expression": {
+            "description": "A cron style schedule or repetition frequency for the rule to fire.",
+            "type": "string",
+            "minLength": 1
+        },
+        "tags": {
+            "description": "Key/value pairs that will be added as tags to the rule.",
+            "type": "object"
+        },
+        "targets": {
+            "description": "A list of targets for the rule. If omitted or empty, the rule may fire but nothing will happen.",
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {
+                        "description": "ARN of a target resource",
+                        "$ref": "#/$defs/common/arn"
+                    },
+                    {
+                        "description": "EventBridge PutTargets specification (AWS API shape, PascalCase keys)",
+                        "type": "object"
+                    }
+                ]
+            }
+        }
+    },
+    "patternProperties": {
+        "^[xX]-": {
+            "description": "X-* fields are ignored by lava."
+        },
+        "^\\$schema$": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "description",
+        "owner",
+        "rule_id"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+        "common": {
+            "arn": {
+                "title": "arn",
+                "description": "AWS ARN",
+                "type": "string",
+                "pattern": "^arn:(aws|aws-cn|aws-us-gov):([a-zA-Z0-9-]+):([a-z0-9-]*):([0-9]{12}|):(.+)$"
+            },
+            "bucket": {
+                "title": "S3 bucket name.",
+                "description": "S3 bucket name.",
+                "type": "string",
+                "pattern": "^[a-z0-9][-.a-z0-9]{1,61}[a-z0-9]$"
+            },
+            "duration": {
+                "title": "A lava duration specification",
+                "description": "A \"duration\" is a string in the form nnX where nn is a number and X is s (seconds), m (minutes) or h (hours), d (days) or w (weeks). If X is not specified, seconds are assumed. A durations is always >= 0.",
+                "oneOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^[0-9]*(\\.[0-9]*)?[smhdw]?$"
+                    }
+                ]
+            },
+            "netloc": {
+                "title": "A network location / endpoint",
+                "description": "A network location is a host name + port number.",
+                "type": "object",
+                "properties": {
+                    "host": {
+                        "description": "The database host DNS name or IP address.",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "port": {
+                        "description": "The database port number.",
+                        "$ref": "#/$defs/common/posint"
+                    }
+                }
+            },
+            "posint": {
+                "title": "A lava positive integer specification",
+                "description": "Lava is tolerant on integer values (for now).",
+                "oneOf": [
+                    {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^[0-9]+$"
+                    }
+                ]
+            },
+            "size": {
+                "title": "A lava (data) size specification",
+                "description": "A \"size\" is a string in the form nnX where nn is a number and X is a case-sensitive unit specifier. If X is not specified, bytes are assumed. A size is always >= 0.",
+                "oneOf": [
+                    {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    {
+                        "type": "string",
+                        "pattern": "^[0-9]*(\\.[0-9]*)?(B|K|KB|M|MB|G|GB|T|TB|P|PB|KiB|MiB|GiB|TiB|PiB)?$"
+                    }
+                ]
+            },
+            "ssl-config": {
+                "title": "SSL configuration options for database connections",
+                "description": "SSL configuration options for database connections.",
+                "type": "object",
+                "properties": {
+                    "ssl_mode": {
+                        "description": "SSL/TLS verification mode",
+                        "type": "string",
+                        "enum": [
+                            "require",
+                            "verify-ca",
+                            "verify-full"
+                        ]
+                    },
+                    "ssl_ca_file": {
+                        "description": "File name or URI for server certificate.",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "ssl": {
+                        "description": "(Deprecated) Enable SSL/TLS. Use ssl_mode=require.",
+                        "type": "boolean",
+                        "default": false,
+                        "deprecated": true
+                    },
+                    "ca_cert": {
+                        "description": "(Deprecated) File name or URI for server certificate. Use ssl_ca_file.",
+                        "type": "string",
+                        "minLength": 1,
+                        "deprecated": true
+                    }
+                }
+            }
+        },
+        "event-rule": {}
+    }
+}

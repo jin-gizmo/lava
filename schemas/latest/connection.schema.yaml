@@ -1,0 +1,1220 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://jin-gizmo.github.io/lava/schemas/latest/connection.schema.yaml
+version: v8.3.0
+documentation: https://jin-gizmo.github.io/lava
+title: Lava connection specification
+type: object
+properties:
+  conn_id:
+    description: Connection ID.
+    type: string
+    minLength: 1
+  description:
+    description: A short description of the connection.
+    type: string
+    minLength: 1
+  enabled:
+    description: Whether or not the connection is enabled. Defaults to false.
+    type: boolean
+    default: false
+  owner:
+    description: Identifies the owner of the connection.
+    type: string
+    minLength: 1
+  type:
+    description: Connection type.
+    type: string
+    enum:
+      - aws
+      - docker
+      - email
+      - generic
+      - git
+      - mariadb
+      - mariadb-rds
+      - mssql
+      - mysql
+      - mysql-aurora
+      - mysql-rds
+      - oracle
+      - oracle-rds
+      - postgres
+      - postgres-aurora
+      - postgres-rds
+      - psql
+      - redshift
+      - redshift-serverless
+      - scp
+      - ses
+      - sftp
+      - sharepoint
+      - slack
+      - smb
+      - sqlite3
+      - ssh
+patternProperties:
+  ^[xX]-:
+    description: X-* fields are ignored by lava.
+  ^\$schema$:
+    type: string
+required:
+  - conn_id
+  - type
+  - description
+  - owner
+allOf:
+  - if:
+      properties:
+        type:
+          const: aws
+    then:
+      $ref: '#/$defs/connection/aws'
+  - if:
+      properties:
+        type:
+          const: docker
+    then:
+      $ref: '#/$defs/connection/docker'
+  - if:
+      properties:
+        type:
+          const: email
+    then:
+      $ref: '#/$defs/connection/email'
+  - if:
+      properties:
+        type:
+          const: generic
+    then:
+      $ref: '#/$defs/connection/generic'
+  - if:
+      properties:
+        type:
+          const: git
+    then:
+      $ref: '#/$defs/connection/git'
+  - if:
+      properties:
+        type:
+          const: mariadb
+    then:
+      $ref: '#/$defs/connection/mariadb'
+  - if:
+      properties:
+        type:
+          const: mariadb-rds
+    then:
+      $ref: '#/$defs/connection/mariadb-rds'
+  - if:
+      properties:
+        type:
+          const: mssql
+    then:
+      $ref: '#/$defs/connection/mssql'
+  - if:
+      properties:
+        type:
+          const: mysql
+    then:
+      $ref: '#/$defs/connection/mysql'
+  - if:
+      properties:
+        type:
+          const: mysql-aurora
+    then:
+      $ref: '#/$defs/connection/mysql-aurora'
+  - if:
+      properties:
+        type:
+          const: mysql-rds
+    then:
+      $ref: '#/$defs/connection/mysql-rds'
+  - if:
+      properties:
+        type:
+          const: oracle
+    then:
+      $ref: '#/$defs/connection/oracle'
+  - if:
+      properties:
+        type:
+          const: oracle-rds
+    then:
+      $ref: '#/$defs/connection/oracle-rds'
+  - if:
+      properties:
+        type:
+          const: postgres
+    then:
+      $ref: '#/$defs/connection/postgres'
+  - if:
+      properties:
+        type:
+          const: postgres-aurora
+    then:
+      $ref: '#/$defs/connection/postgres-aurora'
+  - if:
+      properties:
+        type:
+          const: postgres-rds
+    then:
+      $ref: '#/$defs/connection/postgres-rds'
+  - if:
+      properties:
+        type:
+          const: psql
+    then:
+      $ref: '#/$defs/connection/psql'
+  - if:
+      properties:
+        type:
+          const: redshift
+    then:
+      $ref: '#/$defs/connection/redshift'
+  - if:
+      properties:
+        type:
+          const: redshift-serverless
+    then:
+      $ref: '#/$defs/connection/redshift-serverless'
+  - if:
+      properties:
+        type:
+          const: scp
+    then:
+      $ref: '#/$defs/connection/scp'
+  - if:
+      properties:
+        type:
+          const: ses
+    then:
+      $ref: '#/$defs/connection/ses'
+  - if:
+      properties:
+        type:
+          const: sftp
+    then:
+      $ref: '#/$defs/connection/sftp'
+  - if:
+      properties:
+        type:
+          const: sharepoint
+    then:
+      $ref: '#/$defs/connection/sharepoint'
+  - if:
+      properties:
+        type:
+          const: slack
+    then:
+      $ref: '#/$defs/connection/slack'
+  - if:
+      properties:
+        type:
+          const: smb
+    then:
+      $ref: '#/$defs/connection/smb'
+  - if:
+      properties:
+        type:
+          const: sqlite3
+    then:
+      $ref: '#/$defs/connection/sqlite3'
+  - if:
+      properties:
+        type:
+          const: ssh
+    then:
+      $ref: '#/$defs/connection/ssh'
+unevaluatedProperties: false
+$defs:
+  common:
+    arn:
+      title: arn
+      description: AWS ARN
+      type: string
+      pattern: ^arn:(aws|aws-cn|aws-us-gov):([a-zA-Z0-9-]+):([a-z0-9-]*):([0-9]{12}|):(.+)$
+    bucket:
+      title: S3 bucket name.
+      description: S3 bucket name.
+      type: string
+      pattern: ^[a-z0-9][-.a-z0-9]{1,61}[a-z0-9]$
+    duration:
+      title: A lava duration specification
+      description: A "duration" is a string in the form nnX where nn is a number and
+        X is s (seconds), m (minutes) or h (hours), d (days) or w (weeks). If X is
+        not specified, seconds are assumed. A durations is always >= 0.
+      oneOf:
+        - type: number
+          minimum: 0
+        - type: string
+          pattern: ^[0-9]*(\.[0-9]*)?[smhdw]?$
+    netloc:
+      title: A network location / endpoint
+      description: A network location is a host name + port number.
+      type: object
+      properties:
+        host:
+          description: The database host DNS name or IP address.
+          type: string
+          minLength: 1
+        port:
+          description: The database port number.
+          $ref: '#/$defs/common/posint'
+    posint:
+      title: A lava positive integer specification
+      description: Lava is tolerant on integer values (for now).
+      oneOf:
+        - type: integer
+          minimum: 1
+        - type: string
+          pattern: ^[0-9]+$
+    size:
+      title: A lava (data) size specification
+      description: A "size" is a string in the form nnX where nn is a number and X
+        is a case-sensitive unit specifier. If X is not specified, bytes are assumed.
+        A size is always >= 0.
+      oneOf:
+        - type: number
+          minimum: 0
+        - type: string
+          pattern: ^[0-9]*(\.[0-9]*)?(B|K|KB|M|MB|G|GB|T|TB|P|PB|KiB|MiB|GiB|TiB|PiB)?$
+    ssl-config:
+      title: SSL configuration options for database connections
+      description: SSL configuration options for database connections.
+      type: object
+      properties:
+        ssl_mode:
+          description: SSL/TLS verification mode
+          type: string
+          enum:
+            - require
+            - verify-ca
+            - verify-full
+        ssl_ca_file:
+          description: File name or URI for server certificate.
+          type: string
+          minLength: 1
+        ssl:
+          description: (Deprecated) Enable SSL/TLS. Use ssl_mode=require.
+          type: boolean
+          default: false
+          deprecated: true
+        ca_cert:
+          description: (Deprecated) File name or URI for server certificate. Use ssl_ca_file.
+          type: string
+          minLength: 1
+          deprecated: true
+  connection:
+    aws:
+      title: aws
+      description: Lava aws connection parameters
+      type: object
+      oneOf:
+        - type: object
+          required:
+            - access_keys
+          properties:
+            access_keys:
+              description: The name of an encrypted SSM parameter containing the access
+                keys.
+              type: string
+              minLength: 1
+            region:
+              description: The AWS region name.
+              type: string
+              pattern: ^[a-z]{2}-[a-z]+-\d+$
+        - type: object
+          required:
+            - role_arn
+          properties:
+            role_arn:
+              description: ARN of role to assume.
+              type: string
+              pattern: '^arn:aws:iam:'
+            duration:
+              description: Duration of the assumed role session.
+              $ref: '#/$defs/common/duration'
+            external_id:
+              description: Name of SSM parameter containing external ID.
+              type: string
+              minLength: 1
+            policy:
+              description: Inline policy for assumed role session.
+              type: object
+            policy_arns:
+              description: ARN (or list of ARNs) for managed policies for assumed
+                role session.
+              oneOf:
+                - type: string
+                  pattern: '^arn:aws:iam:'
+                - type: array
+                  items:
+                    type: string
+                    pattern: '^arn:aws:iam:'
+            region:
+              description: The AWS region name.
+              type: string
+              pattern: ^[a-z]{2}-[a-z]+-\d+$
+            tags:
+              description: Tags to apply to the assumed role session.
+              type: object
+    docker:
+      title: Lava docker connection parameters
+      type: object
+      properties:
+        email:
+          description: Email address for registry login.
+          type: string
+          format: email
+        password:
+          description: SSM parameter containing the password for authenticating to
+            the registry.
+          type: string
+          minLength: 1
+        registry:
+          description: Either the URL for a standard registry or ecr[:account-id].
+          oneOf:
+            - type: string
+              format: uri
+              not:
+                pattern: ^ecr(:\d+)?$
+            - type: string
+              pattern: ^ecr(:\d+)?$
+        server:
+          description: URL for the docker server.
+          type: string
+          format: uri
+        timeout:
+          description: Timeout on docker API calls in seconds.
+          type: integer
+          minimum: 0
+        tls:
+          description: Use TLS when connecting to the docker server
+          type: boolean
+        user:
+          description: User name for authenticating to the registry.
+          type: string
+          minLength: 1
+    email:
+      title: Lava email connection parameters
+      type: object
+      properties:
+        from:
+          description: The email address that is sending the email.
+          type: string
+          format: email
+        reply_to:
+          description: The default reply-to email address(es) for messages.
+          anyOf:
+            - type: string
+              format: email
+            - type: array
+              items:
+                type: string
+                format: email
+        subtype:
+          description: Specifies the underlying email handler.
+          type: string
+          enum:
+            - ses
+            - smtp
+      allOf:
+        - if:
+            properties:
+              subtype: false
+          then:
+            $ref: '#/$defs/connection/email.d/ses'
+        - if:
+            properties:
+              subtype:
+                const: ses
+          then:
+            $ref: '#/$defs/connection/email.d/ses'
+        - if:
+            properties:
+              subtype:
+                const: smtp
+          then:
+            $ref: '#/$defs/connection/email.d/smtp'
+    generic:
+      title: Lava generic connection parameters
+      type: object
+      properties:
+        attributes:
+          description: A map comprising the attributes for the connector.
+          type: object
+          items:
+            oneOf:
+              - type: string
+              - type: object
+      required:
+        - attributes
+    git:
+      title: Lava git connection parameters
+      type: object
+      properties:
+        ssh_key:
+          description: The name of an encrypted SSM parameter containing the SSH private
+            key.
+          type: string
+          minLength: 1
+        ssh_options:
+          description: A list of SSH options as per ssh_config(5)
+          type: array
+          items:
+            type: string
+            minLength: 1
+      required:
+        - ssh_key
+    mariadb:
+      title: Lava mysql connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    mariadb-rds:
+      title: Lava mysql connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    mssql:
+      title: Lava mssql connection parameters
+      type: object
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        driver:
+          description: The ODBC driver name in /etc/odbcinst.ini.
+          type: string
+          minLength: 1
+        host:
+          description: The database host DNS name or IP address.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        port:
+          description: The database port number.
+          $ref: '#/$defs/common/posint'
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        subtype:
+          description: The underlying DBAPI 2.0 driver.
+          type: string
+          enum:
+            - pyodbc
+        timeout:
+          description: Connection timeout in seconds.
+          type: integer
+          minimum: 0
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    mysql:
+      title: Lava mysql connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    mysql-aurora:
+      title: Lava mysql-aurora connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    mysql-rds:
+      title: Lava mysql-aurora connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    oracle:
+      title: Lava oracle connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        edition:
+          description: Oracle version for compatibility in the form x.y[.z]
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        service_name:
+          description: The Oracle data base service name.
+          type: string
+          minLength: 1
+        sid:
+          description: The Oracle System Identifier of the database.
+          type: string
+          minLength: 1
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    oracle-rds:
+      title: Lava oracle connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        edition:
+          description: Oracle version for compatibility in the form x.y[.z]
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        service_name:
+          description: The Oracle data base service name.
+          type: string
+          minLength: 1
+        sid:
+          description: The Oracle System Identifier of the database.
+          type: string
+          minLength: 1
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    postgres:
+      title: Lava postgres connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        subtype:
+          description: Specifies the underlying DBAPI 2.0 driver.
+          type: string
+          enum:
+            - pg8000
+            - pygresql
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    postgres-aurora:
+      title: Lava postgres-aurora connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        subtype:
+          description: Specifies the underlying DBAPI 2.0 driver.
+          type: string
+          enum:
+            - pg8000
+            - pygresql
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    postgres-rds:
+      title: Lava postgres-aurora connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        subtype:
+          description: Specifies the underlying DBAPI 2.0 driver.
+          type: string
+          enum:
+            - pg8000
+            - pygresql
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    psql:
+      title: Lava postgres connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        subtype:
+          description: Specifies the underlying DBAPI 2.0 driver.
+          type: string
+          enum:
+            - pg8000
+            - pygresql
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    redshift:
+      title: Lava redshift connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        cluster_id:
+          description: The Redshift cluster identifier.
+          type: string
+          minLength: 1
+        database:
+          description: The name of the database within the database server.
+          type: string
+          minLength: 1
+        password_duration:
+          description: The password duration when generating temporary IAM user credentials
+          $ref: '#/$defs/common/duration'
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        subtype:
+          description: Specifies the underlying DBAPI 2.0 driver.
+          type: string
+          enum:
+            - pg8000
+            - redshift
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+    redshift-serverless:
+      title: Lava redshift-serverless connection parameters
+      type: object
+      allOf:
+        - $ref: '#/$defs/common/netloc'
+        - $ref: '#/$defs/common/ssl-config'
+      properties:
+        database:
+          description: The name of the database within the Redshift Serverless namespace.
+          type: string
+          minLength: 1
+        external_id:
+          description: Name of an SSM parameter containing an external ID to use when
+            assuming the IAM role specified by role_arn.
+          type: string
+          minLength: 1
+        password_duration:
+          description: The password duration when generating temporary IAM user credentials
+          $ref: '#/$defs/common/duration'
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        role_arn:
+          description: The ARN of an IAM role that will be assumed when generating
+            temporary IAM user credentials.
+          type: string
+          minLength: 1
+        secret_id:
+          description: Obtain missing fields from the specified secret in AWS Secrets
+            Manager.
+          type: string
+          minLength: 1
+        subtype:
+          description: Specifies the underlying DBAPI 2.0 driver.
+          type: string
+          enum:
+            - pg8000
+            - redshift
+        user:
+          description: Database user name.
+          type: string
+          minLength: 1
+        workgroup:
+          description: The name of the workgroup associated with the database
+          type: string
+          minLength: 1
+    scp:
+      title: Lava ssh/scp/sftp connection parameters
+      type: object
+      properties:
+        ssh_key:
+          description: The name of an encrypted SSM parameter containing the SSH private
+            key.
+          type: string
+          minLength: 1
+        ssh_options:
+          description: A list of SSH options as per ssh_config(5)
+          type: array
+          items:
+            type: string
+            minLength: 1
+      required:
+        - ssh_key
+    ses:
+      title: Lava ses connection parameters (deprecated)
+      type: object
+      properties:
+        from:
+          description: The email address that is sending the email.
+          type: string
+          format: email
+        region:
+          description: The AWS region name for the SES service.
+          type: string
+          pattern: ^[a-z]{2}-[a-z]+-\d+$
+        reply_to:
+          description: The default reply-to email address(es) for messages.
+          anyOf:
+            - type: string
+              format: email
+            - type: array
+              items:
+                type: string
+                format: email
+        return_path:
+          description: The email address that bounces and complaints will be forwarded
+            to when feedback forwarding is enabled.
+          type: string
+          format: email
+        configuration_set:
+          description: An AWS SES configuration set name.
+          type: string
+          minLength: 1
+    email.d:
+      ses:
+        title: Lava email (ses) connection subtype parameters
+        properties:
+          region:
+            description: The AWS region name for the SES service.
+            type: string
+            pattern: ^[a-z]{2}-[a-z]+-\d+$
+          configuration_set:
+            description: An AWS SES configuration set name.
+            type: string
+            minLength: 1
+      smtp:
+        title: Lava email (smtp) connection subtype parameters
+        properties:
+          host:
+            description: The SMTP server host DNS name or IP address.
+            type: string
+            anyOf:
+              - format: hostname
+              - format: ip4
+              - format: ip6
+          password:
+            description: The name of an encrypted SSM parameter containing the SMTP
+              server password.
+            type: string
+            minLength: 1
+          port:
+            description: The SMTP port number.
+            $ref: '#/$defs/common/posint'
+          tls:
+            description: If true, use SMTP over TLS.
+            type: boolean
+          user:
+            description: SMTP server user name.
+            type: string
+            minLength: 1
+    sftp:
+      title: Lava ssh/scp/sftp connection parameters
+      type: object
+      properties:
+        ssh_key:
+          description: The name of an encrypted SSM parameter containing the SSH private
+            key.
+          type: string
+          minLength: 1
+        ssh_options:
+          description: A list of SSH options as per ssh_config(5)
+          type: array
+          items:
+            type: string
+            minLength: 1
+      required:
+        - ssh_key
+    sharepoint:
+      title: Lava sharepoint connection parameters
+      type: object
+      properties:
+        client_id:
+          description: Application ID that the SharePoint registration portal assigned.
+          type: string
+          minLength: 1
+        client_secret:
+          description: The name of an encrypted SSM parameter containing the client
+            secret.
+          type: string
+          minLength: 1
+        https_proxy:
+          description: HTTPS proxy to use for accessing the SharePoint API endpoints.
+          type: string
+          format: uri
+        org_base_url:
+          description: The hostname component of the organisation's SharePoint base
+            URL.
+          type: string
+          format: hostname
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        site_name:
+          description: The SharePoint site name.
+          type: string
+          minLength: 1
+        tenant:
+          description: The Azure AD registered domain ID.
+          type: string
+          minLength: 1
+        user:
+          description: User name for authenticating to SharePoint.
+          type: string
+          minLength: 1
+      required:
+        - client_id
+        - client_secret
+        - org_base_url
+        - password
+        - site_name
+        - tenant
+    slack:
+      title: Lava slack connection parameters
+      type: object
+      properties:
+        colour:
+          description: Default colour for the sidebar for Slack messages sent using
+            attachment style.
+          type: string
+          minLength: 1
+        from:
+          description: An arbitrary source identifier for display in Slack messages.
+          type: string
+          minLength: 1
+        preamble:
+          description: Default preamble at the start of Slack messages.
+          type: string
+          minLength: 1
+        style:
+          description: Display style for Slack messages.
+          type: string
+          minLength: 1
+        webhook_url:
+          description: 'The webhook URL provided by Slack for sending messages, or
+            the name of an AWS SSM parameter containing the webhook URL.
+
+            '
+          type: string
+      required:
+        - webhook_url
+    smb:
+      title: Lava smb connection parameters
+      type: object
+      properties:
+        subtype:
+          description: The Python package used for connecting to the SMB server. Default
+            is pysmb.
+          type: string
+          enum:
+            - pysmb
+            - smbprotocol
+        domain:
+          description: The network domain.
+          type: string
+          minLength: 1
+        host:
+          description: DNS name or IP address of the SMB host.
+          type: string
+          minLength: 1
+        is_direct_tcp:
+          description: If false, use NetBIOS over TCP/IP. If true use SMB over TCP/IP.
+          type: boolean
+        my_name:
+          description: Local NetBIOS machine name that will identify the origin of
+            connections.
+          type: string
+          minLength: 1
+        password:
+          description: The name of an encrypted SSM parameter containing the password.
+          type: string
+          minLength: 1
+        port:
+          description: Connection port number.
+          $ref: '#/$defs/common/posint'
+        remote_name:
+          description: NetBIOS machine name of the remote server.
+          type: string
+          minLength: 1
+        use_ntlm_v2:
+          description: Use NTLMv2 authentication algorithm for authentication.
+          type: boolean
+        user:
+          description: User name for authenticating to the SMB server.
+          type: string
+          minLength: 1
+        encrypt:
+          description: Use encryption when making requests and transferring files
+            from the SMB server. Default is True.
+          type: boolean
+      required:
+        - host
+        - remote_name
+        - user
+        - password
+    sqlite3:
+      title: Lava sqlite3 connection parameters
+      type: object
+      properties:
+        host:
+          description: The name of the file containing the SQLite3 database.
+          type: string
+          minLength: 1
+        port:
+          description: Required but ignored for sqlite3.
+        preserve_case:
+          description: Don't fold database object names to lower case when quoting
+            them for use in db_from_s3 jobs.
+          type: boolean
+        user:
+          description: Required but ignored for sqlite3.
+          type: string
+      required:
+        - host
+        - port
+        - user
+    ssh:
+      title: Lava ssh/scp/sftp connection parameters
+      type: object
+      properties:
+        ssh_key:
+          description: The name of an encrypted SSM parameter containing the SSH private
+            key.
+          type: string
+          minLength: 1
+        ssh_options:
+          description: A list of SSH options as per ssh_config(5)
+          type: array
+          items:
+            type: string
+            minLength: 1
+      required:
+        - ssh_key
