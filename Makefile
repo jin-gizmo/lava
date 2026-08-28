@@ -12,7 +12,7 @@ include $(repo_base)/etc/make/help.mk
 # ------------------------------------------------------------------------------
 # Auto-help setup
 #
-#+ Welcome to **$(APP)** (v$(LAVA_VERSION)). What do you want to make?
+#+ Welcome to **$(APP) v$(LAVA_VERSION_ALL)**. What do you want to make?
 
 #- For more information, consult the lava user guide $(_URL)
 #-
@@ -32,6 +32,7 @@ PYTEST_WORKERS=auto
 pypi=pypi
 
 export LAVA_VERSION:=$(shell python3 lava/version.py)
+LAVA_VERSION_ALL:=$(shell python3 lava/version.py --all)
 
 # ------------------------------------------------------------------------------
 
@@ -355,16 +356,15 @@ release: _repo_is_clean _on_master
 			gh release edit \
 				--draft="$$draft" \
 				--verify-tag=false \
-				--title "Version $(LAVA_VERSION)" \
+				--title "Version $(LAVA_VERSION_ALL)" \
 				--notes "https://jin-gizmo.github.io/lava/" \
 				"v$(LAVA_VERSION)" ; \
 		else \
 			$e "$GCreating new release for tag v$(LAVA_VERSION)$_" ; \
 			gh release create \
 				--draft="$$draft" \
-				--fail-on-no-commits \
 				--verify-tag=false \
-				--title "Version $(LAVA_VERSION)" \
+				--title "Version $(LAVA_VERSION_ALL)" \
 				--notes "https://jin-gizmo.github.io/lava/" \
 				"v$(LAVA_VERSION)" \
 				$(RELEASE_FILES) ; \

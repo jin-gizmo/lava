@@ -281,6 +281,7 @@ ecr-push: registry
 
 ## Copy the *base* and *full* images from our local registry to the remote
 ## registry for the given OS type. **Log in to the remote registry first.**
+#:req os
 #:opt registry prefix
 push:	registry
 	@( \
