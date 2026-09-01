@@ -141,6 +141,7 @@ FORCE:
 ## Initialise the project (create venv etc.). This is non-destructive and can be
 ## rerun as needed.
 init:	_venv req _git
+	$(MAKE) -C test init
 
 _git:	.git
 	git config core.hooksPath etc/git-hooks
@@ -458,10 +459,18 @@ test:
 load:
 
 ## Start the docker containers providing test resources.
+## The *services* parameter can be set to a comma separated list of service
+## names to start only those. e.g. `services=ministack,mail`.
+## See `docker-compose.yaml` for the available service names.
+#:opt services
 start:
 
 ## Check that the local docker based test infrastructure is ready to use (also
 ## included in the *test* and *coverage* targets).
+## The *services* parameter can be set to a comma separated list of service
+## names to start only those. e.g. `services=ministack,mail`.
+## See `docker-compose.yaml` for the available service names.
+#:opt services
 ready:
 
 ## Stop the docker containers providing test resources.

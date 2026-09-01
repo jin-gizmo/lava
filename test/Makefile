@@ -33,16 +33,31 @@ HELP_CATEGORY=Miscellaneous targets
 # ------------------------------------------------------------------------------
 #:cat Setup targets
 
+# This one is usually called from the parent.
+init:
+	cd jobs && make init
+
 up:	start
 
 down:	stop
 
 
+_COMMA=,
+start:	_services=$(subst $(_COMMA), ,$(services))
+
+
 ## Start the docker containers providing test resources.
-start:
+## The *services* parameter can be set to a comma separated list of service
+## names to start only those. e.g. `services=ministack,mail`.
+## See `docker-compose.yaml` for the available service names.
+#:opt services
+start:	.env
 	jindr start --name jindr
-	docker compose --profile build build
-	docker compose up --renew-anon-volumes -d
+	docker compose --profile build build $(_services)
+	docker compose up --renew-anon-volumes -d $(_services)
+
+.env:
+	$(error You need to create test/.env -- see test/README.md)
 
 _down:	_stop
 
@@ -104,21 +119,35 @@ load:	jobs/venv _ministack_ready
 _ministack_ready:
 	@services/ministack/ready.sh
 
+
+# This is a bit cracked due to bash weirdness with expansion lists with one element
+ifeq ($(strip $(services)),)
+ready:	_services=*
+else ifneq ($(findstring $(_COMMA),$(services)),)
+ready:	_services={$(services)}
+else
+ready:	_services=$(services)
+endif
+
 ## Check that the local docker based test infrastructure is ready to use (also
 ## included in the *test* and *coverage* targets).
+## The *services* parameter can be set to a comma separated list of service
+## names to start only those. e.g. `services=ministack,mail`.
+## See `docker-compose.yaml` for the available service names.
+#:opt services
 ready:
 	@echo "🔵 Checking docker based test infrastructure readiness"
 	@( \
 		sentinel=$$(mktemp) ; \
 		trap 'kill 0; /bin/rm -f "$$sentinel"' INT TERM ; \
-		for f in services/*/ready.sh ; \
+		for f in services/$(_services)/ready.sh ; \
 		do \
 			{ "$$f" || /bin/rm -f "$$sentinel" ; } & \
 		done ; \
 		wait ; \
 		if [ -f "$$sentinel" ] ; \
 		then \
-			echo "💚 All test services started correctly" ; \
+			echo "💚 All services started correctly" ; \
 			/bin/rm -f "$$sentinal" ; \
 		else \
 			echo "❌ One or more test services failed to start correctly" ; \

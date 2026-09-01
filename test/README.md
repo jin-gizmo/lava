@@ -185,32 +185,10 @@ nice little GUI at http://localhost:8025.
 
 Credentials for the local services must be contained in `test/.env`. These must
 match the credentials stored in the lava connectors deployed with the test jobs.
-As `.env` files are not in the repo, this will need to be created manually. It
-needs to contain the following:
+As `.env` files are not in the repo, this will need to be created manually.
 
-```bash
-# Used by the docker compose file
-
-# Note: Some DBs don't let you control the admin user name.
-# e.g. MySQL uses root and MsSQL uses sa.
-DB_ADMIN_USER=master
-DB_ADMIN_PASSWORD=...
-
-SMB_USER=lava
-SMB_PASSWORD=...
-
-# Non admin user stuff. Must match the lava connectors being used.
-DB_LAVA_USER=lava
-DB_LAVA_PASSWORD=...
-
-# This is not really secret given its a fixed value provided by the vercel
-# emulator but this is a reasonable place for it.
-SLACK_WEBHOOK=http://localhost:4000/services/T000000001/B000000001/X00000000
-
-# Mail server stuff
-SMTP_USER=lava
-SMTP_PASSWORD=...
-```
+Copy `dotenv.sample` to `.env` and edit the passwords. The values themselves
+don't matter too much.
 
 ## ODBC Setup
 
