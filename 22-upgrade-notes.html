@@ -13,6 +13,10 @@
       
       
       
+        <link rel="prev" href="21-release-notes.html">
+      
+      
+        <link rel="next" href="23-credits.html">
       
       
         
@@ -23,7 +27,7 @@
     
     
       
-        <title>Lava User Guide</title>
+        <title>Upgrade Notes - Lava User Guide</title>
       
     
     
@@ -78,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#welcome-to-lava" class="md-skip">
+        <a href="#upgrade-notes" class="md-skip">
           Skip to content
         </a>
       
@@ -113,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Welcome to Lava
+              Upgrade Notes
             
           </span>
         </div>
@@ -836,10 +840,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="22-upgrade-notes.html" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade Notes
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="22-upgrade-notes.html" class="md-nav__link md-nav__link--active">
         
   
   
@@ -855,6 +886,87 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-830-mauna-loa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version 8.3.0 (Mauna Loa)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Version 8.3.0 (Mauna Loa)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-lava-job-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lava Job Framework
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upgrading-lava-to-v830" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrading to v8.3.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -933,6 +1045,75 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-830-mauna-loa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version 8.3.0 (Mauna Loa)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Version 8.3.0 (Mauna Loa)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#general" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-lava-job-framework" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lava Job Framework
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upgrading-lava-to-v830" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Upgrading to v8.3.0
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -951,28 +1132,230 @@
   
 
 
-<h1 id="welcome-to-lava">Welcome to Lava<a class="headerlink" href="#welcome-to-lava" title="Permanent link">&para;</a></h1>
-<div style="text-align: center;">
-  <img src="img/lava-icons/svg/256/lava-icon-256-transparent.svg" 
-       alt="Lava Logo" 
-       width="150" 
-       height="auto"
-       class="lava-logo">
+<h1 id="upgrade-notes">Upgrade Notes<a class="headerlink" href="#upgrade-notes" title="Permanent link">&para;</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These notes attempt to cover the salient points, not every detail. Read the
+<a href="21-release-notes.html#release-notes">release notes</a>.</p>
 </div>
-
-<p><strong>Lava</strong> is an AWS based distributed scheduler and job runner.</p>
-<p>Lava has been used extensively in a large, business critical data warehouse /
-data lake environment to run tens of thousands of jobs a day on a 24x7 basis,
-with jobs lasting anywhere between a few seconds and 12 hours.</p>
-<p><a class="autorefs autorefs-internal" title="About Lava" href="01-about-lava.html#about-lava">More ...</a></p>
-<div class="admonition warning">
-<p><strong>Lava</strong> was developed at <a href="https://www.originenergy.com.au">Origin Energy</a> as part of the
-<em>Jindabyne</em> initiative. While not part of our core IP, it proved valuable
-internally, and we're sharing it in the hope it's useful to others.</p>
-<p><a href="https://jin-gizmo.github.io"><img alt="Jin Gizmo Home" src="https://img.shields.io/badge/Jin_Gizmo_Home-d30000?logo=GitHub&amp;color=d30000" /></a></p>
-<p>Kudos to Origin for fostering a culture that empowers its people
-to build complex technology solutions in-house.</p>
+<h2 id="version-830-mauna-loa">Version 8.3.0 (<a href="https://en.wikipedia.org/wiki/Mauna_Loa">Mauna Loa</a>)<a class="headerlink" href="#version-830-mauna-loa" title="Permanent link">&para;</a></h2>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>These notes relate to upgrading from v8.2 to v8.3.0.</p>
 </div>
+<h3 id="general">General<a class="headerlink" href="#general" title="Permanent link">&para;</a></h3>
+<h4 id="degree-of-difficulty-for-upgrade-rollback">Degree of difficulty for upgrade / rollback<a class="headerlink" href="#degree-of-difficulty-for-upgrade-rollback" title="Permanent link">&para;</a></h4>
+<p>Easy.</p>
+<h4 id="whats-new">What’s new?<a class="headerlink" href="#whats-new" title="Permanent link">&para;</a></h4>
+<p>Read the <a href="21-release-notes.html#release-notes">release notes</a>.</p>
+<h4 id="ok-but-whats-the-stuff-i-should-be-focused-on">OK, but what’s the stuff I should be focused on?<a class="headerlink" href="#ok-but-whats-the-stuff-i-should-be-focused-on" title="Permanent link">&para;</a></h4>
+<p>These are the changes that are most likely to cause an issue, if there is one:</p>
+<ul>
+<li>
+<p><strong>TLS/SSL in database connectors:</strong> There have been fairly significant
+    improvements in TLS/SSL handling in the database connectors. These should be
+    backward compatible with existing connections in a v8.2 environment. It
+    would be a good idea to review database connection specs to uplift their
+    TLS/SSL related attributes to the new v8.3.0 model once there is no
+    possibility of needing to rollback to v8.2.</p>
+</li>
+<li>
+<p><strong>Oracle connector:</strong> The Oracle connector now uses the new
+    <a href="https://oracle.github.io/python-oracledb/">python-oracledb</a> driver instead
+    of the obsolete cx_Oracle driver. See <a href="07-connectors.html#through-thick-and-thin">Through Thick and
+    Thin</a> for the dreary tale about thick vs thin mode.
+    The Oracle connector also supports TLS/SSL now. The process of managing the
+    Oracle binaries when building docker images, AMIs etc has been improved as
+    well.</p>
+</li>
+<li>
+<p><strong>Dispatch:</strong> An SQS queue has been introduced between the
+    <code>lava-&lt;REALM&gt;-dispatch</code> SNS topic and the dispatch helper AWS Lambda
+    function. See <a href="05-job-dispatch.html#the-dispatch-helper">The Dispatch Helper</a> for more
+    information. The v8.3.0 realm CloudFormation stack will make this adjustment.</p>
+</li>
+</ul>
+<p>Other stuff to note:</p>
+<ul>
+<li>
+<p><strong>Testing</strong>: There has been a major uplift in test infrastructure and
+    automation. Producing a new lava release with just Python dependency updates
+    should be pretty quick and easy now.</p>
+</li>
+<li>
+<p><strong>JSON schemas:</strong> The <a href="16-commands-utilities.html#lava-json-schemas">JSON schemas</a> for the DynamoDB
+    table entries are now hosted on GitHub in conjunction with the user guide.
+    Upgraded tools and lava job framework use these to improve schema compliance
+    before, and after, deployment. They also work with IDEs for auto-completion
+    / suggestion etc.</p>
+</li>
+<li>
+<p><strong>SharePoint:</strong> The SharePoint connector has not been modified in this
+    release but it hasn’t been regression tested either. Anyone got a free
+    SharePoint?</p>
+</li>
+<li>
+<p><strong>Python 3.9</strong>: This is considered dead from a lava perspective. Lava v8.3.0
+    has not been tested with 3.9.</p>
+</li>
+</ul>
+<h4 id="is-v830-backward-compatible-with-v82">Is v8.3.0 backward compatible with v8.2<a class="headerlink" href="#is-v830-backward-compatible-with-v82" title="Permanent link">&para;</a></h4>
+<p>Yes.</p>
+<h4 id="do-any-jobs-connections-etc-need-to-be-modified-to-run-under-v830">Do any jobs, connections etc need to be modified to run under v8.3.0?<a class="headerlink" href="#do-any-jobs-connections-etc-need-to-be-modified-to-run-under-v830" title="Permanent link">&para;</a></h4>
+<p>No.</p>
+<p>However, once v8.3.0 is deployed, the database connection specs should be
+reviewed to uplift their TLS/SSL related attributes to the new v8.3.0 model.
+Also, there are new capabilities in the job framework and lava utilities to
+improve job hygiene that should be used.</p>
+<h4 id="where-do-i-find-lava-bits-and-pieces">Where do I find lava bits and pieces?<a class="headerlink" href="#where-do-i-find-lava-bits-and-pieces" title="Permanent link">&para;</a></h4>
+<p>The repo is on <a href="https://github.com/jin-gizmo/lava">GitHub</a>.</p>
+<p>Pre-built stuff (no repo required):</p>
+<ul>
+<li>
+<p><strong>jinlava</strong>: The lava Python package
+    <a href="https://pypi.org/project/jinlava/">jinlava</a> is on PyPI. <code>pip install
+    jinlava</code> does the business. This includes all the lava utilities (including
+    the worker), but it is not the way to create a production lava worker</p>
+</li>
+<li>
+<p><strong>User guide</strong>: This version hosted on
+    <a href="https://jin-gizmo.github.io/lava/">GitHub Pages</a> (including the JSON
+    schemas) is the only available version. If you’re looking at anything
+    else, you’re looking at the wrong thing.</p>
+</li>
+<li>
+<p><strong>CloudFormation templates</strong>: Ready to go versions of the templates are
+    provided in the
+    <a href="https://github.com/jin-gizmo/lava/releases">release on GitHub</a>.</p>
+</li>
+<li>
+<p><strong>Lava job framework:</strong> This is provided in the
+    <a href="https://github.com/jin-gizmo/lava/releases">release on GitHub</a>. However,
+    the recommended way to start a new project is using the
+    <a href="16-commands-utilities.html#lava-new-utility">lava-new</a> utility which is installed as part of
+    <a href="https://pypi.org/project/jinlava/">jinlava</a>. The framework bundle is
+    required to upgrade an existing project.</p>
+</li>
+<li>
+<p><strong>Lava docker images:</strong> These are hosted as
+    <a href="https://github.com/jin-gizmo?tab=packages&amp;repo_name=lava">GitHub packages</a>
+    (GHCR). <code>docker run -it --rm ghcr.io/jin-gizmo/lava/amzn2023/base</code></p>
+</li>
+</ul>
+<p>Stuff you need to build from the repo using the makefile(s):</p>
+<ul>
+<li>
+<p><strong>Lava worker package:</strong> The production lava worker deployment package is
+    built from the repo as a self contained code bundle that the EC2 based
+    workers self install from S3 when they boot. The package must match the
+    operating system, machine architecture and Python version. The file name
+    will look like this: <code>lava-8.3.0-amzn2023-py3.11-x86_64.tar.bz2</code>. The files
+    are reasonably chunky (80M or so).</p>
+</li>
+<li>
+<p><strong>Lava lambda code bundles</strong>: A zip file for each of the 4 lambdas is built
+    from the repo: <em>dispatch</em>, <em>metrics</em>, <em>s3trigger</em> and <em>stop</em>. These get put
+    in S3 and the realm CloudFormation stack finds them there.</p>
+</li>
+<li>
+<p><strong>Lava AMI:</strong> The builder for this is in the repo.</p>
+</li>
+</ul>
+<h3 id="infrastructure">Infrastructure<a class="headerlink" href="#infrastructure" title="Permanent link">&para;</a></h3>
+<h4 id="are-there-any-infrastructure-changes">Are there any infrastructure changes?<a class="headerlink" href="#are-there-any-infrastructure-changes" title="Permanent link">&para;</a></h4>
+<p>Yes. </p>
+<p>An SQS queue has been introduced between the <code>lava-&lt;REALM&gt;-dispatch</code> SNS topic
+and the dispatch helper AWS Lambda function. This should be transparent to end
+users.  See <a href="05-job-dispatch.html#the-dispatch-helper">The Dispatch Helper</a> for more info.</p>
+<h4 id="do-i-need-to-update-the-cloudformation-stacks-from-v82-to-v83">Do I need to update the CloudFormation stacks from v8.2 to v8.3?<a class="headerlink" href="#do-i-need-to-update-the-cloudformation-stacks-from-v82-to-v83" title="Permanent link">&para;</a></h4>
+<p>You don’t <em>have</em> to, but it is strongly recommended, preferably before updating
+workers, lambda functions etc. Version 8.2 workers can run on v8.3
+CloudFormation stacks and vice versa.</p>
+<h4 id="how-do-i-know-what-cloudformation-version-is-deployed">How do I know what CloudFormation version is deployed?<a class="headerlink" href="#how-do-i-know-what-cloudformation-version-is-deployed" title="Permanent link">&para;</a></h4>
+<p>The v8.2 and v8.3 templates have a stack output that is the version.</p>
+<h4 id="do-i-need-to-build-the-v83-lava-ami">Do I need to build the v8.3 lava AMI?<a class="headerlink" href="#do-i-need-to-build-the-v83-lava-ami" title="Permanent link">&para;</a></h4>
+<p>You don’t <em>have</em> to, but it is strongly recommended. A v8.2 worker can run on
+the v8.3 AMI and vice versa but it’s a good idea to keep them in sync. The thing
+to be wary of is the Oracle binaries that are built in to the AMI. These are
+less important in v8.3 as they are only used for the Oracle CLI connector and
+any Oracle connection specifying the non-default <em>thick</em> mode.</p>
+<h3 id="the-lava-job-framework">The Lava Job Framework<a class="headerlink" href="#the-lava-job-framework" title="Permanent link">&para;</a></h3>
+<h4 id="whats-new_1">What’s new?<a class="headerlink" href="#whats-new_1" title="Permanent link">&para;</a></h4>
+<p>Read the <a href="#version-830-mauna-loa">release notes</a>.</p>
+<h4 id="ok-but-whats-the-stuff-i-should-be-focused-on_1">OK, but what’s the stuff I should be focused on?<a class="headerlink" href="#ok-but-whats-the-stuff-i-should-be-focused-on_1" title="Permanent link">&para;</a></h4>
+<p>The main changes relate to enhanced support for <a href="11-lava-job-framework.html#working-with-the-json-schemas">utilising the JSON
+schemas</a> to provide syntax support in IDEs and
+pre-install validation. The v8.3 framework will refuse to deploy some jobs that
+v8.2 would have accepted because of schema non-compliance. Rightly so. Fix the
+jobs.</p>
+<h4 id="do-i-need-to-upgrade-existing-projects-to-use-the-v83-framework">Do I need to upgrade existing projects to use the v8.3 framework?<a class="headerlink" href="#do-i-need-to-upgrade-existing-projects-to-use-the-v83-framework" title="Permanent link">&para;</a></h4>
+<p>No. Generally speaking, any version of the framework can be used with any
+version of lava.  However, the v8.3 improvements will improve deployment quality
+and its a good idea to update the framework in existing projects when there is
+occasion to revisit a deployment.</p>
+<h4 id="how-do-i-update-the-framework-in-an-existing-project">How do I update the framework in an existing project?<a class="headerlink" href="#how-do-i-update-the-framework-in-an-existing-project" title="Permanent link">&para;</a></h4>
+<p>See <a href="11-lava-job-framework.html#updating-the-framework-in-an-existing-project">Updating the Framework in an Existing
+Project</a>
+in the user guide.</p>
+<h3 id="upgrading-lava-to-v830">Upgrading Lava to v8.3.0<a class="headerlink" href="#upgrading-lava-to-v830" title="Permanent link">&para;</a></h3>
+<h4 id="whats-the-upgrade-process">What’s the upgrade process?<a class="headerlink" href="#whats-the-upgrade-process" title="Permanent link">&para;</a></h4>
+<p>It can vary a bit based on the target environment but the following is a
+possible high level sequence of events.  Keep in mind that multiple versions of
+lava code (worker and lambdas) can be safely sitting alongside each other in S3.
+Same goes for lava AMI versions. Each realm / worker explicitly specifies the
+versions of code it runs using configuration data. Rolling forwards / backwards
+is generally a matter of changing the configuration and restarting something.</p>
+<ol>
+<li>
+<p>Build everything</p>
+<ul>
+<li>Lava AMI</li>
+<li>Lava Worker package</li>
+<li>Lava lambda functions</li>
+</ul>
+</li>
+<li>
+<p>Deploy the bits to S3 (<code>make deploy …</code>) — this doesn’t affect any running
+    realm.</p>
+</li>
+<li>
+<p>Update the common and realm CloudFormation stacks for the target realm to
+    v8.3. You can flip the lambda function versions to v8.3.0 at the same time.</p>
+</li>
+<li>
+<p>Update the worker CloudFormation stack. You can (optionally) flip the AMI
+    version to the v8.3.0 one at the same time or do that later using the
+    <a href="16-commands-utilities.html#lava-ami-utility">lava-ami</a> utility.</p>
+</li>
+<li>
+<p>Update the realm entry in the realms table to tell the target worker to load
+    v8.3.0.</p>
+</li>
+<li>
+<p>Use the worker auto scaling group to refresh the worker(s).</p>
+</li>
+</ol>
+<p>This order can be shuffled a bit, if necessary.</p>
+<h4 id="how-do-i-rollback-to-v820">How do I rollback to v8.2.0?<a class="headerlink" href="#how-do-i-rollback-to-v820" title="Permanent link">&para;</a></h4>
+<ul>
+<li>
+<p><strong>CloudFormation:</strong> Grab the v8.2.0 CloudFormation templates from the GitHub
+    releases area and deploy them.</p>
+</li>
+<li>
+<p><strong>Lambda functions:</strong> Update the realm CloudFormation stack (same template)
+    and change the lambda version parameter.</p>
+</li>
+<li>
+<p><strong>Lava worker version</strong>: Update the realm entry in the realms table to point
+    the worker back to v8.2.0 of the code and then, replace the worker.</p>
+</li>
+<li>
+<p><strong>AMI:</strong> Use the <a href="16-commands-utilities.html#lava-ami-utility">lava-ami</a>utility to select a different
+    AMI. The utility will update the worker CloudFormation stack for you. Then,
+    replace the worker.</p>
+</li>
+</ul>
 
 
 

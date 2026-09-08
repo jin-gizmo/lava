@@ -1295,7 +1295,34 @@
   
   
     <li class="md-nav__item">
-      <a href="22-credits.html" class="md-nav__link">
+      <a href="22-upgrade-notes.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upgrade Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="23-credits.html" class="md-nav__link">
         
   
   
@@ -1322,7 +1349,7 @@
   
   
     <li class="md-nav__item">
-      <a href="23-known-issues.html" class="md-nav__link">
+      <a href="24-known-issues.html" class="md-nav__link">
         
   
   
@@ -1859,7 +1886,7 @@ stand-alone or invoked by lava <a href="06-jobs-job-types.html#job-type-exe">exe
 </tr>
 <tr>
 <td><a href="#lava-new-utility">lava-new</a></td>
-<td>Create a new <a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a> project.</td>
+<td>Create a new <a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a> project.</td>
 </tr>
 <tr>
 <td>lava-ps</td>
@@ -1924,7 +1951,7 @@ stand-alone or invoked by lava <a href="06-jobs-job-types.html#job-type-exe">exe
 <ul>
 <li>Validation of deployed artefacts and local files using the
     <a href="#lava-schema-utility">lava-schema</a> utility</li>
-<li>Pre-install checks in the <a href="11-lava-job-framework.html#the-lava-job-framework">lav-job-framework</a></li>
+<li>Pre-install checks in the <a href="22-upgrade-notes.html#the-lava-job-framework">lav-job-framework</a></li>
 <li>Syntax support in IDEs such as the JetBrains suite and VS Code.</li>
 </ul>
 <div class="admonition note">
@@ -2326,7 +2353,7 @@ signing mechanism and they are not cryptographically sealed.</p>
 <p>Checksum calculation ignores any field starting with <code>x-</code> or <code>X-</code>.</p>
 </li>
 <li>
-<p>The <a href="11-lava-job-framework.html#the-lava-job-framework">lava-job-framework</a> generates compatible checksums
+<p>The <a href="22-upgrade-notes.html#the-lava-job-framework">lava-job-framework</a> generates compatible checksums
     when deploying entries to the tables.</p>
 </li>
 <li>
@@ -2403,7 +2430,7 @@ will be found.</p>
 <a href="06-jobs-job-types.html#job-type-dag">dag</a> jobs from a dependency matrix. It is
 provided as part of the standard lava worker installation and is also included
 in the <code>bin</code> directory with the
-<a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a>. The lava job
+<a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a>. The lava job
 framework also provides support for using the utility to automatically generate
 DAGs at build time.</p>
 <details class="usage">
@@ -2691,7 +2718,7 @@ style patterns. By default, all entries are extracted.</p>
 </span></code></pre></div>
 </details>
 <p>As well as being useful for backup, it is also useful for importing existing
-items into the <a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a>.</p>
+items into the <a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a>.</p>
 <p>See also <a href="#lava-backup-utility">lava-backup</a>.</p>
 <h2 id="lava-email-utility">Lava Email Utility<a class="headerlink" href="#lava-email-utility" title="Permanent link">&para;</a></h2>
 <p>The <strong>lava-email</strong> utility uses the lava <a href="07-connectors.html#connector-type-email">email</a>
@@ -2943,7 +2970,7 @@ of load intensity.</p>
 <p>New in v8.2 (Kīlauea).</p>
 </div>
 <p>The <strong>lava-new</strong> utility is used to create a new
-<a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a> project.</p>
+<a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a> project.</p>
 <details>
 <summary>Usage</summary>
 <div class="language-bare highlight"><pre><span></span><code><span id="__span-21-1"><span class="err">usage:</span><span class="w"> </span><span class="err">lava-new</span><span class="w"> </span><span class="err">[-h]</span><span class="w"> </span><span class="err">[-v]</span><span class="w"> </span><span class="err">[--no-input]</span><span class="w"> </span><span class="err">[-p</span><span class="w"> </span><span class="err">KEY=VALUE]</span><span class="w"> </span><span class="err">directory</span>
@@ -2977,7 +3004,7 @@ specification objects.</p>
 <p class="admonition-title">Note</p>
 <p>Minor changes have occurred in v8.3.0 (Mauna Loa) to use <a href="#lava-json-schemas">hosted JSON schema
 specifications</a> rather than embedded definitions.
-<strong>Lava-schema</strong> is now bundled in the <a href="11-lava-job-framework.html#the-lava-job-framework">lava job
+<strong>Lava-schema</strong> is now bundled in the <a href="22-upgrade-notes.html#the-lava-job-framework">lava job
 framework</a> to perform pre-installation schema
 validation.</p>
 </div>
@@ -3030,7 +3057,7 @@ validation.</p>
 </details>
 <p><strong>Lava-schema</strong> can read specifications directly from DynamoDB or from the local
 file system in either YAML or JSON format. The latter is useful to check the
-install components produced in the <code>dist</code> directory by a <a href="11-lava-job-framework.html#the-lava-job-framework">lava job
+install components produced in the <code>dist</code> directory by a <a href="22-upgrade-notes.html#the-lava-job-framework">lava job
 framework</a> project.</p>
 <p>Whereas <a href="#lava-check-utility">lava-check</a> is focused on basic configuration
 management hygiene, <strong>lava-schema</strong> is focused on strict compliance with
@@ -3071,7 +3098,7 @@ can try to run the job. (This may change in a future release.)</p>
     For example, the <code>args</code> parameter of the <a href="06-jobs-job-types.html#job-type-exe">exe</a> job type
     expects a list of <em>strings</em> (although numbers are tolerated also). Booleans
     are not. In a YAML job specification file in a
-    <a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a> project, it is easy to mix up
+    <a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a> project, it is easy to mix up
     an argument value of <code>true</code> (boolean) with <code>"true"</code> (string). The first one
     will get presented to the job payload at run-time as <code>True</code> and the second
     one will get presented as <code>true</code>. This could be a problem.</p>
