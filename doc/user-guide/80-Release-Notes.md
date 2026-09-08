@@ -5,6 +5,9 @@
     The historical release notes have been purged, because, well, who cares?
     The headers have been retained for old times sake.
 
+!!! tip
+    See also [Upgrade Notes](#upgrade-notes).
+
 ## Warnings
 
 The following changes will occur in the next major release after Version 8.
