@@ -1,0 +1,11 @@
+description: Plain log job - just logs the resolved job spec
+
+job_id: demo/log/plain
+
+type: log
+
+enabled: true
+worker: '${LAVA_WORKER}'
+owner: sandbox
+
+payload: '--'

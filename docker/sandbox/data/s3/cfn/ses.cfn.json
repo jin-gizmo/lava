@@ -1,0 +1,18 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "SES setup for testing",
+  "Resources": {
+    "sesIdentityMailTest": {
+      "Type": "AWS::SES::EmailIdentity",
+      "Properties": {
+        "EmailIdentity": "mail.test"
+      }
+    },
+    "sesIdentityExampleCom": {
+      "Type": "AWS::SES::EmailIdentity",
+      "Properties": {
+        "EmailIdentity": "example.com"
+      }
+    }
+  }
+}

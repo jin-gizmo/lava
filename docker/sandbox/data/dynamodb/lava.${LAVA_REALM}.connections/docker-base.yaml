@@ -1,0 +1,8 @@
+description: Docker basic connection (covers public repos)
+
+conn_id: sandbox/docker/base
+
+type: docker
+
+enabled: true
+owner: sandbox

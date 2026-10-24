@@ -28,7 +28,7 @@ multi-platform images can be pushed as part of the build process. Unlike single
 platform images that can be built and then pushed to a registry in separate
 steps, multi-platform images *must* be built and pushed in a single step. [^1]
 
-[^1]: Yes, there are ways around this but they're fiddly.
+[^1]: Yes, there are ways around this, but they're fiddly.
 
 The lava build process will start a local docker registry in a container as, and
 when, required as `localhost:5001`. This is managed using the

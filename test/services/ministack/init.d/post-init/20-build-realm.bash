@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 # ------------------------------------------------------------------------------
 # Ministack setup to host a lava realm
@@ -52,10 +52,10 @@ shopt -s nullglob
 TMP=$(mktemp -d)
 trap '/bin/rm -rf $TMP' 0
 
-# Ministack doesn't actually do S3 bucket logging but it does support the API
-# calls that configure it. This is important for some tests.
-LOGGED_BUCKETS=(lava)
-ENCRYPTED_BUCKETS=(lava)
+# Ministack doesn't actually do S3 bucket logging (yet) but it does support the
+# API calls that configure it. This is important for some tests.
+LOGGED_BUCKETS=("lava.${LAVA_REALM}")
+ENCRYPTED_BUCKETS=("lava.${LAVA_REALM}")
 BUCKET_KMS_KEY="alias/lava-${LAVA_REALM}-user"
 
 # ------------------------------------------------------------------------------
@@ -91,32 +91,19 @@ if cfn_stack_exists "$realm_stack"
 then
 	ok "Realm stack \"$realm_stack\" already exists -- leaving as is"
 else
-	envsubst < /lava/conf/realm-cfn-cli.json > "$TMP/realm-cfn-cli.json"
+	envsubst < /lava/conf/lava-realm.cfn.cli.json > "$TMP/lava-realm.cfn.cli.json"
 	info "Running the lava realm stack for \"${LAVA_REALM}\""
 	# WE can't use --cli-input-yaml because ministack container has AWS CLI v1 :-(
 	aws cloudformation create-stack \
 		--stack-name "$realm_stack" \
 		--template-url http://s3.amazonaws.com/cfn/lava-realm.cfn.json \
-		--cli-input-json "file://$TMP/realm-cfn-cli.json"
+		--cli-input-json "file://$TMP/lava-realm.cfn.cli.json"
 	info "Waiting for stack creation to complete"
 	aws cloudformation wait stack-create-complete --stack-name "$realm_stack"
 	ok "Stack \"$realm_stack\" created"
 fi
 aws dynamodb list-tables --output table --query TableNames
-
-# ------------------------------------------------------------------------------
-# Add any setup DynamoDB entries
-info "Creating initial DynamoDB entries (idempotent)"
-for d in /lava/conf/dynamodb-data/*
-do
-	[ ! -d "$d" ] && continue
-	for f in "$d"/*.json
-	do
-		aws dynamodb put-item --table-name "$(basename "$d")" --item "file://$f"
-		ok "Loaded $f"
-	done
-done
-
+#
 # ------------------------------------------------------------------------------
 # Ministack CloudFormation ignores bucket logging configuration. For some
 # buckets this is important for some tests.
@@ -141,7 +128,7 @@ done
 #
 # ------------------------------------------------------------------------------
 # Ministack CloudFormation ignores bucket encryption configuration. For some
-# buckets this is important for some tests.
+# buckets this is important.
 info "Configuring bucket encryption"
 for b in "${ENCRYPTED_BUCKETS[@]}"
 do

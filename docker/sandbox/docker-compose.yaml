@@ -1,0 +1,115 @@
+name: lava-sandbox
+
+# ------------------------------------------------------------------------------
+# The credentials are not secrets in this context. Most of the AWS emulators use
+# the same credentials that are obviously not real AWS credentials.
+x-aws-creds: &aws-creds
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_REGION: us-east-1
+  AWS_ENDPOINT_URL: http://${COMPOSE_PROJECT_NAME}-realm:4566
+
+x-lava-env: &lava-env
+  LAVA_REALM: ${LAVA_REALM:-sandbox}
+  LAVA_WORKER: ${LAVA_WORKER:-dev}
+
+# ------------------------------------------------------------------------------
+services:
+  realm:
+    container_name: ${COMPOSE_PROJECT_NAME}-realm
+    image: ghcr.io/jin-gizmo/lava/sandbox/realm:${LAVA_VERSION:-latest}
+    # image: localhost:5001/lava/sandbox/realm:${LAVA_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      <<: [ *aws-creds, *lava-env ]
+    ports:
+      - "127.0.0.1:4566:4566"
+    networks:
+      - lava
+    volumes:
+      - type: bind
+        source: .
+        target: /host
+        read_only: true
+        bind:
+          # Not really needed for a source of "."
+          create_host_path: false
+
+  console:
+    container_name: ${COMPOSE_PROJECT_NAME}-console
+    image: davireis/stackport
+    restart: unless-stopped
+    environment:
+      <<: *aws-creds
+      # You can add "iam" and "kms" to this list if you wish, but they don't show
+      # anything of genuine interest and the more services, the slower the scan.
+      # The other one to contemplate is "secretsmanager".
+      STACKPORT_SERVICES: ${LAVA_SBX_CONSOLE_SERVICES:-s3,dynamodb,sns,sqs,lambda,logs,cloudformation,ssm,events}
+      STACKPORT_LEARN: false
+    ports:
+      # Port 8080 can be crowded with other local services on a dev machine so
+      # we steer clear of it. Good old 8086. Happy days.
+      - "127.0.0.1:${LAVA_SBX_CONSOLE_PORT:-8086}:8080"
+    networks:
+      - lava
+    depends_on:
+      realm:
+        condition: service_healthy
+
+  worker:
+    container_name: ${COMPOSE_PROJECT_NAME}-worker
+    image: ghcr.io/jin-gizmo/lava/amzn2023/${LAVA_SBX_WORKER_IMAGE_TYPE:-base}:${LAVA_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      <<: [ *aws-creds, *lava-env ]
+    command:
+      - bash
+      - -c
+      - >-
+        lava-worker --root --threads 3 --sleep 1
+        --heartbeat "${LAVA_SBX_WORKER_HEARTBEAT:-0}"
+        --level "${LAVA_SBX_WORKER_LOG_LEVEL:-info}"
+        --realm "$$LAVA_REALM"
+        --worker "$$LAVA_WORKER"
+        ${LAVA_SBX_WORKER_DEV_MODE:+--dev}
+    volumes:
+      # Allows te worker to rum containers for docker jobs
+      # Delete this if it causes problems.
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - lava
+    depends_on:
+      realm:
+        condition: service_healthy
+
+  mail:
+    container_name: ${COMPOSE_PROJECT_NAME}-mail
+    image: axllent/mailpit
+    environment:
+      MP_DISABLE_VERSION_CHECK: 1
+      MP_VERBOSE: 1
+      MP_LABEL: ${COMPOSE_PROJECT_NAME}
+      # To enable authentication, get rid of MP_SMTP_AUTH_ACCEPT_ANY and set
+      # MP_SMTP_AUTH. You will also need to specify the password in the .env
+      # file and adjust the SSM parameter definition used by the lava connector.
+      # First, ask yourself "Why am I doing this?".
+      # MP_SMTP_AUTH: ${LAVA_SBX_SMTP_PASSWORD:+sandbox:${LAVA_SBX_SMTP_PASSWORD}}
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      # Auto generate self signed cert.
+      MP_SMTP_TLS_CERT: sans:localhost
+      MP_SMTP_TLS_KEY: sans:localhost
+    restart: unless-stopped
+    ports:
+      # GUI
+      - "127.0.0.1:8025:8025"
+      # SMTP
+      - "127.0.0.1:1025:1025"
+    networks:
+      - lava
+
+networks:
+  lava:
+    name: ${COMPOSE_PROJECT_NAME}
+    driver: bridge
+    attachable: true

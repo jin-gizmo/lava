@@ -15,7 +15,7 @@ which hardcodes the following values:
 -   CloudFormation stack lava-test creates the DynamoDB tables
     (lava.realms, lava.test.jobs, lava.test.events, etc.)
 
-See also test/config/realm-cfn-cli.yaml for the CFN parameters that
+See also test/config/lava-realm.cfn.cli.json for the CFN parameters that
 define the realm (lavaBucketName=lava, logBucketName=log, etc.).
 """
 

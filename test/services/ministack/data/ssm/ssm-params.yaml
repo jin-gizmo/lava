@@ -1,0 +1,77 @@
+# SSM parameters for testing -- mostly connector stuff
+
+# Note:
+#   1.  Values for SecureString parameters must be a variable reference to
+#       a variable in the ,env file or one of the SSMP_RAND24_* params.
+#   2.  This file is repo safe.
+#   3.  A path prefix will be applied as part of the loading process.
+
+_:
+  kms_sys: &kms_sys alias/lava-${LAVA_REALM}-sys
+
+Parameters:
+
+  - Name: generic
+    Description: A generic string for testing generic connectors
+    Type: String
+    Value: "This generic parameter came from SSM."
+
+  # IAM external IDs are not secret
+  - Name: iam/assume-me/external-id
+    Description: External ID for assume role
+    Type: String
+    Value: "glockenspiel"
+
+  # Access keys would normally be secret but deliberately malformed ones aren't.
+  - Name: iam/bad-access-keys
+    Description: Incorrect format for access keys
+    Type: String
+    Value: "valid-access-keys-must-have-a-comma"
+
+  - Name: mssql_local/lava/password
+    Description: Local SQL Server DB
+    Type: SecureString
+    KeyId: *kms_sys
+    Value: "${DB_LAVA_PASSWORD}"
+
+  - Name: mysql_local/lava/password
+    Description: Local MySQL DB
+    Type: SecureString
+    KeyId: *kms_sys
+    Value: "${DB_LAVA_PASSWORD}"
+
+  - Name: oracle_local/lava/password
+    Description: Local Oracle DB
+    Type: SecureString
+    KeyId: *kms_sys
+    Value: "${DB_LAVA_PASSWORD}"
+
+  - Name: psql_local/lava/password
+    Description: Local PostgreSQL DB
+    Type: SecureString
+    KeyId: *kms_sys
+    Value: "${DB_LAVA_PASSWORD}"
+
+  # AWS access keys are normally secret of course but the test values used by
+  # Ministack are not so we use a standard String parameter.
+  - Name: s3
+    Description: Access keys for S3 for lava-reader (test ones are not secret)
+    Type: String
+    Value: "test,test"
+
+  - Name: slack_local/webhook
+    Description: Default webhook for vercel emulate
+    Type: SecureString
+    KeyId: *kms_sys
+    Value: "${SLACK_WEBHOOK}"
+
+  - Name: smb/lava-test-smb/password
+    Description: Lava SMB test instance
+    Type: SecureString
+    KeyId: *kms_sys
+    Value: "${SMB_PASSWORD}"
+
+  - Name: smtp_local/lava/password
+    Type: SecureString
+    KeyId: *kms_sys
+    Value: "${SMTP_PASSWORD}"

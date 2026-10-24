@@ -156,8 +156,8 @@ smb:
   port: 445
 
 email:
-  test1: test1@lava.test.zzz
-  test2: test2@lava.test.zzz
+  test1: test1@lava.mail.test
+  test2: test2@lava.mail.test
 
 smtp:
   local:
@@ -171,7 +171,7 @@ rsu:
 
 s3:
   bucket:
-    realm: &realm_bucket lava
+    realm: &realm_bucket lava.test
     # For s3trigger tests
     s3trigger: events
     unload: *realm_bucket
@@ -179,8 +179,8 @@ s3:
     s3trigger: triggers
 
 realm_info:
-  s3_payloads: s3://lava/payloads
-  s3_temp: s3://lava/tmp
+  s3_payloads: s3://lava.test/payloads
+  s3_temp: s3://lava.test/tmp
 
 sqs:
   normal: lava-dev-test

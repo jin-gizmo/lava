@@ -10,6 +10,12 @@
 
 **Lava** is an AWS based distributed scheduler and job runner.
 
+!!! info "Introducing the lava sandbox ..."
+    Lava v8.3.0 (Mauna Loa) introduces the [lava sandbox][the-lava-sandbox], a
+    complete, functional lava environment for development and testing that runs
+    locally in docker with a single CLI command. No AWS entanglement. No AWS
+    costs.
+
 Lava has been used extensively in a large, business critical data warehouse /
 data lake environment to run tens of thousands of jobs a day on a 24x7 basis,
 with jobs lasting anywhere between a few seconds and 12 hours.

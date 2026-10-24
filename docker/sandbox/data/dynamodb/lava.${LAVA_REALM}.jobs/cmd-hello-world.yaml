@@ -1,0 +1,15 @@
+description: Hello world cmd job
+
+job_id: demo/cmd/hello-world
+
+type: cmd
+
+enabled: true
+worker: '${LAVA_WORKER}'
+owner: sandbox
+
+payload: echo hello
+
+parameters:
+  args:
+    - world

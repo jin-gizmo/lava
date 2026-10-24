@@ -97,7 +97,7 @@ $(dist)/doc/$(USER_GUIDE).md: user-guide/18-Samples/samples.md $(MARKDOWN_SRC) $
 			cfdoc --format md-mkdocs --name "$$cfn" "$$f" > "$$tmp/$(CFN_DIR)/$${cfn}.md" ; \
 		done ; \
 		echo ".... Merging markdown" ; \
-		find $$tmp -name '*.md' -print0 | sort -z | xargs -0 -n1 sed -e '1s/^/\n/' > $@ ; \
+		md-merge --dir $$tmp > $@ ; \
 		z=0 ; \
 	)
 	@cp -RL img $(dist)/doc

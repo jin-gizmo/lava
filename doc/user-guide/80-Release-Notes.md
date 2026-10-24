@@ -28,6 +28,13 @@ The following changes will occur in the next major release after Version 8.
 
 #### Version 8.3.0 ([Mauna Loa](https://en.wikipedia.org/wiki/Mauna_Loa))
 
+!!! info "Introducing the lava sandbox ..."
+    Lava v8.3.0 (Mauna Loa) introduces the [lava sandbox][the-lava-sandbox], a
+    complete, functional lava environment for development and testing that runs
+    locally in docker with a single CLI command. No AWS entanglement. No AWS
+    costs.
+
+
 This release includes reasonable subset of the lava testing components. Credit
 and thanks to James Nguyen for a lot of effort to bring all this together into
 a more consistent framework.

@@ -28,7 +28,7 @@ for more information.
 
 This is an example of how a JSON formatted object can be sent:
 
-```jsomn
+```json
 {
     "on_success" : [
         {

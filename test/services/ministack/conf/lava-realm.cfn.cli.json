@@ -3,7 +3,6 @@
         "CAPABILITY_IAM",
         "CAPABILITY_NAMED_IAM"
     ],
-    "DisableRollback": false,
     "EnableTerminationProtection": false,
     "OnFailure": "ROLLBACK",
     "Parameters": [
@@ -53,7 +52,7 @@
         },
         {
             "ParameterKey": "lavaBucketName",
-            "ParameterValue": "lava"
+            "ParameterValue": "lava.${LAVA_REALM}"
         },
         {
             "ParameterKey": "writeCapacityEventTable",
@@ -77,11 +76,11 @@
         },
         {
             "ParameterKey": "lambdaRuntime",
-            "ParameterValue": "python3.11"
+            "ParameterValue": "python3.13"
         },
         {
             "ParameterKey": "realm",
-            "ParameterValue": "test"
+            "ParameterValue": "${LAVA_REALM}"
         },
         {
             "ParameterKey": "s3CodeBucket",
@@ -104,6 +103,5 @@
     "RollbackConfiguration": {
         "RollbackTriggers": []
     },
-    "Tags": [],
-    "TemplateURL": "http://s3.amazonaws.com/cfn/lava-realm.cfn.json"
+    "Tags": []
 }

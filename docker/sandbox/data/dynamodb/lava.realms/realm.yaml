@@ -1,0 +1,17 @@
+config:
+  CW_METRICS_PERIOD: 1m
+  CW_METRICS_WORKER: false
+  CW_METRICS_JOB: false
+  STDERR_SIZE: -1024
+  PAYLOAD_DOWNLOADER: v2
+  SES_FROM: 'lava@${LAVA_REALM}.example.com'
+  SES_REGION: us-east-1
+realm: '${LAVA_REALM}'
+s3_key: alias/aws/s3
+s3_payloads: 's3://lava.${LAVA_REALM}/payloads'
+s3_temp: 's3://lava.${LAVA_REALM}/tmp'
+x-workers:
+  '${LAVA_WORKER}':
+    threads: 3
+    version: '${LAVA_VERSION}'
+    workers: '${LAVA_WORKER}'

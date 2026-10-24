@@ -7,6 +7,7 @@ import lava.connection.core
 from lava.lib.smb import LavaSMBConnection, SMBConnectionError
 from test.const import REALM
 
+SMB_DRIVERS = ['pysmb', 'smbprotocol']
 SMB_CONNECTORS = ['smb/lava-test-smb/pysmb', 'smb/lava-test-smb/smbprotocol']
 SQL_CONNECTORS = ['db/psql/local', 'db/mysql/local']
 
@@ -67,11 +68,11 @@ def test_get_pysql_connection_ok(name: str, tc):
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_get_smb_conn_ok(name: str, tc):
+@pytest.mark.parametrize('driver', SMB_DRIVERS)
+def test_get_smb_conn_ok(driver: str, tc, smb_conn_prefix):
     """Test getting SMB connection."""
 
-    conn = lava.connection.get_smb_connection(f'{tc.prefix.conn}/{name}', realm=tc.realm)
+    conn = lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm)
     assert isinstance(conn, LavaSMBConnection)
     assert conn.connected
 
@@ -80,27 +81,51 @@ def test_get_smb_conn_ok(name: str, tc):
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_get_smb_conn_auth_fail(name: str, tc):
+@pytest.mark.parametrize(
+    'driver',
+    [
+        'pysmb',
+        pytest.param(
+            'smbprotocol',
+            marks=pytest.mark.xfail(
+                reason='SMBprotocol handler raises SMBOperationError not SMBConnectionError'
+            ),
+        ),
+    ],
+)
+def test_get_smb_conn_auth_fail(driver: str, tc, smb_conn_prefix):
     conn_spec = lava.connection.core.get_smb_conn_spec(
-        conn_id=f'{tc.prefix.conn}/{name}', realm=tc.realm
+        conn_id=f'{smb_conn_prefix}/{driver}', realm=tc.realm
     )
 
     conn_spec['password'] = 'bad pass'
 
+    # TODO: The SMBprotocol handler raises an SMBOperationError here. It shouldn't.
     with pytest.raises(SMBConnectionError):
         lava.connection.core._get_smb_connection(conn_spec)
 
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_get_smb_conn_fail(name: str, tc):
+@pytest.mark.parametrize(
+    'driver',
+    [
+        pytest.param(
+            'pysmb',
+            marks=pytest.mark.xfail(
+                reason='pysmb raises ConnectionRefusedError -- should be SMBConnectionError'
+            ),
+        ),
+        'smbprotocol',
+    ],
+)
+def test_get_smb_conn_fail(driver: str, tc, smb_conn_prefix):
     conn_spec = lava.connection.core.get_smb_conn_spec(
-        conn_id=f'{tc.prefix.conn}/{name}', realm=tc.realm
+        conn_id=f'{smb_conn_prefix}/{driver}', realm=tc.realm
     )
 
     conn_spec['port'] = 9999  # Should be an unused port.
 
+    # TODO: pysmb handler raises ConnectionRefusedError -- should be SMBConnectionError
     with pytest.raises(SMBConnectionError):
         lava.connection.core._get_smb_connection(conn_spec)

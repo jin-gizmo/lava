@@ -1,0 +1,19 @@
+description: Run a query against an SQLite database stored in S3
+
+job_id: demo/sqli/custard
+
+type: sqli
+
+enabled: true
+worker: '${LAVA_WORKER}'
+owner: sandbox
+
+payload:
+  - >-
+    SELECT FavouriteCustard, COUNT(*) as Count, AVG(CustardBidPrice)
+    FROM custard GROUP BY 1 ORDER BY 1;
+
+parameters:
+  conn_id: demo/db/sqlite
+  header: true
+  delimiter: ","

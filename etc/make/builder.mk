@@ -38,7 +38,7 @@ force=no
 #:opt jobs force
 builder: _runtime registry
 	@img="localhost:$(REGISTRY_LOCAL_PORT)/build/lava/$(runtime)" ; \
-	if [[ "$(force)" != y* ]] && jindr lsi "$$img" > /dev/null 2>&1 ; \
+	if [[ "$(force)" != y* ]] && jindr inspect "$$img" > /dev/null 2>&1 ; \
 	then \
 		$e "$G$$img already exists -- use \"force=yes\" to rebuild$_" ; \
 		exit 0 ; \

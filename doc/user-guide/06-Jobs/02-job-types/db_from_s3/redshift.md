@@ -1,11 +1,11 @@
 
 ### Loading Data to Redshift
 
-Loading to Redshift is done using the native Redshift
-[COPY](https://docs.aws.amazon.com/redshift/latest/dg/r_COPY.html) command.
-Data files contain structured, tabular data. All of the formats supported by
-the [COPY](https://docs.aws.amazon.com/redshift/latest/dg/r_COPY.html) command
-can be used, including:
+[RedshiftCopy]: https://docs.aws.amazon.com/redshift/latest/dg/r_COPY.html
+
+Loading to Redshift is done using the native Redshift [COPY][RedshiftCopy]
+command.  Data files contain structured, tabular data. All of the formats
+supported by the [COPY][RedshiftCopy] command can be used, including:
 
 * CSV files
 * JSON files
@@ -19,11 +19,9 @@ The `db_conn_id` parameter must point to a connection with a `type` of
 [redshift](#connector-type-redshift) or
 [redshift-serverless](#connector-type-redshift-serverless).
 
-The `args` parameter must contain a list of Redshift
-[COPY](https://docs.aws.amazon.com/redshift/latest/dg/r_COPY.html) options
-appropriate for the data file. Most of the parameters supported by
-Redshift [COPY](https://docs.aws.amazon.com/redshift/latest/dg/r_COPY.html),
-including `MANIFEST`, can be used.
+The `args` parameter must contain a list of Redshift [COPY][RedshiftCopy]
+options appropriate for the data file. Most of the parameters supported by
+Redshift [COPY][RedshiftCopy], including `MANIFEST`, can be used.
 
 #### Redshift Examples
 

@@ -1,4 +1,4 @@
-$schema: http://127.0.0.1:8000/schemas/latest/s3trigger.schema.yaml
+schema: http://127.0.0.1:8000/schemas/latest/s3trigger.schema.yaml
 
 description: Catch an S3 event
 owner: "<{ owner }>"

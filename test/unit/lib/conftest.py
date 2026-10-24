@@ -51,7 +51,7 @@ def dynamo_json():
 @pytest.fixture(scope='session')
 def secure_bucket() -> str:
     """Bucket with server logging enabled, encrypted etc."""
-    return 'lava'
+    return 'lava.test'
 
 
 @pytest.fixture(scope='session')

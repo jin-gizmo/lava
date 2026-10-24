@@ -1,0 +1,11 @@
+# Note that relative parameters will be placed under the `/lava/${LAVA_REALM}` path.
+Parameters:
+  - Name: smtp/sandbox/password
+    Description: SMTP password for "sandbox" user in the local Mailpit instance
+    Type: SecureString
+    # This is fine if Mailpit MP_SMTP_AUTH_ACCEPT_ANY is set to true / 1. If
+    # authentication is really required, a password will need to be set in the .env
+    # file (e.g. as LAVA_SBX_SMTP_PASSWORD) and referenced in an SSM  parameter
+    # definition like this one, The Docker Compose file also needs to be updated.
+    Value: ${SSMP_RAND24_0}
+    KeyId: alias/lava-${LAVA_REALM}-sys

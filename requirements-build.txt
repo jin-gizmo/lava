@@ -40,4 +40,4 @@ cfdoc
 jindr
 tqdm
 jinreq
-python-dotenv
+python-dotenv>=1.2.4

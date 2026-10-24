@@ -1,5 +1,14 @@
 name: lava-test
 
+# The credentials are not secrets in this context. Most of the AWS emulators use
+# the same credentials that are obviously not real AWS credentials.
+x-aws-creds: &aws-creds
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_REGION: us-east-1
+  AWS_ENDPOINT_URL: http://${COMPOSE_PROJECT_NAME}-ministack:4566
+
 services:
 
   smb:
@@ -147,37 +156,59 @@ services:
     container_name: ${COMPOSE_PROJECT_NAME}-ministack
     build:
       context: services/ministack
+      additional_contexts:
+        - etc=../etc
       dockerfile: Dockerfile
     image: ${COMPOSE_PROJECT_NAME}-ministack:latest
     restart: unless-stopped
     environment:
+      <<: *aws-creds
       MINISTACK_ACCOUNT_ID: 123456789012
       STATE_DIR: /tmp/ministack-state
-      # Ministack persistence is totally useless. Don't use it.
-      # PERSIST_STATE: 1
-      # S3_PERSIST: 1
       LAMBDA_EXECUTOR: docker
       DOCKER_NETWORK: ${COMPOSE_PROJECT_NAME}
       S3_DATA_DIR: /tmp/ministack-data/s3
       LAVA_VERSION: ${LAVA_VERSION}
       LAVA_REALM: test
       LAVA_WORKER: core
-      AWS_ENDPOINT_URL: http://localhost:4566
     ports:
       - "127.0.0.1:4566:4566"
     volumes:
       # Ministack persistence is totally useless. Don't use it.
       # - ./services/ministack/ms-state.dtmp/state:/tmp/ministack-state
       # - ./services/ministack/ms-state.dtmp/s3:/tmp/ministack-data/s3
+      - ./.env:/.env:ro
       - ./services/ministack/aws:/root/.aws:ro
       - ./services/ministack/init.d/post-init:/docker-entrypoint-initaws.d/ready.d:ro
       - ./services/ministack/conf:/lava/conf:ro
+      - ./services/ministack/data:/lava/data:ro
       - ../dist/cfn:/lava/cfn:ro
       - ../dist/lambda:/lava/lambda:ro
       # Allows ministack to start sidecar containers for lambda
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - lava
+
+  console:
+    container_name: ${COMPOSE_PROJECT_NAME}-console
+    image: davireis/stackport
+    restart: unless-stopped
+    environment:
+      <<: *aws-creds
+      # You can add "iam" and "kms" to this list if you wish, but they don't show
+      # anything of genuine interest and the more services, the slower the scan.
+      # The other one to contemplate is "secretsmanager".
+      STACKPORT_SERVICES: ${STACKPORT_SERVICES:-s3,dynamodb,sns,sqs,lambda,logs,cloudformation,ssm,events}
+      STACKPORT_LEARN: false
+    ports:
+      # Port 8080 can be crowded with other local services on a dev machine so
+      # we steer clear of it. Good old 8086. Happy days.
+      - "127.0.0.1:8086:8080"
+    networks:
+      - lava
+    depends_on:
+      ministack:
+        condition: service_healthy
 
   # Vercel emulate https://github.com/vercel-labs/emulate
   emulate:

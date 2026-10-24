@@ -47,10 +47,9 @@ dist:
 pre-install:
 	@echo "⚪️ Nothing to do for local $@"
 
-install:
-	@echo "🔵 Installing SSM parameters"
-	@./ssmp load --input ssm-params.yaml --path "/lava/$(REALM)" --force
-	@echo
+# There is no real dependency here. We just want these two to run sequentially
+# to ease debugging.
+_install_secrets: _install_ssm_params
 	@echo "🔵 Installing Secrets Manager items"
 	@( \
 		set -a ; \
@@ -84,6 +83,19 @@ install:
 		done ; \
 	)
 
+
+_install_ssm_params:
+	@echo "🔵 Installing SSM parameters"
+	@( \
+		shopt -s nullglob ; \
+		set -e ; \
+		for f in ssm/*.yaml ; \
+		do \
+			./ssmp load --input "$$f" --path "/lava/$(REALM)" --force ; \
+		done ; \
+	)
+
+install: _install_ssm_params _install_secrets
 
 uninstall:
 	@echo "⚪️ Nothing to do for local $@"

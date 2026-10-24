@@ -160,11 +160,13 @@ class Attributes(dict):
             if '=' in token:
                 key, value = token.split('=', 1)
                 attrs[key] = value
+            elif token.startswith('#'):
+                attrs['id'] = token[1:]
         return cls(**attrs)
 
 
 # ------------------------------------------------------------------------------
-def sanitise(value: str) -> str:
+def sanitise(value: str | None) -> str:
     """
     Turn an arbitrary string into something safe to use as a local filename.
 
@@ -352,7 +354,9 @@ def main() -> int:
                 # Switch to new file name
                 fname = f'{md.heading_number}-{sanitise(md.nav)}.md'
             if fname:
-                header_map[md_header_to_xref(md.heading_text)] = fname
+                # An explicit heading tag takes priority over slugified heading text.
+                key = md.heading_attrs.get('id') or md_header_to_xref(md.heading_text)
+                header_map[key] = fname
 
     # ----------------------------------------
     # Pass 2 -- split the file and fix links. Skips stuff before first header.

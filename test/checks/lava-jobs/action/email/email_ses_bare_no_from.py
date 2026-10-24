@@ -23,4 +23,4 @@ class Checker(HandlerChecker):
         # Bare SES does not support attachments
         ev = job_events[self.job_id, self.run_id][-1]
         assert ev['status'] == 'action_failed'
-        assert 'No verified SES domains' in ev['info']
+        assert 'Email address is not verified.' in ev['info']

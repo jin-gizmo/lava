@@ -1,0 +1,23 @@
+description: Send an email with an on_success action
+
+job_id: demo/action/email
+
+type: log
+
+enabled: true
+worker: '${LAVA_WORKER}'
+owner: sandbox
+
+payload: '--'
+
+on_success:
+  - action: email
+    email_conn: sandbox/email/smtp
+    to: someone@sandbox.localhost
+    subject: On_success email from {{ job.job_id }}
+    message: |
+      This message was sent by an on_success action.
+
+      Realm:  {{ realm.realm }}
+      Job ID: {{ job.job_id }}
+      Run ID: {{ job.run_id }}

@@ -81,7 +81,8 @@ lava
 ├── docker                  | Source for building lava docker images
 │   ├── common              | Common (O/S independent) build components
 │   ├── os                  | O/S dependent build components
-│   └── pkg                 | External packages required (e.g. Oracle)
+│   ├── packages            | External packages required (e.g. Oracle)
+│   └── sandbox             | Build content for the lava sandbox
 │   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
 ├── etc                     | Tools & utilities needed to build / maintain lava
 │   ├── boot                | Boot scripts for EC2 host running a lava worker

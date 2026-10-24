@@ -1,13 +1,11 @@
 #!/bin/bash
 
 # ------------------------------------------------------------------------------
-# Set up some auxiliary infrastructure bits and pieces.
+# Run any additional CloudFormation templates in s3://cfn
 # ------------------------------------------------------------------------------
 
-# We don't need the lava bucket in here -- the CFN creates that.
-PRIVATE_BUCKETS=(aux cfn code log events)
-# Ministack doesn't actually do S3 bucket logging but it does support the API
-# calls that configure it. This is important for some tests.
+# DEBUG=yes
+DEBUG=
 
 # ------------------------------------------------------------------------------
 function info {
@@ -19,13 +17,13 @@ function ok {
 function error {
 	echo "❌ $*"
 }
+function debug {
+	[ "$DEBUG" = "" ] && return 0
+	echo "🟪 $*"
+}
 
 function cfn_stack_exists {
 	aws cloudformation describe-stacks --stack-name "$1" > /dev/null 2>&1
-}
-
-function sqs_queue_exists {
-	aws sqs get-queue-url --queue-name "$1" > /dev/null 2>&1
 }
 
 function require {
@@ -36,39 +34,38 @@ function require {
 }
 
 # ------------------------------------------------------------------------------
-require AWS_ENDPOINT_URL
+require AWS_ENDPOINT_URL LAVA_REALM
 
 set -e
 
 shopt -s nullglob
 
-info "Creating some standard S3 buckets (idempotent)"
-for b in "${PRIVATE_BUCKETS[@]}"
-do
-	aws s3 mb "s3://$b"
-	aws s3api put-public-access-block \
-		--bucket "$b" \
-		--public-access-block-configuration BlockPublicAcls=TRUE,IgnorePublicAcls=TRUE,BlockPublicPolicy=TRUE,RestrictPublicBuckets=TRUE
-done
-
-# Create an empty file in aux bucket for tests to use.
-aws s3 cp - s3://aux/sentinel < /dev/null
+TMP=$(mktemp -d)
+trap '/bin/rm -rf $TMP' 0
 
 # ------------------------------------------------------------------------------
 info "Deploying auxiliary CFN stacks"
-for cfn in /lava/conf/*.cfn.{json,yaml}
+for cfn in /lava/data/s3/cfn/*.cfn.{json,yaml}
 do
-	base=$(basename "$cfn")
-	stack="${base%.cfn.*}"
+	base=$(basename "$cfn")  # xyz.cfn.json
+	stack="${base%.cfn.*}"   # xyz
+	stem="${base%.*}"        # xyz.cfn
 	if cfn_stack_exists "$stack"
 	then
 		ok "Stack \"$stack\" already exists -- leaving as is"
 		continue
 	fi
-	aws s3 cp "$cfn" "s3://cfn/"
-	aws cloudformation create-stack \
-		--stack-name "$stack" \
+	create_stack_args=(
+		--stack-name "$stack"
 		--template-url "http://s3.amazonaws.com/cfn/$base"
+	)
+	if [ -f "/lava/conf/${stem}.cli.json" ]
+	then
+		envsubst < "/lava/conf/${stem}.cli.json" > "$TMP/${stem}.cli.json"
+		create_stack_args+=(--cli-input-json "file://$TMP/${stem}.cli.json")
+	fi
+	debug "Create Stack Args:" "${create_stack_args[@]}"
+	aws cloudformation create-stack "${create_stack_args[@]}"
 	info "Stack $stack: waiting for stack creation to complete"
 	aws cloudformation wait stack-create-complete --stack-name "$stack"
 	ok "Stack \"$stack\" created"

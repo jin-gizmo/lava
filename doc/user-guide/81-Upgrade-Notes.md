@@ -15,7 +15,7 @@
 
 #### Degree of difficulty for upgrade / rollback
 
-Easy.
+🟢 Easy.
 
 #### What’s new?
 
@@ -151,7 +151,7 @@ to be wary of is the Oracle binaries that are built in to the AMI. These are
 less important in v8.3 as they are only used for the Oracle CLI connector and
 any Oracle connection specifying the non-default *thick* mode.
 
-### The Lava Job Framework { data-toc-label="Lava Job Framework" }
+### The Lava Job Framework { #upgrade-notes-the-lava-job-framework data-toc-label="Lava Job Framework" }
 
 #### What’s new?
 
@@ -222,6 +222,6 @@ This order can be shuffled a bit, if necessary.
 *   **Lava worker version**: Update the realm entry in the realms table to point
     the worker back to v8.2.0 of the code and then, replace the worker.
 
-*   **AMI:** Use the [lava-ami](#lava-ami-utility)utility to select a different
+*   **AMI:** Use the [lava-ami](#lava-ami-utility) utility to select a different
     AMI. The utility will update the worker CloudFormation stack for you. Then,
     replace the worker.

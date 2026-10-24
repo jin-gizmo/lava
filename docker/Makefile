@@ -35,12 +35,12 @@ HELP_CATEGORY=Miscellaneous targets
 # ------------------------------------------------------------------------------
 
 # These are set as labels on the images and annotations on the manifest.
-IMAGE_DESCRIPTION=Lava is an AWS based distributed scheduler and job runner
 define IMAGE_ATTRS
 org.opencontainers.image.url=https://github.com/jin-gizmo/lava
 org.opencontainers.image.source=https://github.com/jin-gizmo/lava
 org.opencontainers.image.documentation=https://jin-gizmo.github.io/lava
 org.opencontainers.image.licenses=BSD-3-Clause
+org.opencontainers.image.version=$(LAVA_VERSION)
 endef
 export IMAGE_ATTRS
 
@@ -48,12 +48,11 @@ export IMAGE_ATTRS
 tag=latest
 
 LAVA_VERSION=$(shell python3 ../lava/version.py)
-LAVA_FULL_VERSION=$(shell python3 ../lava/version.py --all)
 
 PKG=common/base/lava-$(LAVA_VERSION).tar.bz2
 OS:=$(shell cd os && find * -maxdepth 0 -type d)
 _OS:=$(foreach x,$(OS), `$x`)
-## Base O/S type: $(_OS)
+## Base O/S type for lava image(s): $(_OS)
 os=
 
 ## By default, multi-platform images will be built supporting x86
@@ -80,7 +79,7 @@ endif
 
 ## Prefix for the exported image tag. Default is dist for `ecr-*` targets and
 ## `$(prefix)` otherwise. The resulting image tag will be something like
-## `<registry>/<prefix>/lava/<os>/...`.
+## `<registry>/<prefix>/lava/...`.
 prefix=jin-gizmo
 ecr-%: prefix=dist
 
@@ -88,7 +87,7 @@ ecr-%: prefix=dist
 REPO_PREFIX=$(prefix:%/=%)/
 
 
-.PHONY: help clean all base full package os pkg
+.PHONY: help clean all base full package os pkg sandbox/realm
 
 # ------------------------------------------------------------------------------
 
@@ -100,7 +99,7 @@ $(PKG): _FORCE
 pkg:	$(PKG)
 
 #:cat Build targets
-## Make the *base* and *full* images for all available O/S types.
+## Build the *base* and *full* lava images for all available O/S types.
 #:opt platform tag progress
 build-all:
 	@for os in $(OS) ; \
@@ -120,7 +119,7 @@ ecr-repo-all:
 
 ## Push all images from the local registry to the ECR repos.
 #:opt prefix=dist
-ecr-all: check-all
+ecr-push-all: check-all
 	@for os in $(OS) ; \
 	do \
 		$(MAKE) ecr-push os=$$os || exit 1 ; \
@@ -203,7 +202,7 @@ base:	os Dockerfile $(PKG) registry
 		z=0 ; \
 	)
 
-## Make a lava image with everything, including CLI connector executables.
+## Build a lava image with everything, including CLI connector executables.
 #:req os
 #:opt platform tag progress
 full:	os Dockerfile $(PKG) registry
@@ -262,7 +261,7 @@ ecr-push: registry
 		$(repo_base)/etc/ecr-login ; \
 		for type in base full : \
 		do \
-			repo="$(REPO_PREFIX)lava/amzn2023/$$type" ; \
+			repo="$(REPO_PREFIX)lava/$(os)/$$type" ; \
 			repo_uri=$$( \
 				aws ecr describe-repositories --repository-names $$repo \
 					--query 'repositories[0].repositoryUri' --output text \
@@ -325,4 +324,62 @@ endif
 clean:
 	$(RM) $(PKG)
 	docker system prune -f
+
+
+# ------------------------------------------------------------------------------
+# Sandbox stuff
+
+#:cat Build targets
+## Build an image that provides a working lava realm in a sandbox based on MiniStack.
+#:opt platform tag progress
+
+sandbox:	sandbox/realm
+
+sandbox/realm: registry
+	( \
+		set -e ; \
+		description="Lava realm sandbox based on Ministack." ; \
+		while IFS= read -r line ; \
+		do \
+			LABELS+=("--label" "$$line" "--annotation" "$(ANNOTATIONS):$$line") ; \
+		done <<< "$$IMAGE_ATTRS" ; \
+		$(BUILD) --rm --push --pull --provenance=false \
+			--output type=image,oci-mediatypes=true \
+			-t localhost:$(REGISTRY_LOCAL_PORT)/lava/$@:$(tag) \
+			-t localhost:$(REGISTRY_LOCAL_PORT)/lava/$@:$(LAVA_VERSION) \
+			--build-arg LAVA_VERSION="$(LAVA_VERSION)" \
+			--build-context dist_cfn=../dist/cfn \
+			--build-context dist_lambda=../dist/lambda \
+			--build-context test_services_ministack=../test/services/ministack \
+			--build-context etc=../etc \
+			--build-context docker_sandbox=sandbox \
+			--label org.opencontainers.image.title="Lava realm sandbox" \
+			--label org.opencontainers.image.description="$$description" \
+			--label description="$$description" \
+			--label maintainer="Jin-Gizmo" \
+			--annotation "$(ANNOTATIONS):org.opencontainers.image.description"="$$description" \
+			"$${LABELS[@]}" \
+			-f sandbox/realm.Dockerfile \
+			sandbox ; \
+	)
+
+#:cat Docker registry targets
+
+## Copy the sandbox image(s) from our local registry to the remote
+## registry. **Log in to the remote registry first.**
+#:opt registry prefix
+push-sandbox: registry
+	@( \
+		set -e ; \
+		for type in realm ; \
+		do \
+			echo -e "$MPushing to $(REGISTRY)$(REPO_PREFIX)lava/sandbox/$$type$_" ; \
+			docker buildx imagetools create \
+				--tag "$(REGISTRY)$(REPO_PREFIX)lava/sandbox/$$type:latest" \
+				"localhost:$(REGISTRY_LOCAL_PORT)/lava/sandbox/$$type:$(LAVA_VERSION)" ; \
+			docker buildx imagetools create \
+				--tag "$(REGISTRY)$(REPO_PREFIX)lava/sandbox/$$type:$(LAVA_VERSION)" \
+				"localhost:$(REGISTRY_LOCAL_PORT)/lava/sandbox/$$type:$(LAVA_VERSION)" ; \
+		done ; \
+	)
 

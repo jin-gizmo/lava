@@ -38,6 +38,10 @@ class Checker(SMBChecker):
     ) -> None:
         """Validate smb_put copied a non-empty file into the SMB share."""
 
+        from icecream import ic
+        ic(job_result)
+        ic(job_error)
+        ic(job_events)
         assert job_error is None
         assert job_result is not None
         assert job_result['exit_status'] == 0

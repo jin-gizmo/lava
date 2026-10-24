@@ -1,0 +1,19 @@
+{
+    "Capabilities": [
+        "CAPABILITY_IAM",
+        "CAPABILITY_NAMED_IAM"
+    ],
+    "EnableTerminationProtection": false,
+    "OnFailure": "ROLLBACK",
+    "Parameters": [
+        {
+            "ParameterKey": "realm",
+            "ParameterValue": "${LAVA_REALM}"
+        }
+    ],
+    "RetainExceptOnCreate": true,
+    "RollbackConfiguration": {
+        "RollbackTriggers": []
+    },
+    "Tags": []
+}

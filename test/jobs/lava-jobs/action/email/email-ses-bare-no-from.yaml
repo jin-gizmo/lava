@@ -14,6 +14,7 @@ payload: echo This job uses an action with SES and no valid "from"
 
 on_success:
   - action: email
+    from: x@unverified.test
     to: <{ email.test1 }>
     subject: "{{ job.job_id }} {{ job.run_id }}"
     message: |
@@ -29,3 +30,4 @@ x-lava-test:
   result: OK
   marks:
     - local
+    - IUTX

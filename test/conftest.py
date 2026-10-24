@@ -643,3 +643,11 @@ class SlackEmulateClient:
 def slack_emulator_client() -> SlackEmulateClient:
     """Return a simple client for the vercel slack emulator in our local container."""
     return SlackEmulateClient(token='xoxb-fake-token', base_url=os.environ['SLACK_WEBHOOK'])
+
+
+# ------------------------------------------------------------------------------
+@pytest.fixture
+def smb_conn_prefix(tc) -> str:
+    """Return the full prefix used for SMB connections."""
+    return f'{tc.prefix.conn}/smb/{tc.smb.name}'
+

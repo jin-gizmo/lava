@@ -1,0 +1,17 @@
+conn_id: sandbox/email/smtp
+description: Email connection using local mailpit emulator
+
+type: email
+subtype: smtp
+
+owner: sandbox
+enabled: true
+
+from: lava@${LAVA_REALM}.example.com
+
+host: lava-sandbox-mail
+port: 1025
+tls: true
+
+user: sandbox
+password: /lava/${LAVA_REALM}/smtp/sandbox/password

@@ -4,21 +4,13 @@
 #
 # ex: sw=4 ts=4 ai et
 #
-# Context must be the directory containing the following directories:
-#
-#   pkg:        This directory contains lava install package plus any other
-#               required software packages that can't be obtained directly at
-#               build time (e.g. the Oracle client).
-#   os/type:    A directory containing os type specific build scripts. The
-#               type will be something like "centos", "alpine" etc.
-#
 # Build-args:
 #
-#   base:       The base image. e.g centos:latest
-#   os:         Name of the underlying Linux OS image type. e.g. centos
+#   base:       The base image. e.g ubuntu:24.04
+#   os:         Name of the underlying Linux OS image type. e.g. ubuntu
 #   type:       full or base. If full, the base image must be a compatible lava
 #               base image.
-#   version:    The lava version. e.g. 7.1.0
+#   version:    The lava version. e.g. 8.3.0
 #
 # Author: Murray Andrews
 # ------------------------------------------------------------------------------

@@ -36,22 +36,7 @@ platform=linux/arm64
 .PHONY: help clean pkg
 .PRECIOUS: $(REQ_FILES)
 
-
 # ------------------------------------------------------------------------------
-xhelp:
-	@echo
-	@echo What do you want to make?  Available targets are:
-	@echo
-	@echo "[1mInstallation related targets:[0m"
-	@echo "   pkg:     Make the install packages."
-	@echo
-	@echo "[1mMiscellaneous targets:[0m"
-	@echo "   clean:   Remove the generated packages."
-	@echo "   help:    Print this help text."
-	@echo
-
-# ------------------------------------------------------------------------------
-#
 
 FORCE:
 
@@ -107,5 +92,7 @@ lambda:	registry $(REQ_FILES)
 			make _pkg ; \
 	)
 
+#:cat Miscellaneous targets
+## Remove the generated packages.
 clean:
 	echo $(RM) $(PKGS)

@@ -1,0 +1,156 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Additional generic test infrastructure components",
+  "Parameters": {
+    "realm": {
+      "Description": "Name of the realm",
+      "Type": "String",
+      "AllowedPattern": "[a-z]([a-z0-9_]){2,10}"
+    }
+  },
+  "Resources": {
+    "iamRoleAssumeMe": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "Description": "Test role that can be assumed",
+        "RoleName": "assume-me",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": { "Service": "ec2.amazonaws.com" },
+              "Action": [ "sts:AssumeRole", "sts:TagSession" ]
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": [
+                  { "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:root" }
+                ]
+              },
+              "Action": "sts:TagSession"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": [
+                  { "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:root" }
+                ]
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": { "StringEquals": { "sts:ExternalId": "glockenspiel" } }
+            }
+          ]
+        }
+      }
+    },
+    "sqsS3trigger": {
+      "Type": "AWS::SQS::Queue",
+      "DeletionPolicy": "Delete",
+      "UpdateReplacePolicy": "Delete",
+      "Metadata": {
+        "Description": "Queue for sending bucket notification events to S3trigger lambda."
+      },
+      "Properties": {
+        "QueueName": { "Fn::Sub": "lava-${realm}-s3trigger" },
+        "MessageRetentionPeriod": 86400
+      }
+    },
+    "sqsPolicyS3trigger": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "Metadata": {
+        "Description": "Allow S3 to send messages to the queue"
+      },
+      "Properties": {
+        "Queues": [ { "Ref": "sqsS3trigger" } ],
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": { "Service": "s3.amazonaws.com" },
+              "Action": "sqs:SendMessage",
+              "Resource": { "Fn::GetAtt": [ "sqsS3trigger", "Arn" ] },
+              "Condition": {
+                "StringEquals": { "aws:SourceAccount": { "Ref": "AWS::AccountId" } }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "sqsToLambdaEventSourceMapping": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "Properties": {
+        "EventSourceArn": { "Fn::GetAtt": [ "sqsS3trigger", "Arn" ] },
+        "FunctionName": { "Fn::Sub": "lava-${realm}-s3trigger" },
+        "BatchSize": 10
+      }
+    },
+    "lambdaPermissionS3trigger": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": { "Fn::Sub": "lava-${realm}-s3trigger" },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": { "Ref": "AWS::AccountId" }
+      }
+    },
+    "s3EventsBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DependsOn": [ "lambdaPermissionS3trigger", "sqsPolicyS3trigger" ],
+      "Properties": {
+        "BucketName": "events",
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true
+        },
+        "NotificationConfiguration": {
+          "LambdaConfigurations": [
+            {
+              "Function": {
+                "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:lava-${realm}-s3trigger"
+              },
+              "Event": "s3:ObjectCreated:*",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [ { "Name": "prefix", "Value": "lambda/" } ]
+                }
+              }
+            }
+          ],
+          "QueueConfigurations": [
+            {
+              "Queue": { "Fn::GetAtt": [ "sqsS3trigger", "Arn" ] },
+              "Event": "s3:ObjectCreated:*",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    { "Name": "prefix", "Value": { "Fn::Sub": "${realm}/" } }
+                  ]
+                }
+              }
+            },
+            {
+              "Queue": { "Fn::GetAtt": [ "sqsS3trigger", "Arn" ] },
+              "Event": "s3:ObjectCreated:*",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    { "Name": "prefix", "Value": "sqs/" }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

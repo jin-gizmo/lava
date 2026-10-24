@@ -1,0 +1,22 @@
+description: Catch an S3 event in s3://events/${LAVA_REALM}/
+
+trigger_id: demo/events/${LAVA_REALM}
+
+enabled: true
+owner: sandbox
+
+bucket: events
+prefix: ${LAVA_REALM}
+
+job_id: demo/log/plain
+
+globals:
+  s3trigger_event_info:
+    bucket: '{{bucket}}'
+    event: '{{event}}'
+    event_time: '{{info.event_time}}'
+    event_type: '{{info.event_type}}'
+    info: '{{info}}'
+    key: '{{key}}'
+    source_ip: '{{info.source_ip}}'
+    trigger_id: demo/events/${LAVA_REALM}

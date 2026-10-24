@@ -1,4 +1,4 @@
-personal_ws-1.1 en 501 
+personal_ws-1.1 en 507 
 ACLs
 AMIs
 APIs
@@ -95,11 +95,13 @@ LTS
 Ledesma
 Liang
 Loa
+LocalStack
 LogLevel
 Lolitha
 Lookups
 MINS
 MSGID
+Mailpit
 Mak
 Makefile
 Marlor
@@ -108,6 +110,7 @@ MaxRss
 Mebibytes
 MiB
 MinUpDays
+MiniStack
 ModuleNotFoundError
 Myatt
 NAMESPACE
@@ -177,6 +180,7 @@ SemanticVersion
 Serverless
 Siok
 Sonatype
+StackPort
 StopWorkerDaemons
 TCPS
 TDS
@@ -194,6 +198,7 @@ UTF
 UUID
 VARCHAR
 VPC
+Vercel
 Volcán
 Wah
 WorkerBacklog
@@ -231,6 +236,7 @@ buildkit
 buildx
 burstable
 cfdoc
+charset
 checksums
 clunkiness
 cmd

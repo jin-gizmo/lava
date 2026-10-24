@@ -1,0 +1,17 @@
+description: Hello world docker job
+
+job_id: demo/docker/hello-world
+
+type: docker
+
+enabled: true
+worker: '${LAVA_WORKER}'
+owner: sandbox
+
+payload: alpine
+
+parameters:
+  docker: sandbox/docker/base
+  command: echo hello
+  args:
+    - world

@@ -1,0 +1,13 @@
+description: SQLite3 connector pointing to an SQLite DB in S3
+
+conn_id: demo/db/sqlite
+
+type: sqlite3
+
+enabled: true
+owner: sandbox
+
+host: "s3://data/demo.sqlite3"
+# user / port are ignored for SQLite but they must be present.
+user: not used
+port: 0

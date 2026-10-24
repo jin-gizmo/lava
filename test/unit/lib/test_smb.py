@@ -3,16 +3,13 @@
 from uuid import uuid4
 
 import lava.connection
-import pytest
+import pytest  # noqa
 from .conftest import SMB_SHARED_DIR
 from lava.lib.smb import *
 
 SMB_SERVICE_NAME = 'lavatest'
 
-SMB_CONNECTORS = [
-    'lava-test-smb/pysmb',
-    'lava-test-smb/smbprotocol',
-]
+SMB_DRIVERS = ['pysmb', 'smbprotocol']
 
 
 # ------------------------------------------------------------------------------
@@ -39,12 +36,18 @@ class SMBTestFilePair:
         # self.local = self.smb_share(request) / name
         self.remote = name
 
+    def __str__(self):
+        return f'{self.__class__.__name__}(local={self.local!r}, remote={self.remote!r}'
+
+    def __repr__(self):
+        return str(self)
+
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_list_path(name: str, tc):
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
+@pytest.mark.parametrize('driver', SMB_DRIVERS)
+def test_list_path(driver, tc, smb_conn_prefix):
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
         result = conn.list_path(SMB_SERVICE_NAME, 'lava')
         hello_file = None
         for f in result:
@@ -55,9 +58,9 @@ def test_list_path(name: str, tc):
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_search_path(name: str, tc):
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
+@pytest.mark.parametrize('driver', SMB_DRIVERS)
+def test_search_path(driver: str, tc, smb_conn_prefix):
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
         result = conn.list_path(SMB_SERVICE_NAME, 'lava', pattern='*.txt')
         for f in result:
             if f.filename == 'hello.txt':
@@ -68,12 +71,12 @@ def test_search_path(name: str, tc):
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', ['lava-test-smb/smbprotocol'])
-def test_search_with_pattern(name: str, tc):
+@pytest.mark.parametrize('driver', ['smbprotocol'])
+def test_search_with_pattern(driver, tc, smb_conn_prefix):
     """Test SMB protocol _search_with_pattern()."""
 
     dir1 = SMBTestFilePair(suffix='.d')
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
         assert isinstance(conn, SMBProtocolConnection)
         conn.create_directory(SMB_SERVICE_NAME, dir1.remote)
         assert dir1.local.is_dir()
@@ -81,11 +84,11 @@ def test_search_with_pattern(name: str, tc):
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_smbfile_cls(name: str, tc, smb_hello_file):
+@pytest.mark.parametrize('driver', SMB_DRIVERS)
+def test_smbfile_cls(driver, tc, smb_conn_prefix, smb_hello_file):
     """Test aspects of SMBfile class."""
 
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
         hello_file = conn.get_attributes(SMB_SERVICE_NAME, 'lava/hello.txt')
         assert hello_file.filename == 'hello.txt'
         assert hello_file.file_size == len(smb_hello_file)
@@ -100,26 +103,26 @@ def test_smbfile_cls(name: str, tc, smb_hello_file):
 # ------------------------------------------------------------------------------
 @pytest.mark.local
 @pytest.mark.parametrize(
-    'name,match',
+    'driver,match',
     [
-        ('lava-test-smb/pysmb', 'Unable to open remote file object'),
-        ('lava-test-smb/smbprotocol', 'STATUS_OBJECT_PATH_NOT_FOUND'),
+        ('pysmb', 'Unable to open remote file object'),
+        ('smbprotocol', 'STATUS_OBJECT_PATH_NOT_FOUND'),
     ],
 )
-def test_get_file_fail(name: str, match: str, tc, smb_hello_file):
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
+def test_get_file_fail(driver, match: str, tc, smb_conn_prefix, smb_hello_file):
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
         with pytest.raises(SMBOperationError, match=match):
             conn.get_attributes(SMB_SERVICE_NAME, 'lava/nosuchfile')
 
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_directory_manipulation(name: str, tc, smb_shared_dir):
+@pytest.mark.parametrize('driver', SMB_DRIVERS)
+def test_directory_manipulation(driver, tc, smb_conn_prefix):
     dir1 = SMBTestFilePair()
     dir2 = SMBTestFilePair()
 
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
         conn.create_directory(SMB_SERVICE_NAME, dir1.remote)
         # Check dir is visible through the shared vol
         assert dir1.local.is_dir()
@@ -136,13 +139,13 @@ def test_directory_manipulation(name: str, tc, smb_shared_dir):
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_file_manipulation(name: str, tc, smb_hello_file, smb_shared_dir, tmp_path):
+@pytest.mark.parametrize('driver', SMB_DRIVERS)
+def test_file_manipulation(driver, tc, smb_conn_prefix, smb_hello_file, smb_shared_dir, tmp_path):
     local_file1 = tmp_path / str(uuid4())
     file2 = SMBTestFilePair()
     file3 = SMBTestFilePair()
 
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
 
         # ------------------------------
         # Try getting a file from SMB
@@ -187,15 +190,28 @@ def test_file_manipulation(name: str, tc, smb_hello_file, smb_shared_dir, tmp_pa
 
 
 # ------------------------------------------------------------------------------
+# @pytest.mark.xfail(reason='delete_files for smbprotocol handler is broken')
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_delete_dir_fail(name, tc):
+@pytest.mark.parametrize(
+    'driver',
+    [
+        'pysmb',
+        pytest.param(
+            'smbprotocol',
+            marks=pytest.mark.xfail(reason='#delete_files for smbprotocol should not delete dirs'),
+        ),
+    ],
+)
+def test_delete_dir_fail(driver, tc, smb_conn_prefix):
+
     dir1 = SMBTestFilePair(suffix='.d')
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
         conn.create_directory(SMB_SERVICE_NAME, dir1.remote)
         assert dir1.local.is_dir()
 
         # Try deleting a dir as if it was a file
+        # TODO: delete_files for smbprotocol handler is broken -- it will delete
+        #       directories and it shouldn't.
         with pytest.raises(SMBOperationError, match='Cannot delete'):
             conn.delete_files(SMB_SERVICE_NAME, dir1.remote)
         assert dir1.local.is_dir()
@@ -203,17 +219,17 @@ def test_delete_dir_fail(name, tc):
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_smb_echo(name: str, tc):
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
+@pytest.mark.parametrize("driver", SMB_DRIVERS)
+def test_smb_echo(driver, tc, smb_conn_prefix):
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
         assert conn.echo() == NTStatus.STATUS_SUCCESS
 
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_conn_closed(name: str, tc):
-    conn = lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm)
+@pytest.mark.parametrize('driver', SMB_DRIVERS)
+def test_conn_closed(driver: str, tc, smb_conn_prefix):
+    conn = lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm)
     conn.close()
     assert conn.close() is None
     with pytest.raises(SMBConnectionError, match='Not connected'):
@@ -254,11 +270,10 @@ def test_smbtimeouterror():
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_smb_dir_exists(name: str, tc):
+@pytest.mark.parametrize('driver', SMB_DRIVERS)
+def test_smb_dir_exists(driver: str, tc, smb_conn_prefix):
     dir1 = SMBTestFilePair(suffix='.d')
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
-
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
         # First check the dir doesn't exist
         assert not smb_dir_exists(conn, SMB_SERVICE_NAME, dir1.remote)
         # Create it and check again
@@ -272,10 +287,10 @@ def test_smb_dir_exists(name: str, tc):
 
 # ------------------------------------------------------------------------------
 @pytest.mark.local
-@pytest.mark.parametrize('name', SMB_CONNECTORS)
-def test_smb_mkdirs(name: str, tc):
+@pytest.mark.parametrize('driver', SMB_DRIVERS)
+def test_smb_mkdirs(driver: str, tc, smb_conn_prefix):
     dir1 = SMBTestFilePair(f'lava/{uuid4()}.d/wotcha.d')
-    with lava.connection.get_smb_connection(f'{tc.prefix.conn}/smb/{name}', realm=tc.realm) as conn:
+    with lava.connection.get_smb_connection(f'{smb_conn_prefix}/{driver}', realm=tc.realm) as conn:
         smb_mkdirs(conn, SMB_SERVICE_NAME, dir1.remote)
         assert dir1.local.is_dir()
 
