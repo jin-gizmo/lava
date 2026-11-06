@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1903,7 +1903,7 @@ used provided you have access to the lava framework cookiecutter bundle.</p>
 </span><span id="__span-1-5">pip<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span>--upgrade<span class="w"> </span>awscli
 </span><span id="__span-1-6">
 </span><span id="__span-1-7"><span class="c1"># Create a new lava project. Cookiecutter will issue prompts for a few</span>
-</span><span id="__span-1-8"><span class="c1"># configuration parameters. The parameters &quot;project_name&quot; and &quot;project_dir&quot;</span>
+</span><span id="__span-1-8"><span class="c1"># configuration parameters. The parameters "project_name" and "project_dir"</span>
 </span><span id="__span-1-9"><span class="c1"># are particularly important. The others can easily be changed later.</span>
 </span><span id="__span-1-10">
 </span><span id="__span-1-11">cookiecutter<span class="w"> </span>lava-job-framework-&lt;VERSION&gt;.zip
@@ -1917,7 +1917,7 @@ then create the project structure in the specified directory. It should look
 like this (items in angled brackets refer to the values provided in response to
 cookiecutter prompts):</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1">&lt;project_dir&gt;/
-</span><span id="__span-2-2">        +--&gt; Makefile               # Master make file. Try &quot;make help&quot;.
+</span><span id="__span-2-2">        +--&gt; Makefile               # Master make file. Try "make help".
 </span><span id="__span-2-3">        +--&gt; bin/                   # Miscellaneous utilities.
 </span><span id="__span-2-4">        +--&gt; config/                # Config files - one per environment.
 </span><span id="__span-2-5">        |       +--&gt; &lt;env&gt;.yaml     # Initial config built by cookiecutter.
@@ -2108,7 +2108,7 @@ values for the <code>service</code> and <code>resource</code> arguments are:</p>
 </table>
 <p>For example, this will generate the ARN for the
 <a href="05-job-dispatch.html#dispatching-jobs-from-s3-events">s3trigger</a> Lambda function for the realm:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1">&lt;{ lava.aws.arn(&#39;lambda-function&#39;, &#39;lava-&#39; + realm + &#39;-s3trigger&#39;) }&gt;
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1">&lt;{ lava.aws.arn('lambda-function', 'lava-' + realm + '-s3trigger') }&gt;
 </span></code></pre></div>
 <h3 id="jinja-template-factorisation">Jinja Template Factorisation<a class="headerlink" href="#jinja-template-factorisation" title="Permanent link">&para;</a></h3>
 <p>In more complex projects, it is not uncommon to have several jobs or triggers
@@ -2152,20 +2152,20 @@ files that are not full specification files must have names beginning with
 underscore or be in a subdirectory with a name beginning with an underscore if
 located within one of the <code>lava-*</code> directories.</p>
 <p>For example, consider the following s3trigger specification.</p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-5-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Process</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">received</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">source_a&quot;</span>
-</span><span id="__span-5-2"><span class="nt">trigger_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.s3trigger</span><span class="nv"> </span><span class="s">}&gt;/source_a&quot;</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-5-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Process</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">received</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">source_a"</span>
+</span><span id="__span-5-2"><span class="nt">trigger_id</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">prefix.s3trigger</span><span class="nv"> </span><span class="s">}&gt;/source_a"</span>
 </span><span id="__span-5-3">
 </span><span id="__span-5-4"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </span><span id="__span-5-5">
-</span><span id="__span-5-6"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/process/source_a&quot;</span>
+</span><span id="__span-5-6"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/process/source_a"</span>
 </span><span id="__span-5-7">
-</span><span id="__span-5-8"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">s3.bucket</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
-</span><span id="__span-5-9"><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;source_a&quot;</span>
+</span><span id="__span-5-8"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">s3.bucket</span><span class="nv"> </span><span class="s">}&gt;"</span>
+</span><span id="__span-5-9"><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">"source_a"</span>
 </span><span id="__span-5-10">
 </span><span id="__span-5-11"><span class="nt">parameters</span><span class="p">:</span>
 </span><span id="__span-5-12"><span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
-</span><span id="__span-5-13"><span class="w">    </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">bucket</span><span class="nv"> </span><span class="s">}}&quot;</span>
-</span><span id="__span-5-14"><span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">key</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</span><span id="__span-5-13"><span class="w">    </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">bucket</span><span class="nv"> </span><span class="s">}}"</span>
+</span><span id="__span-5-14"><span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">key</span><span class="nv"> </span><span class="s">}}"</span>
 </span></code></pre></div>
 <p>This is fine if there is only a single <code>source_a</code> that needs to be handled. If
 new sources are added that have similar processing, the s3trigger specification
@@ -2173,27 +2173,27 @@ will be copied multiple times with common material.</p>
 <p>An alternative approach is to create a new directory <code>lava-triggers/_common</code>
 containing the following file <code>whatever.yaml</code>. This relies on the main template
 to set the <code>source</code> variable.</p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-6-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Process</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">received</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
-</span><span id="__span-6-2"><span class="nt">trigger_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.s3trigger</span><span class="nv"> </span><span class="s">}&gt;/&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-6-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Process</span><span class="nv"> </span><span class="s">data</span><span class="nv"> </span><span class="s">received</span><span class="nv"> </span><span class="s">from</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;"</span>
+</span><span id="__span-6-2"><span class="nt">trigger_id</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">prefix.s3trigger</span><span class="nv"> </span><span class="s">}&gt;/&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-6-3">
 </span><span id="__span-6-4"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </span><span id="__span-6-5">
-</span><span id="__span-6-6"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/process/&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-6-6"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/process/&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-6-7">
-</span><span id="__span-6-8"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">s3.bucket</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
-</span><span id="__span-6-9"><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-6-8"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">s3.bucket</span><span class="nv"> </span><span class="s">}&gt;"</span>
+</span><span id="__span-6-9"><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">source</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-6-10">
 </span><span id="__span-6-11"><span class="nt">parameters</span><span class="p">:</span>
 </span><span id="__span-6-12"><span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
-</span><span id="__span-6-13"><span class="w">    </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">bucket</span><span class="nv"> </span><span class="s">}}&quot;</span>
-</span><span id="__span-6-14"><span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">key</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</span><span id="__span-6-13"><span class="w">    </span><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">bucket</span><span class="nv"> </span><span class="s">}}"</span>
+</span><span id="__span-6-14"><span class="w">    </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">key</span><span class="nv"> </span><span class="s">}}"</span>
 </span></code></pre></div>
 <p>The main s3trigger specification then becomes:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-7-1"><span class="c1"># Set the source for the sub-template</span>
-</span><span id="__span-7-2"><span class="c1"># &lt;% set source=&#39;source_a&#39; %&gt;</span>
+</span><span id="__span-7-2"><span class="c1"># &lt;% set source='source_a' %&gt;</span>
 </span><span id="__span-7-3">
 </span><span id="__span-7-4"><span class="c1"># Load the sub-template</span>
-</span><span id="__span-7-5"><span class="c1"># &lt;% include &#39;_common/whatever.yaml&#39; %&gt;</span>
+</span><span id="__span-7-5"><span class="c1"># &lt;% include '_common/whatever.yaml' %&gt;</span>
 </span></code></pre></div>
 <h4 id="jinja-template-import">Jinja Template Import<a class="headerlink" href="#jinja-template-import" title="Permanent link">&para;</a></h4>
 <p>Jinja2 allows variables (and macros) to be imported from other templates using
@@ -2202,17 +2202,17 @@ statement. This process is broadly similar to Python imports.</p>
 <p>Imported templates don’t have access to the current template variables, just the
 globals.</p>
 <p>For example, consider the following file <code>vars.jinja</code>:</p>
-<div class="language-jinja highlight"><pre><span></span><code><span id="__span-8-1"><span class="x">&lt;% set bucket=&#39;my-bucket&#39; %&gt;</span>
+<div class="language-jinja highlight"><pre><span></span><code><span id="__span-8-1"><span class="x">&lt;% set bucket='my-bucket' %&gt;</span>
 </span></code></pre></div>
 <p>This can be used in YAML template thus:</p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-9-1"><span class="c1"># &lt;% from &#39;vars.jinja&#39; import bucket %&gt;</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-9-1"><span class="c1"># &lt;% from 'vars.jinja' import bucket %&gt;</span>
 </span><span id="__span-9-2">
-</span><span id="__span-9-3"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">bucket</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-9-3"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">bucket</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span></code></pre></div>
 <p>Alternatively:</p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-10-1"><span class="c1"># &lt;% import &#39;vars.jinja&#39; as v %&gt;</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-10-1"><span class="c1"># &lt;% import 'vars.jinja' as v %&gt;</span>
 </span><span id="__span-10-2">
-</span><span id="__span-10-3"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">v.bucket</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-10-3"><span class="nt">bucket</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">v.bucket</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span></code></pre></div>
 <p>Note that because <code>vars.jinja</code> does not end in <code>.yaml</code>, the framework will not
 confuse it with a specification file.</p>
@@ -2228,25 +2228,25 @@ avoids embedding specific configuration details.</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-11-1"><span class="c1"># Assume the name of this file is lava-jobs/my-db/my-schema/my-table/count.yaml</span>
 </span><span id="__span-11-2">
 </span><span id="__span-11-3"><span class="c1"># Extract database, schema and table names:</span>
-</span><span id="__span-11-4"><span class="c1"># &lt;% set db=jinja.templates[0].split(&#39;/&#39;)[0] %&gt;</span>
-</span><span id="__span-11-5"><span class="c1"># &lt;% set schema=jinja.templates[0].split(&#39;/&#39;)[1] %&gt;</span>
-</span><span id="__span-11-6"><span class="c1"># &lt;% set table=jinja.templates[0].split(&#39;/&#39;)[2] %&gt;</span>
+</span><span id="__span-11-4"><span class="c1"># &lt;% set db=jinja.templates[0].split('/')[0] %&gt;</span>
+</span><span id="__span-11-5"><span class="c1"># &lt;% set schema=jinja.templates[0].split('/')[1] %&gt;</span>
+</span><span id="__span-11-6"><span class="c1"># &lt;% set table=jinja.templates[0].split('/')[2] %&gt;</span>
 </span><span id="__span-11-7">
 </span><span id="__span-11-8"><span class="c1"># Now we can use these in our job spec</span>
 </span><span id="__span-11-9">
-</span><span id="__span-11-10"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Count</span><span class="nv"> </span><span class="s">rows</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">}&gt;.&lt;{</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">}&gt;</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">database</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">db</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
-</span><span id="__span-11-11"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/count/&lt;{</span><span class="nv"> </span><span class="s">db</span><span class="nv"> </span><span class="s">}&gt;/&lt;{</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">}&gt;.&lt;{</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-10"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="s">"Count</span><span class="nv"> </span><span class="s">rows</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">}&gt;.&lt;{</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">}&gt;</span><span class="nv"> </span><span class="s">in</span><span class="nv"> </span><span class="s">database</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">db</span><span class="nv"> </span><span class="s">}&gt;"</span>
+</span><span id="__span-11-11"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/count/&lt;{</span><span class="nv"> </span><span class="s">db</span><span class="nv"> </span><span class="s">}&gt;/&lt;{</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">}&gt;.&lt;{</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-11-12"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sqli</span>
-</span><span id="__span-11-13"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">owner</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-13"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">owner</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-11-14">
-</span><span id="__span-11-15"><span class="nt">dispatcher</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">dispatcher.main</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
-</span><span id="__span-11-16"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">worker.main</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-15"><span class="nt">dispatcher</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">dispatcher.main</span><span class="nv"> </span><span class="s">}&gt;"</span>
+</span><span id="__span-11-16"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">worker.main</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-11-17"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </span><span id="__span-11-18">
-</span><span id="__span-11-19"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;SELECT</span><span class="nv"> </span><span class="s">count(*)</span><span class="nv"> </span><span class="s">FROM</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">}&gt;.&lt;{</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-19"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">"SELECT</span><span class="nv"> </span><span class="s">count(*)</span><span class="nv"> </span><span class="s">FROM</span><span class="nv"> </span><span class="s">&lt;{</span><span class="nv"> </span><span class="s">schema</span><span class="nv"> </span><span class="s">}&gt;.&lt;{</span><span class="nv"> </span><span class="s">table</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-11-20"><span class="nt">parameters</span><span class="p">:</span>
 </span><span id="__span-11-21"><span class="w">  </span><span class="c1"># Lookup a table in the config file to convert db to a connector ID</span>
-</span><span id="__span-11-22"><span class="w">  </span><span class="nt">conn_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">db_conn_table[db]</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-11-22"><span class="w">  </span><span class="nt">conn_id</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">db_conn_table[db]</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span></code></pre></div>
 <p>This is probably overkill for handling a single table in a single database.
 However, if the same action is required for multiple tables, the same
@@ -2358,7 +2358,7 @@ some target environments.</p>
 <p>The lava framework will skip deployment of a component if the built JSON
 component contains only a <code>null</code> object. This is achieved by wrapping the YAML
 source for the object in a Jinja conditional block like so:</p>
-<div class="language-yaml highlight"><pre><span></span><code><span id="__span-14-1"><span class="c1"># &lt;% if env in (&#39;dev&#39;, &#39;uat&#39;) %&gt;</span>
+<div class="language-yaml highlight"><pre><span></span><code><span id="__span-14-1"><span class="c1"># &lt;% if env in ('dev', 'uat') %&gt;</span>
 </span><span id="__span-14-2"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Conditional job</span>
 </span><span id="__span-14-3"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maybe_yes_maybe_no</span>
 </span><span id="__span-14-4"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">etc ...</span>
@@ -2409,19 +2409,19 @@ whichever environment configuration file is used at build/deploy time.</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-16-1"><span class="c1"># --------------------------------------</span>
 </span><span id="__span-16-2"><span class="c1"># Lava environment configuration file</span>
 </span><span id="__span-16-3">
-</span><span id="__span-16-4"><span class="nt">realm</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user01&quot;</span>
+</span><span id="__span-16-4"><span class="nt">realm</span><span class="p">:</span><span class="w"> </span><span class="s">"user01"</span>
 </span><span id="__span-16-5"><span class="nt">prefix</span><span class="p">:</span>
-</span><span id="__span-16-6"><span class="w">  </span><span class="nt">job</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app/demo&quot;</span>
-</span><span id="__span-16-7"><span class="w">  </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app/demo&quot;</span>
-</span><span id="__span-16-8"><span class="w">  </span><span class="nt">s3trigger</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;app/demo&quot;</span>
-</span><span id="__span-16-9"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Fred&quot;</span>
+</span><span id="__span-16-6"><span class="w">  </span><span class="nt">job</span><span class="p">:</span><span class="w"> </span><span class="s">"app/demo"</span>
+</span><span id="__span-16-7"><span class="w">  </span><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">"app/demo"</span>
+</span><span id="__span-16-8"><span class="w">  </span><span class="nt">s3trigger</span><span class="p">:</span><span class="w"> </span><span class="s">"app/demo"</span>
+</span><span id="__span-16-9"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">"Fred"</span>
 </span><span id="__span-16-10"><span class="nt">worker</span><span class="p">:</span>
-</span><span id="__span-16-11"><span class="w">  </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;core&quot;</span>
+</span><span id="__span-16-11"><span class="w">  </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span><span class="s">"core"</span>
 </span><span id="__span-16-12"><span class="nt">dispatcher</span><span class="p">:</span>
-</span><span id="__span-16-13"><span class="w">  </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Sydney&quot;</span>
-</span><span id="__span-16-14"><span class="w">  </span><span class="nt">none</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;--&quot;</span>
+</span><span id="__span-16-13"><span class="w">  </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span><span class="s">"Sydney"</span>
+</span><span id="__span-16-14"><span class="w">  </span><span class="nt">none</span><span class="p">:</span><span class="w"> </span><span class="s">"--"</span>
 </span><span id="__span-16-15"><span class="nt">schedule</span><span class="p">:</span>
-</span><span id="__span-16-16"><span class="w">  </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;--&quot;</span>
+</span><span id="__span-16-16"><span class="w">  </span><span class="nt">main</span><span class="p">:</span><span class="w"> </span><span class="s">"--"</span>
 </span><span id="__span-16-17">
 </span><span id="__span-16-18"><span class="c1"># --------------------------------------</span>
 </span><span id="__span-16-19"><span class="c1"># Connections</span>
@@ -2433,8 +2433,8 @@ whichever environment configuration file is used at build/deploy time.</p>
 </span><span id="__span-16-25"><span class="nt">on_fail</span><span class="p">:</span>
 </span><span id="__span-16-26"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">email</span>
 </span><span id="__span-16-27"><span class="w">    </span><span class="nt">to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">fred@somewhere.com</span>
-</span><span id="__span-16-28"><span class="w">    </span><span class="nt">subject</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ALARM:</span><span class="nv"> </span><span class="s">Job={{job.job_id}}@{{realm.realm}}&quot;</span>
-</span><span id="__span-16-29"><span class="w">    </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Run</span><span class="nv"> </span><span class="s">{{job.run_id}}:</span><span class="nv"> </span><span class="s">{{result.error}}&quot;</span>
+</span><span id="__span-16-28"><span class="w">    </span><span class="nt">subject</span><span class="p">:</span><span class="w"> </span><span class="s">"ALARM:</span><span class="nv"> </span><span class="s">Job={{job.job_id}}@{{realm.realm}}"</span>
+</span><span id="__span-16-29"><span class="w">    </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="s">"Run</span><span class="nv"> </span><span class="s">{{job.run_id}}:</span><span class="nv"> </span><span class="s">{{result.error}}"</span>
 </span><span id="__span-16-30">
 </span><span id="__span-16-31"><span class="c1"># --------------------------------------</span>
 </span><span id="__span-16-32"><span class="c1"># Custom variables.</span>
@@ -2444,28 +2444,28 @@ whichever environment configuration file is used at build/deploy time.</p>
 </span></code></pre></div>
 <p>The final job will look like this:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-17-1"><span class="p">{</span>
-</span><span id="__span-17-2"><span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sample SQL job&quot;</span><span class="p">,</span>
-</span><span id="__span-17-3"><span class="w">    </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
-</span><span id="__span-17-4"><span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-17-5"><span class="w">    </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;app/demo/simple-sql&quot;</span><span class="p">,</span>
-</span><span id="__span-17-6"><span class="w">    </span><span class="nt">&quot;on_fail&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-17-2"><span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sample SQL job"</span><span class="p">,</span>
+</span><span id="__span-17-3"><span class="w">    </span><span class="nt">"dispatcher"</span><span class="p">:</span><span class="w"> </span><span class="s2">"--"</span><span class="p">,</span>
+</span><span id="__span-17-4"><span class="w">    </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-17-5"><span class="w">    </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"app/demo/simple-sql"</span><span class="p">,</span>
+</span><span id="__span-17-6"><span class="w">    </span><span class="nt">"on_fail"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-17-7"><span class="w">        </span><span class="p">{</span>
-</span><span id="__span-17-8"><span class="w">            </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email&quot;</span><span class="p">,</span>
-</span><span id="__span-17-9"><span class="w">            </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Run {{job.run_id}}: {{result.error}}&quot;</span><span class="p">,</span>
-</span><span id="__span-17-10"><span class="w">            </span><span class="nt">&quot;subject&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALARM: Job={{job.job_id}}@{{realm.realm}}&quot;</span><span class="p">,</span>
-</span><span id="__span-17-11"><span class="w">            </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fred@somewhere.com&quot;</span>
+</span><span id="__span-17-8"><span class="w">            </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"email"</span><span class="p">,</span>
+</span><span id="__span-17-9"><span class="w">            </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Run {{job.run_id}}: {{result.error}}"</span><span class="p">,</span>
+</span><span id="__span-17-10"><span class="w">            </span><span class="nt">"subject"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ALARM: Job={{job.job_id}}@{{realm.realm}}"</span><span class="p">,</span>
+</span><span id="__span-17-11"><span class="w">            </span><span class="nt">"to"</span><span class="p">:</span><span class="w"> </span><span class="s2">"fred@somewhere.com"</span>
 </span><span id="__span-17-12"><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-17-13"><span class="w">    </span><span class="p">],</span>
-</span><span id="__span-17-14"><span class="w">    </span><span class="nt">&quot;owner&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Fred&quot;</span><span class="p">,</span>
-</span><span id="__span-17-15"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-17-16"><span class="w">        </span><span class="nt">&quot;conn_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;redshift/dev&quot;</span><span class="p">,</span>
-</span><span id="__span-17-17"><span class="w">        </span><span class="nt">&quot;vars&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-17-18"><span class="w">            </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;public&quot;</span>
+</span><span id="__span-17-14"><span class="w">    </span><span class="nt">"owner"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Fred"</span><span class="p">,</span>
+</span><span id="__span-17-15"><span class="w">    </span><span class="nt">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-16"><span class="w">        </span><span class="nt">"conn_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"redshift/dev"</span><span class="p">,</span>
+</span><span id="__span-17-17"><span class="w">        </span><span class="nt">"vars"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-18"><span class="w">            </span><span class="nt">"schema"</span><span class="p">:</span><span class="w"> </span><span class="s2">"public"</span>
 </span><span id="__span-17-19"><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-17-20"><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-17-21"><span class="w">    </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;app/demo/simple.sql&quot;</span><span class="p">,</span>
-</span><span id="__span-17-22"><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sql&quot;</span><span class="p">,</span>
-</span><span id="__span-17-23"><span class="w">    </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;core&quot;</span>
+</span><span id="__span-17-21"><span class="w">    </span><span class="nt">"payload"</span><span class="p">:</span><span class="w"> </span><span class="s2">"app/demo/simple.sql"</span><span class="p">,</span>
+</span><span id="__span-17-22"><span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sql"</span><span class="p">,</span>
+</span><span id="__span-17-23"><span class="w">    </span><span class="nt">"worker"</span><span class="p">:</span><span class="w"> </span><span class="s2">"core"</span>
 </span><span id="__span-17-24"><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="creating-amazon-eventbridge-rules">Creating Amazon EventBridge Rules<a class="headerlink" href="#creating-amazon-eventbridge-rules" title="Permanent link">&para;</a></h2>
@@ -2635,7 +2635,7 @@ configuration, including the nature of the event message being sent.</p>
 realm s3trigger lambda function to dispatch a lava job. It also logs the event
 to CloudWatch logs.</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-18-1"><span class="c1"># rule_id becomes the rule name</span>
-</span><span id="__span-18-2"><span class="nt">rule_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.rule</span><span class="nv"> </span><span class="s">}&gt;.s3-rule-example&quot;</span>
+</span><span id="__span-18-2"><span class="nt">rule_id</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">prefix.rule</span><span class="nv"> </span><span class="s">}&gt;.s3-rule-example"</span>
 </span><span id="__span-18-3">
 </span><span id="__span-18-4"><span class="c1"># If you forget this, your rule is disabled.</span>
 </span><span id="__span-18-5"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
@@ -2663,16 +2663,16 @@ to CloudWatch logs.</p>
 </span><span id="__span-18-27"><span class="nt">targets</span><span class="p">:</span>
 </span><span id="__span-18-28">
 </span><span id="__span-18-29"><span class="w">  </span><span class="c1"># Construct the ARN for the realm s3trigger lambda</span>
-</span><span id="__span-18-30"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn(&#39;lambda-function&#39;, &#39;lava-&#39; + realm + &#39;-s3trigger&#39;) }&gt;</span>
-</span><span id="__span-18-31"><span class="w">  </span><span class="c1"># Let&#39;s log messages in CloudWatch logs</span>
-</span><span id="__span-18-32"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn(&#39;log-group&#39;, &#39;/aws/events/lava&#39;) }&gt;</span>
+</span><span id="__span-18-30"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn('lambda-function', 'lava-' + realm + '-s3trigger') }&gt;</span>
+</span><span id="__span-18-31"><span class="w">  </span><span class="c1"># Let's log messages in CloudWatch logs</span>
+</span><span id="__span-18-32"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn('log-group', '/aws/events/lava') }&gt;</span>
 </span><span id="__span-18-33">
 </span><span id="__span-18-34"><span class="w">  </span><span class="c1"># This does exactly the same as the previous targets using the full target</span>
-</span><span id="__span-18-35"><span class="w">  </span><span class="c1"># format. Don&#39;t do both or s3trigger will get 2 events sent</span>
+</span><span id="__span-18-35"><span class="w">  </span><span class="c1"># format. Don't do both or s3trigger will get 2 events sent</span>
 </span><span id="__span-18-36"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">trigger-me</span>
-</span><span id="__span-18-37"><span class="w">    </span><span class="nt">Arn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn(&#39;lambda-function&#39;, &#39;lava-&#39; + realm + &#39;-s3trigger&#39;) }&gt;</span>
+</span><span id="__span-18-37"><span class="w">    </span><span class="nt">Arn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn('lambda-function', 'lava-' + realm + '-s3trigger') }&gt;</span>
 </span><span id="__span-18-38"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">log-me</span>
-</span><span id="__span-18-39"><span class="w">    </span><span class="nt">Arn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn(&#39;log-group&#39;, &#39;/aws/events/lava&#39;) }&gt;</span>
+</span><span id="__span-18-39"><span class="w">    </span><span class="nt">Arn</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;{ lava.aws.arn('log-group', '/aws/events/lava') }&gt;</span>
 </span></code></pre></div>
 <h2 id="creating-payloads">Creating Payloads<a class="headerlink" href="#creating-payloads" title="Permanent link">&para;</a></h2>
 <p>Some job types, such as
@@ -2760,16 +2760,16 @@ framework will always rebuild job specifications that use this function.</p>
 </span><span id="__span-20-2">
 </span><span id="__span-20-3"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dag</span>
 </span><span id="__span-20-4">
-</span><span id="__span-20-5"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/dag/demo&quot;</span>
-</span><span id="__span-20-6"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">worker.main</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-20-5"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/dag/demo"</span>
+</span><span id="__span-20-6"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">worker.main</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-20-7"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-20-8"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">owner</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-20-8"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">owner</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-20-9">
 </span><span id="__span-20-10"><span class="nt">parameters</span><span class="p">:</span>
 </span><span id="__span-20-11"><span class="w">  </span><span class="nt">workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </span><span id="__span-20-12">
 </span><span id="__span-20-13"><span class="c1"># Generate the dag payload by reading the first tab in Excel file dag.xlsx</span>
-</span><span id="__span-20-14"><span class="nt">payload</span><span class="p">:</span><span class="w">  </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">lava.dag(&#39;dag.xlsx&#39;}&gt;&quot;</span>
+</span><span id="__span-20-14"><span class="nt">payload</span><span class="p">:</span><span class="w">  </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">lava.dag('dag.xlsx'}&gt;"</span>
 </span></code></pre></div>
 <p>The first (positional) argument to the <code>lava.dag()</code> function corresponds to the
 <code>source</code> argument of the
@@ -2784,17 +2784,17 @@ dependencies from a database using a lava connector:</p>
 </span><span id="__span-21-2">
 </span><span id="__span-21-3"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dag</span>
 </span><span id="__span-21-4">
-</span><span id="__span-21-5"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/dag/demo&quot;</span>
-</span><span id="__span-21-6"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">worker.main</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-21-5"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">prefix.job</span><span class="nv"> </span><span class="s">}&gt;/dag/demo"</span>
+</span><span id="__span-21-6"><span class="nt">worker</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">worker.main</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-21-7"><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-</span><span id="__span-21-8"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">owner</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-21-8"><span class="nt">owner</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">owner</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span><span id="__span-21-9">
 </span><span id="__span-21-10"><span class="nt">parameters</span><span class="p">:</span>
 </span><span id="__span-21-11"><span class="w">  </span><span class="nt">workers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 </span><span id="__span-21-12">
 </span><span id="__span-21-13"><span class="c1"># Generate the dag payload by reading a database table. Note that the realm</span>
 </span><span id="__span-21-14"><span class="c1"># value from the framework configuration file is used.</span>
-</span><span id="__span-21-15"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">lava.dag(&#39;a_conn_id&#39;,</span><span class="nv"> </span><span class="s">group=&#39;a_batch&#39;,</span><span class="nv"> </span><span class="s">table=&#39;a_schema.dags&#39;,</span><span class="nv"> </span><span class="s">realm=realm)</span><span class="nv"> </span><span class="s">}&gt;&quot;</span>
+</span><span id="__span-21-15"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">lava.dag('a_conn_id',</span><span class="nv"> </span><span class="s">group='a_batch',</span><span class="nv"> </span><span class="s">table='a_schema.dags',</span><span class="nv"> </span><span class="s">realm=realm)</span><span class="nv"> </span><span class="s">}&gt;"</span>
 </span></code></pre></div>
 <p>Note that the <code>lava.dag()</code> function actually returns a JSON formatted string.
 This works in a YAML source file because valid JSON is also valid YAML. Neat eh?</p>
@@ -2862,7 +2862,7 @@ will not attempt to remove payload images in external registries.</p>
 referenced in the job specification like so:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-22-1"><span class="nt">job_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-docker-job</span>
 </span><span id="__span-22-2"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker</span>
-</span><span id="__span-22-3"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;{</span><span class="nv"> </span><span class="s">docker.registry</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">lava.aws.ecr_uri</span><span class="nv"> </span><span class="s">}&gt;/&lt;{</span><span class="nv"> </span><span class="s">prefix.docker</span><span class="nv"> </span><span class="s">}&gt;/plugh</span>
+</span><span id="__span-22-3"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;{</span><span class="nv"> </span><span class="s">docker.registry</span><span class="nv"> </span><span class="s">or</span><span class="nv"> </span><span class="s">lava.aws.ecr_uri</span><span class="nv"> </span><span class="s">}&gt;/&lt;{</span><span class="nv"> </span><span class="s">prefix.docker</span><span class="nv"> </span><span class="s">}&gt;/plugh</span>
 </span></code></pre></div>
 <h4 id="the-default-dockerfile">The Default Dockerfile<a class="headerlink" href="#the-default-dockerfile" title="Permanent link">&para;</a></h4>
 <p>The default <code>Dockerfile</code> supplied with the framework should suffice in most
@@ -3214,7 +3214,7 @@ the checking process is also configured as a pre-commit hook.</p>
 </tr>
 <tr>
 <td>Config alignment</td>
-<td>Builtin</td>
+<td>Built-in</td>
 <td>Compares the key structures in the configuration files in the <code>config</code> directory and highlights any differences. Generally, configuration files for a project correlate to different target realms (e.g. test vs prod). While the configuration values will vary by environment, the key hierarchies should be identical. The only configuration option is the choice between <code>warning</code> and <code>strict</code> modes which is specified in <code>etc/git-hooks/pre-commit</code>.</td>
 </tr>
 </tbody>
@@ -3276,7 +3276,7 @@ project.</p>
 </span><span id="__span-34-4">
 </span><span id="__span-34-5"><span class="c1"># Extract the `bin` directory from the new framework package</span>
 </span><span id="__span-34-6"><span class="c1"># The quotes are important here.</span>
-</span><span id="__span-34-7">unzip<span class="w"> </span>-j<span class="w"> </span>-d<span class="w"> </span>bin<span class="w"> </span>lav-job-framework-&lt;NEW-VERSION&gt;.zip<span class="w"> </span><span class="s1">&#39;*bin/*&#39;</span>
+</span><span id="__span-34-7">unzip<span class="w"> </span>-j<span class="w"> </span>-d<span class="w"> </span>bin<span class="w"> </span>lav-job-framework-&lt;NEW-VERSION&gt;.zip<span class="w"> </span><span class="s1">'*bin/*'</span>
 </span><span id="__span-34-8">chmod<span class="w"> </span>u+x<span class="w"> </span>bin/*
 </span><span id="__span-34-9">
 </span><span id="__span-34-10"><span class="c1"># Activate the virtual environment</span>
@@ -3324,7 +3324,7 @@ added packages. If there are, only those packages need to be retained in that fi
       <div class="md-footer-social">
         <div class="md-copyright">
           <div class="md-copyright__highlight">
-            v8.3.0 (Mauna Loa)
+            v8.4.0 (Kohala)
           </div>
         </div>
       </div>
@@ -3341,10 +3341,10 @@ added packages. If there are, only those packages need to be retained in that fi
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1590,10 +1590,10 @@ job it may have a different timezone to the host.</p>
 </li>
 </ol>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><span class="p">{</span>
-</span><span id="__span-0-2"><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exe&quot;</span><span class="p">,</span>
-</span><span id="__span-0-3"><span class="w">    </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-0-4"><span class="w">    </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-5"><span class="w">        </span><span class="nt">&quot;TZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Australia/Darwin&quot;</span>
+</span><span id="__span-0-2"><span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"exe"</span><span class="p">,</span>
+</span><span id="__span-0-3"><span class="w">    </span><span class="nt">"payload"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-0-4"><span class="w">    </span><span class="nt">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-5"><span class="w">        </span><span class="nt">"TZ"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Australia/Darwin"</span>
 </span><span id="__span-0-6"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-0-7"><span class="p">}</span>
 </span></code></pre></div>
@@ -1667,7 +1667,7 @@ JSONL and Parquet format. It can be called directly from within the payload of
 <a href="06-jobs-job-types.html#job-type-exe">exe</a>, <a href="06-jobs-job-types.html#job-type-pkg">pkg</a> and <a href="06-jobs-job-types.html#job-type-docker">docker</a> jobs.</p>
 <p>It can also be used directly in a <a href="06-jobs-job-types.html#job-type-cmd">cmd</a> job as a DIY version of a
 <code>db_to_s3</code> job. This is what such a job might look like in the YAML format
-supported by the <a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a>:</p>
+supported by the <a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a>:</p>
 <div class="language-yaml highlight"><pre><span></span><code><span id="__span-1-1"><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ersatz db_to_s3 type of job</span>
 </span><span id="__span-1-2">
 </span><span id="__span-1-3"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cmd</span>
@@ -1680,15 +1680,15 @@ supported by the <a href="22-upgrade-notes.html#the-lava-job-framework">lava job
 </span><span id="__span-1-10">
 </span><span id="__span-1-11"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
 </span><span id="__span-1-12"><span class="w">  </span><span class="no">/bin/sh -c</span>
-</span><span id="__span-1-13"><span class="w">  </span><span class="no">&quot;</span>
-</span><span id="__span-1-14"><span class="w">  </span><span class="no">echo &#39;SELECT a, b, c FROM my_schema.my_table&#39; |</span>
+</span><span id="__span-1-13"><span class="w">  </span><span class="no">"</span>
+</span><span id="__span-1-14"><span class="w">  </span><span class="no">echo 'SELECT a, b, c FROM my_schema.my_table' |</span>
 </span><span id="__span-1-15"><span class="w">  </span><span class="no">lava-sql</span>
 </span><span id="__span-1-16"><span class="w">  </span><span class="no">--format csv</span>
 </span><span id="__span-1-17"><span class="w">  </span><span class="no">--header</span>
-</span><span id="__span-1-18"><span class="w">  </span><span class="no">--conn-id &#39;&lt;{ db.conn_id }&gt;&#39;</span>
-</span><span id="__span-1-19"><span class="w">  </span><span class="no">--output &#39;{{ realm.s3_temp }}/{{ job.job_id }}/output.csv&#39;</span>
+</span><span id="__span-1-18"><span class="w">  </span><span class="no">--conn-id '&lt;{ db.conn_id }&gt;'</span>
+</span><span id="__span-1-19"><span class="w">  </span><span class="no">--output '{{ realm.s3_temp }}/{{ job.job_id }}/output.csv'</span>
 </span><span id="__span-1-20"><span class="w">  </span><span class="no">-</span>
-</span><span id="__span-1-21"><span class="w">  </span><span class="no">&quot;</span>
+</span><span id="__span-1-21"><span class="w">  </span><span class="no">"</span>
 </span><span id="__span-1-22">
 </span><span id="__span-1-23"><span class="nt">event_log</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Output file is {{ realm.s3_temp }}/{{ job.job_id }}/output.csv</span>
 </span></code></pre></div>
@@ -1707,14 +1707,14 @@ read the query from stdin.</p>
 </span><span id="__span-2-10">
 </span><span id="__span-2-11"><span class="nt">payload</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
 </span><span id="__span-2-12"><span class="w">  </span><span class="no">/bin/sh -c</span>
-</span><span id="__span-2-13"><span class="w">  </span><span class="no">&quot;</span>
+</span><span id="__span-2-13"><span class="w">  </span><span class="no">"</span>
 </span><span id="__span-2-14"><span class="w">  </span><span class="no">lava-sql</span>
 </span><span id="__span-2-15"><span class="w">  </span><span class="no">--format csv</span>
 </span><span id="__span-2-16"><span class="w">  </span><span class="no">--header</span>
-</span><span id="__span-2-17"><span class="w">  </span><span class="no">--conn-id &#39;&lt;{ db.conn_id }&gt;&#39;</span>
-</span><span id="__span-2-18"><span class="w">  </span><span class="no">--output &#39;{{ realm.s3_temp }}/{{ job.job_id }}/output.csv&#39;</span>
-</span><span id="__span-2-19"><span class="w">  </span><span class="no">&#39;{{ realm.s3_payloads }}/&lt;{ prefix.payload }&gt;/xyz.rsc/query.sql&#39;</span>
-</span><span id="__span-2-20"><span class="w">  </span><span class="no">&quot;</span>
+</span><span id="__span-2-17"><span class="w">  </span><span class="no">--conn-id '&lt;{ db.conn_id }&gt;'</span>
+</span><span id="__span-2-18"><span class="w">  </span><span class="no">--output '{{ realm.s3_temp }}/{{ job.job_id }}/output.csv'</span>
+</span><span id="__span-2-19"><span class="w">  </span><span class="no">'{{ realm.s3_payloads }}/&lt;{ prefix.payload }&gt;/xyz.rsc/query.sql'</span>
+</span><span id="__span-2-20"><span class="w">  </span><span class="no">"</span>
 </span><span id="__span-2-21">
 </span><span id="__span-2-22"><span class="nt">event_log</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Output file is {{ realm.s3_temp }}/{{ job.job_id }}/output.csv</span>
 </span></code></pre></div>
@@ -1727,9 +1727,9 @@ be specified. Rather than hard-wire that into the container, the easiest way to
 set this is by adding the following environment variable to the parameters in
 the job specification:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><span class="p">{</span>
-</span><span id="__span-3-2"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-3"><span class="w">        </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-4"><span class="w">         </span><span class="nt">&quot;AWS_DEFAULT_REGION&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ap-southeast-2&quot;</span>
+</span><span id="__span-3-2"><span class="w">    </span><span class="nt">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-3"><span class="w">        </span><span class="nt">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-4"><span class="w">         </span><span class="nt">"AWS_DEFAULT_REGION"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ap-southeast-2"</span>
 </span><span id="__span-3-5"><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-3-6"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-3-7"><span class="p">}</span>
@@ -1771,10 +1771,10 @@ unrelated to the dispatch timezone.</p>
 can be specified by adding the <code>TZ</code> environment variable to the job
 specification, thus:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><span class="p">{</span>
-</span><span id="__span-6-2"><span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pkg&quot;</span><span class="p">,</span>
-</span><span id="__span-6-3"><span class="w">    </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-6-4"><span class="w">    </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-6-5"><span class="w">        </span><span class="nt">&quot;TZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Australia/Darwin&quot;</span>
+</span><span id="__span-6-2"><span class="w">    </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"pkg"</span><span class="p">,</span>
+</span><span id="__span-6-3"><span class="w">    </span><span class="nt">"payload"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-6-4"><span class="w">    </span><span class="nt">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-5"><span class="w">        </span><span class="nt">"TZ"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Australia/Darwin"</span>
 </span><span id="__span-6-6"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-6-7"><span class="p">}</span>
 </span></code></pre></div>
@@ -1813,7 +1813,7 @@ using a lava connector to manage the underlying connection process.</p>
 and sftp in situations where it cannot verify the fingerprint of the remote
 host's public key. When this occurs, the client will drop into interactive mode
 to ask for confirmation to accept the key, like so:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1">The authenticity of host &#39;sftp.xyzzy.com (192.219.1.1)&#39; can&#39;t be established.
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1">The authenticity of host 'sftp.xyzzy.com (192.219.1.1)' can't be established.
 </span><span id="__span-7-2">RSA key fingerprint is SHA256:TXYwAhoSEfm6Me6RtFHJRUEGL9lTuHqySI6GyxVe//M.
 </span><span id="__span-7-3">RSA key fingerprint is MD5:52:b4:70:1d:c1:0e:aa:4d:32:8e:f8:7a:cb:f9:b8:7e.
 </span><span id="__span-7-4">Are you sure you want to continue connecting (yes/no)?
@@ -1914,7 +1914,7 @@ Jinja content of the var.</p>
       <div class="md-footer-social">
         <div class="md-copyright">
           <div class="md-copyright__highlight">
-            v8.3.0 (Mauna Loa)
+            v8.4.0 (Kohala)
           </div>
         </div>
       </div>
@@ -1931,10 +1931,10 @@ Jinja content of the var.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

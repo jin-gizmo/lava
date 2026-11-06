@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1143,11 +1143,6 @@
 
 
 <h1 id="release-notes">Release Notes<a class="headerlink" href="#release-notes" title="Permanent link">&para;</a></h1>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The historical release notes have been purged, because, well, who cares?
-The headers have been retained for old times sake.</p>
-</div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>See also <a href="22-upgrade-notes.html#upgrade-notes">Upgrade Notes</a>.</p>
@@ -1172,6 +1167,36 @@ The headers have been retained for old times sake.</p>
 </li>
 </ul>
 <h2 id="version-8">Version 8<a class="headerlink" href="#version-8" title="Permanent link">&para;</a></h2>
+<h4 id="version-840-kohala">Version 8.4.0 (<a href="https://en.wikipedia.org/wiki/Kohala_(mountain)">Kohala</a>)<a class="headerlink" href="#version-840-kohala" title="Permanent link">&para;</a></h4>
+<div class="admonition info">
+<p class="admonition-title">Introducing the lava sandbox ...</p>
+<p>Lava v8.4.0 introduces the <a class="autorefs autorefs-internal" title="The Lava Sandbox" href="10-installation-operation.html#the-lava-sandbox">lava sandbox</a>, a
+complete, functional lava environment for development and testing that runs
+locally in docker with a single CLI command. No AWS entanglement. No AWS
+costs.</p>
+</div>
+<p>There are no material changes in the lava code itself in this release.
+It primarily updates the underlying Python packages, docker base images
+etc for security currency. This was done primarily in response to
+<a href="https://github.com/advisories/GHSA-6q48-6c7w-9gw2">GHSA-6q48-6c7w-9gw2</a> that
+impacts the widely used Python
+<a href="https://github.com/certifi/python-certifi">certifi</a> package, as well as <strong>pip</strong>.</p>
+<p>Other changes include:</p>
+<ul>
+<li>
+<p>Minor updates to incidental aspects of code (e.g. some type hints).</p>
+</li>
+<li>
+<p>Minor extensions / refinements to the test setup.</p>
+</li>
+<li>
+<p>Minor updates to build logic for the lava docker images.</p>
+</li>
+<li>
+<p>Minor updates to build logic for other components (e.g. the addition of the
+    <code>scan</code> <strong>make</strong> target for security scanning using <a href="https://trivy.dev">trivy</a>).</p>
+</li>
+</ul>
 <h4 id="version-830-mauna-loa">Version 8.3.0 (<a href="https://en.wikipedia.org/wiki/Mauna_Loa">Mauna Loa</a>)<a class="headerlink" href="#version-830-mauna-loa" title="Permanent link">&para;</a></h4>
 <p>This release includes reasonable subset of the lava testing components. Credit
 and thanks to James Nguyen for a lot of effort to bring all this together into
@@ -1245,7 +1270,7 @@ libraries installed.</p>
     utility that can be used on the DynamoDB tables and on local files.</p>
 </li>
 <li>
-<p>The <a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a> has enhanced support
+<p>The <a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a> has enhanced support
     for <a href="11-lava-job-framework.html#working-with-the-json-schemas">utilising the JSON schemas</a>
     to provide syntax support in IDEs and pre-install validation.
     To run the checks manually:
@@ -1290,7 +1315,7 @@ libraries installed.</p>
 </li>
 <li>
 <p>Some minor usability improvements have been made to the
-    <a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a>. This includes better support
+    <a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a>. This includes better support
     for using external Docker registries for <a href="06-jobs-job-types.html#job-type-docker">docker</a> job
     payloads as an alternative to ECR for the vanishingly rare circumstances
     in which this is a good idea.</p>
@@ -1366,13 +1391,13 @@ been made to elements of packaging, deployment and documentation.</p>
 <ul>
 <li>
 <p>Added the <a href="16-commands-utilities.html#lava-new-utility">lava-new</a> utility. This is the preferred way
-    of creating a new <a href="22-upgrade-notes.html#the-lava-job-framework">lava-job-framework</a> project and
+    of creating a new <a href="11-lava-job-framework.html#the-lava-job-framework">lava-job-framework</a> project and
     replaces the old cookiecutter bundle approach. The latter is still available
     but is now deprecated.</p>
 </li>
 <li>
 <p>Some slight reordering and updating of questions has been done when creating
-    a new <a href="22-upgrade-notes.html#the-lava-job-framework">lava-job-framework</a> project.</p>
+    a new <a href="11-lava-job-framework.html#the-lava-job-framework">lava-job-framework</a> project.</p>
 </li>
 <li>
 <p>A bunch of packaging stuff has been updated for the open source release.</p>
@@ -1414,7 +1439,7 @@ been made to elements of packaging, deployment and documentation.</p>
     &nbsp;&nbsp;&nbsp;&nbsp;<code>123456789123.dkr.ecr.ap-southeast-2.amazonaws.com/dist/lava/amzn2023/base</code>    </p>
 </li>
 <li>
-<p>The <a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a> defaults have been
+<p>The <a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a> defaults have been
     updated to reference the public images, by default. This change will not
     affect existing projects and can be altered on a per project basis, as
     needed.</p>
@@ -1437,7 +1462,7 @@ been made to elements of packaging, deployment and documentation.</p>
     in case, but lava itself no longer uses it.</p>
 </li>
 </ul>
-<h4 id="version-81-kilauea">Version 8.1 (<a href="https://en.wikipedia.org/wiki/Kīlauea">Kīlauea</a>)<a class="headerlink" href="#version-81-kilauea" title="Permanent link">&para;</a></h4>
+<h4 id="version-81-kilauea">Version 8.1 (<a href="https://en.wikipedia.org/wiki/Kīlauea">Kīlauea</a>) <sup id="fnref:5"><a class="footnote-ref" href="#fn:5">1</a></sup><a class="headerlink" href="#version-81-kilauea" title="Permanent link">&para;</a></h4>
 <h4 id="version-80-incahuasi">Version 8.0 (<a href="https://en.wikipedia.org/wiki/Incahuasi">Incahuasi</a>)<a class="headerlink" href="#version-80-incahuasi" title="Permanent link">&para;</a></h4>
 <h2 id="version-7">Version 7<a class="headerlink" href="#version-7" title="Permanent link">&para;</a></h2>
 <h4 id="version-71-pichincha">Version 7.1 (<a href="https://en.wikipedia.org/wiki/https://en.wikipedia.org/wiki/Pichincha_(volcano)">Pichincha</a>)<a class="headerlink" href="#version-71-pichincha" title="Permanent link">&para;</a></h4>
@@ -1454,6 +1479,15 @@ been made to elements of packaging, deployment and documentation.</p>
 <h4 id="version-43-volcan-wolf">Version 4.3 (<a href="https://en.wikipedia.org/wiki/Volcán_Wolf">Volcán Wolf)</a><a class="headerlink" href="#version-43-volcan-wolf" title="Permanent link">&para;</a></h4>
 <h4 id="version-42-fernandina">Version 4.2 (<a href="https://en.wikipedia.org/wiki/Fernandina_Island">Fernandina</a>)<a class="headerlink" href="#version-42-fernandina" title="Permanent link">&para;</a></h4>
 <h4 id="version-41-sierra-negra">Version 4.1 (<a href="https://en.wikipedia.org/wiki/Sierra_Negra_(Galápagos)">Sierra Negra</a>)<a class="headerlink" href="#version-41-sierra-negra" title="Permanent link">&para;</a></h4>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:5">
+<p>The historical release notes have been purged, because, well, who
+cares?  The headers have been retained for old times sake.&#160;<a class="footnote-backref" href="#fnref:5" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
 
 
 
@@ -1489,7 +1523,7 @@ been made to elements of packaging, deployment and documentation.</p>
       <div class="md-footer-social">
         <div class="md-copyright">
           <div class="md-copyright__highlight">
-            v8.3.0 (Mauna Loa)
+            v8.4.0 (Kohala)
           </div>
         </div>
       </div>
@@ -1506,10 +1540,10 @@ been made to elements of packaging, deployment and documentation.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

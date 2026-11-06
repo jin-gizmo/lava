@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1201,27 +1201,27 @@ from the realm specification. An action specification at the job level will
 override one at the realm level.</p>
 <p>A typical action specification within a job or realm specification looks like:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><span class="p">{</span>
-</span><span id="__span-0-2"><span class="w">  </span><span class="nt">&quot;on_fail&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-0-2"><span class="w">  </span><span class="nt">"on_fail"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-0-3"><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-0-4"><span class="w">      </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sns&quot;</span><span class="p">,</span>
-</span><span id="__span-0-5"><span class="w">      </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{job.job_id}}@{{realm.realm}} ({{job.run_id}}) failed: {{result.error}}&quot;</span><span class="p">,</span>
-</span><span id="__span-0-6"><span class="w">      </span><span class="nt">&quot;topic&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:sns:ap-southeast-2:990565496141:lava-proto-notices&quot;</span>
+</span><span id="__span-0-4"><span class="w">      </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sns"</span><span class="p">,</span>
+</span><span id="__span-0-5"><span class="w">      </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{job.job_id}}@{{realm.realm}} ({{job.run_id}}) failed: {{result.error}}"</span><span class="p">,</span>
+</span><span id="__span-0-6"><span class="w">      </span><span class="nt">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"arn:aws:sns:ap-southeast-2:990565496141:lava-proto-notices"</span>
 </span><span id="__span-0-7"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-0-8"><span class="w">  </span><span class="p">],</span>
-</span><span id="__span-0-9"><span class="w">  </span><span class="nt">&quot;on_retry&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-0-9"><span class="w">  </span><span class="nt">"on_retry"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-0-10"><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-0-11"><span class="w">      </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;log&quot;</span><span class="p">,</span>
-</span><span id="__span-0-12"><span class="w">      </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Failed on attempt {{ globals.lava.iteration }} but will try again!&quot;</span>
+</span><span id="__span-0-11"><span class="w">      </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"log"</span><span class="p">,</span>
+</span><span id="__span-0-12"><span class="w">      </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Failed on attempt {{ globals.lava.iteration }} but will try again!"</span>
 </span><span id="__span-0-13"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-0-14"><span class="w">  </span><span class="p">],</span>
-</span><span id="__span-0-15"><span class="w">  </span><span class="nt">&quot;on_success&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-0-15"><span class="w">  </span><span class="nt">"on_success"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-0-16"><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-0-17"><span class="w">      </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;log&quot;</span><span class="p">,</span>
-</span><span id="__span-0-18"><span class="w">      </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;It worked!&quot;</span>
+</span><span id="__span-0-17"><span class="w">      </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"log"</span><span class="p">,</span>
+</span><span id="__span-0-18"><span class="w">      </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"It worked!"</span>
 </span><span id="__span-0-19"><span class="w">    </span><span class="p">},</span>
 </span><span id="__span-0-20"><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-0-21"><span class="w">      </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dispatch&quot;</span><span class="p">,</span>
-</span><span id="__span-0-22"><span class="w">      </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;downstream_job&quot;</span>
+</span><span id="__span-0-21"><span class="w">      </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dispatch"</span><span class="p">,</span>
+</span><span id="__span-0-22"><span class="w">      </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"downstream_job"</span>
 </span><span id="__span-0-23"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-0-24"><span class="w">  </span><span class="p">]</span>
 </span><span id="__span-0-25"><span class="p">}</span>
@@ -1448,10 +1448,10 @@ for more information.</p>
 AWS SES can be set in the <a href="04-dynamodb-tables.html#the-realms-table">realms table</a> by setting
 entries in the <code>config</code> realm entry, thus:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><span class="p">{</span>
-</span><span id="__span-1-2"><span class="w">  </span><span class="nt">&quot;...&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;... other realm related elements ...&quot;</span><span class="p">,</span>
-</span><span id="__span-1-3"><span class="w">  </span><span class="nt">&quot;config&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-4"><span class="w">    </span><span class="nt">&quot;ses_region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;... SES region name ...&quot;</span><span class="p">,</span>
-</span><span id="__span-1-5"><span class="w">    </span><span class="nt">&quot;ses_from&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;... Default source email address&quot;</span>
+</span><span id="__span-1-2"><span class="w">  </span><span class="nt">"..."</span><span class="p">:</span><span class="w"> </span><span class="s2">"... other realm related elements ..."</span><span class="p">,</span>
+</span><span id="__span-1-3"><span class="w">  </span><span class="nt">"config"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-4"><span class="w">    </span><span class="nt">"ses_region"</span><span class="p">:</span><span class="w"> </span><span class="s2">"... SES region name ..."</span><span class="p">,</span>
+</span><span id="__span-1-5"><span class="w">    </span><span class="nt">"ses_from"</span><span class="p">:</span><span class="w"> </span><span class="s2">"... Default source email address"</span>
 </span><span id="__span-1-6"><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-1-7"><span class="p">}</span>
 </span></code></pre></div>
@@ -1566,43 +1566,43 @@ only provides workers with permission to put events on the default event bus.</p
 for more information.</p>
 <p>This is the minimal action specification:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><span class="p">{</span>
-</span><span id="__span-2-2"><span class="w">    </span><span class="nt">&quot;on_success&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-2-2"><span class="w">    </span><span class="nt">"on_success"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-2-3"><span class="w">        </span><span class="p">{</span>
-</span><span id="__span-2-4"><span class="w">            </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event&quot;</span>
+</span><span id="__span-2-4"><span class="w">            </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"event"</span>
 </span><span id="__span-2-5"><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-2-6"><span class="w">    </span><span class="p">]</span>
 </span><span id="__span-2-7"><span class="p">}</span>
 </span></code></pre></div>
 <p>It will produce an event in the default event bus like so:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><span class="p">{</span>
-</span><span id="__span-3-2"><span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
-</span><span id="__span-3-3"><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1bdf1ead-95ef-79fd-1342-8f8ff1e57765&quot;</span><span class="p">,</span>
-</span><span id="__span-3-4"><span class="w">  </span><span class="nt">&quot;detail-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Lava Job Action&quot;</span><span class="p">,</span>
-</span><span id="__span-3-5"><span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lava.dev&quot;</span><span class="p">,</span>
-</span><span id="__span-3-6"><span class="w">  </span><span class="nt">&quot;account&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123456789012&quot;</span><span class="p">,</span>
-</span><span id="__span-3-7"><span class="w">  </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-07-25T05:12:23Z&quot;</span><span class="p">,</span>
-</span><span id="__span-3-8"><span class="w">  </span><span class="nt">&quot;region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ap-southeast-2&quot;</span><span class="p">,</span>
-</span><span id="__span-3-9"><span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-</span><span id="__span-3-10"><span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-11"><span class="w">    </span><span class="nt">&quot;realm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dev&quot;</span><span class="p">,</span>
-</span><span id="__span-3-12"><span class="w">    </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;core&quot;</span><span class="p">,</span>
-</span><span id="__span-3-13"><span class="w">    </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;action/event/default&quot;</span><span class="p">,</span>
-</span><span id="__span-3-14"><span class="w">    </span><span class="nt">&quot;run_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;05175b7c-8b0d-40ed-af31-0bc846bbe400&quot;</span><span class="p">,</span>
-</span><span id="__span-3-15"><span class="w">    </span><span class="nt">&quot;exit_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
+</span><span id="__span-3-2"><span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="p">,</span>
+</span><span id="__span-3-3"><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1bdf1ead-95ef-79fd-1342-8f8ff1e57765"</span><span class="p">,</span>
+</span><span id="__span-3-4"><span class="w">  </span><span class="nt">"detail-type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Lava Job Action"</span><span class="p">,</span>
+</span><span id="__span-3-5"><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lava.dev"</span><span class="p">,</span>
+</span><span id="__span-3-6"><span class="w">  </span><span class="nt">"account"</span><span class="p">:</span><span class="w"> </span><span class="s2">"123456789012"</span><span class="p">,</span>
+</span><span id="__span-3-7"><span class="w">  </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2021-07-25T05:12:23Z"</span><span class="p">,</span>
+</span><span id="__span-3-8"><span class="w">  </span><span class="nt">"region"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ap-southeast-2"</span><span class="p">,</span>
+</span><span id="__span-3-9"><span class="w">  </span><span class="nt">"resources"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+</span><span id="__span-3-10"><span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-11"><span class="w">    </span><span class="nt">"realm"</span><span class="p">:</span><span class="w"> </span><span class="s2">"dev"</span><span class="p">,</span>
+</span><span id="__span-3-12"><span class="w">    </span><span class="nt">"worker"</span><span class="p">:</span><span class="w"> </span><span class="s2">"core"</span><span class="p">,</span>
+</span><span id="__span-3-13"><span class="w">    </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"action/event/default"</span><span class="p">,</span>
+</span><span id="__span-3-14"><span class="w">    </span><span class="nt">"run_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"05175b7c-8b0d-40ed-af31-0bc846bbe400"</span><span class="p">,</span>
+</span><span id="__span-3-15"><span class="w">    </span><span class="nt">"exit_status"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span>
 </span><span id="__span-3-16"><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-3-17"><span class="p">}</span>
 </span></code></pre></div>
 <p>This is a sample, custom event:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><span class="p">{</span>
-</span><span id="__span-4-2"><span class="w">    </span><span class="nt">&quot;on_success&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-4-2"><span class="w">    </span><span class="nt">"on_success"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-4-3"><span class="w">        </span><span class="p">{</span>
-</span><span id="__span-4-4"><span class="w">            </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;event&quot;</span><span class="p">,</span>
-</span><span id="__span-4-5"><span class="w">            </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-6"><span class="w">                </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ job.job_id }}&quot;</span><span class="p">,</span>
-</span><span id="__span-4-7"><span class="w">                </span><span class="nt">&quot;realm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ realm.realm }}&quot;</span><span class="p">,</span>
-</span><span id="__span-4-8"><span class="w">                </span><span class="nt">&quot;result&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{result | tojson}}&quot;</span><span class="p">,</span>
-</span><span id="__span-4-9"><span class="w">                </span><span class="nt">&quot;run_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{job.run_id }}&quot;</span><span class="p">,</span>
-</span><span id="__span-4-10"><span class="w">                </span><span class="nt">&quot;status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;success&quot;</span>
+</span><span id="__span-4-4"><span class="w">            </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"event"</span><span class="p">,</span>
+</span><span id="__span-4-5"><span class="w">            </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-6"><span class="w">                </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ job.job_id }}"</span><span class="p">,</span>
+</span><span id="__span-4-7"><span class="w">                </span><span class="nt">"realm"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ realm.realm }}"</span><span class="p">,</span>
+</span><span id="__span-4-8"><span class="w">                </span><span class="nt">"result"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{result | tojson}}"</span><span class="p">,</span>
+</span><span id="__span-4-9"><span class="w">                </span><span class="nt">"run_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{job.run_id }}"</span><span class="p">,</span>
+</span><span id="__span-4-10"><span class="w">                </span><span class="nt">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span>
 </span><span id="__span-4-11"><span class="w">            </span><span class="p">}</span>
 </span><span id="__span-4-12"><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-4-13"><span class="w">    </span><span class="p">]</span>
@@ -1904,21 +1904,21 @@ for more information.</p>
 <p>Refer to <a href="13-jinja-rendering-in-lava.html#jinja-rendering-in-lava">Jinja Rendering in Lava</a>
 for more information.</p>
 <p>This is an example of how a JSON formatted object can be sent:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1">{
-</span><span id="__span-6-2">    &quot;on_success&quot; : [
-</span><span id="__span-6-3">        {
-</span><span id="__span-6-4">            &quot;action&quot;: &quot;sns&quot;,
-</span><span id="__span-6-5">            &quot;message&quot;: {
-</span><span id="__span-6-6">                &quot;key1&quot;: &quot;Hello world&quot;,
-</span><span id="__span-6-7">                &quot;key2&quot;: {
-</span><span id="__span-6-8">                    &quot;key2a&quot;: &quot;{{ job.globals.a_global }}&quot;,
-</span><span id="__span-6-9">                    &quot;key2b&quot;: 42
-</span><span id="__span-6-10">                }
-</span><span id="__span-6-11">            },
-</span><span id="__span-6-12">            &quot;topic&quot;: &quot;arn:aws:sns:ap-southeast-2:123456789012:mytopic&quot;
-</span><span id="__span-6-13">        }
-</span><span id="__span-6-14">    ]
-</span><span id="__span-6-15">}
+<div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><span class="p">{</span>
+</span><span id="__span-6-2"><span class="w">    </span><span class="nt">"on_success"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-6-3"><span class="w">        </span><span class="p">{</span>
+</span><span id="__span-6-4"><span class="w">            </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sns"</span><span class="p">,</span>
+</span><span id="__span-6-5"><span class="w">            </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-6"><span class="w">                </span><span class="nt">"key1"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello world"</span><span class="p">,</span>
+</span><span id="__span-6-7"><span class="w">                </span><span class="nt">"key2"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-8"><span class="w">                    </span><span class="nt">"key2a"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ job.globals.a_global }}"</span><span class="p">,</span>
+</span><span id="__span-6-9"><span class="w">                    </span><span class="nt">"key2b"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span>
+</span><span id="__span-6-10"><span class="w">                </span><span class="p">}</span>
+</span><span id="__span-6-11"><span class="w">            </span><span class="p">},</span>
+</span><span id="__span-6-12"><span class="w">            </span><span class="nt">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"arn:aws:sns:ap-southeast-2:123456789012:mytopic"</span>
+</span><span id="__span-6-13"><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-6-14"><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-6-15"><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="action-type-sqs">Action type: sqs<a class="headerlink" href="#action-type-sqs" title="Permanent link">&para;</a></h2>
 <p>The <strong>sqs</strong> action type sends a message to an SQS queue.</p>
@@ -2025,21 +2025,21 @@ for more information.</p>
 <p>Refer to <a href="13-jinja-rendering-in-lava.html#jinja-rendering-in-lava">Jinja Rendering in Lava</a>
 for more information.</p>
 <p>This is an example of how a JSON formatted object can be sent:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1">{
-</span><span id="__span-7-2">    &quot;on_success&quot; : [
-</span><span id="__span-7-3">        {
-</span><span id="__span-7-4">            &quot;action&quot;: &quot;sqs&quot;,
-</span><span id="__span-7-5">            &quot;message&quot;: {
-</span><span id="__span-7-6">                &quot;key1&quot;: &quot;Hello world&quot;,
-</span><span id="__span-7-7">                &quot;key2&quot;: {
-</span><span id="__span-7-8">                    &quot;key2a&quot;: &quot;{{ job.globals.a_global }}&quot;,
-</span><span id="__span-7-9">                    &quot;key2b&quot;: 42
-</span><span id="__span-7-10">                }
-</span><span id="__span-7-11">            },
-</span><span id="__span-7-12">            &quot;topic&quot;: &quot;myqueue&quot;
-</span><span id="__span-7-13">        }
-</span><span id="__span-7-14">    ]
-</span><span id="__span-7-15">}
+<div class="language-json highlight"><pre><span></span><code><span id="__span-7-1"><span class="p">{</span>
+</span><span id="__span-7-2"><span class="w">    </span><span class="nt">"on_success"</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-7-3"><span class="w">        </span><span class="p">{</span>
+</span><span id="__span-7-4"><span class="w">            </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sqs"</span><span class="p">,</span>
+</span><span id="__span-7-5"><span class="w">            </span><span class="nt">"message"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-6"><span class="w">                </span><span class="nt">"key1"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hello world"</span><span class="p">,</span>
+</span><span id="__span-7-7"><span class="w">                </span><span class="nt">"key2"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-8"><span class="w">                    </span><span class="nt">"key2a"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ job.globals.a_global }}"</span><span class="p">,</span>
+</span><span id="__span-7-9"><span class="w">                    </span><span class="nt">"key2b"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span>
+</span><span id="__span-7-10"><span class="w">                </span><span class="p">}</span>
+</span><span id="__span-7-11"><span class="w">            </span><span class="p">},</span>
+</span><span id="__span-7-12"><span class="w">            </span><span class="nt">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"myqueue"</span>
+</span><span id="__span-7-13"><span class="w">        </span><span class="p">}</span>
+</span><span id="__span-7-14"><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-7-15"><span class="p">}</span>
 </span></code></pre></div>
 <h2 id="action-type-state">Action type: state<a class="headerlink" href="#action-type-state" title="Permanent link">&para;</a></h2>
 <p>The <strong>state</strong> action type allows jobs to post <a href="09-lava-state-manager.html#the-lava-state-manager">state items</a>
@@ -2192,7 +2192,7 @@ for more information.</p>
       <div class="md-footer-social">
         <div class="md-copyright">
           <div class="md-copyright__highlight">
-            v8.3.0 (Mauna Loa)
+            v8.4.0 (Kohala)
           </div>
         </div>
       </div>
@@ -2209,10 +2209,10 @@ for more information.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

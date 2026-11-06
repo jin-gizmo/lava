@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1834,22 +1834,22 @@ entries in the crontab that don't belong to lava.</p>
 <a href="06-jobs-job-types.html#job-type-lavasched">lavasched</a> job. Note the two different
 <code>dispatcher</code> items that serve related but separate purposes.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><span class="p">{</span>
-</span><span id="__span-1-2"><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Rebuild the crontab for the dispatcher&quot;</span><span class="p">,</span>
-</span><span id="__span-1-3"><span class="w">  </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sydney&quot;</span><span class="p">,</span>
-</span><span id="__span-1-4"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-1-5"><span class="w">  </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-1-6"><span class="w">  </span><span class="nt">&quot;owner&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-1-7"><span class="w">  </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-8"><span class="w">    </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sydney&quot;</span><span class="p">,</span>
-</span><span id="__span-1-9"><span class="w">    </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-10"><span class="w">      </span><span class="nt">&quot;CRON_TZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Australia/Sydney&quot;</span><span class="p">,</span>
-</span><span id="__span-1-11"><span class="w">      </span><span class="nt">&quot;PATH&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/usr/local/bin:/bin:/usr/bin&quot;</span>
+</span><span id="__span-1-2"><span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rebuild the crontab for the dispatcher"</span><span class="p">,</span>
+</span><span id="__span-1-3"><span class="w">  </span><span class="nt">"dispatcher"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sydney"</span><span class="p">,</span>
+</span><span id="__span-1-4"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-1-5"><span class="w">  </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-1-6"><span class="w">  </span><span class="nt">"owner"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-1-7"><span class="w">  </span><span class="nt">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-8"><span class="w">    </span><span class="nt">"dispatcher"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sydney"</span><span class="p">,</span>
+</span><span id="__span-1-9"><span class="w">    </span><span class="nt">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-10"><span class="w">      </span><span class="nt">"CRON_TZ"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Australia/Sydney"</span><span class="p">,</span>
+</span><span id="__span-1-11"><span class="w">      </span><span class="nt">"PATH"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/usr/local/bin:/bin:/usr/bin"</span>
 </span><span id="__span-1-12"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-1-13"><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-1-14"><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
-</span><span id="__span-1-15"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0-59/15 * * * *&quot;</span><span class="p">,</span>
-</span><span id="__span-1-16"><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lavasched&quot;</span><span class="p">,</span>
-</span><span id="__span-1-17"><span class="w">  </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;core&quot;</span>
+</span><span id="__span-1-14"><span class="w">  </span><span class="nt">"payload"</span><span class="p">:</span><span class="w"> </span><span class="s2">"--"</span><span class="p">,</span>
+</span><span id="__span-1-15"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0-59/15 * * * *"</span><span class="p">,</span>
+</span><span id="__span-1-16"><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lavasched"</span><span class="p">,</span>
+</span><span id="__span-1-17"><span class="w">  </span><span class="nt">"worker"</span><span class="p">:</span><span class="w"> </span><span class="s2">"core"</span>
 </span><span id="__span-1-18"><span class="p">}</span>
 </span></code></pre></div>
 <div class="admonition info">
@@ -1883,22 +1883,22 @@ much simpler than changing all of the other jobs and still allows the scheduled
 dispatch process to be re-enabled when required.</p>
 <p>For example:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><span class="p">{</span>
-</span><span id="__span-2-2"><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Rebuild the crontab for the dispatcher&quot;</span><span class="p">,</span>
-</span><span id="__span-2-3"><span class="w">  </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;**Disabled** Sydney&quot;</span><span class="p">,</span>
-</span><span id="__span-2-4"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-2-5"><span class="w">  </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-2-6"><span class="w">  </span><span class="nt">&quot;owner&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-2-7"><span class="w">  </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-8"><span class="w">    </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;**Disabled** Sydney&quot;</span><span class="p">,</span>
-</span><span id="__span-2-9"><span class="w">    </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-10"><span class="w">      </span><span class="nt">&quot;CRON_TZ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Australia/Sydney&quot;</span><span class="p">,</span>
-</span><span id="__span-2-11"><span class="w">      </span><span class="nt">&quot;PATH&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/usr/local/bin:/bin:/usr/bin&quot;</span><span class="p">,</span>
+</span><span id="__span-2-2"><span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rebuild the crontab for the dispatcher"</span><span class="p">,</span>
+</span><span id="__span-2-3"><span class="w">  </span><span class="nt">"dispatcher"</span><span class="p">:</span><span class="w"> </span><span class="s2">"**Disabled** Sydney"</span><span class="p">,</span>
+</span><span id="__span-2-4"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-2-5"><span class="w">  </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-2-6"><span class="w">  </span><span class="nt">"owner"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-2-7"><span class="w">  </span><span class="nt">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-8"><span class="w">    </span><span class="nt">"dispatcher"</span><span class="p">:</span><span class="w"> </span><span class="s2">"**Disabled** Sydney"</span><span class="p">,</span>
+</span><span id="__span-2-9"><span class="w">    </span><span class="nt">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-10"><span class="w">      </span><span class="nt">"CRON_TZ"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Australia/Sydney"</span><span class="p">,</span>
+</span><span id="__span-2-11"><span class="w">      </span><span class="nt">"PATH"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/usr/local/bin:/bin:/usr/bin"</span><span class="p">,</span>
 </span><span id="__span-2-12"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-2-13"><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-2-14"><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
-</span><span id="__span-2-15"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0-59/15 * * * *&quot;</span><span class="p">,</span>
-</span><span id="__span-2-16"><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;lavasched&quot;</span><span class="p">,</span>
-</span><span id="__span-2-17"><span class="w">  </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;core&quot;</span>
+</span><span id="__span-2-14"><span class="w">  </span><span class="nt">"payload"</span><span class="p">:</span><span class="w"> </span><span class="s2">"--"</span><span class="p">,</span>
+</span><span id="__span-2-15"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0-59/15 * * * *"</span><span class="p">,</span>
+</span><span id="__span-2-16"><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lavasched"</span><span class="p">,</span>
+</span><span id="__span-2-17"><span class="w">  </span><span class="nt">"worker"</span><span class="p">:</span><span class="w"> </span><span class="s2">"core"</span>
 </span><span id="__span-2-18"><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="schedule-specifications">Schedule Specifications<a class="headerlink" href="#schedule-specifications" title="Permanent link">&para;</a></h3>
@@ -1986,16 +1986,16 @@ and assume the local timezone of the worker running the
 <p>The simplest form of schedule is a simple crontab string:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><span class="p">{</span>
 </span><span id="__span-3-2"><span class="w">  </span><span class="err">...</span>
-</span><span id="__span-3-3"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 12 * * Mon&quot;</span><span class="p">,</span>
+</span><span id="__span-3-3"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0 12 * * Mon"</span><span class="p">,</span>
 </span><span id="__span-3-4"><span class="w">  </span><span class="err">...</span>
 </span><span id="__span-3-5"><span class="p">}</span>
 </span></code></pre></div>
 <p>This one will run the job at midday on weekdays and 2pm on weekends.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><span class="p">{</span>
 </span><span id="__span-4-2"><span class="w">  </span><span class="err">...</span>
-</span><span id="__span-4-3"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-4-4"><span class="w">    </span><span class="s2">&quot;0 12 * * 1-5&quot;</span><span class="p">,</span>
-</span><span id="__span-4-5"><span class="w">    </span><span class="s2">&quot;0 14 * * 0,6&quot;</span>
+</span><span id="__span-4-3"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-4-4"><span class="w">    </span><span class="s2">"0 12 * * 1-5"</span><span class="p">,</span>
+</span><span id="__span-4-5"><span class="w">    </span><span class="s2">"0 14 * * 0,6"</span>
 </span><span id="__span-4-6"><span class="w">  </span><span class="p">],</span>
 </span><span id="__span-4-7"><span class="w">  </span><span class="err">...</span>
 </span><span id="__span-4-8"><span class="p">}</span>
@@ -2004,14 +2004,14 @@ and assume the local timezone of the worker running the
 after that. Note that in this example, UTC is specified in the date entries.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><span class="p">{</span>
 </span><span id="__span-5-2"><span class="w">  </span><span class="err">...</span>
-</span><span id="__span-5-3"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-5-3"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-5-4"><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-5-5"><span class="w">      </span><span class="nt">&quot;crontab&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 12 * * *&quot;</span><span class="p">,</span>
-</span><span id="__span-5-6"><span class="w">      </span><span class="nt">&quot;to&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-06-30T00:00:00Z&quot;</span>
+</span><span id="__span-5-5"><span class="w">      </span><span class="nt">"crontab"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0 12 * * *"</span><span class="p">,</span>
+</span><span id="__span-5-6"><span class="w">      </span><span class="nt">"to"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2019-06-30T00:00:00Z"</span>
 </span><span id="__span-5-7"><span class="w">    </span><span class="p">},</span>
 </span><span id="__span-5-8"><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-5-9"><span class="w">      </span><span class="nt">&quot;crontab&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 14 * * *&quot;</span><span class="p">,</span>
-</span><span id="__span-5-10"><span class="w">      </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-06-30T00:00:00Z&quot;</span>
+</span><span id="__span-5-9"><span class="w">      </span><span class="nt">"crontab"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0 14 * * *"</span><span class="p">,</span>
+</span><span id="__span-5-10"><span class="w">      </span><span class="nt">"from"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2019-06-30T00:00:00Z"</span>
 </span><span id="__span-5-11"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-5-12"><span class="w">  </span><span class="p">],</span>
 </span><span id="__span-5-13"><span class="w">  </span><span class="err">...</span>
@@ -2021,10 +2021,10 @@ after that. Note that in this example, UTC is specified in the date entries.</p>
 is not active. Note that <code>from</code> is greater than <code>to</code> in this case.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-6-1"><span class="p">{</span>
 </span><span id="__span-6-2"><span class="w">  </span><span class="err">...</span>
-</span><span id="__span-6-3"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-6-4"><span class="w">    </span><span class="nt">&quot;crontab&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0 12 * * *&quot;</span><span class="p">,</span>
-</span><span id="__span-6-5"><span class="w">    </span><span class="nt">&quot;from&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-03-01T00:00:00+11:00&quot;</span><span class="p">,</span>
-</span><span id="__span-6-6"><span class="w">    </span><span class="nt">&quot;to:&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-02-01T00:00:00+11:00&quot;</span>
+</span><span id="__span-6-3"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-6-4"><span class="w">    </span><span class="nt">"crontab"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0 12 * * *"</span><span class="p">,</span>
+</span><span id="__span-6-5"><span class="w">    </span><span class="nt">"from"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2019-03-01T00:00:00+11:00"</span><span class="p">,</span>
+</span><span id="__span-6-6"><span class="w">    </span><span class="nt">"to:"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2019-02-01T00:00:00+11:00"</span>
 </span><span id="__span-6-7"><span class="w">  </span><span class="p">},</span>
 </span><span id="__span-6-8"><span class="w">  </span><span class="err">...</span>
 </span><span id="__span-6-9"><span class="p">}</span>
@@ -2089,20 +2089,20 @@ following format:</p>
 </span><span id="__span-7-8">&lt;JOB_ID&gt;<span class="w"> </span><span class="o">[</span>--delay<span class="w"> </span>DURATION<span class="o">]</span><span class="w"> </span><span class="o">[</span>--global<span class="w"> </span>&lt;GLOBAL&gt;<span class="o">=</span>&lt;VALUE&gt;<span class="o">]</span><span class="w"> </span>...<span class="w"> </span><span class="o">[</span>--param<span class="w"> </span>&lt;PARAM&gt;<span class="o">=</span>&lt;VALUE&gt;<span class="w"> </span><span class="o">]</span><span class="w"> </span>...
 </span></code></pre></div>
 <p>For example:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><span class="c1"># Dispatch the job &quot;my-job&quot; with no parameters.</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><span class="c1"># Dispatch the job "my-job" with no parameters.</span>
 </span><span id="__span-8-2">my-job
 </span><span id="__span-8-3">
-</span><span id="__span-8-4"><span class="c1"># Dispatch the job &quot;my-job&quot; with some additional parameters.</span>
-</span><span id="__span-8-5">my-job<span class="w"> </span>-p<span class="w"> </span><span class="nv">timeout</span><span class="o">=</span>20m<span class="w"> </span>-p<span class="w"> </span><span class="nv">flow</span><span class="o">=</span>Pahoehoe<span class="w"> </span>-g<span class="w"> </span><span class="nv">planet</span><span class="o">=</span>Mars<span class="w"> </span>-g<span class="w"> </span><span class="nv">name</span><span class="o">=</span><span class="s1">&#39;Alba Mons&#39;</span>
+</span><span id="__span-8-4"><span class="c1"># Dispatch the job "my-job" with some additional parameters.</span>
+</span><span id="__span-8-5">my-job<span class="w"> </span>-p<span class="w"> </span><span class="nv">timeout</span><span class="o">=</span>20m<span class="w"> </span>-p<span class="w"> </span><span class="nv">flow</span><span class="o">=</span>Pahoehoe<span class="w"> </span>-g<span class="w"> </span><span class="nv">planet</span><span class="o">=</span>Mars<span class="w"> </span>-g<span class="w"> </span><span class="nv">name</span><span class="o">=</span><span class="s1">'Alba Mons'</span>
 </span><span id="__span-8-6">
-</span><span id="__span-8-7"><span class="c1"># Dispatch the job &quot;my-job&quot; with a delay of 3 minutes</span>
+</span><span id="__span-8-7"><span class="c1"># Dispatch the job "my-job" with a delay of 3 minutes</span>
 </span><span id="__span-8-8">my-job<span class="w"> </span>-d<span class="w"> </span>3m
 </span></code></pre></div>
 <p>This is one way to send a dispatch message via the helper:</p>
 <div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><span class="c1"># Get the topic ARN then ...</span>
 </span><span id="__span-9-2">aws<span class="w"> </span>sns<span class="w"> </span>publish<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-9-3"><span class="w">    </span>--topic-arn<span class="w"> </span><span class="s2">&quot;arn:aws:sns:us-west-2:0123456789012:lava-&lt;REALM&gt;-dispatch&quot;</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-9-4"><span class="w">    </span>--message<span class="w"> </span><span class="s2">&quot;my-job -p timeout=20m -p flow=Pahoehoe -g planet=Mars -g name=&#39;Alba Mons&#39;&quot;</span>
+</span><span id="__span-9-3"><span class="w">    </span>--topic-arn<span class="w"> </span><span class="s2">"arn:aws:sns:us-west-2:0123456789012:lava-&lt;REALM&gt;-dispatch"</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-9-4"><span class="w">    </span>--message<span class="w"> </span><span class="s2">"my-job -p timeout=20m -p flow=Pahoehoe -g planet=Mars -g name='Alba Mons'"</span>
 </span></code></pre></div>
 <h4 id="parameter-and-global-specifications">Parameter and Global Specifications<a class="headerlink" href="#parameter-and-global-specifications" title="Permanent link">&para;</a></h4>
 <p>When specifying parameters and globals, the name can be a simple name or a dot
@@ -2112,18 +2112,18 @@ worker receives the dispatch message, it will merge this structure into the
 corresponding parameter or globals structure extracted from the <a href="04-dynamodb-tables.html#the-jobs-table">jobs
 table</a>.</p>
 <p>For example, consider the following message sent to the dispatch helper:</p>
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1">my-job<span class="w"> </span>-p<span class="w"> </span><span class="nv">timeout</span><span class="o">=</span>1h<span class="w"> </span>-p<span class="w"> </span>vars.location<span class="o">=</span>Isabela<span class="w"> </span>-p<span class="w"> </span>vars.name<span class="o">=</span><span class="s2">&quot;Sierra Negra&quot;</span><span class="w"> </span>-g<span class="w"> </span><span class="nv">country</span><span class="o">=</span>Equador
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-10-1">my-job<span class="w"> </span>-p<span class="w"> </span><span class="nv">timeout</span><span class="o">=</span>1h<span class="w"> </span>-p<span class="w"> </span>vars.location<span class="o">=</span>Isabela<span class="w"> </span>-p<span class="w"> </span>vars.name<span class="o">=</span><span class="s2">"Sierra Negra"</span><span class="w"> </span>-g<span class="w"> </span><span class="nv">country</span><span class="o">=</span>Equador
 </span></code></pre></div>
 <p>The dispatch message sent by the dispatch helper will contain the following.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-11-1"><span class="p">{</span>
-</span><span id="__span-11-2"><span class="w">    </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-11-3"><span class="w">        </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Equador&quot;</span>
+</span><span id="__span-11-2"><span class="w">    </span><span class="nt">"globals"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-11-3"><span class="w">        </span><span class="nt">"country"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Equador"</span>
 </span><span id="__span-11-4"><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-11-5"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-11-6"><span class="w">        </span><span class="nt">&quot;timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1h&quot;</span><span class="p">,</span>
-</span><span id="__span-11-7"><span class="w">        </span><span class="nt">&quot;vars&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-11-8"><span class="w">            </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Isabela&quot;</span><span class="p">,</span>
-</span><span id="__span-11-9"><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sierra Negra&quot;</span>
+</span><span id="__span-11-5"><span class="w">    </span><span class="nt">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-11-6"><span class="w">        </span><span class="nt">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1h"</span><span class="p">,</span>
+</span><span id="__span-11-7"><span class="w">        </span><span class="nt">"vars"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-11-8"><span class="w">            </span><span class="nt">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Isabela"</span><span class="p">,</span>
+</span><span id="__span-11-9"><span class="w">            </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sierra Negra"</span>
 </span><span id="__span-11-10"><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-11-11"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-11-12"><span class="p">}</span>
@@ -2131,31 +2131,31 @@ table</a>.</p>
 <p>If the job specification in the <a href="04-dynamodb-tables.html#the-jobs-table">jobs table</a>
 contains the following:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-12-1"><span class="p">{</span>
-</span><span id="__span-12-2"><span class="w">    </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-12-3"><span class="w">        </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Replaced at run time&quot;</span><span class="p">,</span>
-</span><span id="__span-12-4"><span class="w">        </span><span class="nt">&quot;ocean&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Atlantic&quot;</span>
+</span><span id="__span-12-2"><span class="w">    </span><span class="nt">"globals"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-12-3"><span class="w">        </span><span class="nt">"country"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Replaced at run time"</span><span class="p">,</span>
+</span><span id="__span-12-4"><span class="w">        </span><span class="nt">"ocean"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Atlantic"</span>
 </span><span id="__span-12-5"><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-12-6"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-12-7"><span class="w">        </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run away&quot;</span><span class="p">,</span>
-</span><span id="__span-12-8"><span class="w">        </span><span class="nt">&quot;timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;20m&quot;</span><span class="p">,</span>
-</span><span id="__span-12-9"><span class="w">        </span><span class="nt">&quot;vars&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-12-10"><span class="w">            </span><span class="nt">&quot;whatever&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;This will be replaced&quot;</span>
+</span><span id="__span-12-6"><span class="w">    </span><span class="nt">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-12-7"><span class="w">        </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"run away"</span><span class="p">,</span>
+</span><span id="__span-12-8"><span class="w">        </span><span class="nt">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="s2">"20m"</span><span class="p">,</span>
+</span><span id="__span-12-9"><span class="w">        </span><span class="nt">"vars"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-12-10"><span class="w">            </span><span class="nt">"whatever"</span><span class="p">:</span><span class="w"> </span><span class="s2">"This will be replaced"</span>
 </span><span id="__span-12-11"><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-12-12"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-12-13"><span class="p">}</span>
 </span></code></pre></div>
 <p>then the final job specification used by the lava worker will be:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-13-1"><span class="p">{</span>
-</span><span id="__span-13-2"><span class="w">    </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-13-3"><span class="w">        </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Equador&quot;</span><span class="p">,</span>
-</span><span id="__span-13-4"><span class="w">        </span><span class="nt">&quot;ocean&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Atlantic&quot;</span>
+</span><span id="__span-13-2"><span class="w">    </span><span class="nt">"globals"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-3"><span class="w">        </span><span class="nt">"country"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Equador"</span><span class="p">,</span>
+</span><span id="__span-13-4"><span class="w">        </span><span class="nt">"ocean"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Atlantic"</span>
 </span><span id="__span-13-5"><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-13-6"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-13-7"><span class="w">        </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;run away&quot;</span><span class="p">,</span>
-</span><span id="__span-13-8"><span class="w">        </span><span class="nt">&quot;timeout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1h&quot;</span><span class="p">,</span>
-</span><span id="__span-13-9"><span class="w">        </span><span class="nt">&quot;vars&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-13-10"><span class="w">            </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Isabela&quot;</span><span class="p">,</span>
-</span><span id="__span-13-11"><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Sierra Negra&quot;</span>
+</span><span id="__span-13-6"><span class="w">    </span><span class="nt">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-7"><span class="w">        </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"run away"</span><span class="p">,</span>
+</span><span id="__span-13-8"><span class="w">        </span><span class="nt">"timeout"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1h"</span><span class="p">,</span>
+</span><span id="__span-13-9"><span class="w">        </span><span class="nt">"vars"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-10"><span class="w">            </span><span class="nt">"location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Isabela"</span><span class="p">,</span>
+</span><span id="__span-13-11"><span class="w">            </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sierra Negra"</span>
 </span><span id="__span-13-12"><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-13-13"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-13-14"><span class="p">}</span>
@@ -2166,16 +2166,16 @@ this case, the entire <code>vars</code> map in the parameters.</p>
 <h3 id="json-dispatch-requests">JSON Dispatch Requests<a class="headerlink" href="#json-dispatch-requests" title="Permanent link">&para;</a></h3>
 <p>JSON formatted dispatch requests must be in the following format:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-14-1"><span class="p">{</span>
-</span><span id="__span-14-2"><span class="w">  </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-14-3"><span class="w">  </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-14-4"><span class="w">    </span><span class="nt">&quot;g1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-14-5"><span class="w">    </span><span class="nt">&quot;g2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+</span><span id="__span-14-2"><span class="w">  </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-14-3"><span class="w">  </span><span class="nt">"globals"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-14-4"><span class="w">    </span><span class="nt">"g1"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-14-5"><span class="w">    </span><span class="nt">"g2"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span>
 </span><span id="__span-14-6"><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-14-7"><span class="w">  </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-14-8"><span class="w">    </span><span class="nt">&quot;p1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-14-9"><span class="w">    </span><span class="nt">&quot;p2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+</span><span id="__span-14-7"><span class="w">  </span><span class="nt">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-14-8"><span class="w">    </span><span class="nt">"p1"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-14-9"><span class="w">    </span><span class="nt">"p2"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span>
 </span><span id="__span-14-10"><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-14-11"><span class="w">  </span><span class="nt">&quot;delay&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;DURATION&gt;&quot;</span>
+</span><span id="__span-14-11"><span class="w">  </span><span class="nt">"delay"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;DURATION&gt;"</span>
 </span><span id="__span-14-12"><span class="p">}</span>
 </span></code></pre></div>
 <p>The <code>job_id</code> element is mandatory. All other elements are optional. The values
@@ -2200,7 +2200,7 @@ helper lambda using the AWS CLI.</p>
 </span><span id="__span-15-3">aws<span class="w"> </span>lambda<span class="w"> </span>invoke<span class="w"> </span>--cli-binary-format<span class="w"> </span>raw-in-base64-out<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-15-4"><span class="w">    </span>--function-name<span class="w"> </span>lava-&lt;REALM&gt;-dispatch<span class="w"> </span><span class="se">\</span>
 </span><span id="__span-15-5"><span class="w">    </span>--invocation-type<span class="w"> </span>Event<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-15-6"><span class="w">    </span>--payload<span class="w"> </span><span class="s1">&#39;{&quot;job_id&quot;: &quot;my-job-id&quot;, &quot;globals&quot;: {&quot;g1&quot;: &quot;GLOB1&quot;}}&#39;</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-15-6"><span class="w">    </span>--payload<span class="w"> </span><span class="s1">'{"job_id": "my-job-id", "globals": {"g1": "GLOB1"}}'</span><span class="w"> </span><span class="se">\</span>
 </span><span id="__span-15-7"><span class="w">    </span>/dev/stdout
 </span></code></pre></div>
 <p>See also
@@ -2387,39 +2387,39 @@ to the Jinja rendering process of any job that uses this mechanism.</p>
 </table>
 <p>A typical <code>info</code> (Python) object looks like this:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-16-1"><span class="p">{</span>
-</span><span id="__span-16-2">    <span class="s1">&#39;bucket&#39;</span><span class="p">:</span> <span class="s1">&#39;my-bucket&#39;</span><span class="p">,</span>
-</span><span id="__span-16-3">    <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="s1">&#39;HappyFace.jpg&#39;</span><span class="p">,</span>
-</span><span id="__span-16-4">    <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
-</span><span id="__span-16-5">    <span class="s1">&#39;event_time&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">tzutc</span><span class="p">()),</span>
-</span><span id="__span-16-6">    <span class="s1">&#39;source_ip&#39;</span><span class="p">:</span> <span class="n">IPv4Address</span><span class="p">(</span><span class="s1">&#39;10.200.240.5&#39;</span><span class="p">),</span>
-</span><span id="__span-16-7">    <span class="s1">&#39;event_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ObjectCreated:Put&#39;</span><span class="p">,</span>
-</span><span id="__span-16-8">    <span class="s1">&#39;aws_region&#39;</span><span class="p">:</span> <span class="s1">&#39;ap-southeast-2&#39;</span>
+</span><span id="__span-16-2">    <span class="s1">'bucket'</span><span class="p">:</span> <span class="s1">'my-bucket'</span><span class="p">,</span>
+</span><span id="__span-16-3">    <span class="s1">'key'</span><span class="p">:</span> <span class="s1">'HappyFace.jpg'</span><span class="p">,</span>
+</span><span id="__span-16-4">    <span class="s1">'size'</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+</span><span id="__span-16-5">    <span class="s1">'event_time'</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">tzutc</span><span class="p">()),</span>
+</span><span id="__span-16-6">    <span class="s1">'source_ip'</span><span class="p">:</span> <span class="n">IPv4Address</span><span class="p">(</span><span class="s1">'10.200.240.5'</span><span class="p">),</span>
+</span><span id="__span-16-7">    <span class="s1">'event_type'</span><span class="p">:</span> <span class="s1">'ObjectCreated:Put'</span><span class="p">,</span>
+</span><span id="__span-16-8">    <span class="s1">'aws_region'</span><span class="p">:</span> <span class="s1">'ap-southeast-2'</span>
 </span><span id="__span-16-9"><span class="p">}</span>
 </span></code></pre></div>
 <p>An s3triggers (JSON) entry may then look like this.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-17-1"><span class="p">{</span>
-</span><span id="__span-17-2"><span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Something interesting just happened.&quot;</span><span class="p">,</span>
-</span><span id="__span-17-3"><span class="w">    </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-17-4"><span class="w">    </span><span class="nt">&quot;prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-17-5"><span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-17-6"><span class="w">    </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-17-7"><span class="w">        </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{bucket}}&quot;</span><span class="p">,</span>
-</span><span id="__span-17-8"><span class="w">        </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{key}}&quot;</span><span class="p">,</span>
-</span><span id="__span-17-9"><span class="w">        </span><span class="nt">&quot;account-id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{bucket.split(&#39;:&#39;)[4]}}&quot;</span>
+</span><span id="__span-17-2"><span class="w">    </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Something interesting just happened."</span><span class="p">,</span>
+</span><span id="__span-17-3"><span class="w">    </span><span class="nt">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-17-4"><span class="w">    </span><span class="nt">"prefix"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-17-5"><span class="w">    </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-17-6"><span class="w">    </span><span class="nt">"globals"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-7"><span class="w">        </span><span class="nt">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{bucket}}"</span><span class="p">,</span>
+</span><span id="__span-17-8"><span class="w">        </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{key}}"</span><span class="p">,</span>
+</span><span id="__span-17-9"><span class="w">        </span><span class="nt">"account-id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{bucket.split(':')[4]}}"</span>
 </span><span id="__span-17-10"><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-17-11"><span class="w">    </span><span class="nt">&quot;if_fnmatch&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*.zip&quot;</span><span class="p">,</span>
-</span><span id="__span-17-12"><span class="w">    </span><span class="nt">&quot;if_not_fnmatch&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*ignore*&quot;</span><span class="p">,</span>
-</span><span id="__span-17-13"><span class="w">    </span><span class="nt">&quot;if_size_gt&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-</span><span id="__span-17-14"><span class="w">    </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_exe_job&quot;</span><span class="p">,</span>
-</span><span id="__span-17-15"><span class="w">    </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-17-16"><span class="w">        </span><span class="nt">&quot;env&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-17-17"><span class="w">            </span><span class="nt">&quot;BUCKET&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{bucket}}&quot;</span><span class="p">,</span>
-</span><span id="__span-17-18"><span class="w">            </span><span class="nt">&quot;KEY&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{key}}&quot;</span><span class="p">,</span>
-</span><span id="__span-17-19"><span class="w">            </span><span class="nt">&quot;IP&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{info.source_ip}}&quot;</span><span class="p">,</span>
-</span><span id="__span-17-20"><span class="w">            </span><span class="nt">&quot;EVENT_TIME&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{info.event_time.isoformat()}}&quot;</span>
+</span><span id="__span-17-11"><span class="w">    </span><span class="nt">"if_fnmatch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"*.zip"</span><span class="p">,</span>
+</span><span id="__span-17-12"><span class="w">    </span><span class="nt">"if_not_fnmatch"</span><span class="p">:</span><span class="w"> </span><span class="s2">"*ignore*"</span><span class="p">,</span>
+</span><span id="__span-17-13"><span class="w">    </span><span class="nt">"if_size_gt"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-17-14"><span class="w">    </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my_exe_job"</span><span class="p">,</span>
+</span><span id="__span-17-15"><span class="w">    </span><span class="nt">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-16"><span class="w">        </span><span class="nt">"env"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-17-17"><span class="w">            </span><span class="nt">"BUCKET"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{bucket}}"</span><span class="p">,</span>
+</span><span id="__span-17-18"><span class="w">            </span><span class="nt">"KEY"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{key}}"</span><span class="p">,</span>
+</span><span id="__span-17-19"><span class="w">            </span><span class="nt">"IP"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{info.source_ip}}"</span><span class="p">,</span>
+</span><span id="__span-17-20"><span class="w">            </span><span class="nt">"EVENT_TIME"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{info.event_time.isoformat()}}"</span>
 </span><span id="__span-17-21"><span class="w">            </span><span class="p">}</span>
 </span><span id="__span-17-22"><span class="w">        </span><span class="p">},</span>
-</span><span id="__span-17-23"><span class="w">    </span><span class="nt">&quot;trigger_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;unique_trigger_id&quot;</span>
+</span><span id="__span-17-23"><span class="w">    </span><span class="nt">"trigger_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"unique_trigger_id"</span>
 </span><span id="__span-17-24"><span class="p">}</span>
 </span></code></pre></div>
 <h3 id="about-s3-event-types">About S3 Event Types<a class="headerlink" href="#about-s3-event-types" title="Permanent link">&para;</a></h3>
@@ -2580,15 +2580,15 @@ permission issues.</p>
 </ol>
 <p>An event pattern will look something like this:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-18-1"><span class="p">{</span>
-</span><span id="__span-18-2"><span class="w">    </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;aws.s3&quot;</span><span class="p">],</span>
-</span><span id="__span-18-3"><span class="w">    </span><span class="nt">&quot;detail-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Object Created&quot;</span><span class="p">],</span>
-</span><span id="__span-18-4"><span class="w">    </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-18-5"><span class="w">        </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-18-6"><span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;my-bucket&quot;</span><span class="p">]</span>
+</span><span id="__span-18-2"><span class="w">    </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"aws.s3"</span><span class="p">],</span>
+</span><span id="__span-18-3"><span class="w">    </span><span class="nt">"detail-type"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"Object Created"</span><span class="p">],</span>
+</span><span id="__span-18-4"><span class="w">    </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-5"><span class="w">        </span><span class="nt">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-6"><span class="w">            </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"my-bucket"</span><span class="p">]</span>
 </span><span id="__span-18-7"><span class="w">        </span><span class="p">},</span>
-</span><span id="__span-18-8"><span class="w">        </span><span class="nt">&quot;object&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-18-9"><span class="w">            </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-18-10"><span class="w">                </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;prefix&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;an-interesting-prefix&quot;</span><span class="w"> </span><span class="p">}</span>
+</span><span id="__span-18-8"><span class="w">        </span><span class="nt">"object"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-18-9"><span class="w">            </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-18-10"><span class="w">                </span><span class="p">{</span><span class="w"> </span><span class="nt">"prefix"</span><span class="p">:</span><span class="w"> </span><span class="s2">"an-interesting-prefix"</span><span class="w"> </span><span class="p">}</span>
 </span><span id="__span-18-11"><span class="w">            </span><span class="p">]</span>
 </span><span id="__span-18-12"><span class="w">        </span><span class="p">}</span>
 </span><span id="__span-18-13"><span class="w">    </span><span class="p">}</span>
@@ -2654,30 +2654,30 @@ AWS EC2 auto scaling event, with the EC2 instance ID and auto scaling group name
 passed as globals to the lava job.</p>
 <p>The auto scaling event message in the event bus looks like this:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-19-1"><span class="p">{</span>
-</span><span id="__span-19-2"><span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
-</span><span id="__span-19-3"><span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-19-4"><span class="w">  </span><span class="nt">&quot;detail-type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;EC2 Instance Launch Successful&quot;</span><span class="p">,</span>
-</span><span id="__span-19-5"><span class="w">  </span><span class="nt">&quot;source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aws.autoscaling&quot;</span><span class="p">,</span>
-</span><span id="__span-19-6"><span class="w">  </span><span class="nt">&quot;account&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123456789012&quot;</span><span class="p">,</span>
-</span><span id="__span-19-7"><span class="w">  </span><span class="nt">&quot;time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-10-11T11:23:51Z&quot;</span><span class="p">,</span>
-</span><span id="__span-19-8"><span class="w">  </span><span class="nt">&quot;region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ap-southeast-2&quot;</span><span class="p">,</span>
-</span><span id="__span-19-9"><span class="w">  </span><span class="nt">&quot;resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-19-10"><span class="w">    </span><span class="s2">&quot;arn:aws:autoscaling:ap-southeast2:123456789012:autoScalingGroup:...&quot;</span><span class="p">,</span>
-</span><span id="__span-19-11"><span class="w">    </span><span class="s2">&quot;arn:aws:ec2:ap-southeast-2:123456789012:instance/i-0cefe067f7c6ee173&quot;</span>
+</span><span id="__span-19-2"><span class="w">  </span><span class="nt">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="p">,</span>
+</span><span id="__span-19-3"><span class="w">  </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-19-4"><span class="w">  </span><span class="nt">"detail-type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"EC2 Instance Launch Successful"</span><span class="p">,</span>
+</span><span id="__span-19-5"><span class="w">  </span><span class="nt">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"aws.autoscaling"</span><span class="p">,</span>
+</span><span id="__span-19-6"><span class="w">  </span><span class="nt">"account"</span><span class="p">:</span><span class="w"> </span><span class="s2">"123456789012"</span><span class="p">,</span>
+</span><span id="__span-19-7"><span class="w">  </span><span class="nt">"time"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2020-10-11T11:23:51Z"</span><span class="p">,</span>
+</span><span id="__span-19-8"><span class="w">  </span><span class="nt">"region"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ap-southeast-2"</span><span class="p">,</span>
+</span><span id="__span-19-9"><span class="w">  </span><span class="nt">"resources"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-19-10"><span class="w">    </span><span class="s2">"arn:aws:autoscaling:ap-southeast2:123456789012:autoScalingGroup:..."</span><span class="p">,</span>
+</span><span id="__span-19-11"><span class="w">    </span><span class="s2">"arn:aws:ec2:ap-southeast-2:123456789012:instance/i-0cefe067f7c6ee173"</span>
 </span><span id="__span-19-12"><span class="w">  </span><span class="p">],</span>
-</span><span id="__span-19-13"><span class="w">  </span><span class="nt">&quot;detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-19-14"><span class="w">    </span><span class="nt">&quot;StatusCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;InProgress&quot;</span><span class="p">,</span>
-</span><span id="__span-19-15"><span class="w">    </span><span class="nt">&quot;AutoScalingGroupName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myAutoScalingGroup&quot;</span><span class="p">,</span>
-</span><span id="__span-19-16"><span class="w">    </span><span class="nt">&quot;ActivityId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-19-17"><span class="w">    </span><span class="nt">&quot;Details&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-19-18"><span class="w">      </span><span class="nt">&quot;Availability Zone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ap-southeast-2a&quot;</span><span class="p">,</span>
-</span><span id="__span-19-19"><span class="w">      </span><span class="nt">&quot;Subnet ID&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;subnet-745bae91&quot;</span>
+</span><span id="__span-19-13"><span class="w">  </span><span class="nt">"detail"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-14"><span class="w">    </span><span class="nt">"StatusCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"InProgress"</span><span class="p">,</span>
+</span><span id="__span-19-15"><span class="w">    </span><span class="nt">"AutoScalingGroupName"</span><span class="p">:</span><span class="w"> </span><span class="s2">"myAutoScalingGroup"</span><span class="p">,</span>
+</span><span id="__span-19-16"><span class="w">    </span><span class="nt">"ActivityId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-19-17"><span class="w">    </span><span class="nt">"Details"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-19-18"><span class="w">      </span><span class="nt">"Availability Zone"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ap-southeast-2a"</span><span class="p">,</span>
+</span><span id="__span-19-19"><span class="w">      </span><span class="nt">"Subnet ID"</span><span class="p">:</span><span class="w"> </span><span class="s2">"subnet-745bae91"</span>
 </span><span id="__span-19-20"><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-19-21"><span class="w">    </span><span class="nt">&quot;RequestId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-19-22"><span class="w">    </span><span class="nt">&quot;EndTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-10-11T11:23:51Z&quot;</span><span class="p">,</span>
-</span><span id="__span-19-23"><span class="w">    </span><span class="nt">&quot;EC2InstanceId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;i-0cefe067f7c6ee173&quot;</span><span class="p">,</span>
-</span><span id="__span-19-24"><span class="w">    </span><span class="nt">&quot;StartTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2020-10-11T11:16:43Z&quot;</span><span class="p">,</span>
-</span><span id="__span-19-25"><span class="w">    </span><span class="nt">&quot;Cause&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span>
+</span><span id="__span-19-21"><span class="w">    </span><span class="nt">"RequestId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-19-22"><span class="w">    </span><span class="nt">"EndTime"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2020-10-11T11:23:51Z"</span><span class="p">,</span>
+</span><span id="__span-19-23"><span class="w">    </span><span class="nt">"EC2InstanceId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"i-0cefe067f7c6ee173"</span><span class="p">,</span>
+</span><span id="__span-19-24"><span class="w">    </span><span class="nt">"StartTime"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2020-10-11T11:16:43Z"</span><span class="p">,</span>
+</span><span id="__span-19-25"><span class="w">    </span><span class="nt">"Cause"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span>
 </span><span id="__span-19-26"><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-19-27"><span class="p">}</span>
 </span></code></pre></div>
@@ -2685,18 +2685,18 @@ passed as globals to the lava job.</p>
 affected EC2 instance ID as job globals, the <strong>Input Path</strong> would look like
 this:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-20-1"><span class="p">{</span>
-</span><span id="__span-20-2"><span class="w">  </span><span class="nt">&quot;asg_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.detail.AutoScalingGroupName&quot;</span><span class="p">,</span>
-</span><span id="__span-20-3"><span class="w">  </span><span class="nt">&quot;instance&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;$.detail.EC2InstanceId&quot;</span>
+</span><span id="__span-20-2"><span class="w">  </span><span class="nt">"asg_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"$.detail.AutoScalingGroupName"</span><span class="p">,</span>
+</span><span id="__span-20-3"><span class="w">  </span><span class="nt">"instance"</span><span class="p">:</span><span class="w"> </span><span class="s2">"$.detail.EC2InstanceId"</span>
 </span><span id="__span-20-4"><span class="p">}</span>
 </span></code></pre></div>
 <p>The <strong>Input Template</strong> uses <code>&lt;input_path_var&gt;</code> to select values from the <strong>Input
 Path</strong>. The <strong>Input Template</strong> that constructs the dispatch request looks like
 this:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-21-1"><span class="p">{</span>
-</span><span id="__span-21-2"><span class="w">  </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my-job-id&quot;</span><span class="p">,</span>
-</span><span id="__span-21-3"><span class="w">  </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-21-4"><span class="w">      </span><span class="nt">&quot;instance&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;instance&gt;&quot;</span><span class="p">,</span>
-</span><span id="__span-21-5"><span class="w">      </span><span class="nt">&quot;asg_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;asg_name&gt;&quot;</span>
+</span><span id="__span-21-2"><span class="w">  </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my-job-id"</span><span class="p">,</span>
+</span><span id="__span-21-3"><span class="w">  </span><span class="nt">"globals"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-21-4"><span class="w">      </span><span class="nt">"instance"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;instance&gt;"</span><span class="p">,</span>
+</span><span id="__span-21-5"><span class="w">      </span><span class="nt">"asg_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;asg_name&gt;"</span>
 </span><span id="__span-21-6"><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-21-7"><span class="p">}</span>
 </span></code></pre></div>
@@ -2712,13 +2712,13 @@ target.</p>
 <p>For example:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-22-1"><span class="p">[</span>
 </span><span id="__span-22-2"><span class="w">  </span><span class="p">{</span>
-</span><span id="__span-22-3"><span class="w">    </span><span class="nt">&quot;Source&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-22-4"><span class="w">    </span><span class="nt">&quot;Detail&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{ \&quot;AutoScalingGroupName\&quot;: \&quot;...\&quot;, \&quot;EC2InstanceId\&quot;: \&quot;...\&quot; }&quot;</span><span class="p">,</span>
-</span><span id="__span-22-5"><span class="w">    </span><span class="nt">&quot;Resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-22-6"><span class="w">      </span><span class="s2">&quot;resource1&quot;</span><span class="p">,</span>
-</span><span id="__span-22-7"><span class="w">      </span><span class="s2">&quot;resource2&quot;</span>
+</span><span id="__span-22-3"><span class="w">    </span><span class="nt">"Source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-22-4"><span class="w">    </span><span class="nt">"Detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{ \"AutoScalingGroupName\": \"...\", \"EC2InstanceId\": \"...\" }"</span><span class="p">,</span>
+</span><span id="__span-22-5"><span class="w">    </span><span class="nt">"Resources"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-22-6"><span class="w">      </span><span class="s2">"resource1"</span><span class="p">,</span>
+</span><span id="__span-22-7"><span class="w">      </span><span class="s2">"resource2"</span>
 </span><span id="__span-22-8"><span class="w">    </span><span class="p">],</span>
-</span><span id="__span-22-9"><span class="w">    </span><span class="nt">&quot;DetailType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;myDetailType&quot;</span>
+</span><span id="__span-22-9"><span class="w">    </span><span class="nt">"DetailType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"myDetailType"</span>
 </span><span id="__span-22-10"><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-22-11"><span class="p">]</span>
 </span></code></pre></div>
@@ -2751,7 +2751,7 @@ on the SQS worker queue. It will end in tears. Trust me on this.</p>
 libraries. Refer to the API documentation for more information.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-24-1"><span class="kn">from</span><span class="w"> </span><span class="nn">lava.lavacore</span><span class="w"> </span><span class="kn">import</span> <span class="n">dispatch</span>
 </span><span id="__span-24-2">
-</span><span id="__span-24-3"><span class="n">run_id</span> <span class="o">=</span> <span class="n">dispatch</span><span class="p">(</span><span class="n">realm</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">,</span> <span class="n">job_id</span><span class="o">=</span><span class="s1">&#39;...&#39;</span><span class="p">)</span>
+</span><span id="__span-24-3"><span class="n">run_id</span> <span class="o">=</span> <span class="n">dispatch</span><span class="p">(</span><span class="n">realm</span><span class="o">=</span><span class="s1">'...'</span><span class="p">,</span> <span class="n">job_id</span><span class="o">=</span><span class="s1">'...'</span><span class="p">)</span>
 </span></code></pre></div>
 <h2 id="handling-of-parameters-and-globals-during-dispatch">Handling of Parameters and Globals During Dispatch<a class="headerlink" href="#handling-of-parameters-and-globals-during-dispatch" title="Permanent link">&para;</a></h2>
 <p>In addition to specifying the job to be dispatched, dispatch messages may also
@@ -2873,7 +2873,7 @@ useful for constructing Jinja render values that are guaranteed to be
 consistent across all jobs started from a common master (e.g. for use in
 filenames).</p>
 <div class="language-jinja highlight"><pre><span></span><code><span id="__span-25-1"><span class="c">{# This might be useful in a filename #}</span>
-</span><span id="__span-25-2"><span class="cp">{{</span> <span class="nv">globals.lava.master_ustart.strftime</span><span class="o">(</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="o">)</span> <span class="cp">}}</span>
+</span><span id="__span-25-2"><span class="cp">{{</span> <span class="nv">globals.lava.master_ustart.strftime</span><span class="o">(</span><span class="s1">'%Y-%m-%d'</span><span class="o">)</span> <span class="cp">}}</span>
 </span></code></pre></div>
 <h3 id="use-with-event-triggered-dispatch">Use with Event Triggered Dispatch<a class="headerlink" href="#use-with-event-triggered-dispatch" title="Permanent link">&para;</a></h3>
 <p>The <a href="04-dynamodb-tables.html#the-s3triggers-table">s3triggers table</a> permits the
@@ -2914,7 +2914,7 @@ These will override similarly named globals in the job specification.</p>
       <div class="md-footer-social">
         <div class="md-copyright">
           <div class="md-copyright__highlight">
-            v8.3.0 (Mauna Loa)
+            v8.4.0 (Kohala)
           </div>
         </div>
       </div>
@@ -2931,10 +2931,10 @@ These will override similarly named globals in the job specification.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

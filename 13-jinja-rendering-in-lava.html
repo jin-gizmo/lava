@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1107,7 +1107,7 @@ substitutions using <code>{{ ... }}</code> delimiters and control structures (lo
 conditionals etc.) using <code>{% ... %}</code> syntax.</p>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>Note that the <a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a>
+<p>Note that the <a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a>
 deliberately uses <code>&lt;{ ...}&gt;</code>and <code>&lt;% ... %&gt;</code> delimiters to differentiate
 between build-time rendering done in the framework and run-time rendering
 performed by the lava worker.</p>
@@ -1215,7 +1215,7 @@ datetime. The
 <a href="https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior">strptime()</a>
 method is particularly useful. For example:</p>
 <div class="language-jinja highlight"><pre><span></span><code><span id="__span-0-1"><span class="c">{# Get the job start date in local time #}</span>
-</span><span id="__span-0-2"><span class="cp">{{</span> <span class="nv">start.strptime</span><span class="o">(</span><span class="s1">&#39;%Y-%m-%d&#39;</span><span class="o">)</span> <span class="cp">}}</span>
+</span><span id="__span-0-2"><span class="cp">{{</span> <span class="nv">start.strptime</span><span class="o">(</span><span class="s1">'%Y-%m-%d'</span><span class="o">)</span> <span class="cp">}}</span>
 </span><span id="__span-0-3">
 </span><span id="__span-0-4"><span class="c">{# Get the job start time in UTC as an ISOO 8601 format timestamp #}</span>
 </span><span id="__span-0-5"><span class="cp">{{</span> <span class="nv">ustart.isoformat</span><span class="o">()</span> <span class="cp">}}</span>
@@ -1223,7 +1223,7 @@ method is particularly useful. For example:</p>
 <p>It is even possible to do some elementary date calculations, although this can
 be accomplished more easily since lava version 4.3.0 (Volcán Wolf) using the
 provided <a href="#jinja-utility-functions">utility functions</a>.</p>
-<div class="language-jinja highlight"><pre><span></span><code><span id="__span-1-1"><span class="c">{# Calculate yesterday&#39;s date #}</span>
+<div class="language-jinja highlight"><pre><span></span><code><span id="__span-1-1"><span class="c">{# Calculate yesterday's date #}</span>
 </span><span id="__span-1-2"><span class="cp">{{</span> <span class="o">(</span><span class="nv">start.fromtimestamp</span><span class="o">(</span><span class="nv">start.timestamp</span><span class="o">()-</span><span class="m">86400</span><span class="o">))</span><span class="nv">.date</span><span class="o">()</span> <span class="cp">}}</span>
 </span></code></pre></div>
 <h2 id="jinja-utility-functions">Jinja Utility Functions<a class="headerlink" href="#jinja-utility-functions" title="Permanent link">&para;</a></h2>
@@ -1236,18 +1236,18 @@ class.</p>
 <div class="language-jinja highlight"><pre><span></span><code><span id="__span-2-1"><span class="c">{# The epoch #}</span>
 </span><span id="__span-2-2"><span class="cp">{{</span> <span class="nv">utils.date</span><span class="o">(</span><span class="nv">year</span><span class="o">=</span><span class="m">1970</span><span class="o">,</span> <span class="nv">month</span><span class="o">=</span><span class="m">1</span><span class="o">,</span> <span class="nv">day</span><span class="o">=</span><span class="m">1</span><span class="o">)</span> <span class="cp">}}</span>
 </span><span id="__span-2-3">
-</span><span id="__span-2-4"><span class="c">{# What day of the week is next year&#39;s ANZAC day? #}</span>
-</span><span id="__span-2-5"><span class="cp">{{</span> <span class="nv">utils.date</span><span class="o">(</span><span class="nv">year</span><span class="o">=</span><span class="nv">ustart.year</span> <span class="o">+</span> <span class="m">1</span><span class="o">,</span> <span class="nv">month</span><span class="o">=</span><span class="m">4</span><span class="o">,</span> <span class="nv">day</span><span class="o">=</span><span class="m">25</span><span class="o">)</span><span class="nv">.strftime</span><span class="o">(</span><span class="s1">&#39;%A&#39;</span><span class="o">)</span> <span class="cp">}}</span>
+</span><span id="__span-2-4"><span class="c">{# What day of the week is next year's ANZAC day? #}</span>
+</span><span id="__span-2-5"><span class="cp">{{</span> <span class="nv">utils.date</span><span class="o">(</span><span class="nv">year</span><span class="o">=</span><span class="nv">ustart.year</span> <span class="o">+</span> <span class="m">1</span><span class="o">,</span> <span class="nv">month</span><span class="o">=</span><span class="m">4</span><span class="o">,</span> <span class="nv">day</span><span class="o">=</span><span class="m">25</span><span class="o">)</span><span class="nv">.strftime</span><span class="o">(</span><span class="s1">'%A'</span><span class="o">)</span> <span class="cp">}}</span>
 </span></code></pre></div>
 <h4 id="datetime">datetime<a class="headerlink" href="#datetime" title="Permanent link">&para;</a></h4>
 <p>This is the standard Python
 <a href="https://docs.python.org/3/library/datetime.html#datetime.datetime">datetime.datetime</a>
 class.</p>
-<div class="language-jinja highlight"><pre><span></span><code><span id="__span-3-1"><span class="c">{# Next new year&#39;s day #}</span>
+<div class="language-jinja highlight"><pre><span></span><code><span id="__span-3-1"><span class="c">{# Next new year's day #}</span>
 </span><span id="__span-3-2"><span class="cp">{{</span> <span class="nv">utils.datetime</span><span class="o">(</span><span class="nv">year</span><span class="o">=</span><span class="nv">ustart.year</span> <span class="o">+</span> <span class="m">1</span><span class="o">,</span> <span class="nv">month</span><span class="o">=</span><span class="m">1</span><span class="o">,</span> <span class="nv">day</span><span class="o">=</span><span class="m">1</span><span class="o">)</span> <span class="cp">}}</span>
 </span><span id="__span-3-3">
 </span><span id="__span-3-4"><span class="c">{# What day of the week is that? #}</span>
-</span><span id="__span-3-5"><span class="cp">{{</span> <span class="nv">utils.datetime</span><span class="o">(</span><span class="nv">year</span><span class="o">=</span><span class="nv">ustart.year</span> <span class="o">+</span> <span class="m">1</span><span class="o">,</span> <span class="nv">month</span><span class="o">=</span><span class="m">1</span><span class="o">,</span> <span class="nv">day</span><span class="o">=</span><span class="m">1</span><span class="o">)</span><span class="nv">.strftime</span><span class="o">(</span><span class="s1">&#39;%A&#39;</span><span class="o">)</span> <span class="cp">}}</span>
+</span><span id="__span-3-5"><span class="cp">{{</span> <span class="nv">utils.datetime</span><span class="o">(</span><span class="nv">year</span><span class="o">=</span><span class="nv">ustart.year</span> <span class="o">+</span> <span class="m">1</span><span class="o">,</span> <span class="nv">month</span><span class="o">=</span><span class="m">1</span><span class="o">,</span> <span class="nv">day</span><span class="o">=</span><span class="m">1</span><span class="o">)</span><span class="nv">.strftime</span><span class="o">(</span><span class="s1">'%A'</span><span class="o">)</span> <span class="cp">}}</span>
 </span></code></pre></div>
 <h4 id="dateutil">dateutil<a class="headerlink" href="#dateutil" title="Permanent link">&para;</a></h4>
 <p>This is the <a href="https://dateutil.readthedocs.io/en/stable/index.html">dateutil</a>
@@ -1264,7 +1264,7 @@ Python module.</p>
 <a href="https://dateutil.readthedocs.io/en/stable/parser.html#dateutil.parser">dateutil.parser</a>
 module. It is useful for parsing strings into dates.</p>
 <div class="language-jinja highlight"><pre><span></span><code><span id="__span-6-1"><span class="c">{# Convert a string back to a datetime #}</span>
-</span><span id="__span-6-2"><span class="cp">{{</span> <span class="nv">utils.parsedate.isoparse</span><span class="o">(</span><span class="s1">&#39;2020-02-11T09:30:00+11:00&#39;</span><span class="o">)</span> <span class="cp">}}</span>
+</span><span id="__span-6-2"><span class="cp">{{</span> <span class="nv">utils.parsedate.isoparse</span><span class="o">(</span><span class="s1">'2020-02-11T09:30:00+11:00'</span><span class="o">)</span> <span class="cp">}}</span>
 </span></code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1274,8 +1274,8 @@ alternative is <code>utils.dateutil.parser</code>.</p>
 <h4 id="path">path<a class="headerlink" href="#path" title="Permanent link">&para;</a></h4>
 <p>This is the standard Python <a href="https://docs.python.org/3/library/os.path.html">os.path</a>
 module.</p>
-<div class="language-jinja highlight"><pre><span></span><code><span id="__span-7-1"><span class="c">{# &quot;s3://bucket.xyzzy.com/an/s3/key&quot; --&gt; &quot;key&quot; #}</span>
-</span><span id="__span-7-2"><span class="cp">{{</span> <span class="nv">utils.path.basename</span><span class="o">(</span><span class="s1">&#39;s3://bucket.xyzzy.com/an/s3/key&#39;</span><span class="o">)</span> <span class="cp">}}</span>
+<div class="language-jinja highlight"><pre><span></span><code><span id="__span-7-1"><span class="c">{# "s3://bucket.xyzzy.com/an/s3/key" --&gt; "key" #}</span>
+</span><span id="__span-7-2"><span class="cp">{{</span> <span class="nv">utils.path.basename</span><span class="o">(</span><span class="s1">'s3://bucket.xyzzy.com/an/s3/key'</span><span class="o">)</span> <span class="cp">}}</span>
 </span><span id="__span-7-3">
 </span><span id="__span-7-4"><span class="c">{# Get the last component of the lava temp bucket prefix #}</span>
 </span><span id="__span-7-5"><span class="cp">{{</span> <span class="nv">utils.path.basename</span><span class="o">(</span><span class="nv">realm.s3_temp</span><span class="o">)</span> <span class="cp">}}</span>
@@ -1284,21 +1284,21 @@ module.</p>
 <p>This is the standard Python <a href="https://docs.python.org/3/library/re.html">re</a>
 (regex) module. It is useful for extracting selected components of other render
 variables.</p>
-<div class="language-jinja highlight"><pre><span></span><code><span id="__span-8-1"><span class="c">{# &quot;s3://bucket.xyzzy.com/an/s3/key&quot; --&gt; &quot;bucket&quot; #}</span>
-</span><span id="__span-8-2"><span class="cp">{{</span> <span class="nv">utils.re.search</span><span class="o">(</span><span class="s1">&#39;s3://([^.]*)&#39;</span><span class="o">,</span> <span class="s1">&#39;s3://bucket.xyzzy.com/an/s3/key)&#39;</span><span class="nv">.group</span><span class="o">(</span><span class="m">1</span><span class="o">)</span> <span class="cp">}}</span>
+<div class="language-jinja highlight"><pre><span></span><code><span id="__span-8-1"><span class="c">{# "s3://bucket.xyzzy.com/an/s3/key" --&gt; "bucket" #}</span>
+</span><span id="__span-8-2"><span class="cp">{{</span> <span class="nv">utils.re.search</span><span class="o">(</span><span class="s1">'s3://([^.]*)'</span><span class="o">,</span> <span class="s1">'s3://bucket.xyzzy.com/an/s3/key)'</span><span class="nv">.group</span><span class="o">(</span><span class="m">1</span><span class="o">)</span> <span class="cp">}}</span>
 </span></code></pre></div>
 <h4 id="s3bucket">s3bucket<a class="headerlink" href="#s3bucket" title="Permanent link">&para;</a></h4>
 <p>Extract the S3 bucket name component from a string.</p>
-<div class="language-jinja highlight"><pre><span></span><code><span id="__span-9-1"><span class="c">{# &quot;s3://bucket.xyzzy.com/an/s3/key&quot; --&gt; &quot;bucket.xyzzy.com&quot; #}</span>
-</span><span id="__span-9-2"><span class="cp">{{</span> <span class="nv">utils.s3bucket</span><span class="o">(</span><span class="s1">&#39;s3://bucket.xyzzy.com/an/s3/key&#39;</span><span class="o">)</span> <span class="cp">}}</span>
+<div class="language-jinja highlight"><pre><span></span><code><span id="__span-9-1"><span class="c">{# "s3://bucket.xyzzy.com/an/s3/key" --&gt; "bucket.xyzzy.com" #}</span>
+</span><span id="__span-9-2"><span class="cp">{{</span> <span class="nv">utils.s3bucket</span><span class="o">(</span><span class="s1">'s3://bucket.xyzzy.com/an/s3/key'</span><span class="o">)</span> <span class="cp">}}</span>
 </span><span id="__span-9-3">
 </span><span id="__span-9-4"><span class="c">{# Get the lava temp bucket name #}</span>
 </span><span id="__span-9-5"><span class="cp">{{</span> <span class="nv">utils.s3bucket</span><span class="o">(</span><span class="nv">realm.s3_temp</span><span class="o">)</span> <span class="cp">}}</span>
 </span></code></pre></div>
 <h4 id="s3key">s3key<a class="headerlink" href="#s3key" title="Permanent link">&para;</a></h4>
 <p>Extract the S3 key name component from a string.</p>
-<div class="language-jinja highlight"><pre><span></span><code><span id="__span-10-1"><span class="c">{# &quot;s3://bucket.xyzzy.com/an/s3/key&quot; --&gt; &quot;an/s3/key&quot; #}</span>
-</span><span id="__span-10-2"><span class="cp">{{</span> <span class="nv">utils.s3key</span><span class="o">(</span><span class="s1">&#39;s3://bucket.xyzzy.com/an/s3/key&#39;</span><span class="o">)</span> <span class="cp">}}</span>
+<div class="language-jinja highlight"><pre><span></span><code><span id="__span-10-1"><span class="c">{# "s3://bucket.xyzzy.com/an/s3/key" --&gt; "an/s3/key" #}</span>
+</span><span id="__span-10-2"><span class="cp">{{</span> <span class="nv">utils.s3key</span><span class="o">(</span><span class="s1">'s3://bucket.xyzzy.com/an/s3/key'</span><span class="o">)</span> <span class="cp">}}</span>
 </span><span id="__span-10-3">
 </span><span id="__span-10-4"><span class="c">{# Get the lava temp bucket prefix #}</span>
 </span><span id="__span-10-5"><span class="cp">{{</span> <span class="nv">utils.s3key</span><span class="o">(</span><span class="nv">realm.s3_temp</span><span class="o">)</span> <span class="cp">}}</span>
@@ -1311,7 +1311,7 @@ class.</p>
 <p>This is the standard Python
 <a href="https://docs.python.org/3/library/datetime.html#datetime.timedelta">datetime.timedelta</a>
 class.</p>
-<div class="language-jinja highlight"><pre><span></span><code><span id="__span-11-1"><span class="c">{# Calculate yesterday&#39;s date #}</span>
+<div class="language-jinja highlight"><pre><span></span><code><span id="__span-11-1"><span class="c">{# Calculate yesterday's date #}</span>
 </span><span id="__span-11-2"><span class="cp">{{</span> <span class="o">(</span><span class="nv">start</span> <span class="o">-</span> <span class="nv">utils.timedelta</span><span class="o">(</span><span class="nv">days</span><span class="o">=</span><span class="m">1</span><span class="o">))</span><span class="nv">.date</span><span class="o">()</span> <span class="cp">}}</span>
 </span></code></pre></div>
 <h4 id="tojson">tojson<a class="headerlink" href="#tojson" title="Permanent link">&para;</a></h4>
@@ -1370,7 +1370,7 @@ filter cannot (such as <code>datetime</code> objects).</p>
       <div class="md-footer-social">
         <div class="md-copyright">
           <div class="md-copyright__highlight">
-            v8.3.0 (Mauna Loa)
+            v8.4.0 (Kohala)
           </div>
         </div>
       </div>
@@ -1387,10 +1387,10 @@ filter cannot (such as <code>datetime</code> objects).</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

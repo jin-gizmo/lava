@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1456,7 +1456,7 @@ information about jobs and their associated run information.</p>
 <td>X-*</td>
 <td>String</td>
 <td>No</td>
-<td>Any fields beginning with <code>x-</code> or <code>X-</code> are ignored by lava. These can be used as required for other purposes (e.g. CI/CD, versioning or other related purposes). The <a href="22-upgrade-notes.html#the-lava-job-framework">lava job framework</a> uses a number of these fields for various purposes.</td>
+<td>Any fields beginning with <code>x-</code> or <code>X-</code> are ignored by lava. These can be used as required for other purposes (e.g. CI/CD, versioning or other related purposes). The <a href="11-lava-job-framework.html#the-lava-job-framework">lava job framework</a> uses a number of these fields for various purposes.</td>
 </tr>
 </tbody>
 </table>
@@ -1524,38 +1524,38 @@ execution to be conditional on run-time values. </p>
 <p>As an example, the following job specification fragment will only enable the
 job if the value of the global <code>a</code> is palindromic (which it is, in the example):</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><span class="p">{</span>
-</span><span id="__span-0-2"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{% set word = globals.a | lower %}{{ word == word | reverse }}&quot;</span><span class="p">,</span>
-</span><span id="__span-0-3"><span class="w">  </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-0-4"><span class="w">    </span><span class="nt">&quot;#&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Global a is a palindrome.&quot;</span><span class="p">,</span>
-</span><span id="__span-0-5"><span class="w">    </span><span class="nt">&quot;a&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Tattarrattat&quot;</span>
+</span><span id="__span-0-2"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{% set word = globals.a | lower %}{{ word == word | reverse }}"</span><span class="p">,</span>
+</span><span id="__span-0-3"><span class="w">  </span><span class="nt">"globals"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-4"><span class="w">    </span><span class="nt">"#"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Global a is a palindrome."</span><span class="p">,</span>
+</span><span id="__span-0-5"><span class="w">    </span><span class="nt">"a"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Tattarrattat"</span>
 </span><span id="__span-0-6"><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-0-7"><span class="p">}</span>
 </span></code></pre></div>
 <p>In this example, the job is only enabled if the value of the <code>x</code> field in
 <a href="#the-state-table">state</a> item <code>sid</code> is odd:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><span class="p">{</span>
-</span><span id="__span-1-2"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{% set val = state[&#39;sid&#39;].x | int %}{{ val % 2 == 1 }}&quot;</span><span class="p">,</span>
-</span><span id="__span-1-3"><span class="w">  </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-4"><span class="w">    </span><span class="nt">&quot;sid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;-- set at run-time --&quot;</span>
+</span><span id="__span-1-2"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{% set val = state['sid'].x | int %}{{ val % 2 == 1 }}"</span><span class="p">,</span>
+</span><span id="__span-1-3"><span class="w">  </span><span class="nt">"state"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-4"><span class="w">    </span><span class="nt">"sid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-- set at run-time --"</span>
 </span><span id="__span-1-5"><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-1-6"><span class="p">}</span>
 </span></code></pre></div>
 <p>As a more complex example, this job specification fragment only enables a
 job if it has not run successfully in the last 4 hours:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><span class="p">{</span>
-</span><span id="__span-2-2"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;30 * * * *&quot;</span><span class="p">,</span>
-</span><span id="__span-2-3"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{% set ts=utils.parsedate.parse(state[&#39;sid&#39;]) %}{{ ustart-ts &gt; utils.timedelta(hours=4) }}&quot;</span><span class="p">,</span>
-</span><span id="__span-2-4"><span class="w">  </span><span class="nt">&quot;on_success&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-2-2"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="s2">"30 * * * *"</span><span class="p">,</span>
+</span><span id="__span-2-3"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{% set ts=utils.parsedate.parse(state['sid']) %}{{ ustart-ts &gt; utils.timedelta(hours=4) }}"</span><span class="p">,</span>
+</span><span id="__span-2-4"><span class="w">  </span><span class="nt">"on_success"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-2-5"><span class="w">    </span><span class="p">{</span>
-</span><span id="__span-2-6"><span class="w">      </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;state&quot;</span><span class="p">,</span>
-</span><span id="__span-2-7"><span class="w">      </span><span class="nt">&quot;state_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sid&quot;</span><span class="p">,</span>
-</span><span id="__span-2-8"><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ ustart.isoformat() }}&quot;</span>
+</span><span id="__span-2-6"><span class="w">      </span><span class="nt">"action"</span><span class="p">:</span><span class="w"> </span><span class="s2">"state"</span><span class="p">,</span>
+</span><span id="__span-2-7"><span class="w">      </span><span class="nt">"state_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sid"</span><span class="p">,</span>
+</span><span id="__span-2-8"><span class="w">      </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ ustart.isoformat() }}"</span>
 </span><span id="__span-2-9"><span class="w">    </span><span class="p">}</span>
 </span><span id="__span-2-10"><span class="w">  </span><span class="p">],</span>
-</span><span id="__span-2-11"><span class="w">  </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-2-12"><span class="w">    </span><span class="nt">&quot;sid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2000-01-01T00:00:00Z&quot;</span>
+</span><span id="__span-2-11"><span class="w">  </span><span class="nt">"state"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-12"><span class="w">    </span><span class="nt">"sid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2000-01-01T00:00:00Z"</span>
 </span><span id="__span-2-13"><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-2-14"><span class="w">  </span><span class="nt">&quot;event_log&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Time since last run: {% set ts=utils.parsedate.parse(state[&#39;sid&#39;]) %}{{ ustart-ts }}&quot;</span>
+</span><span id="__span-2-14"><span class="w">  </span><span class="nt">"event_log"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Time since last run: {% set ts=utils.parsedate.parse(state['sid']) %}{{ ustart-ts }}"</span>
 </span><span id="__span-2-15">
 </span><span id="__span-2-16"><span class="p">}</span>
 </span></code></pre></div>
@@ -1645,21 +1645,21 @@ field of the event record.</p>
 <p>As an example, the following job specification fragment would record the value
 of a specific global.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><span class="p">{</span>
-</span><span id="__span-3-2"><span class="w">  </span><span class="nt">&quot;event_log&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;The value of global g1 is &#39;{{ globals.g1 }}&#39;&quot;</span>
+</span><span id="__span-3-2"><span class="w">  </span><span class="nt">"event_log"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The value of global g1 is '{{ globals.g1 }}'"</span>
 </span><span id="__span-3-3"><span class="p">}</span>
 </span></code></pre></div>
 <p>This fragment would record two globals in a map format:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><span class="p">{</span>
-</span><span id="__span-4-2"><span class="w">  </span><span class="nt">&quot;event_log&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-4-3"><span class="w">    </span><span class="nt">&quot;g1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ globals.g1 }}&quot;</span><span class="p">,</span>
-</span><span id="__span-4-4"><span class="w">    </span><span class="nt">&quot;g2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ globals.g2 }}&quot;</span>
+</span><span id="__span-4-2"><span class="w">  </span><span class="nt">"event_log"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-3"><span class="w">    </span><span class="nt">"g1"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ globals.g1 }}"</span><span class="p">,</span>
+</span><span id="__span-4-4"><span class="w">    </span><span class="nt">"g2"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ globals.g2 }}"</span>
 </span><span id="__span-4-5"><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-4-6"><span class="p">}</span>
 </span></code></pre></div>
 <p>This fragment would record all of the globals (as a Python object converted to
 a string):</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-5-1"><span class="p">{</span>
-</span><span id="__span-5-2"><span class="w">  </span><span class="nt">&quot;event_log&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{{ globals }}&#39;&quot;</span>
+</span><span id="__span-5-2"><span class="w">  </span><span class="nt">"event_log"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{{ globals }}'"</span>
 </span><span id="__span-5-3"><span class="p">}</span>
 </span></code></pre></div>
 <div class="admonition warning">
@@ -2062,7 +2062,7 @@ all the necessary encoding and decoding.</p>
       <div class="md-footer-social">
         <div class="md-copyright">
           <div class="md-copyright__highlight">
-            v8.3.0 (Mauna Loa)
+            v8.4.0 (Kohala)
           </div>
         </div>
       </div>
@@ -2079,10 +2079,10 @@ all the necessary encoding and decoding.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>

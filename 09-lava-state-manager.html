@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="img/lava-icons/png/256/lava-icon-256-transparent.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.0">
     
     
       
@@ -31,10 +31,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -1224,9 +1224,9 @@ available to another job via the Jinja renderer.</p>
 shorthand <code>state</code>. A state item with a <code>state_id</code> of <code>my_state_id</code> can then be
 referenced in a Jinja expression using any of the following equivalents:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1">{{ job.state.my_state_id }}
-</span><span id="__span-0-2">{{ job.state[&#39;my_state_id&#39;] }}
+</span><span id="__span-0-2">{{ job.state['my_state_id'] }}
 </span><span id="__span-0-3">{{ state.my_state_id }}
-</span><span id="__span-0-4">{{ state[&#39;my_state_id&#39;] }}
+</span><span id="__span-0-4">{{ state['my_state_id'] }}
 </span></code></pre></div>
 <p>The square brackets variant is required when <code>my_state_id</code> is not a valid
 Python identifier.</p>
@@ -1235,47 +1235,47 @@ Python identifier.</p>
 S3 (via s3trigger). The job simply counts the number of lines in the file and
 stores the result as a state item with ID <code>sid</code>.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><span class="p">{</span>
-</span><span id="__span-1-2"><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Count lines in file from S3&quot;</span><span class="p">,</span>
-</span><span id="__span-1-3"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-1-4"><span class="w">  </span><span class="nt">&quot;globals&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-5"><span class="w">    </span><span class="nt">&quot;bucket&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;-- provided by s3trigger --&quot;</span><span class="p">,</span>
-</span><span id="__span-1-6"><span class="w">    </span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;-- provided by s3trigger --&quot;</span>
+</span><span id="__span-1-2"><span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Count lines in file from S3"</span><span class="p">,</span>
+</span><span id="__span-1-3"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-1-4"><span class="w">  </span><span class="nt">"globals"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-5"><span class="w">    </span><span class="nt">"bucket"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-- provided by s3trigger --"</span><span class="p">,</span>
+</span><span id="__span-1-6"><span class="w">    </span><span class="nt">"key"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-- provided by s3trigger --"</span>
 </span><span id="__span-1-7"><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-1-8"><span class="w">  </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo/line-counter&quot;</span><span class="p">,</span>
-</span><span id="__span-1-9"><span class="w">  </span><span class="nt">&quot;parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-1-10"><span class="w">    </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-1-11"><span class="w">      </span><span class="s2">&quot;lava-state put sid -p lines=$(aws s3 cp &#39;s3://{{globals.bucket}}/{{globals.key}}&#39; - | wc -l)&quot;</span>
+</span><span id="__span-1-8"><span class="w">  </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"demo/line-counter"</span><span class="p">,</span>
+</span><span id="__span-1-9"><span class="w">  </span><span class="nt">"parameters"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-10"><span class="w">    </span><span class="nt">"args"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-1-11"><span class="w">      </span><span class="s2">"lava-state put sid -p lines=$(aws s3 cp 's3://{{globals.bucket}}/{{globals.key}}' - | wc -l)"</span>
 </span><span id="__span-1-12"><span class="w">    </span><span class="p">]</span>
 </span><span id="__span-1-13"><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-1-14"><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/bin/sh -c&quot;</span><span class="p">,</span>
-</span><span id="__span-1-15"><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cmd&quot;</span><span class="p">,</span>
-</span><span id="__span-1-16"><span class="w">  </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;core&quot;</span>
+</span><span id="__span-1-14"><span class="w">  </span><span class="nt">"payload"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/bin/sh -c"</span><span class="p">,</span>
+</span><span id="__span-1-15"><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cmd"</span><span class="p">,</span>
+</span><span id="__span-1-16"><span class="w">  </span><span class="nt">"worker"</span><span class="p">:</span><span class="w"> </span><span class="s2">"core"</span>
 </span><span id="__span-1-17"><span class="p">}</span>
 </span></code></pre></div>
 <p>The resulting state item will look like this:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-2-1"><span class="p">{</span>
-</span><span id="__span-2-2"><span class="w">  </span><span class="nt">&quot;publisher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo/line-counter&quot;</span><span class="p">,</span>
-</span><span id="__span-2-3"><span class="w">  </span><span class="nt">&quot;state_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sid&quot;</span><span class="p">,</span>
-</span><span id="__span-2-4"><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-03-26T12:18:04+11:00&quot;</span><span class="p">,</span>
-</span><span id="__span-2-5"><span class="w">  </span><span class="nt">&quot;ttl&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1648343884</span><span class="p">,</span>
-</span><span id="__span-2-6"><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;json&quot;</span><span class="p">,</span>
-</span><span id="__span-2-7"><span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{\&quot;lines\&quot;: \&quot;45\&quot;}&quot;</span>
+</span><span id="__span-2-2"><span class="w">  </span><span class="nt">"publisher"</span><span class="p">:</span><span class="w"> </span><span class="s2">"demo/line-counter"</span><span class="p">,</span>
+</span><span id="__span-2-3"><span class="w">  </span><span class="nt">"state_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sid"</span><span class="p">,</span>
+</span><span id="__span-2-4"><span class="w">  </span><span class="nt">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2022-03-26T12:18:04+11:00"</span><span class="p">,</span>
+</span><span id="__span-2-5"><span class="w">  </span><span class="nt">"ttl"</span><span class="p">:</span><span class="w"> </span><span class="mi">1648343884</span><span class="p">,</span>
+</span><span id="__span-2-6"><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"json"</span><span class="p">,</span>
+</span><span id="__span-2-7"><span class="w">  </span><span class="nt">"value"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{\"lines\": \"45\"}"</span>
 </span><span id="__span-2-8"><span class="p">}</span>
 </span></code></pre></div>
 <p>Another job can access this state item in the job spec rendering process or in
 the job logic itself. Here is an example of the former.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><span class="p">{</span>
-</span><span id="__span-3-2"><span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Print out how many lines there were&quot;</span><span class="p">,</span>
-</span><span id="__span-3-3"><span class="w">  </span><span class="nt">&quot;dispatcher&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-3-4"><span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-</span><span id="__span-3-5"><span class="w">  </span><span class="nt">&quot;job_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo/line-reporter&quot;</span><span class="p">,</span>
-</span><span id="__span-3-6"><span class="w">  </span><span class="nt">&quot;payload&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;echo The file contained {{state.sid}} lines&quot;</span><span class="p">,</span>
-</span><span id="__span-3-7"><span class="w">  </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-3-8"><span class="w">    </span><span class="nt">&quot;sid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;-- default value to be replaced at run-time --&quot;</span>
+</span><span id="__span-3-2"><span class="w">  </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Print out how many lines there were"</span><span class="p">,</span>
+</span><span id="__span-3-3"><span class="w">  </span><span class="nt">"dispatcher"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-3-4"><span class="w">  </span><span class="nt">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-3-5"><span class="w">  </span><span class="nt">"job_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"demo/line-reporter"</span><span class="p">,</span>
+</span><span id="__span-3-6"><span class="w">  </span><span class="nt">"payload"</span><span class="p">:</span><span class="w"> </span><span class="s2">"echo The file contained {{state.sid}} lines"</span><span class="p">,</span>
+</span><span id="__span-3-7"><span class="w">  </span><span class="nt">"state"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-8"><span class="w">    </span><span class="nt">"sid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-- default value to be replaced at run-time --"</span>
 </span><span id="__span-3-9"><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-3-10"><span class="w">  </span><span class="nt">&quot;schedule&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;...&quot;</span><span class="p">,</span>
-</span><span id="__span-3-11"><span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cmd&quot;</span><span class="p">,</span>
-</span><span id="__span-3-12"><span class="w">  </span><span class="nt">&quot;worker&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;core&quot;</span>
+</span><span id="__span-3-10"><span class="w">  </span><span class="nt">"schedule"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+</span><span id="__span-3-11"><span class="w">  </span><span class="nt">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"cmd"</span><span class="p">,</span>
+</span><span id="__span-3-12"><span class="w">  </span><span class="nt">"worker"</span><span class="p">:</span><span class="w"> </span><span class="s2">"core"</span>
 </span><span id="__span-3-13"><span class="p">}</span>
 </span></code></pre></div>
 <p>Note that the state item that is required at run-time has to be declared (with a
@@ -1288,18 +1288,18 @@ removal of state items.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-4-1"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 </span><span id="__span-4-2"><span class="kn">from</span><span class="w"> </span><span class="nn">lava.lib.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">LavaStateItem</span>
 </span><span id="__span-4-3">
-</span><span id="__span-4-4"><span class="n">realm</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LAVA_REALM&#39;</span><span class="p">]</span>
+</span><span id="__span-4-4"><span class="n">realm</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'LAVA_REALM'</span><span class="p">]</span>
 </span><span id="__span-4-5">
-</span><span id="__span-4-6"><span class="n">value1</span> <span class="o">=</span> <span class="s2">&quot;Hello world&quot;</span>
+</span><span id="__span-4-6"><span class="n">value1</span> <span class="o">=</span> <span class="s2">"Hello world"</span>
 </span><span id="__span-4-7"><span class="c1"># .. or maybe ...</span>
 </span><span id="__span-4-8"><span class="n">value2</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="__span-4-9">    <span class="s2">&quot;volcano_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tronador&quot;</span><span class="p">,</span>
-</span><span id="__span-4-10">    <span class="s2">&quot;elevation&quot;</span><span class="p">:</span> <span class="mi">3491</span><span class="p">,</span>
-</span><span id="__span-4-11">    <span class="s2">&quot;active&quot;</span><span class="p">:</span> <span class="kc">False</span>
+</span><span id="__span-4-9">    <span class="s2">"volcano_name"</span><span class="p">:</span> <span class="s2">"Tronador"</span><span class="p">,</span>
+</span><span id="__span-4-10">    <span class="s2">"elevation"</span><span class="p">:</span> <span class="mi">3491</span><span class="p">,</span>
+</span><span id="__span-4-11">    <span class="s2">"active"</span><span class="p">:</span> <span class="kc">False</span>
 </span><span id="__span-4-12"><span class="p">}</span>
 </span><span id="__span-4-13">
 </span><span id="__span-4-14"><span class="c1"># Create our item. This is a local operation so far.</span>
-</span><span id="__span-4-15"><span class="n">my_state_item</span> <span class="o">=</span> <span class="n">LavaStateItem</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="s1">&#39;my_state_id&#39;</span><span class="p">,</span> <span class="n">realm</span><span class="p">,</span> <span class="n">value1</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="s1">&#39;2d&#39;</span><span class="p">)</span>
+</span><span id="__span-4-15"><span class="n">my_state_item</span> <span class="o">=</span> <span class="n">LavaStateItem</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'json'</span><span class="p">,</span> <span class="s1">'my_state_id'</span><span class="p">,</span> <span class="n">realm</span><span class="p">,</span> <span class="n">value1</span><span class="p">,</span> <span class="n">ttl</span><span class="o">=</span><span class="s1">'2d'</span><span class="p">)</span>
 </span><span id="__span-4-16">
 </span><span id="__span-4-17"><span class="c1"># Changed my mind</span>
 </span><span id="__span-4-18"><span class="n">my_state_item</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value2</span>
@@ -1319,24 +1319,24 @@ on the JSON encoded state item value.</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 </span><span id="__span-5-2"><span class="kn">from</span><span class="w"> </span><span class="nn">lava.lib.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">LavaStateItem</span>
 </span><span id="__span-5-3">
-</span><span id="__span-5-4"><span class="n">realm</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LAVA_REALM&#39;</span><span class="p">]</span>
-</span><span id="__span-5-5"><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;Big Secret&#39;</span>
+</span><span id="__span-5-4"><span class="n">realm</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'LAVA_REALM'</span><span class="p">]</span>
+</span><span id="__span-5-5"><span class="n">value</span> <span class="o">=</span> <span class="s1">'Big Secret'</span>
 </span><span id="__span-5-6">
 </span><span id="__span-5-7"><span class="c1"># Create a secure item with the default key.</span>
-</span><span id="__span-5-8"><span class="n">my_state_item</span> <span class="o">=</span> <span class="n">LavaStateItem</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;secure&#39;</span><span class="p">,</span> <span class="s1">&#39;my_state_id&#39;</span><span class="p">,</span> <span class="n">realm</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</span><span id="__span-5-8"><span class="n">my_state_item</span> <span class="o">=</span> <span class="n">LavaStateItem</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'secure'</span><span class="p">,</span> <span class="s1">'my_state_id'</span><span class="p">,</span> <span class="n">realm</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 </span><span id="__span-5-9">
 </span><span id="__span-5-10"><span class="c1"># or</span>
 </span><span id="__span-5-11"><span class="n">my_state_item</span> <span class="o">=</span> <span class="n">LavaStateItem</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
-</span><span id="__span-5-12">    <span class="s1">&#39;secure&#39;</span><span class="p">,</span> <span class="s1">&#39;my_state_id&#39;</span><span class="p">,</span> <span class="n">realm</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">kms_key</span><span class="o">=</span><span class="s1">&#39;alias/my-key&#39;</span>
+</span><span id="__span-5-12">    <span class="s1">'secure'</span><span class="p">,</span> <span class="s1">'my_state_id'</span><span class="p">,</span> <span class="n">realm</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">kms_key</span><span class="o">=</span><span class="s1">'alias/my-key'</span>
 </span><span id="__span-5-13"><span class="p">)</span>
 </span></code></pre></div>
 <p>To retrieve a state item:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 </span><span id="__span-6-2"><span class="kn">from</span><span class="w"> </span><span class="nn">lava.lib.state</span><span class="w"> </span><span class="kn">import</span> <span class="n">LavaStateItem</span>
 </span><span id="__span-6-3">
-</span><span id="__span-6-4"><span class="n">realm</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LAVA_REALM&#39;</span><span class="p">]</span>
+</span><span id="__span-6-4"><span class="n">realm</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">'LAVA_REALM'</span><span class="p">]</span>
 </span><span id="__span-6-5">
-</span><span id="__span-6-6"><span class="n">value</span> <span class="o">=</span> <span class="n">LavaStateItem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;my_state_id&#39;</span><span class="p">,</span> <span class="n">realm</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+</span><span id="__span-6-6"><span class="n">value</span> <span class="o">=</span> <span class="n">LavaStateItem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'my_state_id'</span><span class="p">,</span> <span class="n">realm</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
 </span></code></pre></div>
 <p>The lava state manager handles all the encoding / decoding processes and the
 interaction with DynamoDB.</p>
@@ -1375,7 +1375,7 @@ interaction with DynamoDB.</p>
       <div class="md-footer-social">
         <div class="md-copyright">
           <div class="md-copyright__highlight">
-            v8.3.0 (Mauna Loa)
+            v8.4.0 (Kohala)
           </div>
         </div>
       </div>
@@ -1392,10 +1392,10 @@ interaction with DynamoDB.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "content.code.copy", {"icon": {"repo": "material/github"}}], "search": "assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="assets/javascripts/bundle.c21346df.min.js"></script>
       
     
   </body>
