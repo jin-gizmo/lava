@@ -16,4 +16,5 @@ RUN \
 	dnf install util-linux gcc gcc-c++ make tar bzip2 cpio findutils -y ; \
 	dnf install unixODBC-devel -y ; \
 	dnf install postgresql-devel -y ; \
-	python3 -m pip install pip setuptools packaging -U
+	python3 -m pip install pip setuptools packaging -U ; \
+    dnf clean all

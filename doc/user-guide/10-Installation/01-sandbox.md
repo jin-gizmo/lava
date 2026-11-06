@@ -15,14 +15,14 @@ locally in docker with a single CLI command. No AWS entanglement. No AWS costs.
 It is ideal for local development, testing and experimentation.
 
 !!! note
-    The lava sandbox is new in v8.3.0 (Mauna Loa).
+    The lava sandbox is new in v8.4.0 (Kohala)
 
 !!! info
     The lava sandbox was developed with [Docker Desktop][DockerDesktop].
     Your mileage may vary with the various alternatives. [^Docker-Alternatives]
 
 [^Docker-Alternatives]: There are no philosophical objections to Docker Desktop
-    alternatives but neither is supporting them a priority. If anyone is
+    alternatives, but neither is supporting them a priority. If anyone is
     inspired to take this on, raise an issue to discuss.
 
 ### Quick Start
@@ -155,7 +155,7 @@ that logs the job specification, which includes the bucket and object name in
 the job globals.
 
 !!! note
-    The `sandbox` prefix is based on the name of the realm. Modify i
+    The `sandbox` prefix is based on the name of the realm. Modify it
     appropriately if the realm name is changed.
 
 It's relatively straightforward to adapt or extend this for your own purposes.
@@ -241,6 +241,9 @@ Data should be placed in a `data` directory in the same base directory as the
 │   ├── s3
 │   │   └── my-bucket
 │   │       └── my-data-file
+│   ├── ssh
+│   │   ├── my-ssh-key
+│   │   └── my-ssh-key.pub
 │   └── ssm
 │       └── my-params.yaml
 │
@@ -297,6 +300,22 @@ x-workers:
 Files under `data/s3` will be replicated to S3 in the sandbox on startup.
 The file name structure is `data/s3/<BUCKET>/<KEY>`. Buckets will be created, as
 required.
+
+#### SSH Keys
+
+Some lava connectors require SSH keys to be stored as SSM parameters. Files
+under `data/ssh` are assumed to contain SSH keys that will be loaded to the SSM
+parameter store.
+
+Files with a `.pub` suffix are assumed to contain public keys and are loaded as
+`String` parameters with names in the form
+`/lava/${LAVA_REALM}/ssh/<STEM>/public`, where `<STEM>` is the basename of the
+file with the `.pub` suffix removed.
+
+Files without a `.pub` suffix are assumed to contain secret keys and are loaded
+as `SecureString` parameters with names in the form
+`/lava/${LAVA_REALM}/ssh/<STEM>/secret`, where `<STEM>` is the basename of the
+file.
 
 #### SSM Parameters
 

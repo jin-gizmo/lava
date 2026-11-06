@@ -150,7 +150,7 @@ smb:
   host: lava-test-smb
   volume: lavatest
   # Empty string is root
-  dir: ""
+  dir: lava
   remote_name: whatever
   user: lava
   port: 445

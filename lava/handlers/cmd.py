@@ -42,7 +42,7 @@ def run(
     tmpdir: str,
     s3tmp: str,
     dev_mode: bool = False,
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> dict[str, Any]:
     """
     Run single command.
@@ -137,7 +137,7 @@ def run(
     # ----------------------------------------
     # Run the command and capture output.
 
-    return_info = {'exit_status': 0, 'output': []}
+    return_info: dict[str, Any] = {'exit_status': 0, 'output': []}
     failed = False
     fail_reason = None
     job_result = {'payload': job_spec['payload']}

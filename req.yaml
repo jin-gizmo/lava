@@ -119,3 +119,19 @@ require:
                 ;;
       esac
       exit 126
+
+  - name: trivy
+    description: Vulnerability scanner
+    check: req_has_command trivy
+    install: |
+      case "$REQ_OS"
+      in
+        darwin)
+                echo "Try ..."
+                echo "    brew install trivy"
+                ;;
+        *)
+                echo "See https://trivy.dev"
+                ;;
+      esac
+      exit 126

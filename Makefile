@@ -416,11 +416,16 @@ clean:
 count:
 	tokei .
 
-## Upgrade the virtual environment with the latest Python packages.
+## Upgrade the virtual environment with the latest Python packages. The default
+## upgrade strategy is `eager` but can be set to the **pip** default of 
+## `only-if-needed`, if necessary.
+#:opt strategy
+upgrade: strategy=eager
+
 upgrade: _venv_is_on
-	python3 -m pip install -r requirements-build.txt --upgrade
-	python3 -m pip install -r requirements.in --upgrade
-	python3 -m pip install -r requirements-extra.in --upgrade
+	python3 -m pip install -r requirements-build.txt --upgrade --upgrade-strategy "$(strategy)"
+	python3 -m pip install -r requirements.in --upgrade --upgrade-strategy "$(strategy)"
+	python3 -m pip install -r requirements-extra.in --upgrade --upgrade-strategy "$(strategy)"
 	
 ## Build frozen `requirements-*.txt` files based on versions currently
 ## installed in the venv.
@@ -442,6 +447,27 @@ toc:
 		echo "README.md TOC updated" ; \
 	fi ; \
 	z=0
+
+## Scan for security vulnerabilities. Includes *scan-py*, *scan-secrets* and
+## *scan-licences*.
+scan:	scan-py scan-secrets scan-licences
+
+scan-secrets:
+	@echo "🔵 $@"
+	trivy fs --scanners secret .
+
+scan-licences:
+	@echo "🔵 $@"
+	trivy fs --scanners license .
+
+scan-py:	_venv_is_on
+	@echo "🔵 $@"
+	@( \
+		tmp=$$(mktemp -d) ; \
+		trap '/bin/rm -rf "$$tmp"' 0 ; \
+		pip freeze > "$$tmp/requirements.txt" ; \
+		trivy fs --scanners vuln "$$tmp/requirements.txt" ; \
+	)
 
 
 
@@ -468,7 +494,7 @@ start:
 ## Check that the local docker based test infrastructure is ready to use (also
 ## included in the *test* and *coverage* targets).
 ## The *services* parameter can be set to a comma separated list of service
-## names to start only those. e.g. `services=ministack,mail`.
+## names to check only those. e.g. `services=ministack,mail`.
 ## See `docker-compose.yaml` for the available service names.
 #:opt services
 ready:

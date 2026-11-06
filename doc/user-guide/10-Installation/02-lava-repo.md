@@ -25,7 +25,7 @@ source venv/bin/activate
 Apart from a standard UNIX-like Python development environment, the following
 additional tools are required:
 
-| Tool  | Why it's needed                                              |
+| Tool | Why it's needed |
 | ----------- | --- |
 | [aspell](http://aspell.net)                                  | Spell checking the user guide. Install it on macOS with Homebrew. |
 | [AWS CLI v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) | Used for deployment of lava components and various other things. |
@@ -34,6 +34,7 @@ additional tools are required:
 | [packer](https://developer.hashicorp.com/packer)             | Building the [lava AMI](#the-lava-ec2-ami).                  |
 | [shellcheck](https://www.shellcheck.net) | Used as part of pre-commit checks. Install it on macOS with Homebrew. |
 | [tokei](https://github.com/XAMPPRocky/tokei)                 | Required to count lines of code (optional). Install it on macOS with Homebrew. |
+| [trivy](https://trivy.dev)                                   | Vulnerability scanning. |
 
 !!! tip
     Running `make req` will do an automated check for prerequisites using the

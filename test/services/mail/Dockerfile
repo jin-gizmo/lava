@@ -3,7 +3,7 @@ FROM axllent/mailpit
 COPY mailpit/docker-entrypoint-init.sh /
 
 RUN \
-    apk add openssl ; \
+    apk add --no-cache openssl ; \
     mkdir /mail ; \
     chown mail /mail ; \
     chgrp mail /mail ; \

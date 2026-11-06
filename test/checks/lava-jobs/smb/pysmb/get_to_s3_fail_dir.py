@@ -43,5 +43,9 @@ class Checker(SMBChecker):
     ) -> None:
         """Validate smb_get fails when the source path is a directory."""
 
+        assert (
+            'is a directory'
+            in job_events[self.job_id, self.run_id][-1]['info']['error_data']['error']
+        )
         assert job_result is None
         assert job_error is not None

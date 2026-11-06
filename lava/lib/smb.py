@@ -211,15 +211,15 @@ class MSCIFSFileAttributes(SMBFileAttributes):
     https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-cifs/6008aa8f-d2d8-4366-b775-b81aece05bb1
     """
 
-    NORMAL: int = 0x00
-    READONLY: int = 0x01
-    HIDDEN: int = 0x02
-    SYSTEM: int = 0x04
-    VOLUME: int = 0x08
-    DIRECTORY: int = 0x10
-    ARCHIVE: int = 0x20
-    TEMPORARY: int = 0x0100
-    COMPRESSED: int = 0x0800
+    NORMAL = 0x00
+    READONLY = 0x01
+    HIDDEN = 0x02
+    SYSTEM = 0x04
+    VOLUME = 0x08
+    DIRECTORY = 0x10
+    ARCHIVE = 0x20
+    TEMPORARY = 0x0100
+    COMPRESSED = 0x0800
 
     # INCL_NORMAL is a special placeholder to include normal files
     # with other search attributes for list_path() operations.
@@ -237,26 +237,26 @@ class MSFSCCFileAttributes(SMBFileAttributes):
     https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/ca28ec38-f155-4768-81d6-4bfeb8586fc9
     """
 
-    READONLY: int = 0x01
-    HIDDEN: int = 0x02
-    SYSTEM: int = 0x04
-    VOLUME: int = 0x08
-    DIRECTORY: int = 0x10
-    ARCHIVE: int = 0x20
-    NORMAL: int = 0x80
-    TEMPORARY: int = 0x0100
-    SPARSE_FILE: int = 0x0200
-    REPARSE_POINT: int = 0x0400
-    COMPRESSED: int = 0x0800
-    OFFLINE: int = 0x1000
-    NOT_CONTENT_INDEXED: int = 0x2000
-    ENCRYPTED: int = 0x4000
-    INTEGRITY_STREAM: int = 0x8000
-    NO_SCRUB_DATA: int = 0x020000
-    RECALL_ON_OPEN: int = 0x040000
-    PINNED: int = 0x080000
-    UNPINNED: int = 0x100000
-    RECALL_ON_DATA_ACCESS: int = 0x400000
+    READONLY = 0x01
+    HIDDEN = 0x02
+    SYSTEM = 0x04
+    VOLUME = 0x08
+    DIRECTORY = 0x10
+    ARCHIVE = 0x20
+    NORMAL = 0x80
+    TEMPORARY = 0x0100
+    SPARSE_FILE = 0x0200
+    REPARSE_POINT = 0x0400
+    COMPRESSED = 0x0800
+    OFFLINE = 0x1000
+    NOT_CONTENT_INDEXED = 0x2000
+    ENCRYPTED = 0x4000
+    INTEGRITY_STREAM = 0x8000
+    NO_SCRUB_DATA = 0x020000
+    RECALL_ON_OPEN = 0x040000
+    PINNED = 0x080000
+    UNPINNED = 0x100000
+    RECALL_ON_DATA_ACCESS = 0x400000
 
 
 # ------------------------------------------------------------------------------
@@ -275,8 +275,8 @@ class SMBFile:
         file_attributes: bin,
         filename: str,
         attributes_class: type[SMBFileAttributes],
-        short_name: str = None,
-        file_id: int = None,
+        short_name: str | None = None,
+        file_id: int | None = None,
     ):
         """
         Create an SMBFile object.
@@ -388,7 +388,7 @@ class LavaSMBConnection(ABC):  # pragma: no cover
 
     # --------------------------------------------------------------------------
     @abstractmethod
-    def connect(self, ip: str = None, port: int = None, timeout: int = 60) -> None:
+    def connect(self, ip: str | None = None, port: int | None = None, timeout: int = 60) -> None:
         """
         Connect to an SMB server.
 
@@ -585,7 +585,7 @@ class SMBProtocolConnection(LavaSMBConnection):
         password: str,
         my_name: str,
         remote_name: str,
-        port: int = None,
+        port: int | None = None,
         domain: str = '',
         use_ntlm_v2: bool = True,
         sign_options: SMBSigningOptions = SMBSigningOptions.SIGN_WHEN_REQUIRED,
@@ -803,7 +803,7 @@ class SMBProtocolConnection(LavaSMBConnection):
         self.log.debug('Set SMB client config')
 
     # --------------------------------------------------------------------------
-    def connect(self, ip: str = None, port: int = None, timeout: int = 60) -> None:
+    def connect(self, ip: str | None = None, port: int | None = None, timeout: int = 60) -> None:
         """
         Connect to SMB server.
 
@@ -864,7 +864,7 @@ class SMBProtocolConnection(LavaSMBConnection):
         path: str,
         pattern: str = '*',
         timeout: int = 30,
-        search: int = None,
+        search: int | None = None,
     ) -> list[SMBFile]:
         """
         Retrieve a directory listing of files/folders at path.
@@ -938,7 +938,10 @@ class SMBProtocolConnection(LavaSMBConnection):
         unc_path = self._service_path(service_name, path)
         tmp_path = path.strip('\\/').replace('/', '\\')
 
-        dir_path, file_name = tmp_path.rsplit('\\', 1)
+        try:
+            dir_path, file_name = tmp_path.rsplit('\\', 1)
+        except ValueError:
+            dir_path, file_name = '', tmp_path
         files = self.list_path(service_name, dir_path, file_name, timeout)
         if len(files) != 1:
             raise SMBOperationError(
@@ -1278,7 +1281,7 @@ class PySMBConnection(LavaSMBConnection):
         return bool(self._connection.sock)
 
     # ------------------------------------------------------------------------------
-    def connect(self, ip: str = None, port: int = None, timeout: int = 60) -> None:
+    def connect(self, ip: str | None = None, port: int | None = None, timeout: int = 60) -> None:
         """
         Connect to SMB server.
 
@@ -1316,7 +1319,7 @@ class PySMBConnection(LavaSMBConnection):
         path: str,
         pattern: str = '*',
         timeout: int = 30,
-        search: int = None,
+        search: int | None = None,
     ) -> list[SMBFile]:
         """
         Retrieve a directory listing of files/folders at path.

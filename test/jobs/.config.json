@@ -8,9 +8,9 @@
             "templates",
             "*.tpl"
         ],
-        "_output_dir": "/private/tmp/lava-framework.6442/proj",
-        "_repo_dir": "/var/folders/34/yp3fcjdj1455gjg9_fbygm9h0000gn/T/tmpng72zo9q/cookiecutter",
-        "_template": "../lava-job-framework-8.3.0rc3.zip",
+        "_output_dir": "/private/tmp/lava-framework.29651/proj",
+        "_repo_dir": "/var/folders/34/yp3fcjdj1455gjg9_fbygm9h0000gn/T/tmpjutd002o/cookiecutter",
+        "_template": "../lava-job-framework-8.4.0.zip",
         "_version": "-- auto injected --",
         "config_checks": "strict",
         "description": "Lava test jobs",

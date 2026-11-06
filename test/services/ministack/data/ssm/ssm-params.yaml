@@ -72,6 +72,13 @@ Parameters:
     Value: "${SMB_PASSWORD}"
 
   - Name: smtp_local/lava/password
+    Description: Local SMTP test server
     Type: SecureString
     KeyId: *kms_sys
     Value: "${SMTP_PASSWORD}"
+
+  - Name: redshift/lava/password
+    Description: Lava user password on Redshift
+    Type: SecureString
+    KeyId: *kms_sys
+    Value: "${REDSHIFT_LAVA_PASSWORD}"

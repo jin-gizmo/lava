@@ -188,7 +188,8 @@ match the credentials stored in the lava connectors deployed with the test jobs.
 As `.env` files are not in the repo, this will need to be created manually.
 
 Copy `dotenv.sample` to `.env` and edit the passwords. The values themselves
-don't matter too much.
+don't matter too much, except for ones that reference external resources
+(e.g. Redshift, when testing against AWS hosted clusters).
 
 ## ODBC Setup
 

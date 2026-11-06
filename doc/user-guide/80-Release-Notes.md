@@ -1,10 +1,6 @@
 
 # Release Notes
 
-!!! note
-    The historical release notes have been purged, because, well, who cares?
-    The headers have been retained for old times sake.
-
 !!! tip
     See also [Upgrade Notes](#upgrade-notes).
 
@@ -26,13 +22,33 @@ The following changes will occur in the next major release after Version 8.
 
 ## Version 8
 
-#### Version 8.3.0 ([Mauna Loa](https://en.wikipedia.org/wiki/Mauna_Loa))
+#### Version 8.4.0 ([Kohala](https://en.wikipedia.org/wiki/Kohala_(mountain)))
 
 !!! info "Introducing the lava sandbox ..."
-    Lava v8.3.0 (Mauna Loa) introduces the [lava sandbox][the-lava-sandbox], a
+    Lava v8.4.0 introduces the [lava sandbox][the-lava-sandbox], a
     complete, functional lava environment for development and testing that runs
     locally in docker with a single CLI command. No AWS entanglement. No AWS
     costs.
+
+There are no material changes in the lava code itself in this release.
+It primarily updates the underlying Python packages, docker base images
+etc for security currency. This was done primarily in response to
+[GHSA-6q48-6c7w-9gw2](https://github.com/advisories/GHSA-6q48-6c7w-9gw2) that
+impacts the widely used Python
+[certifi](https://github.com/certifi/python-certifi) package, as well as **pip**.
+
+Other changes include:
+
+*   Minor updates to incidental aspects of code (e.g. some type hints).
+
+*   Minor extensions / refinements to the test setup.
+
+*   Minor updates to build logic for the lava docker images.
+
+*   Minor updates to build logic for other components (e.g. the addition of the
+    `scan` **make** target for security scanning using [trivy](https://trivy.dev)).
+
+#### Version 8.3.0 ([Mauna Loa](https://en.wikipedia.org/wiki/Mauna_Loa))
 
 
 This release includes reasonable subset of the lava testing components. Credit
@@ -252,7 +268,10 @@ Changes are:
     The semantic versioning support code has been left in (and repaired), just
     in case, but lava itself no longer uses it.
 
-#### Version 8.1 ([Kīlauea](https://en.wikipedia.org/wiki/Kīlauea))
+#### Version 8.1 ([Kīlauea](https://en.wikipedia.org/wiki/Kīlauea)) [^OldNotes]
+
+[^OldNotes]: The historical release notes have been purged, because, well, who
+    cares?  The headers have been retained for old times sake.
 
 #### Version 8.0 ([Incahuasi](https://en.wikipedia.org/wiki/Incahuasi))
 

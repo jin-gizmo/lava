@@ -19,6 +19,7 @@ services:
   realm:
     container_name: ${COMPOSE_PROJECT_NAME}-realm
     image: ghcr.io/jin-gizmo/lava/sandbox/realm:${LAVA_VERSION:-latest}
+    # For testing the sandbox ...
     # image: localhost:5001/lava/sandbox/realm:${LAVA_VERSION:-latest}
     restart: unless-stopped
     environment:

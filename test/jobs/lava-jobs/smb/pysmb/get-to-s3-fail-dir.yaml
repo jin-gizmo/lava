@@ -25,6 +25,6 @@ parameters:
 x-lava-nocheck: joborphan
 x-lava-test:
   result: FAIL
-  error_pattern: "Can't compile non template nodes"
+  error_pattern: "Failed with exit status 1"
   marks:
     - local

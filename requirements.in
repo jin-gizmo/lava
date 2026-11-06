@@ -14,7 +14,14 @@ oracledb
 docker
 jinja2
 jsonschema
-pg8000
+
+# This is needed because redshift-connector 2.2.0 requires scramp<1.5.0,>=1.2.0
+# and pg8000 1.31.6 requires scramp==1.5.0 so we have a conflict. Pg8000 v1.31.6
+# only upgrades its scramp to v1.5.0. Scramp v1.5.0 includes breaking changes
+# and does not appear to fix any CVEs so safer to hold pg8000 back for now.
+# -- Murray (30/10/2026)
+pg8000<1.31.6
+
 psutil
 pygments
 pymysql

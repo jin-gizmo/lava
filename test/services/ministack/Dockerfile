@@ -1,7 +1,7 @@
 FROM ministackorg/ministack
 
 RUN --mount=type=bind,from=etc,target=/tmp/lava/etc \
-    apk add jq envsubst wget ; \
+    apk add --no-cache jq envsubst wget openssh-keygen ; \
     wget -q -O /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py \
         && python3 /tmp/get-pip.py --root-user-action ignore \
         && /bin/rm -f /tmp/get-pip.py ; \

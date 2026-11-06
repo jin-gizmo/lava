@@ -24,13 +24,13 @@ HTML_FILES=$(patsubst %.cfn.json,$(dist)/cfn/%.cfn.html,$(wildcard *.cfn.json))
 
 DIST_CFN_FILES=$(patsubst %.cfn.json,$(dist)/cfn/%.cfn.json,$(wildcard *.cfn.json))
 
-LAVA_VERSION_NUM=$(shell python3 ../lava/version.py)
+LAVA_VERSION_NUM=$(shell python3 $(repo_base)/lava/version.py)
 
 .PHONY: dist
 
 # Inject version info into the CFN
-$(dist)/cfn/%.cfn.json: %.cfn.json
-	../etc/json-inject --no-sort \
+$(dist)/cfn/%.cfn.json: %.cfn.json $(repo_base)/lava/VERSION.json
+	$(repo_base)/etc/json-inject --no-sort \
 		--deep-param Outputs.Version.Value="$(LAVA_VERSION_NUM)" \
 		< $< > $@
 

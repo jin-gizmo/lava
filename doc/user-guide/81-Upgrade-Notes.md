@@ -5,11 +5,160 @@
     [release notes](#release-notes).
 
 
+## Version 8.4.0 ([Kohala](https://en.wikipedia.org/wiki/Kohala_(mountain)))
+
+!!! info
+    These notes relate to upgrading from v8.3 to v8.4.0.
+
+## General
+
+#### Degree of difficulty for upgrade / rollback
+
+🟢 Easy.
+
+#### What’s new?
+
+There are no material changes in the lava code itself in version 8.4.0 (Kohala).
+[^8_4_0_1] It merely updates the underlying Python packages, docker base images
+etc for security currency. This was done primarily in response to
+[GHSA-6q48-6c7w-9gw2](https://github.com/advisories/GHSA-6q48-6c7w-9gw2) that
+impacts the Python [certifi](https://github.com/certifi/python-certifi) package
+and **pip**.
+
+[^8_4_0_1]: There have been some minor updates to things such as type hints
+    here and there, but nothing material.
+
+The main addition in this release is the [lava sandbox][the-lava-sandbox]. If
+not for this, the release would have been a patch release.
+
+There have also been some minor changes in the test and build setup. No
+production code impacts though.
+
+Read the [release notes](#release-notes) for more information.
+
+#### Is v8.4.0 backward compatible with v8.3?
+
+Yes.
+
+#### Do any jobs, connections etc need to be modified to run under v8.4.0?
+
+No.
+
+#### Where do I find lava bits and pieces?
+
+| Item | Location |
+|-|-|
+|Repo| [GitHub](https://github.com/jin-gizmo/lava).|
+|**jinlava** Python package.|PyPI : `pip install jinlava`|
+|CloudFormation templates|[Release on GitHub](https://github.com/jin-gizmo/lava/releases)|
+|Lava job framework|[Release on GitHub](https://github.com/jin-gizmo/lava/releases)|
+|Lava docker images|[GitHub packages](https://github.com/jin-gizmo?tab=packages&repo_name=lava)|
+
+Stuff you need to build from the repo using the makefile(s):
+
+*   Lava worker package
+*   Lava lambda code bundles
+*   Lava AMI.
+
+### Infrastructure
+
+#### Are there any infrastructure changes?
+
+No.
+
+#### Do I need to update the CloudFormation stacks from v8.3 to v8.4.0?
+
+No.
+
+There are no changes in this area but there are no downsides to updating if
+the version mismatch bothers you.
+
+#### Do I need to build the v8.4 lava AMI?
+
+Yes.
+
+The v8.3.0 AMI contains versions of pip and certifi containing compromised
+certificates as described in 
+[GHSA-6q48-6c7w-9gw2](https://github.com/advisories/GHSA-6q48-6c7w-9gw2).
+Although lava jobs will pick up a remediated version of certifi without the
+compromised emSign root certificates, deployed as part
+of the v8.4.0 lava worker code bundle, the compromised certificates will still
+be present on the host. While they won't be used, you really don't want them
+there at all and any host security scanners will ring like a bell until they are
+gone.
+
+Once the new AMI is built, it's a simple process to roll it out for workers
+using the [lava-ami](#lava-ami-utility) utility.
+
+#### Can I run lava v8.3 workers on the v8.4.0 AMI and vice versa?
+
+Yes.
+
+### The Lava Job Framework { #upgrade-notes-the-lava-job-framework-v840 data-toc-label="Lava Job Framework" }
+
+#### What’s new?
+
+Nothing.
+
+#### Do I need to upgrade existing projects to use the v8.4.0 framework?
+
+No.
+
+#### Do I need to redeploy existing projects?
+
+Not for lava's sake. However, if your project includes Python components that
+use common packages such as **requests** or **urllib3**, you may need to do so
+as it may contain the tainted version of **certifi**.
+
+### Upgrading Lava to v8.4.0 { data-toc-label="Upgrading to v8.4.0" }
+
+#### What’s the upgrade process?
+
+It can vary a bit based on the target environment but the following is a
+possible high level sequence of events.  Keep in mind that multiple versions of
+lava code (worker and lambdas) can be safely sitting alongside each other in S3.
+Same goes for lava AMI versions. Each realm / worker explicitly specifies the
+versions of code it runs using configuration data. Rolling forwards / backwards
+is generally a matter of changing the configuration and restarting something.
+
+1.  Build everything
+    * Lava AMI
+    * Lava Worker package
+    * Lava lambda functions
+
+2.  Deploy the bits to S3 (`make deploy …`) — this doesn’t affect any running
+    realm.
+
+3.  Update the realm CloudFormation stack for the target realm *in place* to
+    flip the lambda function versions to v8.4.0.
+
+4.  Use the [lava-ami](#lava-ami-utility) utility to flip the AMI version on the
+    workers to the v8.4.0 one. The utility will update the CloudFormation stack
+    for you.
+
+5.  Update the realm entry in the realms table to tell the target worker to load
+    v8.4.0.
+
+6.  Use the worker auto scaling group to refresh the worker(s).
+
+This order can be shuffled a bit, if necessary.
+
+#### How do I rollback to v8.3.0?
+
+*   **Lambda functions:** Update the realm CloudFormation stack (same template)
+    and change the lambda version parameter.
+
+*   **Lava worker version**: Update the realm entry in the realms table to point
+    the worker back to v8.3.0 of the code and then, replace the worker.
+
+*   **AMI:** Use the [lava-ami](#lava-ami-utility) utility to select a different
+    AMI. The utility will update the worker CloudFormation stack for you. Then,
+    replace the worker.
+
 ## Version 8.3.0 ([Mauna Loa](https://en.wikipedia.org/wiki/Mauna_Loa))
 
 !!! info
     These notes relate to upgrading from v8.2 to v8.3.0.
-
 
 ### General
 
@@ -64,7 +213,7 @@ Other stuff to note:
 *   **Python 3.9**: This is considered dead from a lava perspective. Lava v8.3.0
     has not been tested with 3.9.
 
-#### Is v8.3.0 backward compatible with v8.2
+#### Is v8.3.0 backward compatible with v8.2?
 
 Yes.
 
@@ -151,7 +300,7 @@ to be wary of is the Oracle binaries that are built in to the AMI. These are
 less important in v8.3 as they are only used for the Oracle CLI connector and
 any Oracle connection specifying the non-default *thick* mode.
 
-### The Lava Job Framework { #upgrade-notes-the-lava-job-framework data-toc-label="Lava Job Framework" }
+### The Lava Job Framework { #upgrade-notes-the-lava-job-framework-v830 data-toc-label="Lava Job Framework" }
 
 #### What’s new?
 

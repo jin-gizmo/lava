@@ -1,5 +1,8 @@
 """Shared checker utilities for SMB integration jobs."""
 
+# TODO: Not sure why this needs to be so complicated and opaque. Naming can be
+#       better too. Needs work.
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -38,10 +41,10 @@ class SMBChecker(HandlerChecker):
     def init_split_triplet(self) -> None:
         """Initialize common split exe state from a single args triplet."""
 
-        args = self.job_spec['parameters']['args']
-        assert len(args) == 3, f'Expected exactly 3 args, got {len(args)}'
+        job_args = self.job_spec['parameters']['args']
+        assert len(job_args) == 3, f'Expected exactly 3 args, got {len(job_args)}'
 
-        self.message = args[0]
+        self.message = job_args[0]
         self.expected_status = 0 if self.message.startswith('OK:') else 1
         self.conn_id = self.job_spec['parameters']['connections']['smb']
 

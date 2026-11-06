@@ -174,14 +174,12 @@ services:
     ports:
       - "127.0.0.1:4566:4566"
     volumes:
-      # Ministack persistence is totally useless. Don't use it.
-      # - ./services/ministack/ms-state.dtmp/state:/tmp/ministack-state
-      # - ./services/ministack/ms-state.dtmp/s3:/tmp/ministack-data/s3
       - ./.env:/.env:ro
       - ./services/ministack/aws:/root/.aws:ro
       - ./services/ministack/init.d/post-init:/docker-entrypoint-initaws.d/ready.d:ro
       - ./services/ministack/conf:/lava/conf:ro
-      - ./services/ministack/data:/lava/data:ro
+      - ./services/ministack/data:/lava/data
+      - ../dist/test/ssh:/lava/data/ssh:ro
       - ../dist/cfn:/lava/cfn:ro
       - ../dist/lambda:/lava/lambda:ro
       # Allows ministack to start sidecar containers for lambda

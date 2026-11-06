@@ -24,3 +24,9 @@ SLACK_WEBHOOK=http://localhost:4000/services/T000000001/B000000001/X00000000
 # Mail server stuff
 SMTP_USER=lava
 SMTP_PASSWORD=...
+
+# Redshift
+# Even if you're not running the Redshift tests (they require real Redshift
+# clusters), you need to set values here.
+REDSHIFT_LAVA_USER=lava
+REDSHIFT_LAVA_PASSWORD=...

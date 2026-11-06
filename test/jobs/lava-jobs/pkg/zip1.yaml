@@ -1,6 +1,6 @@
 $schema: http://127.0.0.1:8000/schemas/latest/job.schema.yaml
 
-description: OK - Run a simple pkg job and create an (unused) git connector
+description: OK - Run a simple pkg job and create (unused) git / ssh connectors
 
 type: pkg
 
@@ -18,6 +18,7 @@ parameters:
     - payload area={{realm.s3_payloads}}
   connections:
     git: "<{ prefix.conn }>/git"
+    ssh: "<{ prefix.conn }>/ssh"
   command: lava_info.sh
 
 x-lava-nocheck: joborphan

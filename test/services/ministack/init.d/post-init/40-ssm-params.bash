@@ -19,14 +19,6 @@ function error {
 	echo "❌ $*"
 }
 
-function cfn_stack_exists {
-	aws cloudformation describe-stacks --stack-name "$1" > /dev/null 2>&1
-}
-
-function sqs_queue_exists {
-	aws sqs get-queue-url --queue-name "$1" > /dev/null 2>&1
-}
-
 function require {
 	for i
 	do
@@ -55,7 +47,7 @@ done
 
 # ------------------------------------------------------------------------------
 info "Loading SSM parameters"
-for f in /lava/data/ssm/**/*.yaml /host/data/ssm/**/*.yaml
+for f in /lava/data/ssm/**/*.yaml /host/data/ssm/**/*.yaml /run/data/ssm/**/*.yaml
 do
 	(
 		# cd allows ssmp to pick up the .env for this group of files.

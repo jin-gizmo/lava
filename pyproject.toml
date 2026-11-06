@@ -69,6 +69,8 @@ lint.ignore = [
     'RUF100',  # Unused `noqa` directive
     'RUF012',  # Temporary -- to be re-enabled: Mutable class attributes should be annotated with `typing.ClassVar`
     'RUF013',  # Temporary -- to be re-enabled: PEP 484 prohibits implicit `Optional`
+
+    'ICN001', # Total BS -- `datetime` should be imported as `dt`'. Sack anyone who does this
 ]
 
 lint.external = [

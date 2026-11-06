@@ -25,7 +25,7 @@ class Checker(SMBChecker):
         self.conn_id = self.job_spec['parameters']['conn_id']
         self.share_name = self.job_spec['parameters']['share_name']
         filename = self.target_uri.rsplit('/', 1)[-1]
-        share_file = self.fx.dirs.smb_share / self.run_id / filename
+        share_file = self.fx.dirs.smb_share / self.fx.tc.smb.dir / self.run_id / filename
         remote_file = share_file.relative_to(self.fx.dirs.smb_share).as_posix()
         self.share_content = f'hello-world,{self.run_id}\n'
 

@@ -9,7 +9,7 @@ ENV SMB_ROOT=/smb-data
 
 RUN \
     apt-get update ; \
-    apt-get install -y samba smbclient ; \
+    apt-get install --no-install-recommends -y samba smbclient ; \
     mkdir "$SMB_ROOT"
 
 

@@ -30,4 +30,3 @@ x-lava-test:
   result: OK
   marks:
     - local
-    - IUTX

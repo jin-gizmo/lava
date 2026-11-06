@@ -22,6 +22,7 @@
 
 
 ARG base=this-must-be-specified-as-a-build-arg
+# trivy:ignore:DS-0001
 FROM ${base}
 
 # ------------------------------------------------------------------------------
@@ -42,8 +43,8 @@ ENV \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+WORKDIR /tmp/lava
 RUN --mount=type=bind,source=.,target=/tmp/lava \
-    cd /tmp/lava ; \
     for f in ${type}-* ; \
     do \
         [ ! -x $f ] && continue ; \
@@ -53,4 +54,5 @@ RUN --mount=type=bind,source=.,target=/tmp/lava \
     done ; \
     echo Done
 
+WORKDIR /
 CMD ["/bin/bash"]

@@ -3,7 +3,7 @@ FROM ubuntu:26.04
 
 RUN \
     apt-get update ; \
-    apt-get install -y postgresql-client ; \
+    apt-get install --no-install-recommends -y postgresql-client ; \
     psql --version
 
 ENTRYPOINT [ "psql" ]

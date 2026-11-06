@@ -1,0 +1,63 @@
+misconfigurations:
+  - id: DS-0026
+    paths:
+      - "test/**/*Dockerfile"
+      - "etc/builders/**/*Dockerfile"
+    statement: No health check needed for test / builder images.
+  - id: DS-0001
+    paths:
+      - "test/**/*Dockerfile"
+    statement: "Not required for test: Specify a tag in the 'FROM' statement"
+  - id: DS-0002
+    statement: "Not required for test: Specify at least 1 USER command in Dockerfile with non-root user as argument"
+  - id: DS-0026
+    paths:
+      - lava/resources/cookiecutter/**/Dockerfile
+      - docker/Dockerfile
+    statement: Add HEALTHCHECK instruction in your Dockerfile.
+
+  - id: AWS-0066
+    paths:
+      - "**/*.cfn.json"
+      - "**/*.cfn.yaml"
+    statement: (AWS Lambda) Function does not have tracing enabled.
+
+  - id: AWS-0123
+    paths:
+      - "**/*.cfn.json"
+      - "**/*.cfn.yaml"
+    statement: Multi-Factor authentication is not enforced for IAM group.
+
+  # ----------------------------------------------------------------------------
+  # CFN stuff that is overkill for the sandbox / test env
+  - id: AWS-0089
+    paths:
+      - docker/sandbox/**/*.cfn.json
+      - docker/sandbox/**/*.cfn.yaml
+      - test/services/ministack/**/*.cfn.json
+      - test/services/ministack/**/*.cfn.yaml
+    statement: Bucket has logging disabled.
+
+  - id: AWS-0090
+    paths:
+      - docker/sandbox/**/*.cfn.json
+      - docker/sandbox/**/*.cfn.yaml
+      - test/services/ministack/**/*.cfn.json
+      - test/services/ministack/**/*.cfn.yaml
+    statement: Bucket does not have versioning enabled.
+
+  - id: AWS-0096
+    paths:
+      - docker/sandbox/**/*.cfn.json
+      - docker/sandbox/**/*.cfn.yaml
+      - test/services/ministack/**/*.cfn.json
+      - test/services/ministack/**/*.cfn.yaml
+    statement: Queue is not encrypted.
+
+  - id: AWS-0132
+    paths:
+      - docker/sandbox/**/*.cfn.json
+      - docker/sandbox/**/*.cfn.yaml
+      - test/services/ministack/**/*.cfn.json
+      - test/services/ministack/**/*.cfn.yaml
+    statement: Bucket does not encrypt data with a customer managed key.

@@ -37,7 +37,7 @@ def run(
     tmpdir: str,
     s3tmp: str,
     dev_mode: bool = False,
-    aws_session: boto3.Session = None,
+    aws_session: boto3.Session | None = None,
 ) -> dict[str, Any]:
     """
     Put a file onto an SMB file share.
@@ -95,6 +95,9 @@ def run(
 
     """
 
+    if not aws_session:
+        aws_session = boto3.Session()
+
     fn_args = locals()
     parameters = job_spec.get('parameters', {})
     try:
@@ -106,7 +109,7 @@ def run(
 
     timeout = duration_to_seconds(parameters.get('timeout', config('SMB_TIMEOUT')))
 
-    basedir = parameters.get('basedir', tmpdir)
+    basedir: str = parameters.get('basedir', tmpdir)
 
     # ----------------------------------------
     # Jinja rendering
@@ -164,8 +167,8 @@ def run(
 
     failed = False
     fail_reason = None
-    return_info = {'exit_status': 0, 'output': []}
-    job_result = {'exit_status': 0}
+    return_info: dict[str, Any] = {'exit_status': 0, 'output': []}
+    job_result: dict[str, Any] = {'exit_status': 0}
 
     try:
         with open(stdout_file, 'w') as stdout, open(stderr_file, 'w') as stderr:

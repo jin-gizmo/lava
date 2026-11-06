@@ -19,7 +19,7 @@ parameters:
   args:
     - "OK: S3 to SMB"
     - "{{ realm.s3_payloads }}/<{ prefix.payload }>/misc.rsc/hello-world.txt"
-    - <{ smb.volume }>:<{ smb.dir }>/hello-world.txt
+    - <{ smb.volume }>:<{ smb.dir }>/hello-world-{{ job.run_id }}.txt
 
 x-lava-nocheck: joborphan
 x-lava-test:

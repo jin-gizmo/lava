@@ -51,7 +51,7 @@ the checking process is also configured as a pre-commit hook.
 |---|--|--------------------|
 |Python quality|[flake8](https://flake8.pycqa.org/en/latest/)|Performs a range of PEP8 compliance and other code health checks, including compliance with [black](https://github.com/psf/black) formatting. The configuration file for flake8 is contained in `.flake8` and for black in `pyproject.toml`.|
 |YAML correctness|[yamllint](https://yamllint.readthedocs.io)|Performs correctness and style checks on the project YAML files. The configuration file is in `.yamllint.yaml`.|
-|Config alignment|Builtin|Compares the key structures in the configuration files in the `config` directory and highlights any differences. Generally, configuration files for a project correlate to different target realms (e.g. test vs prod). While the configuration values will vary by environment, the key hierarchies should be identical. The only configuration option is the choice between `warning` and `strict` modes which is specified in `etc/git-hooks/pre-commit`.|
+|Config alignment|Built-in|Compares the key structures in the configuration files in the `config` directory and highlights any differences. Generally, configuration files for a project correlate to different target realms (e.g. test vs prod). While the configuration values will vary by environment, the key hierarchies should be identical. The only configuration option is the choice between `warning` and `strict` modes which is specified in `etc/git-hooks/pre-commit`.|
 
 The following command will apply [black](https://github.com/psf/black)
 formatting to project Python files:

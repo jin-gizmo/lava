@@ -4,6 +4,7 @@
 # Ministack setup to host a lava realm
 # ------------------------------------------------------------------------------
 
+# DEBUG=yes
 
 # ------------------------------------------------------------------------------
 function info {
@@ -14,6 +15,10 @@ function ok {
 }
 function error {
 	echo "❌ $*"
+}
+function debug {
+	[ "$DEBUG" = "" ] && return 0
+	echo "🟪 $*"
 }
 
 function cfn_stack_exists {
@@ -45,7 +50,7 @@ function aws {
 # ------------------------------------------------------------------------------
 
 require AWS_ENDPOINT_URL
-require LAVA_REALM LAVA_WORKER
+require LAVA_REALM LAVA_WORKER LAVA_VERSION
 set -e
 shopt -s nullglob
 
@@ -166,4 +171,3 @@ else
 	aws sqs create-queue --queue-name "$worker_queue"
 	ok "SQS queue \"$worker_queue\" created"
 fi
-

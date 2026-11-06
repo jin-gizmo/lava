@@ -8,7 +8,7 @@ type: sftp
 conn_id: <{ prefix.conn }>/sftp
 enabled: true
 
-ssh_key: <{ prefix.ssm }>/canis2/ssh-key
+ssh_key: <{ prefix.ssm }>/ssh/lava-test/secret
 
 ssh_options:
   - BatchMode=yes

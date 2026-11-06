@@ -1,4 +1,4 @@
-personal_ws-1.1 en 507 
+personal_ws-1.1 en 524 
 ACLs
 AMIs
 APIs
@@ -11,6 +11,7 @@ Auth
 Booleans
 Boul
 CFN
+CI
 CLI
 CLIs
 CPUs
@@ -54,6 +55,7 @@ Feng
 Fernandina
 Flet
 FreeTDS
+GHSA
 GLOBs
 GetClusterCredentials
 GetCredentials
@@ -88,6 +90,7 @@ KMS
 Khant
 KiB
 Kibibytes
+Kohala
 LF
 LGPL
 LOGLEVEL
@@ -122,6 +125,7 @@ Nyan
 ODBC
 OIDS
 ObjectCreated
+OldNotes
 OpenSSL
 PARAM
 PEM
@@ -151,6 +155,7 @@ QEMU
 RDBMS
 RHEL
 RPMs
+RS
 RW
 Ratnayake
 RebootWorkerInstance
@@ -215,6 +220,7 @@ aarch
 alarmTopic
 ami
 amiId
+among
 amzn
 aquiver
 args
@@ -228,6 +234,7 @@ autoscalingHeartbeatMinutes
 aws
 backport
 basedir
+basename
 bcc
 blkio
 boto
@@ -235,6 +242,7 @@ botocore
 buildkit
 buildx
 burstable
+certifi
 cfdoc
 charset
 checksums
@@ -282,9 +290,11 @@ domainname
 doublequote
 downloader
 egid
+emSign
 emptor
 encodable
 env
+es
 escapechar
 euid
 eventbridge
@@ -295,12 +305,14 @@ filesystem
 fnmatch
 foreach
 formatter
+framework's
 getrusage
 gh
 ghcr
 gid
 globals
 gui
+gw
 gzip
 haproxy
 hashbang
@@ -365,10 +377,12 @@ outpath
 pandoc
 parsedate
 pathlib
+percent
 personorgroup
 pgdb
 postgres
 pre
+prepended
 prog
 ps
 psql
@@ -463,6 +477,8 @@ tod
 tojson
 tokei
 trigmeta
+trivy
+ts
 ttl
 tu
 tz
@@ -472,6 +488,7 @@ unixODBC
 untagged
 untrusted
 url
+urllib
 ustart
 utc
 utils

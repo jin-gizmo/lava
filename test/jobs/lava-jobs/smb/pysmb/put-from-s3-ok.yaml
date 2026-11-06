@@ -25,7 +25,6 @@ parameters:
 
 x-lava-nocheck: joborphan
 x-lava-test:
-  result: FAIL
+  result: OK
   marks:
     - local
-    - IUT

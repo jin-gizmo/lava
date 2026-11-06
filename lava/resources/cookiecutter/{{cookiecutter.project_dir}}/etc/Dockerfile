@@ -2,6 +2,8 @@
 
 # BASE_IMG should generally be overridden as a build arg from the config file
 ARG BASE_IMG=ghcr.io/jin-gizmo/lava/amzn2023/base
+# DS-0001: Specify a tag in the 'FROM' statement for image
+# trivy:ignore:DS-0001
 FROM $BASE_IMG
 
 SHELL ["/bin/bash", "-c"]
@@ -35,6 +37,9 @@ ENV \
 # ------------------------------------------------------------------------------
 # Do package updates and install the payload.
 
+# DS-0017: The instruction 'RUN <package-manager> update' should always be
+#          followed by '<package-manager> install' in the same RUN statement.
+# trivy:ignore:DS-0017
 RUN \
 	(yum > /dev/null 2>&1; [ $? -ne 127 ] && echo Doing yum updates && yum update -y && yum clean all && rm -rf /var/cache/yum) ; \
 	(apt-get > /dev/null 2>&1; [ $? -ne 127 ] && echo Doing apt updates && apt-get update && apt-get upgrade -y && apt-get clean) ; \

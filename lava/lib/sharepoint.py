@@ -105,7 +105,7 @@ def dump_request(suf: str, r: Response, req: Any = None) -> None:
 
 
 # ------------------------------------------------------------------------------
-def key_val_match(key: str, val: str | list[str], obj: Any) -> bool:
+def key_val_match(key: str, val: str | list[str] | KeyExists, obj: Any) -> bool:
     """
     Return true if object at key matches val.
 
@@ -137,6 +137,7 @@ def key_val_match(key: str, val: str | list[str], obj: Any) -> bool:
         return False
 
     # TODO: This logic fails if non-string/list/tuple values occur
+    # TODO: Also fails on non-string values. A bit of an unfair test but ...
     if isinstance(val, (list, tuple)):
         if objval not in val:
             return False

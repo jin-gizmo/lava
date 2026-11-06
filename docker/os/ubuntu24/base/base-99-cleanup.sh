@@ -11,6 +11,7 @@ rm -f /var/cache/debconf/*old
 python3 -m pip cache purge > /dev/null 2>&1
 rm -rf ~/.cache
 rm -rf /var/log/*log
+rm -rf /var/lib/apt/lists/*
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 info "Deleting stuff we don't need"

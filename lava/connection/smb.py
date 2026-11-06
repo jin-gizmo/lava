@@ -160,7 +160,7 @@ def smb_connect_smbprotocol(conn_spec: dict[str, Any]) -> SMBProtocolConnection:
 # ------------------------------------------------------------------------------
 @cli_connector('smb')
 def cli_connect_smb(
-    conn_spec: dict[str, Any], workdir: str, aws_session: boto3.Session = None
+    conn_spec: dict[str, Any], workdir: str, aws_session: boto3.Session | None = None
 ) -> str:
     """
     Generate a CLI command that will invoke lava-smb.

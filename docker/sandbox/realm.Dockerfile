@@ -7,6 +7,8 @@
 # that need to be done right. The makefile handles that.
 # ------------------------------------------------------------------------------
 
+# DS-0001 (MEDIUM): Specify a tag in the 'FROM' statement
+# trivy:ignore:DS-0001
 FROM ministackorg/ministack
 
 ARG GATEWAY_PORT=4566
@@ -39,7 +41,7 @@ RUN --mount=type=bind,from=dist_cfn,target=/tmp/lava/cfn \
     then echo "❌ LAVA_VERSION must be set" && exit 1 ; \
     else true ; \
     fi ; \
-    apk add jq envsubst sqlite wget ; \
+    apk add --no-cache jq envsubst sqlite wget ; \
     wget -q -O /tmp/get-pip.py https://bootstrap.pypa.io/get-pip.py \
         && python3 /tmp/get-pip.py --root-user-action ignore \
         && /bin/rm -f /tmp/get-pip.py ; \

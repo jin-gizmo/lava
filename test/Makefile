@@ -51,13 +51,30 @@ start:	_services=$(subst $(_COMMA), ,$(services))
 ## names to start only those. e.g. `services=ministack,mail`.
 ## See `docker-compose.yaml` for the available service names.
 #:opt services
-start:	.env
+start:	.env _lambda _cfn _ssh_keys
 	jindr start --name jindr
 	docker compose --profile build build $(_services)
 	docker compose up --renew-anon-volumes -d $(_services)
 
 .env:
 	$(error You need to create test/.env -- see test/README.md)
+
+_lambda: $(repo_base)/dist/lambda/s3trigger-$(LAVA_VERSION).zip
+
+$(repo_base)/dist/lambda/s3trigger-$(LAVA_VERSION).zip:
+	$(error You need to build the Lambdas first -- try "make lambda" from the repo base)
+
+_cfn:	$(repo_base)/dist/cfn/lava-realm.cfn.json
+
+$(repo_base)/dist/cfn/lava-realm.cfn.json:
+	$(error You need to build the CFN templates first -- try "make cfn" from the repo base)
+
+# SSH keys for use in testing.
+_ssh_keys: $(repo_base)/dist/test/ssh/lava-test
+
+$(repo_base)/dist/test/ssh/lava-test:
+	mkdir -p "$(dir $@)"
+	ssh-keygen -t ed25519 -C 'ssh@lava.test' -f "$@" -q -N ""
 
 _down:	_stop
 
@@ -97,16 +114,16 @@ refresh:
 
 ## Run the unit tests.
 ## Do *make start* first to start up the test infrastructure.
-test:	_venv_is_on _aws ready
-	cd .. && pytest -v -s -n "$(PYTEST_WORKERS)"
+test:	_venv_is_on _aws _ready
+	cd $(repo_base) && pytest -v -s -n "$(PYTEST_WORKERS)"
 
 ## Run the unit tests and produce a coverage report.
 ## Do *make start* first to start up the test infrastructure.
-coverage: _venv_is_on _aws ready
-	@mkdir -p ../dist/test
-	cd .. && pytest --cov=. --cov-report html:dist/test/htmlcov -n "$(PYTEST_WORKERS)"
+coverage: _venv_is_on _aws _ready
+	@mkdir -p $(repo_base)/dist/test
+	cd $(repo_base) && pytest --cov=. --cov-report html:dist/test/htmlcov -n "$(PYTEST_WORKERS)"
 
-## Load the test job suite into the ministack container
+## Load the test job suite into the ministack container.
 load:	jobs/venv _ministack_ready
 	@( \
 		cd jobs ; \
@@ -122,11 +139,11 @@ _ministack_ready:
 
 # This is a bit cracked due to bash weirdness with expansion lists with one element
 ifeq ($(strip $(services)),)
-ready:	_services=*
+_ready:	_services=*
 else ifneq ($(findstring $(_COMMA),$(services)),)
-ready:	_services={$(services)}
+_ready:	_services={$(services)}
 else
-ready:	_services=$(services)
+_ready:	_services=$(services)
 endif
 
 ## Check that the local docker based test infrastructure is ready to use (also
@@ -135,7 +152,9 @@ endif
 ## names to start only those. e.g. `services=ministack,mail`.
 ## See `docker-compose.yaml` for the available service names.
 #:opt services
-ready:
+ready:	_ready
+
+_ready:
 	@echo "🔵 Checking docker based test infrastructure readiness"
 	@( \
 		sentinel=$$(mktemp) ; \

@@ -12,13 +12,17 @@
 #           So, we have to wing it and install the 20.04 sqlcmd on 18.04.
 #           _Please_ don't tell me that Microsoft now gets Linux.
 
+# DS-0001 (MEDIUM): Specify a tag in the 'FROM' statement for image 'mcr.microsoft.com/azure-sql-edge'
+# trivy:ignore:DS-0001
 FROM mcr.microsoft.com/azure-sql-edge:latest
 
+# DS-0002 (HIGH): Last USER command in Dockerfile should not be 'root'
+# trivy:ignore:DS-0002
 USER root
 RUN \
     apt-get update ; \
     curl https://packages.microsoft.com/keys/microsoft.asc > /etc/apt/trusted.gpg.d/microsoft.asc ; \
-    apt-get install software-properties-common -y ; \
+    apt-get install --no-install-recommends software-properties-common -y ; \
     add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/20.04/prod.list)" ; \
     apt-get install gettext sqlcmd -y ; \
     :
